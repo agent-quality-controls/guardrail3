@@ -5,6 +5,7 @@ use g3rs_test_types::{
     G3RsTestFileTreeChecksInput, G3RsTestFileTreeInputFailure, G3RsTestSourceFile,
 };
 
+/// `build_file_tree_checks_input` function.
 pub(crate) fn build_file_tree_checks_input(
     root_rel_dir: String,
     cargo_rel_path: String,
@@ -52,6 +53,7 @@ pub(crate) fn build_file_tree_checks_input(
     }
 }
 
+/// `enrich_components` function.
 fn enrich_components(
     components: Vec<G3RsTestComponentFileTreeFacts>,
     files: &[G3RsTestAnalyzedSourceFile],

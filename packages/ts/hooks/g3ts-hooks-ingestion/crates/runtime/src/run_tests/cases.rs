@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test-helper file: drives git config setup with std::process::Command for ingestion regression coverage; production code uses the centralized process module"
+)]
+
 use g3ts_hooks_ingestion_assertions::run as assertions;
 
 use super::helpers::{git_init, temp_root, write};
@@ -56,8 +61,16 @@ fn source_ingestion_does_not_read_neighbor_verifiers() {
         ".githooks/pre-commit",
         "#!/usr/bin/env bash\nscripts/g3ts/verify --mode pre-commit --scope .\n",
     );
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
-    write(&root, "scripts/g3rs/verify", "g3rs validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
+    write(
+        &root,
+        "scripts/g3rs/verify",
+        "g3rs validate --path \"$SCOPE\"\n",
+    );
     write(&root, "scripts/guardrails/verify", "echo shared\n");
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl fixture workspace");
@@ -114,9 +127,20 @@ fn source_ingestion_accepts_absolute_core_hooks_path() {
         .current_dir(&root)
         .status()
         .expect("set absolute hooks path");
-    assert!(status.success(), "git config should accept absolute hooks path");
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    assert!(
+        status.success(),
+        "git config should accept absolute hooks path"
+    );
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "apps/landing/package.json", "{}\n");
 
     let crawl = g3_workspace_crawl::crawl_any_root(&root.join("apps/landing"))
@@ -141,7 +165,11 @@ fn absolute_repo_root_verifier_scope_enables_root_categories() {
         )
         .as_str(),
     );
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl repo root with absolute scope");
     let inputs = super::super::ingest_for_source_checks(&crawl);
@@ -157,8 +185,16 @@ fn absolute_repo_root_verifier_scope_enables_root_categories() {
 fn scoped_app_root_enables_package_policy_category() {
     let root = temp_root("scoped-package-policy");
     git_init(&root);
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "apps/landing/package.json", "{}\n");
 
     let crawl = g3_workspace_crawl::crawl_any_root(&root.join("apps/landing"))
@@ -178,11 +214,23 @@ fn repo_root_hook_scope_uses_only_configured_app_categories() {
     git_init(&root);
     write(&root, "Cargo.toml", "[workspace]\nresolver = \"2\"\n");
     write(&root, "package.json", "{}\n");
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/plain\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/plain\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "apps/plain/package.json", "{}\n");
     write(&root, "apps/styled/package.json", "{}\n");
-    write(&root, "apps/styled/stylelint.config.mjs", "export default {};\n");
+    write(
+        &root,
+        "apps/styled/stylelint.config.mjs",
+        "export default {};\n",
+    );
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl repo root with multiple apps");
     let inputs = super::super::ingest_for_source_checks(&crawl);
@@ -200,10 +248,22 @@ fn repo_root_hook_scope_detects_configured_package_categories() {
     git_init(&root);
     write(&root, "Cargo.toml", "[workspace]\nresolver = \"2\"\n");
     write(&root, "package.json", "{}\n");
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope packages/ui\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope packages/ui\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "packages/ui/package.json", "{}\n");
-    write(&root, "packages/ui/stylelint.config.mjs", "export default {};\n");
+    write(
+        &root,
+        "packages/ui/stylelint.config.mjs",
+        "export default {};\n",
+    );
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl repo root with package scope");
     let inputs = super::super::ingest_for_source_checks(&crawl);
@@ -226,8 +286,16 @@ fn root_stylelint_config_does_not_enable_unconfigured_app_stylelint() {
     write(&root, "Cargo.toml", "[workspace]\nresolver = \"2\"\n");
     write(&root, "package.json", "{}\n");
     write(&root, "stylelint.config.mjs", "export default {};\n");
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/plain\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/plain\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "apps/plain/package.json", "{}\n");
 
     let crawl = g3_workspace_crawl::crawl(&root).expect("crawl repo root with root stylelint");
@@ -244,10 +312,22 @@ fn root_stylelint_config_does_not_enable_unconfigured_app_stylelint() {
 fn scoped_app_root_enables_stylelint_category() {
     let root = temp_root("scoped-stylelint");
     git_init(&root);
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(&root, "apps/landing/package.json", "{}\n");
-    write(&root, "apps/landing/stylelint.config.mjs", "export default {};\n");
+    write(
+        &root,
+        "apps/landing/stylelint.config.mjs",
+        "export default {};\n",
+    );
 
     let crawl = g3_workspace_crawl::crawl_any_root(&root.join("apps/landing"))
         .expect("crawl scoped app root with stylelint config");
@@ -264,8 +344,16 @@ fn scoped_app_root_enables_stylelint_category() {
 fn scoped_app_root_enables_typecov_category() {
     let root = temp_root("scoped-typecov");
     git_init(&root);
-    write(&root, ".githooks/pre-commit", "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n");
-    write(&root, "scripts/g3ts/verify", "g3ts validate --path \"$SCOPE\"\n");
+    write(
+        &root,
+        ".githooks/pre-commit",
+        "scripts/g3ts/verify --mode pre-commit --scope apps/landing\n",
+    );
+    write(
+        &root,
+        "scripts/g3ts/verify",
+        "g3ts validate --path \"$SCOPE\"\n",
+    );
     write(
         &root,
         "apps/landing/package.json",

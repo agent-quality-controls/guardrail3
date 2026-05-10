@@ -67,6 +67,7 @@ pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroStateFi
     }
 }
 
+/// Returns rel paths under the app root that match the policy's forbidden state globs.
 fn forbidden_state_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,

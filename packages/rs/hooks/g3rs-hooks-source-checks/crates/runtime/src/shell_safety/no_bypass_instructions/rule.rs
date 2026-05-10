@@ -2,8 +2,10 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use crate::inputs::ExecutableCommandContextInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/no-bypass-instructions";
 
+/// `check` function.
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     for line in &input.parsed.source_lines {
         let Some(comment) = crate::support::inline_comment_text(&line.raw) else {

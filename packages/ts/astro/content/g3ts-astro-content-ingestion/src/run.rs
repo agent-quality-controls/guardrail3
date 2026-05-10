@@ -87,6 +87,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroContentCon
     }
 }
 
+/// Helper `adapter_root_contracts`.
 fn adapter_root_contracts(
     contract: &G3TsAstroContentIntegrationContractInput,
 ) -> Vec<G3TsAstroContentAdapterRootInput> {
@@ -112,6 +113,7 @@ fn adapter_root_contracts(
         .collect()
 }
 
+/// Helper `adapter_source_contracts`.
 fn adapter_source_contracts(
     contract: &G3TsAstroContentIntegrationContractInput,
 ) -> Vec<G3TsAstroContentAdapterSourceInput> {
@@ -136,6 +138,7 @@ fn adapter_source_contracts(
         .collect()
 }
 
+/// Helper `adapter_has_source`.
 fn adapter_has_source(adapter: &str, source_paths: &[String]) -> bool {
     let adapter = adapter.trim_end_matches('/');
     let adapter_prefix = format!("{adapter}/");

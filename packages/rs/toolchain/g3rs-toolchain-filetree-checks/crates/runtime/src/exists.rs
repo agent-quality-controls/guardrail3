@@ -1,8 +1,10 @@
 use g3rs_toolchain_types::G3RsToolchainFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-toolchain/exists";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsToolchainFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     match input.toolchain_toml_rel_path.as_deref() {
         Some(rel_path) => results.push(

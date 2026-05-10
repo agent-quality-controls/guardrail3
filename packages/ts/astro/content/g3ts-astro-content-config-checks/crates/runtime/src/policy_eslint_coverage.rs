@@ -5,7 +5,9 @@ use g3ts_astro_content_types::{
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-content/policy-eslint-coverage";
+/// Internal constant `ROUTE_SCOPED_PIPELINE_RULES`.
 const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
@@ -17,6 +19,7 @@ const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-velite-imports",
 ];
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroContentPolicyEslintContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -64,12 +67,17 @@ pub(crate) fn check(
     results.push(error(policy_rel_path, &missing.join("; ")));
 }
 
+/// Internal struct `PolicyCoverage`.
 struct PolicyCoverage {
+    /// Internal field `content_routes`.
     content_routes: Vec<String>,
+    /// Internal field `non_content_routes`.
     non_content_routes: Vec<String>,
+    /// Internal field `endpoints`.
     endpoints: Vec<String>,
 }
 
+/// Internal function `policy_coverage`.
 fn policy_coverage(
     contract: &G3TsAstroContentPolicyEslintContractInput,
     policy: &G3TsAstroContentPolicySnapshot,
@@ -85,6 +93,7 @@ fn policy_coverage(
     }
 }
 
+/// Internal function `missing_lane_coverage`.
 fn missing_lane_coverage(
     lane: &str,
     scopes: &[G3TsAstroPipelineRuleScopeSnapshot],
@@ -108,6 +117,7 @@ fn missing_lane_coverage(
         .collect()
 }
 
+/// Internal function `scope_covers_policy`.
 fn scope_covers_policy(
     scope: &G3TsAstroPipelineRuleScopeSnapshot,
     coverage: &PolicyCoverage,
@@ -124,6 +134,7 @@ fn scope_covers_policy(
         && all_match(&endpoint_globs, &coverage.endpoints)
 }
 
+/// Internal function `matching_paths`.
 fn matching_paths(paths: &[String], globs: Option<&GlobSet>) -> Vec<String> {
     let Some(globs) = globs else {
         return Vec::new();
@@ -136,14 +147,17 @@ fn matching_paths(paths: &[String], globs: Option<&GlobSet>) -> Vec<String> {
         .collect()
 }
 
+/// Internal function `all_match`.
 fn all_match(globs: &GlobSet, paths: &[String]) -> bool {
     paths.iter().all(|path| globs.is_match(path.as_str()))
 }
 
+/// Internal function `none_match`.
 fn none_match(globs: &GlobSet, paths: &[String]) -> bool {
     paths.iter().all(|path| !globs.is_match(path.as_str()))
 }
 
+/// Internal function `glob_set`.
 fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
     let mut builder = GlobSetBuilder::new();
     for pattern in patterns {
@@ -152,14 +166,14 @@ fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
     builder.build()
 }
 
-fn error(policy_rel_path: Option<&str>, reason: &str) -> G3CheckResult {
+/// Internal function `error`.
+fn error(policy_rel_path: &str, reason: &str) -> G3CheckResult {
     crate::support::error(
         ID,
         "Astro ESLint route coverage does not match strict content policy",
         format!(
-            "`{}` must configure `g3ts-eslint-plugin-astro-pipeline` so Astro, TS, and TSX source lanes cover every discovered `[ts.astro.routes].content` page, exclude `[ts.astro.routes].non_content` pages from route-scoped content enforcement, and cover every discovered `[ts.astro.routes].endpoints` file. Mismatch: {reason}.",
-            policy_rel_path.unwrap_or("guardrail3-ts.toml")
+            "`{policy_rel_path}` must configure `g3ts-eslint-plugin-astro-pipeline` so Astro, TS, and TSX source lanes cover every discovered `[ts.astro.routes].content` page, exclude `[ts.astro.routes].non_content` pages from route-scoped content enforcement, and cover every discovered `[ts.astro.routes].endpoints` file. Mismatch: {reason}."
         ),
-        policy_rel_path,
+        Some(policy_rel_path),
     )
 }

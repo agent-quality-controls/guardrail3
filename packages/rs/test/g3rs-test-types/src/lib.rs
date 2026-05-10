@@ -1,3 +1,4 @@
+/// `types` module.
 #[cfg(feature = "api")]
 mod types;
 

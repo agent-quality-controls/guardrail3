@@ -28,8 +28,6 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/ts/arch/g3ts-arch-config-checks/crates/runtime/src/declared_entrypoints_canonical.rs`
 - `TS-ARCH-FILETREE-01` -> `g3ts-arch/declared-entrypoint-exists`
   - definition: `packages/ts/arch/g3ts-arch-file-tree-checks/crates/runtime/src/declared_entrypoint_exists.rs`
-- `TS-ARCH-FILETREE-02` -> `g3ts-arch/structural-split`
-  - definition: `packages/ts/arch/g3ts-arch-file-tree-checks/crates/runtime/src/structural_split.rs`
 - `TS-ARCH-SOURCE-01` -> `g3ts-arch/facade-parseable`
   - definition: `packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/facade_parseable.rs`
 - `TS-ARCH-SOURCE-02` -> `g3ts-arch/facade-only`

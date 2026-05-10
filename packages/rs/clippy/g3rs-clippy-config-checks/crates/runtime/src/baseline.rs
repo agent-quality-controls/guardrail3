@@ -1,17 +1,30 @@
+/// MAX STRUCT BOOLS const.
 pub(crate) const MAX_STRUCT_BOOLS: i64 = 3;
+/// MAX FN PARAMS BOOLS const.
 pub(crate) const MAX_FN_PARAMS_BOOLS: i64 = 3;
+/// TOO MANY LINES THRESHOLD const.
 pub(crate) const TOO_MANY_LINES_THRESHOLD: i64 = 75;
+/// TOO MANY ARGUMENTS THRESHOLD const.
 pub(crate) const TOO_MANY_ARGUMENTS_THRESHOLD: i64 = 7;
+/// EXCESSIVE NESTING THRESHOLD const.
 pub(crate) const EXCESSIVE_NESTING_THRESHOLD: i64 = 4;
+/// COGNITIVE COMPLEXITY THRESHOLD const.
 pub(crate) const COGNITIVE_COMPLEXITY_THRESHOLD: i64 = 15;
+/// TYPE COMPLEXITY THRESHOLD const.
 pub(crate) const TYPE_COMPLEXITY_THRESHOLD: i64 = 75;
 
+/// ALLOW DBG IN TESTS const.
 pub(crate) const ALLOW_DBG_IN_TESTS: bool = false;
+/// ALLOW EXPECT IN TESTS const.
 pub(crate) const ALLOW_EXPECT_IN_TESTS: bool = true;
+/// ALLOW PANIC IN TESTS const.
 pub(crate) const ALLOW_PANIC_IN_TESTS: bool = false;
+/// ALLOW PRINT IN TESTS const.
 pub(crate) const ALLOW_PRINT_IN_TESTS: bool = false;
+/// ALLOW UNWRAP IN TESTS const.
 pub(crate) const ALLOW_UNWRAP_IN_TESTS: bool = false;
 
+/// EXPECTED MACRO BANS const.
 pub(crate) const EXPECTED_MACRO_BANS: &[&str] = &[
     "std::println",
     "std::eprintln",
@@ -20,6 +33,7 @@ pub(crate) const EXPECTED_MACRO_BANS: &[&str] = &[
     "std::unimplemented",
 ];
 
+/// SERVICE METHOD PATHS const.
 pub(crate) const SERVICE_METHOD_PATHS: &[&str] = &[
     "std::env::var",
     "std::env::var_os",
@@ -93,6 +107,7 @@ pub(crate) const SERVICE_METHOD_PATHS: &[&str] = &[
     "figment::Figment::extract",
 ];
 
+/// BASE TYPE PATHS const.
 pub(crate) const BASE_TYPE_PATHS: &[&str] = &[
     "std::collections::HashMap",
     "std::collections::HashSet",
@@ -117,6 +132,7 @@ pub(crate) const BASE_TYPE_PATHS: &[&str] = &[
     "axum_extra::extract::MsgPack",
 ];
 
+/// LIBRARY EXTRA TYPE PATHS const.
 pub(crate) const LIBRARY_EXTRA_TYPE_PATHS: &[&str] = &[
     "std::sync::LazyLock",
     "std::sync::OnceLock",

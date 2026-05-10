@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{CORE_METHOD_BANS, disallowed_method_paths, info, missing_bans, warn};
 
+/// Rule identifier.
 const ID: &str = "g3rs-garde/core-method-bans";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Vec<G3CheckResult>) {
     let found = disallowed_method_paths(clippy);
     let missing = missing_bans(&found, CORE_METHOD_BANS);
@@ -30,6 +32,7 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
     ));
 }
 
+/// Emit an info finding when the rule cannot verify its inputs.
 pub(crate) fn check_unverifiable(
     clippy_rel_path: Option<&str>,
     message: &str,

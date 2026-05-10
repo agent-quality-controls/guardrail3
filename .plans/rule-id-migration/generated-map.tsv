@@ -14,7 +14,6 @@ RS-ARCH-CONFIG-07	g3rs-arch/dependency-count-split	packages/rs/arch/g3rs-arch-co
 RS-ARCH-CONFIG-08	g3rs-arch/feature-contract	packages/rs/arch/g3rs-arch-config-checks/crates/runtime/src/feature_contract.rs
 RS-ARCH-FILETREE-01	g3rs-arch/crate-has-facade	packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/crate_has_facade.rs
 RS-ARCH-FILETREE-03	g3rs-arch/mod-rs-required	packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/mod_rs_required.rs
-RS-ARCH-FILETREE-07	g3rs-arch/structural-split	packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/structural_split.rs
 RS-ARCH-SOURCE-02	g3rs-arch/lib-facade-only	packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/lib_facade_only.rs
 RS-ARCH-SOURCE-04	g3rs-arch/mod-facade-only	packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/mod_facade_only.rs
 RS-ARCH-SOURCE-08	g3rs-arch/feature-gated-exports	packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/feature_gated_exports.rs
@@ -261,7 +260,6 @@ TS-ARCH-CONFIG-01	g3ts-arch/root-manifest-exists	packages/ts/arch/g3ts-arch-conf
 TS-ARCH-CONFIG-02	g3ts-arch/root-manifest-parseable	packages/ts/arch/g3ts-arch-config-checks/crates/runtime/src/root_manifest_parseable.rs
 TS-ARCH-CONFIG-03	g3ts-arch/declared-entrypoints-canonical	packages/ts/arch/g3ts-arch-config-checks/crates/runtime/src/declared_entrypoints_canonical.rs
 TS-ARCH-FILETREE-01	g3ts-arch/declared-entrypoint-exists	packages/ts/arch/g3ts-arch-file-tree-checks/crates/runtime/src/declared_entrypoint_exists.rs
-TS-ARCH-FILETREE-02	g3ts-arch/structural-split	packages/ts/arch/g3ts-arch-file-tree-checks/crates/runtime/src/structural_split.rs
 TS-ARCH-SOURCE-01	g3ts-arch/facade-parseable	packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/facade_parseable.rs
 TS-ARCH-SOURCE-02	g3ts-arch/facade-only	packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/facade_only.rs
 TS-ARCH-SOURCE-03	g3ts-arch/no-broad-reexport	packages/ts/arch/g3ts-arch-source-checks/crates/runtime/src/no_broad_reexport.rs

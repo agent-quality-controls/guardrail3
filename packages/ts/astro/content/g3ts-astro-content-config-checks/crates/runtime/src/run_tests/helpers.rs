@@ -9,6 +9,44 @@ use g3ts_astro_content_types::{
 };
 use std::collections::BTreeMap;
 
+/// Returns a mutable reference to the parsed eslint snapshot of the first eslint contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first eslint contract must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn eslint_snapshot_mut(
+    input: &mut G3TsAstroContentConfigChecksInput,
+) -> &mut G3TsAstroContentEslintSurfaceSnapshot {
+    let config = &mut input.eslint_contracts[0].config;
+    let G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden content eslint config should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed eslint snapshot of the first policy-eslint contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first policy_eslint contract must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn policy_eslint_snapshot_mut(
+    input: &mut G3TsAstroContentConfigChecksInput,
+) -> &mut G3TsAstroContentEslintSurfaceSnapshot {
+    let config = &mut input.policy_eslint_contracts[0].eslint_config;
+    let G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden content policy-eslint config should be parsed");
+    };
+    snapshot
+}
+
 pub(super) fn golden() -> G3TsAstroContentConfigChecksInput {
     let astro_policy = astro_policy();
     let eslint_config = eslint_config();

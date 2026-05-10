@@ -1,6 +1,7 @@
 use g3ts_fmt_types::G3TsFmtContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs the corresponding fmt config check.
 pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
     let rel_path = crate::common::syncpack_rel_path(&contract.syncpack_config);
     let Some(snapshot) = crate::common::parsed_syncpack(&contract.syncpack_config) else {
@@ -8,10 +9,9 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
             "g3ts-fmt/syncpack-prettier-pin",
             "Prettier Syncpack pin cannot be checked",
             format!(
-                "`{}` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack.",
-                rel_path.unwrap_or(".syncpackrc")
+                "`{rel_path}` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack."
             ),
-            rel_path,
+            Some(rel_path),
         );
     };
     if snapshot.version_groups.iter().any(|group| {

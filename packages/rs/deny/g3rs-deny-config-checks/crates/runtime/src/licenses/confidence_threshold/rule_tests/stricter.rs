@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn stricter_threshold_produces_inventory() {
     let results = run_check(
-        r#"
+        r"
 [licenses]
 confidence-threshold = 0.9
-"#,
+",
     );
     assertions::assert_findings(
         &results,

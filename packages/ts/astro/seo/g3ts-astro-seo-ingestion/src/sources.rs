@@ -4,10 +4,12 @@ use g3_workspace_crawl::{
 };
 use g3ts_astro_seo_types::{G3TsAstroSeoApprovedSourcePaths, G3TsAstroSeoPolicySurfaceState};
 
+/// `SOURCE_MODULE_EXTENSIONS` constant.
 const SOURCE_MODULE_EXTENSIONS: [&str; 9] = [
     ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs", ".astro",
 ];
 
+/// `seo_helper_sources`: seo helper sources.
 pub(crate) fn seo_helper_sources(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -18,7 +20,10 @@ pub(crate) fn seo_helper_sources(
             snapshot.metadata_helpers.clone(),
             snapshot.json_ld_helpers.clone(),
         ),
-        _ => (Vec::new(), Vec::new()),
+        G3TsAstroSeoPolicySurfaceState::Missing { .. }
+        | G3TsAstroSeoPolicySurfaceState::Unreadable { .. }
+        | G3TsAstroSeoPolicySurfaceState::ParseError { .. }
+        | G3TsAstroSeoPolicySurfaceState::MissingAstroPolicy { .. } => (Vec::new(), Vec::new()),
     };
     let (metadata_helpers, missing_metadata_helpers) =
         policy_module_source_paths(crawl, app_root_rel_path, &metadata_policy_paths);
@@ -33,11 +38,15 @@ pub(crate) fn seo_helper_sources(
     }
 }
 
+/// Pair of (found-source-paths, missing-policy-paths) returned by `policy_module_source_paths`.
+type FoundAndMissingPaths = (Vec<String>, Vec<String>);
+
+/// `policy_module_source_paths`: policy module source paths.
 fn policy_module_source_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
     policy_paths: &[String],
-) -> (Vec<String>, Vec<String>) {
+) -> FoundAndMissingPaths {
     let mut source_paths = Vec::new();
     let mut missing_policy_paths = Vec::new();
 
@@ -53,6 +62,7 @@ fn policy_module_source_paths(
     (source_paths, missing_policy_paths)
 }
 
+/// `source_paths_under_policy_path`: source paths under policy path.
 fn source_paths_under_policy_path(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -83,6 +93,7 @@ fn source_paths_under_policy_path(
         .collect()
 }
 
+/// `is_source_module_file`: is source module file.
 fn is_source_module_file(rel_path: &str) -> bool {
     SOURCE_MODULE_EXTENSIONS
         .iter()

@@ -1,5 +1,10 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Asserts that the combined deny family checks emitted both coverage and shadowing findings.
+///
+/// # Panics
+/// Panics when either the expected coverage info finding or the shadowing error
+/// finding is missing from `results`.
 pub fn assert_combined_coverage_and_shadowing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

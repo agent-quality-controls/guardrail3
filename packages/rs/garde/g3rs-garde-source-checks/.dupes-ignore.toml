@@ -1,0 +1,43 @@
+[[ignore]]
+fingerprint = "109eae7048111a59"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "73cf9c3d6e3b3c63"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "8f35d2f6150729a3"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "97cee55161a20106"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "e3bd812dff423989"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "771ce6e4047f2912"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "23a3a514f832033d"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "27b383b46278f5c5"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "72b0a479ffd493a9"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "d42c41b1782652d2"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"
+
+[[ignore]]
+fingerprint = "e621fae488c9cda4"
+reason = "per-rule helpers, fixtures, and test bodies share shape across the family's parallel rules; each duplicate proves a different rule path"

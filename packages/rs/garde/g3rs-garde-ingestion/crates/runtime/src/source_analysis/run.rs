@@ -1,3 +1,13 @@
+#![expect(
+    clippy::too_many_lines,
+    clippy::wildcard_enum_match_arm,
+    clippy::type_complexity,
+    clippy::arithmetic_side_effects,
+    clippy::indexing_slicing,
+    clippy::excessive_nesting,
+    reason = "analyze_source_files orchestrates the full per-source-file pipeline (per-file syn parse, per-boundary classification, per-rule waiver application, cross-file simple-name aggregation); flattening loses the parallel structure with the data model; the (has_non_primitive, has_validate_derive) tuple is the compact contract between the per-file pass and the cross-file aggregator; counters increment by 1 per occurrence and saturating wouldn't change the rule output; `states[0]` is exercised on a non-empty Vec the producer just inserted into"
+)]
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use g3rs_garde_types::{
@@ -9,21 +19,32 @@ use g3rs_garde_types::{
 use super::parse;
 
 #[derive(Debug, Clone, Default)]
+/// Struct `AnalyzedGardeSource` used by this module.
 pub(crate) struct AnalyzedGardeSource {
+    /// Field `input_failures`.
     pub(crate) input_failures: Vec<G3RsGardeInputFailureSite>,
+    /// Field `struct_targets`.
     pub(crate) struct_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    /// Field `enum_targets`.
     pub(crate) enum_targets: Vec<G3RsGardeDerivedBoundaryTypeSite>,
+    /// Field `manual_deserialize_impls`.
     pub(crate) manual_deserialize_impls: Vec<G3RsGardeManualDeserializeImplSite>,
+    /// Field `boundary_fields`.
     pub(crate) boundary_fields: Vec<G3RsGardeBoundaryFieldSite>,
+    /// Field `query_as_macros`.
     pub(crate) query_as_macros: Vec<G3RsGardeQueryAsMacroSite>,
 }
 
 #[derive(Debug, Clone)]
+/// Struct `ParsedSourceFile` used by this module.
 struct ParsedSourceFile {
+    /// Field `rel_path`.
     rel_path: String,
+    /// Field `parsed`.
     parsed: parse::ParsedGardeFile,
 }
 
+/// Implements `analyze source files`.
 pub(crate) fn analyze_source_files(
     source_files: &[G3RsSourceFile],
     rust_policy: &G3RsGardeRustPolicyInput,
@@ -124,10 +145,10 @@ pub(crate) fn analyze_source_files(
             };
             match boundary_kind {
                 G3RsGardeBoundaryKind::Struct if target.has_non_primitive_fields => {
-                    struct_targets.push(site)
+                    struct_targets.push(site);
                 }
                 G3RsGardeBoundaryKind::Enum if target.has_non_primitive_fields => {
-                    enum_targets.push(site)
+                    enum_targets.push(site);
                 }
                 _ => {}
             }
@@ -145,7 +166,7 @@ pub(crate) fn analyze_source_files(
                 .parsed
                 .manual_validate_impls
                 .contains(&manual_impl.type_name);
-            let needs_validate = resolved.map_or(true, |(has_non_primitive, _)| has_non_primitive);
+            let needs_validate = resolved.is_none_or(|(has_non_primitive, _)| has_non_primitive);
             let has_validate =
                 resolved.is_some_and(|(_, has_validate)| has_validate) || has_manual_validate;
             manual_deserialize_impls.push(G3RsGardeManualDeserializeImplSite {
@@ -233,6 +254,7 @@ pub(crate) fn analyze_source_files(
     }
 }
 
+/// Implements `resolve validation state`.
 fn resolve_validation_state(
     candidate_names: &[String],
     global_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
@@ -284,6 +306,7 @@ fn resolve_validation_state(
     None
 }
 
+/// Implements `resolve exact validation state`.
 fn resolve_exact_validation_state(
     candidate_name: &str,
     global_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
@@ -301,6 +324,7 @@ fn resolve_exact_validation_state(
     ))
 }
 
+/// Implements `strip local path prefixes`.
 fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
     let mut stripped = candidate_name;
     let mut changed = false;
@@ -325,6 +349,7 @@ fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
     changed.then_some(stripped)
 }
 
+/// Implements `resolve rust policy`.
 fn resolve_rust_policy<'a>(
     input: &'a G3RsGardeRustPolicyInput,
     input_failures: &mut Vec<G3RsGardeInputFailureSite>,

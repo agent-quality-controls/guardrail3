@@ -1,7 +1,7 @@
-use super::constants::*;
+use super::constants::ESLINT_CONFIG_PATTERN;
 use super::prelude::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum G3TsAstroRawEslintConfigState {
     Missing {
         rel_path: String,
@@ -38,8 +38,7 @@ pub fn read_eslint_config_surface(
         };
     }
 
-    let document = match parse_eslint_document(&crawl.root_abs_path, &entry.path.rel_path, &probes)
-    {
+    let document = match parse_eslint_document(&crawl.root_abs_path, &entry.path.rel_path, probes) {
         Ok(document) => document,
         Err(error) => {
             return G3TsAstroRawEslintConfigState::ParseError {
@@ -68,6 +67,7 @@ pub fn read_eslint_config_surface(
     }
 }
 
+/// Compose the placeholder rel-path used when no `ESLint` config is found at or above `app_root_rel_path`.
 #[must_use]
 fn missing_eslint_config_rel_path(app_root_rel_path: &str) -> String {
     if app_root_rel_path == "." {

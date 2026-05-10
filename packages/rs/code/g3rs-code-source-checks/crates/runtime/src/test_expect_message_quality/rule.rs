@@ -1,11 +1,18 @@
+#![allow(
+    clippy::panic,
+    reason = "rule check fns intentionally call std::panic::panic_any to surface unparseable input bubbled up by the upstream parser; this is the documented fail-fast contract for the source-checks family"
+)]
+
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::parse::comments::line_text;
 use crate::parse::visitors::find_test_expect_calls;
 use crate::support::CodeSourceRuleInput;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-code/test-expect-message-quality";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for issue in find_test_expect_calls(input.source, input.is_test) {
         match issue.message {
@@ -36,6 +43,7 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
+/// Implements `test expect message is useful`.
 fn test_expect_message_is_useful(message: &str) -> bool {
     let trimmed = message.trim();
     if trimmed.len() < 12 {

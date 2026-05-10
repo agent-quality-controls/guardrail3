@@ -1,3 +1,11 @@
+#![expect(
+    clippy::case_sensitive_file_extension_comparisons,
+    reason = "rust source filenames are conventionally lowercase; case-insensitive matching not needed"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{parse, types::CargoToml};
@@ -7,13 +15,19 @@ use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 use crate::ingest::IngestionError;
 use crate::roots::{OwnedTestRoot, join_under_root, parent_dir};
 
+/// `AssertionsLayout` struct.
 pub(crate) struct AssertionsLayout {
+    /// `assertions_rel_dir` item.
     pub(crate) assertions_rel_dir: String,
+    /// `assertions_cargo_rel_path` item.
     pub(crate) assertions_cargo_rel_path: String,
+    /// `assertions_manifest` item.
     pub(crate) assertions_manifest: Option<CargoToml>,
+    /// `nested_assertions_cargo_rel_path` item.
     pub(crate) nested_assertions_cargo_rel_path: Option<String>,
 }
 
+/// `parse_manifest_lenient` function.
 pub(crate) fn parse_manifest_lenient(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -56,6 +70,7 @@ pub(crate) fn parse_manifest_lenient(
     }
 }
 
+/// `manifest_normal_dependencies` function.
 pub(crate) fn manifest_normal_dependencies(manifest: &CargoToml) -> BTreeSet<String> {
     manifest
         .dependencies
@@ -65,6 +80,7 @@ pub(crate) fn manifest_normal_dependencies(manifest: &CargoToml) -> BTreeSet<Str
         .collect()
 }
 
+/// `manifest_dev_dependencies` function.
 pub(crate) fn manifest_dev_dependencies(manifest: &CargoToml) -> BTreeSet<String> {
     manifest
         .dev_dependencies
@@ -73,10 +89,11 @@ pub(crate) fn manifest_dev_dependencies(manifest: &CargoToml) -> BTreeSet<String
         .collect()
 }
 
+/// `resolve_assertions_layout` function.
 pub(crate) fn resolve_assertions_layout(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
-    mut input_failures: Option<&mut Vec<G3RsTestFileTreeInputFailure>>,
+    input_failures: Option<&mut Vec<G3RsTestFileTreeInputFailure>>,
 ) -> Result<AssertionsLayout, IngestionError> {
     let nested_assertions_cargo_rel_path = g3rs_workspace_crawl::entry(
         crawl,
@@ -94,7 +111,7 @@ pub(crate) fn resolve_assertions_layout(
         format!("{}/assertions", parent_dir(&root.runtime_rel_dir))
     };
     let assertions_cargo_rel_path = format!("{assertions_rel_dir}/Cargo.toml");
-    let assertions_manifest = if let Some(failures) = input_failures.as_deref_mut() {
+    let assertions_manifest = if let Some(failures) = input_failures {
         parse_optional_manifest_lenient(crawl, &assertions_cargo_rel_path, failures)
     } else {
         parse_optional_manifest(crawl, &assertions_cargo_rel_path)?
@@ -109,10 +126,12 @@ pub(crate) fn resolve_assertions_layout(
     })
 }
 
+/// `rust_crate_name` function.
 pub(crate) fn rust_crate_name(package_name: &str) -> String {
     package_name.replace('-', "_")
 }
 
+/// `collect_sidecars` function.
 pub(crate) fn collect_sidecars(
     crawl: &G3RsWorkspaceCrawl,
     runtime_rel_dir: &str,
@@ -158,6 +177,7 @@ pub(crate) fn collect_sidecars(
     sidecars
 }
 
+/// `collect_external_harnesses` function.
 pub(crate) fn collect_external_harnesses(
     crawl: &G3RsWorkspaceCrawl,
     runtime_rel_dir: &str,
@@ -178,11 +198,13 @@ pub(crate) fn collect_external_harnesses(
     files
 }
 
+/// `dedupe_failures` function.
 pub(crate) fn dedupe_failures(input_failures: &mut Vec<G3RsTestFileTreeInputFailure>) {
     input_failures
         .dedup_by(|left, right| left.rel_path == right.rel_path && left.message == right.message);
 }
 
+/// `path_is_under` function.
 pub(crate) fn path_is_under(rel_path: &str, prefix: &str) -> bool {
     rel_path == prefix
         || rel_path
@@ -190,6 +212,7 @@ pub(crate) fn path_is_under(rel_path: &str, prefix: &str) -> bool {
             .is_some_and(|rest| rest.starts_with('/'))
 }
 
+/// `file_stem` function.
 pub(crate) fn file_stem(rel_path: &str) -> Option<&str> {
     rel_path
         .rsplit('/')
@@ -197,6 +220,7 @@ pub(crate) fn file_stem(rel_path: &str) -> Option<&str> {
         .and_then(|name| name.strip_suffix(".rs"))
 }
 
+/// `owner_module_name_from_sidecar_path` function.
 pub(crate) fn owner_module_name_from_sidecar_path(rel_after_src: &str) -> Option<String> {
     rel_after_src.split('/').find_map(|segment| {
         segment
@@ -206,6 +230,7 @@ pub(crate) fn owner_module_name_from_sidecar_path(rel_after_src: &str) -> Option
     })
 }
 
+/// `is_fixture_path` function.
 pub(crate) fn is_fixture_path(rel_path: &str) -> bool {
     rel_path.contains("/tests/fixtures/")
         || rel_path.starts_with("tests/fixtures/")
@@ -214,6 +239,7 @@ pub(crate) fn is_fixture_path(rel_path: &str) -> bool {
         || rel_path.contains("test_support/src/fixtures/")
 }
 
+/// `parse_optional_manifest` function.
 fn parse_optional_manifest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -241,13 +267,12 @@ fn parse_optional_manifest(
         })
 }
 
+/// `parse_optional_manifest_lenient` function.
 fn parse_optional_manifest_lenient(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
     input_failures: &mut Vec<G3RsTestFileTreeInputFailure>,
 ) -> Option<CargoToml> {
-    if g3rs_workspace_crawl::entry(crawl, rel_path).is_none() {
-        return None;
-    }
+    let _entry = g3rs_workspace_crawl::entry(crawl, rel_path)?;
     parse_manifest_lenient(crawl, rel_path, input_failures)
 }

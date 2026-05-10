@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "ebca207f47110b29"
+reason = "rel-path-helper: each surface state has its own rel_path projection; deduping would couple unrelated rule modules to support, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "1cc031951896df37"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "a130420960f89a32"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "afe07c809b9b9000"
+reason = "per-rule check body: distinct ID and message strings per rule; deduping would couple unrelated rules, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "dafb83d2391c900d"
+reason = "per-validator helper: list and helper-list have different valid-pattern predicates; deduping would couple unrelated validations, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "f4baf9f589f12769"
+reason = "glob_set helper: private per-rule wrapper enforces rule-local error semantics; deduping would couple unrelated rules, conflicts with real-proof-site contract"

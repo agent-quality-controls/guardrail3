@@ -7,6 +7,7 @@ use g3ts_astro_i18n_types::G3TsAstroPackageSurfaceState;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// File names recognised as a root Astro config in any supported source extension.
 const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.js",
     "astro.config.mjs",
@@ -16,6 +17,7 @@ const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.cts",
 ];
 
+/// Returns the relative paths of Astro app roots discovered in the workspace crawl.
 #[must_use]
 pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
@@ -37,11 +39,13 @@ pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// Returns true when the entry is a regular file included by ignore rules.
 pub(crate) fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
+/// Returns true when `rel_path`'s file name is a recognised root Astro config.
 fn root_astro_config_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -49,6 +53,7 @@ fn root_astro_config_file(rel_path: &str) -> bool {
         .is_some_and(|file_name| ROOT_ASTRO_CONFIGS.contains(&file_name))
 }
 
+/// Returns true when `rel_path` ends in a `package.json` file name.
 fn package_json_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -56,6 +61,7 @@ fn package_json_file(rel_path: &str) -> bool {
         == Some("package.json")
 }
 
+/// Returns the parent directory rel path (or "." when at the workspace root).
 fn parent_rel_path(rel_path: &str) -> String {
     Path::new(rel_path)
         .parent()
@@ -65,6 +71,7 @@ fn parent_rel_path(rel_path: &str) -> String {
         .to_owned()
 }
 
+/// Returns true when the parsed `package.json` declares an `astro` dependency.
 fn package_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {
     match package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => snapshot

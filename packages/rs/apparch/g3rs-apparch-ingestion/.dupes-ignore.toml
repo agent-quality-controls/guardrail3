@@ -1,0 +1,39 @@
+[[ignore]]
+fingerprint = "57cf703009d09e36"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "e53d9a3783129852"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "12ee220bb0b61717"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "14c4206c1e11f00b"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "309401c22a3e503f"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "42053f95a1930a7c"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "759b8c7cec18fc42"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "91d0245b1b3bca73"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "9a972dfa12d39d19"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"
+
+[[ignore]]
+fingerprint = "aaf52f523cb24414"
+reason = "apparch ingestion test fixtures and assertion helpers follow uniform layouts per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each #[test] is a separate proof site that writes a synthetic workspace and inspects ingested facts; the temp_workspace/write/crawl/ingest pipeline is identical across fixtures because the ingestion contract is uniform"

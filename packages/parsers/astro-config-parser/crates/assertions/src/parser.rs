@@ -21,11 +21,7 @@ pub fn assert_parsed_document(document: &AstroConfigDocument) {
 
 pub fn assert_invalid_document(document: &AstroConfigDocument, expected_reason_fragment: &str) {
     let Some(reason) = astro_config_parser_runtime::parse_error_reason(document) else {
-        assert!(
-            false,
-            "expected invalid Astro config document, got parsed: {document:#?}"
-        );
-        return;
+        unreachable!("expected invalid Astro config document, got parsed: {document:#?}");
     };
     assert!(
         reason.contains(expected_reason_fragment),
@@ -43,11 +39,7 @@ pub fn assert_snapshot(
     expected_adapter: Option<&str>,
 ) {
     let Some(snapshot) = astro_config_parser_runtime::typed(document) else {
-        assert!(
-            false,
-            "expected parsed Astro config document, got: {document:#?}"
-        );
-        return;
+        unreachable!("expected parsed Astro config document, got: {document:#?}");
     };
 
     assert_eq!(snapshot.site.as_deref(), expected_site);

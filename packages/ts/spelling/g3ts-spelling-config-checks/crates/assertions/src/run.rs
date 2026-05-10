@@ -1,3 +1,7 @@
+/// Assert the spelling-config-checks runtime emits a check result with the given id.
+///
+/// # Panics
+/// Panics if no check result with `id` is found.
 pub fn assert_runtime_has_rule(
     input: &g3ts_spelling_types::G3TsSpellingConfigChecksInput,
     id: &str,
@@ -9,16 +13,20 @@ pub fn assert_runtime_has_rule(
     );
 }
 
+/// Assert the runtime emits an error-severity result with the expected id and file.
+///
+/// # Panics
+/// Panics if the result is missing or its severity/file/title/message disagree with expectations.
 pub fn assert_runtime_error(
     input: &g3ts_spelling_types::G3TsSpellingConfigChecksInput,
     id: &str,
     file: Option<&str>,
 ) {
     let results = g3ts_spelling_config_checks_runtime::check(input);
-    let Some(result) = results.iter().find(|result| result.id() == id) else {
-        assert!(false, "expected check result `{id}`");
-        return;
-    };
+    let result = results
+        .iter()
+        .find(|result| result.id() == id)
+        .unwrap_or_else(|| unreachable!("expected check result `{id}`"));
     assert_eq!(
         result.severity(),
         guardrail3_check_types::G3Severity::Error,
@@ -29,16 +37,20 @@ pub fn assert_runtime_error(
     assert!(!result.message().is_empty(), "message must not be empty");
 }
 
+/// Assert the runtime emits an info-severity result with the expected id and file.
+///
+/// # Panics
+/// Panics if the result is missing or its severity/file/title/message disagree with expectations.
 pub fn assert_runtime_info(
     input: &g3ts_spelling_types::G3TsSpellingConfigChecksInput,
     id: &str,
     file: Option<&str>,
 ) {
     let results = g3ts_spelling_config_checks_runtime::check(input);
-    let Some(result) = results.iter().find(|result| result.id() == id) else {
-        assert!(false, "expected check result `{id}`");
-        return;
-    };
+    let result = results
+        .iter()
+        .find(|result| result.id() == id)
+        .unwrap_or_else(|| unreachable!("expected check result `{id}`"));
     assert_eq!(
         result.severity(),
         guardrail3_check_types::G3Severity::Info,

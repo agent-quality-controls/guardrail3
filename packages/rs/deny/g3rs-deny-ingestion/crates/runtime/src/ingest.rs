@@ -18,6 +18,7 @@ pub(crate) fn assemble(
     }
 }
 
+/// Implements `input failure`.
 pub(crate) fn input_failure(
     title: impl Into<String>,
     rel_path: impl Into<String>,
@@ -30,7 +31,8 @@ pub(crate) fn input_failure(
     }
 }
 
-pub(crate) fn filetree_input(
+/// Implements `filetree input`.
+pub(crate) const fn filetree_input(
     selected_deny_rel_path: Option<String>,
     candidate_deny_rel_paths: Vec<String>,
     input_failures: Vec<G3RsDenyInputFailure>,

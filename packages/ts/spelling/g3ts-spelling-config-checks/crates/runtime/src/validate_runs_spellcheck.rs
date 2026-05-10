@@ -1,6 +1,7 @@
 use g3ts_spelling_types::G3TsSpellingContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// `check`: check.
 pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
     let rel_path = crate::common::package_rel_path(&contract.package);
     let Some(package) = crate::common::parsed_package(&contract.package) else {
@@ -8,10 +9,9 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
             "g3ts-spelling/validate-runs-spellcheck",
             "Validate script cannot be checked",
             format!(
-                "`{}` must be readable and parseable so G3TS can prove `validate` runs spelling fail-closed.",
-                rel_path.unwrap_or("package.json")
+                "`{rel_path}` must be readable and parseable so G3TS can prove `validate` runs spelling fail-closed."
             ),
-            rel_path,
+            Some(rel_path),
         );
     };
     if crate::common::validate_runs_spellcheck(package) {

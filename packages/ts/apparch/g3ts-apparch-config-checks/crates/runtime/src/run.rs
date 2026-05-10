@@ -1,6 +1,7 @@
 use g3ts_apparch_types::G3TsApparchConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3TsApparchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::types_dependency_direction::check(input, &mut results);

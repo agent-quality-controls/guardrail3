@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "ae3ada0164d07027"
+reason = "nextest.toml execution types each declare a custom Deserialize impl that maps a TOML scalar to an enum variant; the impls share visit_str/visit_u64/etc shape because that is the serde Visitor surface"
+
+[[ignore]]
+fingerprint = "8fa960ac7afabefc"
+reason = "nextest.toml parser tests prove section parsing per fixture; each #[test] is a separate proof site for a different nextest.toml shape"
+
+[[ignore]]
+fingerprint = "74c527ee33c027ae"
+reason = "nextest.toml feature-gated rejection tests share parse_error_message shape; each proves a different experimental-feature rejection path"
+
+[[ignore]]
+fingerprint = "780bf44c55ea505e"
+reason = "nextest.toml validation tests share parse_error_message shape; each proves a different invalid-input rejection path"
+
+[[ignore]]
+fingerprint = "034a954b409ab31d"
+reason = "From<toml::de::Error> and From<std::io::Error> are both single-statement variant constructors that always look structurally identical"
+
+[[ignore]]
+fingerprint = "7e71c3bdc3bdfbff"
+reason = "TestThreads and ThreadsRequired share the Deserialize visitor shape; their assertion helpers mirror that shape on the assertion side"

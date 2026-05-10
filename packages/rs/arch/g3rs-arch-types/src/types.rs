@@ -1,4 +1,8 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each bool encodes an independent observable attribute of an arch crate node (Cargo `[package]` table presence, `[workspace]` table presence, `src/lib.rs` presence, `src/main.rs` presence, shared-marker); downstream rule packages (g3rs-arch-source-checks, g3rs-arch-ingestion) pattern-match these flags independently, so collapsing them into an enum would break out-of-scope callers"
+)]
 pub struct G3RsArchCrateNode {
     pub rel_dir: String,
     pub cargo_rel_path: String,
@@ -12,7 +16,6 @@ pub struct G3RsArchCrateNode {
     pub shared: bool,
     pub feature_contract: G3RsArchFeatureContract,
     pub dependency_counts: G3RsArchDependencyCounts,
-    pub structure: G3RsArchCrateStructure,
     pub cargo_parse_error: Option<String>,
 }
 
@@ -28,13 +31,6 @@ pub struct G3RsArchFeatureContract {
 pub struct G3RsArchDependencyCounts {
     pub production: usize,
     pub dev: usize,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3RsArchCrateStructure {
-    pub max_sibling_rs_file_count: usize,
-    pub max_sibling_dir_count: usize,
-    pub max_module_depth: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -128,6 +124,10 @@ pub struct G3RsArchSourceChecksInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each bool encodes an independent observable attribute of an arch config crate (shared-marker, feature-contract requirement, presence of `default` feature, presence of `all` feature); downstream rule packages pattern-match these flags independently, so collapsing them would break out-of-scope callers"
+)]
 pub struct G3RsArchConfigCrate {
     pub rel_dir: String,
     pub cargo_rel_path: String,
@@ -155,9 +155,6 @@ pub struct G3RsArchFileTreeCrate {
     pub has_package: bool,
     pub has_lib_rs: bool,
     pub has_main_rs: bool,
-    pub max_sibling_rs_file_count: usize,
-    pub max_sibling_dir_count: usize,
-    pub max_module_depth: usize,
     pub cargo_parse_error: Option<String>,
 }
 

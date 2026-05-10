@@ -1,0 +1,71 @@
+[[ignore]]
+fingerprint = "7c3ade2c3ab4319d"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "d5c2b1f458e5bf8e"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "c2eba742f9562b9e"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "074b519fc7be3d56"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "fd741c8dfac5f427"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "04548736d9aee2b2"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "c6b4d1fd765a6442"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "15454e94f5e4376a"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "dd75dc86c47074d7"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "ebdebfb858ff0ef7"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "4d137bb12b8894f3"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "7d9888cce6953c3d"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "9019fb060b6937a4"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "9b585bd57f3ba266"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "9d6ce7d8f7a36003"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "a1b0a5474884ec85"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "c80b7f296a9b9a77"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"
+
+[[ignore]]
+fingerprint = "ea3b587902e435eb"
+reason = "hook-shell-parser stages mirror bash construct shapes; each per-construct helper and per-construct test shares the visitor body shape because that is the shell-script semantic surface"

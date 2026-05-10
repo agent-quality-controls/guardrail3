@@ -2,8 +2,10 @@ use cargo_toml_parser::types::LintValue;
 use g3rs_code_types::{G3RsCodeConfigFile, G3RsCodeConfigFileKind};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-code/unsafe-code-lint";
 
+/// check fn.
 pub(crate) fn check(file: &G3RsCodeConfigFile, results: &mut Vec<G3CheckResult>) {
     let G3RsCodeConfigFileKind::CargoToml { cargo } = &file.kind else {
         return;
@@ -18,9 +20,9 @@ pub(crate) fn check(file: &G3RsCodeConfigFile, results: &mut Vec<G3CheckResult>)
         .as_ref()
         .and_then(|lints| lints.tools.get("rust").cloned())
         .and_then(|tool| tool.get("unsafe_code").cloned())
-        .and_then(|value| match value {
-            LintValue::Level(level) => Some(level),
-            LintValue::Detailed(detail) => Some(detail.level),
+        .map(|value| match value {
+            LintValue::Level(level) => level,
+            LintValue::Detailed(detail) => detail.level,
         });
 
     match lint_level.as_deref() {

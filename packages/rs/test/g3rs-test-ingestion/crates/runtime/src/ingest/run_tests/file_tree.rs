@@ -1,3 +1,15 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures must call std::fs and std::process::Command directly to seed and tear down filesystem state"
+)]
+#![expect(
+    clippy::indexing_slicing,
+    reason = "test fixtures index into known-shaped fixture data"
+)]
+#![expect(
+    clippy::items_after_statements,
+    reason = "test fixture inline helpers improve readability when colocated with the using test"
+)]
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::process::Command;

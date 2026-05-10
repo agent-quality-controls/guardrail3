@@ -43,9 +43,9 @@ unmaintained = "workspace"
 #[test]
 fn both_missing() {
     let results = run_check(
-        r#"
+        r"
 [advisories]
-"#,
+",
     );
     assertions::assert_findings(
         &results,

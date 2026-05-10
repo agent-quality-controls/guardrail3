@@ -1,5 +1,10 @@
 use std::collections::BTreeMap;
 
+/// Pair of (script name, script body) extracted from `package.json`.
+type ScriptBody = (String, String);
+/// Map of plugin name to its package names.
+type PluginPackageMap = BTreeMap<String, Vec<String>>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroPackageSurfaceSnapshot {
     pub rel_path: String,
@@ -9,7 +14,7 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub optional_dependencies: Vec<String>,
     pub peer_dependencies: Vec<String>,
     pub script_names: Vec<String>,
-    pub script_bodies: Vec<(String, String)>,
+    pub script_bodies: Vec<ScriptBody>,
     pub script_commands: Vec<G3TsAstroPackageScriptCommand>,
     pub script_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
     pub script_all_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
@@ -48,6 +53,10 @@ pub struct G3TsAstroPackageScriptParseBlocker {
     pub reason: String,
 }
 
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Boxing the parsed snapshot would force constructor changes across consumer crates outside this types crate."
+)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsAstroPackageSurfaceState {
     Missing {
@@ -100,7 +109,7 @@ pub enum G3TsAstroStaticValue {
     Number(f64),
     String(String),
     Null,
-    Array(Vec<G3TsAstroStaticValue>),
+    Array(Vec<Self>),
     Object(Vec<G3TsAstroStaticObjectProperty>),
     ImportedIdentifier {
         local_name: String,
@@ -142,6 +151,10 @@ pub struct G3TsAstroSetupAppRootInput {
     pub astro_config_rel_path: Option<String>,
 }
 
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Each bool flags an independent ESLint config dimension required by downstream contracts."
+)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroSetupEslintSurfaceSnapshot {
     pub rel_path: String,
@@ -154,9 +167,9 @@ pub struct G3TsAstroSetupEslintSurfaceSnapshot {
     pub astro_source_plugin_meta_names: BTreeMap<String, String>,
     pub ts_source_plugin_meta_names: BTreeMap<String, String>,
     pub tsx_source_plugin_meta_names: BTreeMap<String, String>,
-    pub astro_source_plugin_package_names: BTreeMap<String, Vec<String>>,
-    pub ts_source_plugin_package_names: BTreeMap<String, Vec<String>>,
-    pub tsx_source_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub astro_source_plugin_package_names: PluginPackageMap,
+    pub ts_source_plugin_package_names: PluginPackageMap,
+    pub tsx_source_plugin_package_names: PluginPackageMap,
     pub astro_source_error_rules: Vec<String>,
     pub ts_source_error_rules: Vec<String>,
     pub tsx_source_error_rules: Vec<String>,
@@ -174,6 +187,10 @@ pub struct G3TsAstroSetupEslintSurfaceSnapshot {
     pub tsx_source_probe_ignored: bool,
 }
 
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Boxing the parsed snapshot would force constructor changes across consumer crates outside this types crate."
+)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsAstroSetupEslintSurfaceState {
     Missing {

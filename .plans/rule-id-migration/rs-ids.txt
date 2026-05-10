@@ -14,7 +14,6 @@ g3rs-arch/dependency-count-split
 g3rs-arch/feature-contract
 g3rs-arch/crate-has-facade
 g3rs-arch/mod-rs-required
-g3rs-arch/structural-split
 g3rs-arch/lib-facade-only
 g3rs-arch/mod-facade-only
 g3rs-arch/feature-gated-exports

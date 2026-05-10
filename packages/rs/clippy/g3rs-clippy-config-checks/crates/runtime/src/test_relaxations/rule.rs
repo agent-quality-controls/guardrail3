@@ -10,8 +10,10 @@ use crate::support::{
     allow_unwrap_in_tests, relaxation_message, typed_clippy,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/test-relaxations";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(clippy) = typed_clippy(input) else {
         return;
@@ -59,7 +61,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
             continue;
         }
 
-        mismatch_count += 1;
+        mismatch_count = mismatch_count.saturating_add(1);
         let suffix = if actual.is_some() { "" } else { " missing" };
         results.push(G3CheckResult::new(
             ID.to_owned(),

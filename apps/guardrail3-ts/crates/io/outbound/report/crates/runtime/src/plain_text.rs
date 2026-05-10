@@ -65,6 +65,7 @@ const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Spelling => "spelling",
         SupportedFamily::Typecov => "typecov",
         SupportedFamily::Hooks => "hooks",
+        SupportedFamily::Topology => "topology",
     }
 }
 

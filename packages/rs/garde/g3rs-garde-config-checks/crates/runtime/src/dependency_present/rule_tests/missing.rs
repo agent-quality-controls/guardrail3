@@ -11,7 +11,7 @@ fn errors_when_garde_dependency_missing() {
 
     assertions::assert_contains(
         &results,
-        assertions::error(
+        &assertions::error(
             "garde dependency missing",
             "Missing `garde` dependency in `Cargo.toml`. Add `garde` to `[dependencies]` or `[workspace.dependencies]` in this Cargo.toml.",
             "Cargo.toml",

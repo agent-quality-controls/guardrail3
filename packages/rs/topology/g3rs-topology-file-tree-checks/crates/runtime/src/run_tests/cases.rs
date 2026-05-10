@@ -3,8 +3,9 @@ use g3rs_topology_file_tree_checks_assertions::run as assertions;
 use g3rs_topology_types::{
     G3RsTopologyEscapingWorkspaceMemberPathInput, G3RsTopologyFileTreeChecksInput,
     G3RsTopologyFileTreeInputFailure, G3RsTopologyIllegalFamilyFilePlacementInput,
-    G3RsTopologyNestedWorkspaceInput, G3RsTopologyWorkspaceFamily,
-    G3RsTopologyWorkspaceMemberIssueInput, G3RsTopologyWorkspaceMemberIssueKind,
+    G3RsTopologyNestedGuardrail3RsTomlInput, G3RsTopologyNestedWorkspaceInput,
+    G3RsTopologyWorkspaceFamily, G3RsTopologyWorkspaceMemberIssueInput,
+    G3RsTopologyWorkspaceMemberIssueKind,
 };
 
 use super::super::check;
@@ -26,6 +27,11 @@ fn run_dispatches_precomputed_file_tree_inputs() {
             rel_dir: "crates/api/nested".to_owned(),
             cargo_rel_path: "crates/api/nested/Cargo.toml".to_owned(),
             parent_workspace_rel: String::new(),
+        }],
+        nested_guardrail3_rs_tomls: vec![G3RsTopologyNestedGuardrail3RsTomlInput {
+            rel_dir: "crates/api/inner".to_owned(),
+            guardrail3_rs_toml_rel_path: "crates/api/inner/guardrail3-rs.toml".to_owned(),
+            outer_adopted_unit_rel: String::new(),
         }],
         membership_issues: vec![G3RsTopologyWorkspaceMemberIssueInput {
             rel_dir: "crates/extra".to_owned(),

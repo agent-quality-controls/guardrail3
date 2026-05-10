@@ -1,3 +1,11 @@
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::{BTreeMap, BTreeSet};
 
 use syn::spanned::Spanned;
@@ -9,6 +17,7 @@ use g3rs_test_types::ast::{
     ReturnKind, TestFunctionInfo, TestHarnessFacts,
 };
 
+/// `maybe_push_test_function` function.
 pub(super) fn maybe_push_test_function(
     attrs: &[syn::Attribute],
     sig: &syn::Signature,
@@ -43,6 +52,7 @@ pub(super) fn maybe_push_test_function(
     });
 }
 
+/// `analyze_function` function.
 pub(super) fn analyze_function(
     attrs: &[syn::Attribute],
     vis: &syn::Visibility,
@@ -88,6 +98,7 @@ pub(super) fn analyze_function(
     }
 }
 
+/// `classify_return_kind` function.
 fn classify_return_kind(output: &syn::ReturnType) -> ReturnKind {
     let syn::ReturnType::Type(_, ty) = output else {
         return ReturnKind::None;
@@ -95,6 +106,7 @@ fn classify_return_kind(output: &syn::ReturnType) -> ReturnKind {
     classify_type_kind(ty)
 }
 
+/// `classify_type_kind` function.
 fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
     match ty {
         syn::Type::Path(type_path) => {
@@ -104,8 +116,8 @@ fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
                 .last()
                 .map(|segment| segment.ident.to_string());
             match last.as_deref() {
-                Some("String") | Some("str") => ReturnKind::StringLike,
-                Some("Path") | Some("PathBuf") => ReturnKind::PathLike,
+                Some("String" | "str") => ReturnKind::StringLike,
+                Some("Path" | "PathBuf") => ReturnKind::PathLike,
                 _ => ReturnKind::Other,
             }
         }
@@ -119,6 +131,7 @@ fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
     }
 }
 
+/// `type_mentions_check_result` function.
 fn type_mentions_check_result(ty: &syn::Type, aliases: &BTreeSet<String>) -> bool {
     match ty {
         syn::Type::Path(type_path) => type_path.path.segments.iter().any(|segment| {
@@ -137,6 +150,7 @@ fn type_mentions_check_result(ty: &syn::Type, aliases: &BTreeSet<String>) -> boo
     }
 }
 
+/// `collect_check_result_aliases` function.
 pub(super) fn collect_check_result_aliases(source: &syn::File) -> BTreeSet<String> {
     let mut aliases = BTreeSet::new();
 
@@ -161,19 +175,32 @@ pub(super) fn collect_check_result_aliases(source: &syn::File) -> BTreeSet<Strin
     aliases
 }
 
+/// `TestBodyVisitor` struct.
 #[derive(Default)]
 pub(super) struct TestBodyVisitor {
+    /// `has_assertion_macro` item.
     has_assertion_macro: bool,
+    /// `has_failure_enforcement` item.
     has_failure_enforcement: bool,
+    /// `call_paths` item.
     call_paths: Vec<Vec<String>>,
+    /// `path_uses` item.
     path_uses: Vec<Vec<String>>,
+    /// `method_receiver_paths` item.
     method_receiver_paths: Vec<Vec<String>>,
+    /// `method_names` item.
     method_names: Vec<String>,
+    /// `local_call_aliases` item.
     local_call_aliases: BTreeMap<String, Vec<String>>,
+    /// `field_accesses` item.
     field_accesses: Vec<FieldAccessInfo>,
+    /// `string_literals` item.
     string_literals: Vec<String>,
+    /// `shadowed_idents` item.
     shadowed_idents: BTreeSet<String>,
+    /// `tautological_assert_lines` item.
     tautological_assert_lines: Vec<usize>,
+    /// `weak_matches_lines` item.
     weak_matches_lines: Vec<usize>,
 }
 

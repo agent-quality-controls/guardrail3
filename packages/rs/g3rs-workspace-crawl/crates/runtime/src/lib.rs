@@ -1,8 +1,17 @@
+//! Workspace crawl runtime: discovers files in a Cargo workspace honouring
+//! gitignore semantics with targeted recovery for ignored-but-relevant files.
+
+/// Two-phase crawl implementation.
 mod crawl;
+/// Centralized filesystem boundary.
 mod fs;
+/// Query helpers over a `G3RsWorkspaceCrawl`.
 mod query;
+/// Recovery list (banned dirs and ignored-but-relevant files).
 mod recovery;
+/// Public crawl entry points and error type.
 mod run;
+/// Internal entry construction helpers.
 mod support;
 
 #[cfg(feature = "crawl")]

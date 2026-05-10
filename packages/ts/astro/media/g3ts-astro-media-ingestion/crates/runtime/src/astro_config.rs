@@ -4,6 +4,7 @@ use g3ts_astro_media_types::{
     G3TsAstroIntegrationSnapshot, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
 };
 
+/// `ingest_astro_config_surface`: ingest astro config surface.
 pub(crate) fn ingest_astro_config_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -58,6 +59,7 @@ pub(crate) fn ingest_astro_config_surface(
     }
 }
 
+/// `astro_integration`: astro integration.
 fn astro_integration(
     value: &astro_config_parser::types::AstroIntegrationSnapshot,
 ) -> G3TsAstroIntegrationSnapshot {
@@ -69,12 +71,14 @@ fn astro_integration(
     }
 }
 
+/// `astro_call`: astro call.
 fn astro_call(value: &astro_config_parser::types::AstroCallSnapshot) -> G3TsAstroCallSnapshot {
     G3TsAstroCallSnapshot {
         first_arg: value.first_arg.as_ref().map(astro_static_value),
     }
 }
 
+/// `astro_static_value`: astro static value.
 fn astro_static_value(
     value: &astro_config_parser::types::AstroStaticValue,
 ) -> G3TsAstroStaticValue {

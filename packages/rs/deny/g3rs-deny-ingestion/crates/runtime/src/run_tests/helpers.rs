@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures need direct filesystem and process access to build temp workspaces"
+)]
+
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -8,6 +13,11 @@ pub(super) fn git_init(path: &Path) {
         .current_dir(path)
         .status()
         .expect("git init should succeed in test fixture setup");
+    // g3rs-workspace-crawl::crawl requires a Cargo.toml at the workspace root.
+    // Provide a minimal one so test fixtures need only write the deny-specific files
+    // they care about. Tests that exercise Cargo.toml content can overwrite it.
+    fs::write(path.join("Cargo.toml"), "[workspace]\nmembers = []\n")
+        .expect("should write minimal Cargo.toml in test fixture root");
 }
 
 pub(super) fn write(path: impl AsRef<Path>, content: &str) {

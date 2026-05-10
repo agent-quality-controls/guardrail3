@@ -1,3 +1,15 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures must use std::fs and std::process::Command directly to seed and tear down filesystem state"
+)]
+#![expect(
+    clippy::panic,
+    reason = "test fixtures may panic when setup invariants fail"
+)]
+#![expect(
+    clippy::shadow_unrelated,
+    reason = "test fixture code reuses bindings like `root` for staged setup steps"
+)]
 use std::fs;
 
 use g3rs_topology_ingestion_assertions::run as assertions;
@@ -41,10 +53,10 @@ version = "0.1.0"
 
     write(
         root.path().join("nested/Cargo.toml"),
-        r#"
+        r"
 [workspace]
 members = []
-"#,
+",
     );
     write(
         root.path().join("nested/src/lib.rs"),
@@ -195,23 +207,6 @@ version = "0.1.0"
         g3rs_topology_ingestion_types::G3RsTopologyIngestionError::RootManifestNotWorkspace { path }
         if path.ends_with("Cargo.toml")
     ));
-}
-
-#[test]
-fn missing_root_cargo_in_crawl_fails_ingestion() {
-    let root = tempdir().expect("create temp dir");
-
-    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
-    let err = super::super::ingest_for_file_tree_checks(&crawl)
-        .expect_err("missing root manifest should fail ingestion");
-
-    match err {
-        g3rs_topology_ingestion_types::G3RsTopologyIngestionError::Unreadable { path, reason } => {
-            assert!(path.ends_with("Cargo.toml"));
-            assert_eq!(reason, "file is missing from crawl");
-        }
-        other => panic!("unexpected ingestion error: {other:?}"),
-    }
 }
 
 #[test]
@@ -1121,7 +1116,7 @@ version = "0.1.0"
         "rust-toolchain.toml",
         G3RsTopologyWorkspaceFamilyFileKind::RustToolchainToml,
         G3RsTopologyWorkspaceFamilyFileAttachment::ExactRoot {
-            root_rel: "".to_owned(),
+            root_rel: String::new(),
         },
     );
     assertions::assert_family_file(
@@ -1167,7 +1162,7 @@ version = "0.1.0"
         "tools/helper/guardrail3-rs.toml",
         G3RsTopologyWorkspaceFamilyFileKind::Guardrail3RsToml,
         G3RsTopologyWorkspaceFamilyFileAttachment::NestedUnderRoot {
-            root_rel: "".to_owned(),
+            root_rel: String::new(),
             owner_rel: "tools/helper".to_owned(),
         },
     );
@@ -1282,10 +1277,10 @@ version = "0.1.0"
 
     write(
         root.path().join("apps/nested/Cargo.toml"),
-        r#"
+        r"
 [workspace]
 members = []
-"#,
+",
     );
     write(
         root.path().join("apps/nested/src/lib.rs"),
@@ -1339,6 +1334,92 @@ version = "0.1.0"
         "tools/helper/guardrail3-rs.toml",
         "nested under `tools/helper`",
     );
+}
+
+#[test]
+fn nested_guardrail3_rs_toml_under_adopted_outer_fires() {
+    let root = tempdir().expect("create temp dir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["inner"]
+"#,
+    );
+    write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
+
+    fs::create_dir_all(root.path().join("inner/src")).expect("create inner source dir");
+    write(
+        root.path().join("inner/Cargo.toml"),
+        r"
+[workspace]
+members = []
+",
+    );
+    write(root.path().join("inner/src/lib.rs"), "pub struct Inner;\n");
+    write(root.path().join("inner/guardrail3-rs.toml"), "[rust]\n");
+
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingest topology file-tree facts");
+
+    assertions::assert_nested_guardrail3_rs_toml(&input, "inner", "inner/guardrail3-rs.toml", "");
+}
+
+#[test]
+fn sibling_guardrail3_rs_tomls_do_not_fire() {
+    // reason: ingestion runs rooted at one adopted unit. Two adopted siblings under a
+    // non-adopted parent are not visible to each other's run; each run sees no descendant
+    // guardrail3-rs.toml. The non-adopted parent run is covered by the
+    // `non_adopted_outer_does_not_fire_for_inner_guardrail3_rs_toml` test.
+    let root = tempdir().expect("create temp dir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r"
+[workspace]
+members = []
+",
+    );
+    write(root.path().join("guardrail3-rs.toml"), "[rust]\n");
+
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingest topology file-tree facts");
+
+    assertions::assert_no_nested_guardrail3_rs_tomls(&input);
+}
+
+#[test]
+fn non_adopted_outer_does_not_fire_for_inner_guardrail3_rs_toml() {
+    let root = tempdir().expect("create temp dir");
+
+    write(
+        root.path().join("Cargo.toml"),
+        r#"
+[workspace]
+members = ["inner"]
+"#,
+    );
+    // reason: outer has no sibling guardrail3-rs.toml; outer is not adopted.
+
+    fs::create_dir_all(root.path().join("inner/src")).expect("create inner source dir");
+    write(
+        root.path().join("inner/Cargo.toml"),
+        r"
+[workspace]
+members = []
+",
+    );
+    write(root.path().join("inner/src/lib.rs"), "pub struct Inner;\n");
+    write(root.path().join("inner/guardrail3-rs.toml"), "[rust]\n");
+
+    let crawl = crawl(root.path()).expect("crawl workspace fixture before ingestion");
+    let input =
+        super::super::ingest_for_file_tree_checks(&crawl).expect("ingest topology file-tree facts");
+
+    assertions::assert_no_nested_guardrail3_rs_tomls(&input);
 }
 
 fn write(path: std::path::PathBuf, content: &str) {

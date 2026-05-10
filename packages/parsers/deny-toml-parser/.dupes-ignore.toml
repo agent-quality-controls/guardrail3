@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "d84193a2cff1deb8"
+reason = "deny.toml parser tests share parse_fixture + section assertion shape; each #[test] proves a different deny.toml section so they must remain separate"
+
+[[ignore]]
+fingerprint = "1b21b3dd27b63295"
+reason = "ban-entry assertion closures iterate over Vec<X> with field-level checks; the closure bodies look identical structurally because BanAllow/BanDeny/BanSkip all carry the same crate+version+reason fields"
+
+[[ignore]]
+fingerprint = "034a954b409ab31d"
+reason = "From<toml::de::Error> and From<std::io::Error> are both single-statement variant constructors that will always look structurally identical"
+
+[[ignore]]
+fingerprint = "309401c22a3e503f"
+reason = "parse_fixture and parse_error are minimal one-line wrappers around parser entry points; merging would obscure the success-vs-error split"
+
+[[ignore]]
+fingerprint = "4d7b20970717205f"
+reason = "invalid_required_git_spec_is_rejected and parse_error_on_invalid_toml both prove the parser surfaces an error for different invalid inputs; they must remain separate proof sites"

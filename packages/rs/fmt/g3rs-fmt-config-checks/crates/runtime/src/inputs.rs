@@ -2,23 +2,41 @@ use cargo_toml_parser::{types::CargoToml, types::InheritableValue};
 use g3rs_fmt_types::{G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtRustfmtConfigState};
 use rustfmt_toml_parser::types::{Edition, RustfmtToml, StyleEdition};
 
-pub(crate) fn rustfmt(input: &G3RsFmtConfigChecksInput) -> Option<&RustfmtToml> {
+/// Implements `rustfmt`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
+pub(crate) const fn rustfmt(input: &G3RsFmtConfigChecksInput) -> Option<&RustfmtToml> {
     match &input.rustfmt_state {
         G3RsFmtRustfmtConfigState::Parsed(rustfmt) => Some(rustfmt),
         G3RsFmtRustfmtConfigState::Unreadable | G3RsFmtRustfmtConfigState::ParseError => None,
     }
 }
 
+/// Implements `rustfmt table`.
+///
+/// Returns the typed `RustfmtToml` re-encoded as a `toml::value::Table` for downstream
+/// rule queries. Returns an empty table when serialization unexpectedly fails or the
+/// serialized value is not a table; both are unreachable for a valid `RustfmtToml`
+/// but the rules tolerate an empty table by emitting their normal "missing key"
+/// findings.
 pub(crate) fn rustfmt_table(rustfmt: &RustfmtToml) -> toml::value::Table {
-    let value = toml::Value::try_from(rustfmt.clone())
-        .expect("typed RustfmtToml should serialize to toml::Value");
-    value
-        .as_table()
-        .cloned()
-        .expect("typed RustfmtToml should serialize as a table")
+    let Ok(value) = toml::Value::try_from(rustfmt.clone()) else {
+        return toml::value::Table::new();
+    };
+    match value {
+        toml::Value::Table(table) => table,
+        toml::Value::String(_)
+        | toml::Value::Integer(_)
+        | toml::Value::Float(_)
+        | toml::Value::Boolean(_)
+        | toml::Value::Datetime(_)
+        | toml::Value::Array(_) => toml::value::Table::new(),
+    }
 }
 
-pub(crate) fn cargo(input: &G3RsFmtConfigChecksInput) -> Option<&CargoToml> {
+/// Implements `cargo`.
+pub(crate) const fn cargo(input: &G3RsFmtConfigChecksInput) -> Option<&CargoToml> {
     match &input.cargo_state {
         G3RsFmtCargoState::Parsed(cargo) => Some(cargo),
         G3RsFmtCargoState::Missing
@@ -27,6 +45,7 @@ pub(crate) fn cargo(input: &G3RsFmtConfigChecksInput) -> Option<&CargoToml> {
     }
 }
 
+/// Implements `cargo edition`.
 pub(crate) fn cargo_edition(cargo: &CargoToml) -> Option<&str> {
     cargo
         .workspace
@@ -41,14 +60,17 @@ pub(crate) fn cargo_edition(cargo: &CargoToml) -> Option<&str> {
         })
 }
 
+/// Implements `rustfmt edition`.
 pub(crate) fn rustfmt_edition(edition: Option<Edition>) -> Option<&'static str> {
     edition.map(edition_str)
 }
 
+/// Implements `rustfmt style edition`.
 pub(crate) fn rustfmt_style_edition(edition: Option<StyleEdition>) -> Option<&'static str> {
     edition.map(style_edition_str)
 }
 
+/// Implements `inheritable string`.
 fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> {
     match value {
         Some(InheritableValue::Value(value)) => Some(value.as_str()),
@@ -56,6 +78,7 @@ fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> 
     }
 }
 
+/// Implements `edition str`.
 const fn edition_str(edition: Edition) -> &'static str {
     match edition {
         Edition::Edition2015 => "2015",
@@ -65,6 +88,7 @@ const fn edition_str(edition: Edition) -> &'static str {
     }
 }
 
+/// Implements `style edition str`.
 const fn style_edition_str(edition: StyleEdition) -> &'static str {
     match edition {
         StyleEdition::Edition2015 => "2015",

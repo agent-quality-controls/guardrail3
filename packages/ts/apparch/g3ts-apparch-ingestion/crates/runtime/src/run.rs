@@ -1,8 +1,10 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_apparch_types::{G3TsApparchConfigChecksInput, G3TsApparchSourceChecksInput};
 
+/// Error type for ingestion failures.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsApparchIngestionError {
+    /// Human-readable failure description.
     pub message: String,
 }
 
@@ -14,6 +16,11 @@ impl std::fmt::Display for G3TsApparchIngestionError {
 
 impl std::error::Error for G3TsApparchIngestionError {}
 
+/// Ingest config-checks input from a workspace crawl.
+///
+/// # Errors
+///
+/// Returns a `G3TsApparchIngestionError` when source files cannot be read or parsed.
 pub fn ingest_for_config_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<G3TsApparchConfigChecksInput, G3TsApparchIngestionError> {
@@ -25,6 +32,11 @@ pub fn ingest_for_config_checks(
     })
 }
 
+/// Ingest source-checks input from a workspace crawl.
+///
+/// # Errors
+///
+/// Returns a `G3TsApparchIngestionError` when source files cannot be read or parsed.
 pub fn ingest_for_source_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<G3TsApparchSourceChecksInput, G3TsApparchIngestionError> {

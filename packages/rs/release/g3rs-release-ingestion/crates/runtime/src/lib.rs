@@ -8,6 +8,7 @@ mod parse;
 mod run;
 /// Select config entries from a workspace crawl.
 mod select;
+/// `workflow` module.
 mod workflow;
 
 #[cfg(feature = "ingest")]

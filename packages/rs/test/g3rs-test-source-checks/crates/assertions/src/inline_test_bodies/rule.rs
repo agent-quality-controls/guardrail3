@@ -1,3 +1,7 @@
+#![expect(
+    clippy::must_use_candidate,
+    reason = "structural assertion helper code where lint conflicts with verification surface"
+)]
 pub use g3rs_test_ingestion_runtime::fixtures::{file, input};
 use g3rs_test_types::G3RsTestSourceChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -6,6 +10,11 @@ pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
     g3rs_test_source_checks_runtime::check(input)
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_result(
     results: &[G3CheckResult],
     rule_id: &str,
@@ -26,6 +35,11 @@ pub fn assert_has_result(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_inventory(results: &[G3CheckResult], rule_id: &str, title: &str, file: &str) {
     assert!(
         results.iter().any(|result| {

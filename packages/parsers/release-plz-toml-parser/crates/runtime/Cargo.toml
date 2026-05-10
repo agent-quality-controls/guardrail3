@@ -26,6 +26,7 @@ toml = "0.8"
 
 [dev-dependencies]
 release-plz-toml-parser-runtime-assertions = { path = "../assertions" }
+tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true

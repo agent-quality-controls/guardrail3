@@ -1,5 +1,14 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::string_slice,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use hook_shell_parser::command_query::ResolvedCommand;
 
+/// `inline_comment_text` function.
 pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
     let mut single_quoted = false;
     let mut double_quoted = false;
@@ -37,6 +46,7 @@ pub(crate) fn inline_comment_text(line: &str) -> Option<&str> {
     None
 }
 
+/// `cargo_subcommand_tail` function.
 pub(crate) fn cargo_subcommand_tail<'a>(
     command: &'a ResolvedCommand,
     subcommand: &str,
@@ -85,14 +95,17 @@ pub(crate) fn cargo_subcommand_tail<'a>(
     Some(args.get(index + 1..).unwrap_or(&[]))
 }
 
+/// `args_have_help_or_version` function.
 pub(crate) fn args_have_help_or_version(args: &[String]) -> bool {
     args.iter().any(|arg| is_help_or_version_flag(arg))
 }
 
+/// `is_help_or_version_flag` function.
 pub(crate) fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,

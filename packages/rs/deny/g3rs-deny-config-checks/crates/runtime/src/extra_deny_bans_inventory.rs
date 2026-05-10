@@ -5,8 +5,10 @@ use crate::support::expectations::expected_ban_names;
 use crate::support::identities::ban_name;
 use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/extra-deny-bans-inventory";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;
@@ -35,7 +37,7 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         if expected_names.contains(&name) {
             continue;
         }
-        extra_count += 1;
+        extra_count = extra_count.saturating_add(1);
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),

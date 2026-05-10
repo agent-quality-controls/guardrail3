@@ -7,7 +7,9 @@ use g3ts_astro_content_types::{
 };
 use std::path::Path;
 
+/// Constant `GUARDRAIL_CONFIG_REL_PATH`.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
+/// Constant `CONTENT_CONFIGS`.
 const CONTENT_CONFIGS: [&str; 6] = [
     "src/content.config.js",
     "src/content.config.mjs",
@@ -16,14 +18,7 @@ const CONTENT_CONFIGS: [&str; 6] = [
     "src/content.config.mts",
     "src/content.config.cts",
 ];
-const LIVE_CONFIGS: [&str; 6] = [
-    "src/live.config.js",
-    "src/live.config.mjs",
-    "src/live.config.cjs",
-    "src/live.config.ts",
-    "src/live.config.mts",
-    "src/live.config.cts",
-];
+/// Constant `VELITE_CONFIGS`.
 const VELITE_CONFIGS: [&str; 6] = [
     "velite.config.js",
     "velite.config.mjs",
@@ -33,6 +28,7 @@ const VELITE_CONFIGS: [&str; 6] = [
     "velite.config.cts",
 ];
 
+/// Helper `ingest_content_policy_surface`.
 pub(crate) fn ingest_content_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -41,7 +37,7 @@ pub(crate) fn ingest_content_policy_surface(
         app_root_rel_path,
         GUARDRAIL_CONFIG_REL_PATH,
     );
-    let Some(entry) = exact_included_file(crawl, &rel_path) else {
+    let Some(entry) = crate::roots::exact_included_file(crawl, &rel_path) else {
         return G3TsAstroContentPolicySurfaceState::Missing { rel_path };
     };
 
@@ -88,11 +84,12 @@ pub(crate) fn ingest_content_policy_surface(
     }
 }
 
+/// Helper `classify_content_mode`.
 pub(crate) fn classify_content_mode(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> G3TsAstroContentMode {
-    if select_live_config(crawl, app_root_rel_path).is_some() {
+    if crate::roots::select_live_config(crawl, app_root_rel_path).is_some() {
         G3TsAstroContentMode::LiveCollections
     } else if select_content_config(crawl, app_root_rel_path).is_some()
         || has_content_files(crawl, app_root_rel_path)
@@ -103,18 +100,15 @@ pub(crate) fn classify_content_mode(
     }
 }
 
+/// Helper `select_content_config`.
 pub(crate) fn select_content_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
-    CONTENT_CONFIGS.iter().find_map(|rel_path| {
-        exact_included_file(
-            crawl,
-            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
-        )
-    })
+    crate::roots::find_first_scoped_included_file(crawl, app_root_rel_path, &CONTENT_CONFIGS)
 }
 
+/// Helper `select_velite_config`.
 pub(crate) fn select_velite_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -137,6 +131,7 @@ pub(crate) fn select_velite_config<'a>(
         .min_by(|left, right| left.path.rel_path.cmp(&right.path.rel_path))
 }
 
+/// Helper `route_page_paths`.
 pub(crate) fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
     let pages_prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/pages/");
@@ -158,6 +153,7 @@ pub(crate) fn route_page_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str
         .collect()
 }
 
+/// Helper `endpoint_paths`.
 pub(crate) fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
     let pages_prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/pages/");
@@ -179,6 +175,7 @@ pub(crate) fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) 
         .collect()
 }
 
+/// Helper `route_markdown_pages`.
 pub(crate) fn route_markdown_pages(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -192,12 +189,14 @@ pub(crate) fn route_markdown_pages(
         .filter(|entry| {
             is_included_file(entry)
                 && entry.path.rel_path.starts_with(&pages_prefix)
-                && (entry.path.rel_path.ends_with(".md") || entry.path.rel_path.ends_with(".mdx"))
+                && (has_extension_ascii_ci(&entry.path.rel_path, "md")
+                    || has_extension_ascii_ci(&entry.path.rel_path, "mdx"))
         })
         .map(|entry| entry.path.rel_path.clone())
         .collect()
 }
 
+/// Helper `velite_output_paths`.
 pub(crate) fn velite_output_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -223,18 +222,7 @@ pub(crate) fn velite_output_paths(
         .collect()
 }
 
-fn select_live_config<'a>(
-    crawl: &'a G3WorkspaceCrawl,
-    app_root_rel_path: &str,
-) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
-    LIVE_CONFIGS.iter().find_map(|rel_path| {
-        exact_included_file(
-            crawl,
-            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
-        )
-    })
-}
-
+/// Helper `has_content_files`.
 fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool {
     let prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/content/");
@@ -246,23 +234,14 @@ fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool 
     })
 }
 
-fn exact_included_file<'crawl>(
-    crawl: &'crawl G3WorkspaceCrawl,
-    rel_path: &str,
-) -> Option<&'crawl g3_workspace_crawl::G3RsWorkspaceEntry> {
-    crawl.entries.iter().find(|entry| {
-        entry.kind == G3WorkspaceEntryKind::File
-            && entry.ignore_state == G3WorkspaceIgnoreState::Included
-            && entry.path.rel_path == rel_path
-    })
-}
-
+/// Helper `is_included_file`.
 fn is_included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
-fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
+/// Helper `is_app_visible`.
+const fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.readable
         && matches!(
             entry.kind,
@@ -270,23 +249,36 @@ fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
         )
 }
 
+/// Helper `is_route_tree_path`.
 fn is_route_tree_path(rel_path: &str, app_root_rel_path: &str) -> bool {
     let pages_prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/pages/");
     rel_path.starts_with(&pages_prefix)
 }
 
+/// Helper `is_route_page_file`.
 fn is_route_page_file(rel_path: &str) -> bool {
-    rel_path.ends_with(".astro")
-        || rel_path.ends_with(".md")
-        || rel_path.ends_with(".mdx")
-        || rel_path.ends_with(".html")
+    has_extension_ascii_ci(rel_path, "astro")
+        || has_extension_ascii_ci(rel_path, "md")
+        || has_extension_ascii_ci(rel_path, "mdx")
+        || has_extension_ascii_ci(rel_path, "html")
 }
 
+/// Helper `is_endpoint_file`.
 fn is_endpoint_file(rel_path: &str) -> bool {
-    (rel_path.ends_with(".js") || rel_path.ends_with(".ts")) && !rel_path.ends_with(".d.ts")
+    (has_extension_ascii_ci(rel_path, "js") || has_extension_ascii_ci(rel_path, "ts"))
+        && !rel_path.to_ascii_lowercase().ends_with(".d.ts")
 }
 
+/// Returns `true` when `rel_path` has the given `extension`, comparing the
+/// extension byte-wise in an ASCII-case-insensitive manner.
+fn has_extension_ascii_ci(rel_path: &str, extension: &str) -> bool {
+    Path::new(rel_path)
+        .extension()
+        .is_some_and(|actual| actual.eq_ignore_ascii_case(extension))
+}
+
+/// Helper `path_has_segment`.
 fn path_has_segment(rel_path: &str, segment: &str) -> bool {
     Path::new(rel_path)
         .components()

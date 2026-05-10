@@ -1,3 +1,4 @@
+/// Hook contract definition for the Astro media hook.
 #[cfg(feature = "api")]
 mod contract;
 

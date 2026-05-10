@@ -7,6 +7,7 @@ use g3ts_astro_content_types::{
     G3TsAstroContentPolicySurfaceState, G3TsAstroPipelineRuleScopeSnapshot,
 };
 
+/// Constant `ROUTE_SCOPED_PIPELINE_RULES`.
 const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
@@ -17,11 +18,16 @@ const ROUTE_SCOPED_PIPELINE_RULES: [&str; 8] = [
     "astro-pipeline/no-side-loader-imports",
     "astro-pipeline/no-velite-imports",
 ];
+/// Constant `INLINE_PUBLIC_CONTENT_RULE`.
 const INLINE_PUBLIC_CONTENT_RULE: &str = "i18next/no-literal-string";
+/// Constant `INLINE_PUBLIC_CONTENT_MESSAGE`.
 const INLINE_PUBLIC_CONTENT_MESSAGE: &str = "Inline public copy must live in Astro content entries. Move this text into the content collection, validate it through the collection schema, and pass the typed value into source.";
+/// Constant `CONTENT_ADAPTER_PIPELINE_RULE`.
 const CONTENT_ADAPTER_PIPELINE_RULE: &str =
     "astro-pipeline/require-approved-content-adapter-in-routes";
 
+/// Ingest the `ESLint` configuration surface for the content family checks
+/// rooted at `app_root_rel_path`.
 #[must_use]
 pub(crate) fn ingest_content_eslint_surface(
     crawl: &G3WorkspaceCrawl,
@@ -102,6 +108,7 @@ pub(crate) fn ingest_content_eslint_surface(
     }
 }
 
+/// Helper `probe_targets`.
 fn probe_targets(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -111,26 +118,27 @@ fn probe_targets(
             crawl,
             app_root_rel_path,
             eslint_config_parser::types::EslintProbeKind::AstroSource,
-            |rel_path| rel_path.starts_with("src/") && rel_path.ends_with(".astro"),
+            |rel_path| rel_path.starts_with("src/") && has_extension_ascii_ci(rel_path, "astro"),
             "src/__g3ts_probe__.astro",
         ),
         source_probe(
             crawl,
             app_root_rel_path,
             eslint_config_parser::types::EslintProbeKind::TsSource,
-            |rel_path| rel_path.starts_with("src/") && rel_path.ends_with(".ts"),
+            |rel_path| rel_path.starts_with("src/") && has_extension_ascii_ci(rel_path, "ts"),
             "src/index.ts",
         ),
         source_probe(
             crawl,
             app_root_rel_path,
             eslint_config_parser::types::EslintProbeKind::TsxSource,
-            |rel_path| rel_path.starts_with("src/") && rel_path.ends_with(".tsx"),
+            |rel_path| rel_path.starts_with("src/") && has_extension_ascii_ci(rel_path, "tsx"),
             "src/__g3ts_probe__.tsx",
         ),
     ]
 }
 
+/// Helper `source_probe`.
 fn source_probe(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -151,6 +159,7 @@ fn source_probe(
     }
 }
 
+/// Helper `first_matching_app_rel_path`.
 fn first_matching_app_rel_path(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -174,6 +183,7 @@ fn first_matching_app_rel_path(
         .map(|entry| entry.path.rel_path.clone())
 }
 
+/// Helper `map_raw_state`.
 fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroContentEslintSurfaceState {
     match raw {
         G3TsAstroRawEslintConfigState::Missing { rel_path } => {
@@ -194,6 +204,7 @@ fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroContentEslintSu
     }
 }
 
+/// Helper `active_probe`.
 fn active_probe(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -201,6 +212,7 @@ fn active_probe(
     probe_by_kind(typed, kind).filter(|probe| !probe.ignored)
 }
 
+/// Helper `probe_by_kind`.
 fn probe_by_kind(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -208,6 +220,7 @@ fn probe_by_kind(
     typed.probes.iter().find(|probe| probe.probe == kind)
 }
 
+/// Helper `probe_ignored`.
 fn probe_ignored(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -215,10 +228,12 @@ fn probe_ignored(
     probe_by_kind(typed, kind).is_none_or(|probe| probe.ignored)
 }
 
+/// Helper `plugins`.
 fn plugins(probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>) -> Vec<String> {
     probe.map_or_else(Vec::new, |probe| probe.plugins.clone())
 }
 
+/// Helper `active_error_rules`.
 fn active_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -234,6 +249,7 @@ fn active_error_rules(
     })
 }
 
+/// Helper `active_warn_or_error_rules`.
 fn active_warn_or_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -249,6 +265,7 @@ fn active_warn_or_error_rules(
     })
 }
 
+/// Helper `restricted_disable_patterns`.
 fn restricted_disable_patterns(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -274,6 +291,7 @@ fn restricted_disable_patterns(
         .collect()
 }
 
+/// Helper `route_scoped_pipeline_rule_scopes`.
 fn route_scoped_pipeline_rule_scopes(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<G3TsAstroPipelineRuleScopeSnapshot> {
@@ -297,6 +315,7 @@ fn route_scoped_pipeline_rule_scopes(
         .collect()
 }
 
+/// Helper `effective_content_adapter_modules`.
 fn effective_content_adapter_modules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -319,6 +338,7 @@ fn effective_content_adapter_modules(
         })
 }
 
+/// Helper `effective_inline_public_content_rules`.
 fn effective_inline_public_content_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -340,6 +360,7 @@ fn effective_inline_public_content_rules(
         })
 }
 
+/// Helper `probe_has_pipeline_plugin_package`.
 fn probe_has_pipeline_plugin_package(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> bool {
@@ -353,6 +374,7 @@ fn probe_has_pipeline_plugin_package(
         })
 }
 
+/// Helper `rule_setting_has_inline_public_content_policy`.
 fn rule_setting_has_inline_public_content_policy(
     setting: &eslint_config_parser::types::EslintRuleSetting,
 ) -> bool {
@@ -365,81 +387,89 @@ fn rule_setting_has_inline_public_content_policy(
     };
 
     object.len() == 10
-        && object_string_value(object.get("framework")) == Some("react")
+        && inline_public_scalar_options_match(object)
+        && inline_public_collection_options_match(object)
+}
+
+/// Returns `true` when the scalar option fields of the inline-public-content
+/// rule match the expected baseline.
+fn inline_public_scalar_options_match(object: JsonObjectRef<'_>) -> bool {
+    object_string_value(object.get("framework")) == Some("react")
         && object_string_value(object.get("mode")) == Some("all")
         && object_string_value(object.get("message")) == Some(INLINE_PUBLIC_CONTENT_MESSAGE)
         && object_bool_value(object.get("should-validate-template")) == Some(true)
-        && object_has_exact_string_arrays(
-            object.get("words"),
-            "include",
-            &[],
-            "exclude",
-            &["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"],
-        )
-        && object_has_exact_string_arrays(
-            object.get("jsx-components"),
-            "include",
-            &[],
-            "exclude",
-            &[],
-        )
-        && object_has_exact_string_arrays(
-            object.get("jsx-attributes"),
-            "include",
-            &[],
-            "exclude",
-            &[
-                "as",
-                "class",
-                "className",
-                "color",
-                "data-.+",
-                "height",
-                "href",
-                "id",
-                "intent",
-                "key",
-                "name",
-                "rel",
-                "role",
-                "size",
-                "slot",
-                "src",
-                "style",
-                "styleName",
-                "target",
-                "tone",
-                "type",
-                "variant",
-                "width",
-                "aria-hidden",
-            ],
-        )
-        && object_has_exact_string_arrays(
-            object.get("callees"),
-            "include",
-            &[],
-            "exclude",
-            &[
-                "require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL",
-            ],
-        )
-        && object_has_exact_string_arrays(
-            object.get("object-properties"),
-            "include",
-            &[],
-            "exclude",
-            &["[A-Z_-]+"],
-        )
-        && object_has_exact_string_arrays(
-            object.get("class-properties"),
-            "include",
-            &[],
-            "exclude",
-            &["displayName"],
-        )
 }
 
+/// Returns `true` when every collection-shaped option field of the
+/// inline-public-content rule matches the expected baseline arrays.
+fn inline_public_collection_options_match(object: JsonObjectRef<'_>) -> bool {
+    object_has_exact_string_arrays(
+        object.get("words"),
+        "include",
+        &[],
+        "exclude",
+        &["[0-9!-/:-@[-`{-~]+", "[A-Z_-]+"],
+    ) && object_has_exact_string_arrays(
+        object.get("jsx-components"),
+        "include",
+        &[],
+        "exclude",
+        &[],
+    ) && object_has_exact_string_arrays(
+        object.get("jsx-attributes"),
+        "include",
+        &[],
+        "exclude",
+        &[
+            "as",
+            "class",
+            "className",
+            "color",
+            "data-.+",
+            "height",
+            "href",
+            "id",
+            "intent",
+            "key",
+            "name",
+            "rel",
+            "role",
+            "size",
+            "slot",
+            "src",
+            "style",
+            "styleName",
+            "target",
+            "tone",
+            "type",
+            "variant",
+            "width",
+            "aria-hidden",
+        ],
+    ) && object_has_exact_string_arrays(
+        object.get("callees"),
+        "include",
+        &[],
+        "exclude",
+        &[
+            "require", "clsx", "cn", "cx", "cva", "twMerge", "twJoin", "tv", "URL",
+        ],
+    ) && object_has_exact_string_arrays(
+        object.get("object-properties"),
+        "include",
+        &[],
+        "exclude",
+        &["[A-Z_-]+"],
+    ) && object_has_exact_string_arrays(
+        object.get("class-properties"),
+        "include",
+        &[],
+        "exclude",
+        &["displayName"],
+    )
+}
+
+/// Helper `object_has_exact_string_arrays`.
 fn object_has_exact_string_arrays(
     value: Option<&serde_json::Value>,
     first_key: &str,
@@ -456,6 +486,7 @@ fn object_has_exact_string_arrays(
         && string_array_exactly(object.get(second_key), second_expected)
 }
 
+/// Helper `string_array_exactly`.
 fn string_array_exactly(value: Option<&serde_json::Value>, expected: &[&str]) -> bool {
     let Some(values) = value.and_then(serde_json::Value::as_array) else {
         return false;
@@ -465,30 +496,39 @@ fn string_array_exactly(value: Option<&serde_json::Value>, expected: &[&str]) ->
         && values
             .iter()
             .zip(expected.iter().copied())
-            .all(|(value, expected)| value.as_str() == Some(expected))
+            .all(|(actual, expected_str)| actual.as_str() == Some(expected_str))
 }
 
+/// Decode `option` as a borrowed JSON string.
 fn object_string_value(option: Option<&serde_json::Value>) -> Option<&str> {
     option.and_then(serde_json::Value::as_str)
 }
 
+/// Decode `option` as a JSON bool, treating non-bool values as `None`.
 fn object_bool_value(option: Option<&serde_json::Value>) -> Option<bool> {
     option.and_then(serde_json::Value::as_bool)
 }
 
+/// Convenience alias for a borrowed JSON object map (`{ String -> Value }`)
+/// that backs `ESLint` rule option payloads.
+type JsonObjectRef<'a> = &'a serde_json::Map<String, serde_json::Value>;
+
+/// Helper `first_option_object`.
 fn first_option_object(
     setting: &eslint_config_parser::types::EslintRuleSetting,
-) -> Option<&serde_json::Map<String, serde_json::Value>> {
+) -> Option<JsonObjectRef<'_>> {
     setting
         .options
         .first()
         .and_then(serde_json::Value::as_object)
 }
 
+/// Helper `rule_setting_is_error`.
 fn rule_setting_is_error(setting: &eslint_config_parser::types::EslintRuleSetting) -> bool {
     setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error
 }
 
+/// Helper `string_array_option`.
 fn string_array_option(
     setting: &eslint_config_parser::types::EslintRuleSetting,
     option_name: &str,
@@ -505,4 +545,12 @@ fn string_array_option(
                 .map(str::to_owned)
                 .collect()
         })
+}
+
+/// Returns `true` when `rel_path` has the given `extension`, comparing the
+/// extension byte-wise in an ASCII-case-insensitive manner.
+fn has_extension_ascii_ci(rel_path: &str, extension: &str) -> bool {
+    std::path::Path::new(rel_path)
+        .extension()
+        .is_some_and(|actual| actual.eq_ignore_ascii_case(extension))
 }

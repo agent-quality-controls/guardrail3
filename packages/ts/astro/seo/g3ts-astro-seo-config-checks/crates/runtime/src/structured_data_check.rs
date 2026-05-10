@@ -1,9 +1,13 @@
 use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/structured-data-check";
+/// Static rule data.
 const DEPENDENCY_NAME: &str = "g3ts-astro-nuasite-checks";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -20,14 +24,12 @@ pub(crate) fn check(
     };
 
     if has_package && has_wiring {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                    ID,
-                    "JSON-LD presence check is delegated to Nuasite",
-                    format!("`{rel_path}` wires `structuredDataPresentCheck` imported from `{DEPENDENCY_NAME}` through `checks({{ customChecks: [...] }})`."),
-                    rel_path,
-                ));
-        }
+        results.push(crate::support::info(
+                ID,
+                "JSON-LD presence check is delegated to Nuasite",
+                format!("`{rel_path}` wires `structuredDataPresentCheck` imported from `{DEPENDENCY_NAME}` through `checks({{ customChecks: [...] }})`."),
+                rel_path,
+            ));
         return;
     }
 
@@ -37,6 +39,6 @@ pub(crate) fn check(
             format!(
                 "This Astro app must list `{DEPENDENCY_NAME}` and pass `structuredDataPresentCheck` imported from `{DEPENDENCY_NAME}` in `checks({{ customChecks: [structuredDataPresentCheck] }})`. Inline app-local custom checks do not satisfy this contract because the validator implementation must be shared.",
             ),
-            rel_path,
+            Some(rel_path),
         ));
 }

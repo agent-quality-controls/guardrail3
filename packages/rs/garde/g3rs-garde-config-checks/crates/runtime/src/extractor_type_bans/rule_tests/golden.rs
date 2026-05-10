@@ -11,7 +11,7 @@ fn inventories_when_all_extractor_bans_present() {
 
     assertions::assert_contains(
         &results,
-        assertions::info(
+        &assertions::info(
             "garde extractor bans present",
             "All required Axum extractor bans are present in the covering clippy configuration.",
             "clippy.toml",

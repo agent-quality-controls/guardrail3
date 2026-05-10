@@ -1,5 +1,6 @@
 use g3ts_eslint_config_checks_runtime as _;
 
+/// Internal module `common`.
 mod common;
 
 #[cfg(feature = "checks")]

@@ -7,11 +7,5 @@ allowed_deps = [
   "guardrail3-check-types",
 ]
 
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "config-check packages keep one rule per file at runtime root"
-
 [checks]
 garde = false

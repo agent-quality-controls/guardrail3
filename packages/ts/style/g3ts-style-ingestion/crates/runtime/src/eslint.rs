@@ -4,6 +4,7 @@ use g3ts_style_types::{
     G3TsStyleEslintSurfaceState, G3TsStylePolicySurfaceState,
 };
 
+/// Recognized `ESLint` config file names, ordered by preference.
 const CONFIG_CANDIDATES: [&str; 6] = [
     "eslint.config.mjs",
     "eslint.config.js",
@@ -13,6 +14,14 @@ const CONFIG_CANDIDATES: [&str; 6] = [
     "eslint.config.cts",
 ];
 
+/// Read and parse the nearest `ESLint` config under `app_root_rel_path`
+/// from `crawl`, using `policy` to derive probe targets.
+#[expect(
+    clippy::too_many_lines,
+    reason = "Linear single-function ingestion expressing distinct ESLint config-surface \
+              variants with their result emissions; splitting would require shared mutable \
+              state plumbing that would obscure the linear control flow"
+)]
 pub(crate) fn ingest_eslint_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -83,11 +92,7 @@ pub(crate) fn ingest_eslint_config(
         .collect::<std::collections::BTreeSet<_>>()
         .into_iter()
         .collect();
-    let source_probe_disable_policies = snapshot
-        .probes
-        .iter()
-        .map(probe_disable_policy)
-        .collect();
+    let source_probe_disable_policies = snapshot.probes.iter().map(probe_disable_policy).collect();
 
     G3TsStyleEslintSurfaceState::Parsed {
         snapshot: G3TsStyleEslintSurfaceSnapshot {
@@ -105,6 +110,7 @@ pub(crate) fn ingest_eslint_config(
     }
 }
 
+/// Build a disable-policy snapshot for a single probe.
 fn probe_disable_policy(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> G3TsStyleEslintProbeDisablePolicySnapshot {
@@ -116,6 +122,8 @@ fn probe_disable_policy(
     }
 }
 
+/// List rule names that are configured at warn-or-error severity in the
+/// probe's effective config.
 fn active_warn_or_error_rules(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -132,6 +140,7 @@ fn active_warn_or_error_rules(
         .collect()
 }
 
+/// List patterns configured for `@eslint-community/eslint-comments/no-restricted-disable`.
 fn restricted_disable_patterns(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -157,9 +166,8 @@ fn restricted_disable_patterns(
         .collect()
 }
 
-fn rule_has_effective_style_policy(
-    rule: &eslint_config_parser::types::EslintRuleSetting,
-) -> bool {
+/// Whether `rule` configures the `style-policy/*` plugin with non-empty options.
+fn rule_has_effective_style_policy(rule: &eslint_config_parser::types::EslintRuleSetting) -> bool {
     rule.severity == eslint_config_parser::types::EslintRuleSeverity::Error
         && rule
             .options
@@ -167,11 +175,14 @@ fn rule_has_effective_style_policy(
             .is_some_and(option_has_non_empty_style_policy)
 }
 
+/// Whether every probe in the config snapshot lists the owned
+/// `style-policy` plugin.
 fn all_probes_use_owned_style_policy_plugin(
     probes: &[eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> bool {
     probes.iter().all(|probe| {
-        probe.plugin_package_names
+        probe
+            .plugin_package_names
             .get("style-policy")
             .is_some_and(|packages| {
                 packages
@@ -181,12 +192,14 @@ fn all_probes_use_owned_style_policy_plugin(
     })
 }
 
+/// Whether `option` is an object with a non-empty `style-policy` string list.
 fn option_has_non_empty_style_policy(option: &serde_json::Value) -> bool {
     ["denyList", "denyPrefixes", "denyPatterns"]
         .iter()
         .any(|key| option_has_non_empty_string_array(option, key))
 }
 
+/// Whether `option[key]` is a non-empty array of non-empty strings.
 fn option_has_non_empty_string_array(option: &serde_json::Value, key: &str) -> bool {
     option
         .get(key)
@@ -198,6 +211,8 @@ fn option_has_non_empty_string_array(option: &serde_json::Value, key: &str) -> b
         })
 }
 
+/// Derive `ESLint` probe targets from `policy.source_globs` (or a fallback
+/// when policy is unavailable).
 fn probe_targets(
     app_root_rel_path: &str,
     policy: &G3TsStylePolicySurfaceState,
@@ -217,6 +232,7 @@ fn probe_targets(
     }
 }
 
+/// Default probe target list used when the policy declares no source globs.
 fn fallback_probe_targets(
     app_root_rel_path: &str,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
@@ -227,6 +243,7 @@ fn fallback_probe_targets(
     )]
 }
 
+/// Derive a list of probe targets from a single `glob` pattern.
 fn probe_targets_from_glob(
     app_root_rel_path: &str,
     glob: &str,
@@ -247,15 +264,18 @@ fn probe_targets_from_glob(
         .collect()
 }
 
+/// Whether `glob` textually mentions `extension`.
 fn glob_mentions_extension(glob: &str, extension: &str) -> bool {
     glob.contains(&format!(".{extension}"))
         || glob.contains(&format!("{{{extension}"))
         || glob.contains(&format!(",{extension}"))
 }
 
+/// Extract the static directory prefix of `glob` (the portion preceding
+/// the first glob metacharacter), returning None when the prefix is empty.
 fn glob_prefix_directory(glob: &str) -> Option<String> {
     let prefix = glob
-        .split(|character| matches!(character, '*' | '?' | '[' | '{'))
+        .split(['*', '?', '[', '{'])
         .next()?
         .trim_end_matches('/');
     if prefix.is_empty() {
@@ -271,6 +291,7 @@ fn glob_prefix_directory(glob: &str) -> Option<String> {
     Some(prefix.to_owned())
 }
 
+/// Map a source-file `extension` to its `ESLint` probe-kind variant.
 fn probe_kind_for_extension(
     extension: &str,
 ) -> Option<eslint_config_parser::types::EslintProbeKind> {
@@ -283,6 +304,7 @@ fn probe_kind_for_extension(
     }
 }
 
+/// Build an `EslintProbeTarget` for `local_rel_path` scoped to `app_root_rel_path`.
 fn target(
     app_root_rel_path: &str,
     local_rel_path: &str,
@@ -294,6 +316,7 @@ fn target(
     }
 }
 
+/// Drop duplicate `(probe, rel_path)` pairs from `targets`, preserving order.
 fn dedupe_targets(
     targets: Vec<eslint_config_parser::types::EslintProbeTarget>,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
@@ -304,6 +327,8 @@ fn dedupe_targets(
         .collect()
 }
 
+/// Find the nearest `ESLint` config rel-path by walking up from
+/// `app_root_rel_path` and matching each ancestor against `CONFIG_CANDIDATES`.
 fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
     ancestors(app_root_rel_path).into_iter().find_map(|scope| {
         CONFIG_CANDIDATES
@@ -323,6 +348,8 @@ fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<S
 // reason: keep private ESLint style ingestion tests in the owned sidecar directory.
 mod eslint_tests;
 
+/// Enumerate `app_root_rel_path` and each of its ancestor directories, in
+/// nearest-first order, using `"."` for the workspace root.
 fn ancestors(app_root_rel_path: &str) -> Vec<String> {
     let mut ancestors = Vec::new();
     let mut current = std::path::Path::new(app_root_rel_path);

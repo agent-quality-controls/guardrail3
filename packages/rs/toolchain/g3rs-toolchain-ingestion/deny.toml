@@ -42,7 +42,7 @@ deny = [
   { name = "rmp-serde", wrappers = [], reason = "Ban competing binary serialization formats" },
   { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
   { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
-  { name = "regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, serde_json, toml)" },
+  { name = "regex", wrappers = ["tree-sitter"], reason = "Ban regex crates - use structured parsers (syn, serde_json, toml)" },
   { name = "fancy-regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
   { name = "onig", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
   { name = "pcre2", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },

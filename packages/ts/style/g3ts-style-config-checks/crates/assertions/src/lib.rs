@@ -1,6 +1,7 @@
 #[cfg(feature = "api")]
 use g3ts_style_config_checks_runtime as _;
 
+/// Public assertion helpers used by integration tests.
 #[cfg(feature = "api")]
 mod run;
 

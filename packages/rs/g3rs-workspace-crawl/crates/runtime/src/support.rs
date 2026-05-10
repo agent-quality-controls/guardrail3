@@ -1,8 +1,16 @@
+//! Internal entry-construction helpers.
+
 use std::path::Path;
 
 use g3rs_workspace_crawl_types::{
     G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState, G3RsWorkspacePath,
 };
+
+/// Build a `G3RsWorkspaceEntry` from a walker-discovered path.
+///
+/// When `path` is not under `workspace_root` the relative path falls back to
+/// the file's lossy representation (this should not occur for entries
+/// produced by the configured walkers, which descend from `workspace_root`).
 pub(crate) fn build_entry(
     workspace_root: &Path,
     path: &Path,
@@ -11,7 +19,7 @@ pub(crate) fn build_entry(
 ) -> G3RsWorkspaceEntry {
     let rel_path = path
         .strip_prefix(workspace_root)
-        .expect("walked path should stay under workspace root")
+        .map_or_else(|_| path.to_path_buf(), Path::to_path_buf)
         .to_string_lossy()
         .replace('\\', "/");
     let abs_path = path.to_path_buf();
@@ -24,6 +32,7 @@ pub(crate) fn build_entry(
     }
 }
 
+/// Whether the entry at `path` can be read from disk.
 fn is_readable(path: &Path, kind: G3RsWorkspaceEntryKind) -> bool {
     match kind {
         G3RsWorkspaceEntryKind::File => crate::fs::is_readable_file(path),

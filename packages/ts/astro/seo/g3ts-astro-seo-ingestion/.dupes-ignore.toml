@@ -1,0 +1,43 @@
+[[ignore]]
+fingerprint = "d211718343988512"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "4b9df59b673c0721"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "6f1290eaab9767f7"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "6f40b83834348423"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "820918d3fbe3cc22"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "9457ccabca6b6311"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "a84c27c0681cb8a0"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "b540258d69f17ee9"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "b58323ae37466eb5"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "c0e10846b52fdd6a"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "c4e42037de4941ab"
+reason = "per-rule/per-surface helper: each helper handles a distinct policy/probe variant; deduping would couple unrelated rules and break per-surface independence, conflicts with real-proof-site contract"

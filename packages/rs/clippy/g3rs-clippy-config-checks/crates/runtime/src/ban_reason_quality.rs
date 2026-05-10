@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{clippy_document, parse_ban_section};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/ban-reason-quality";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(document) = clippy_document(input) else {
         return;
@@ -18,7 +20,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     ] {
         let section = parse_ban_section(document, key);
         for malformed in &section.malformed_messages {
-            issue_count += 1;
+            issue_count = issue_count.saturating_add(1);
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Error,
@@ -30,7 +32,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         }
         for entry in section.entries {
             if entry.is_plain_string || entry.reason.as_deref().is_none() {
-                issue_count += 1;
+                issue_count = issue_count.saturating_add(1);
                 results.push(G3CheckResult::new(
                     ID.to_owned(),
                     G3Severity::Error,

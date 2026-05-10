@@ -23,11 +23,7 @@ fn golden_content_package_reports_owned_ids() {
 #[test]
 fn protected_content_rule_disables_must_cover_every_protected_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .tsx_source_restricted_disable_patterns
         .retain(|rule| rule != "i18next/no-literal-string");
@@ -42,11 +38,7 @@ fn protected_content_rule_disables_must_cover_every_protected_rule() {
 #[test]
 fn protected_content_rule_disables_requires_restrict_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .astro_source_warn_or_error_rules
         .retain(|rule| rule != "@eslint-community/eslint-comments/no-restricted-disable");
@@ -61,11 +53,7 @@ fn protected_content_rule_disables_requires_restrict_rule() {
 #[test]
 fn protected_content_rule_disables_accept_pipeline_wildcard() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     let patterns = vec![
         "astro-pipeline/*".to_owned(),
         "i18next/no-literal-string".to_owned(),
@@ -128,11 +116,7 @@ fn eslint_disable_inventory_fails_closed_on_parse_error() {
 #[test]
 fn content_adapter_rule_accepts_equivalent_recursive_file_globs() {
     let mut input = super::helpers::golden();
-    let config = &mut input.policy_eslint_contracts[0].eslint_config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::policy_eslint_snapshot_mut(&mut input);
     let glob = "src/lib/content/**/*".to_owned();
     snapshot.astro_source_effective_content_adapter_modules = vec![glob.clone()];
     snapshot.ts_source_effective_content_adapter_modules = vec![glob.clone()];
@@ -148,11 +132,7 @@ fn content_adapter_rule_accepts_equivalent_recursive_file_globs() {
 #[test]
 fn content_adapter_rule_rejects_unrelated_recursive_file_globs() {
     let mut input = super::helpers::golden();
-    let config = &mut input.policy_eslint_contracts[0].eslint_config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::policy_eslint_snapshot_mut(&mut input);
     let glob = "src/other-content/**/*".to_owned();
     snapshot.astro_source_effective_content_adapter_modules = vec![glob.clone()];
     snapshot.ts_source_effective_content_adapter_modules = vec![glob.clone()];
@@ -168,11 +148,7 @@ fn content_adapter_rule_rejects_unrelated_recursive_file_globs() {
 #[test]
 fn content_adapter_rule_rejects_missing_tsx_lane_coverage() {
     let mut input = super::helpers::golden();
-    let config = &mut input.policy_eslint_contracts[0].eslint_config;
-    let g3ts_astro_content_types::G3TsAstroContentEslintSurfaceState::Parsed { snapshot } = config
-    else {
-        panic!("golden content eslint config should be parsed");
-    };
+    let snapshot = super::helpers::policy_eslint_snapshot_mut(&mut input);
     snapshot
         .tsx_source_effective_content_adapter_modules
         .clear();

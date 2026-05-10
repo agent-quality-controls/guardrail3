@@ -1,3 +1,4 @@
+/// Public input contract types for g3rs toolchain checks.
 #[cfg(feature = "api")]
 mod types;
 

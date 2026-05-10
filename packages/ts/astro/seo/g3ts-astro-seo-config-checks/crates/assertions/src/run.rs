@@ -1,3 +1,8 @@
+/// Asserts the rule and panics on mismatch.
+///
+/// # Panics
+///
+/// Panics when the assertion fails.
 pub fn assert_runtime_check_exact_ids(
     input: &g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     expected: &[&str],
@@ -12,6 +17,11 @@ pub fn assert_runtime_check_exact_ids(
     );
 }
 
+/// Asserts the rule and panics on mismatch.
+///
+/// # Panics
+///
+/// Panics when the assertion fails.
 pub fn assert_runtime_error_id(
     input: &g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     expected_id: &str,
@@ -26,6 +36,11 @@ pub fn assert_runtime_error_id(
     );
 }
 
+/// Asserts the rule and panics on mismatch.
+///
+/// # Panics
+///
+/// Panics when the assertion fails.
 pub fn assert_runtime_check_id_severity(
     input: &g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     expected_id: &str,
@@ -40,6 +55,11 @@ pub fn assert_runtime_check_id_severity(
     );
 }
 
+/// Asserts the rule and panics on mismatch.
+///
+/// # Panics
+///
+/// Panics when the assertion fails.
 pub fn assert_exact_ids(results: &[guardrail3_check_types::G3CheckResult], expected: &[&str]) {
     let actual = results
         .iter()

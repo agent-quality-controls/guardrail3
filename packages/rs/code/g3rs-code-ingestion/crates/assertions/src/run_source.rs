@@ -7,6 +7,7 @@
 
 use g3rs_code_types as code_types;
 
+#[must_use]
 pub fn require_source_file<'a>(
     inputs: &'a [code_types::G3RsCodeSourceChecksInput],
     rel_path: &str,

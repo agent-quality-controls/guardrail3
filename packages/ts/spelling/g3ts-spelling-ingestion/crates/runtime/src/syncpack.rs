@@ -4,6 +4,8 @@ use g3ts_spelling_types::{
     G3TsSpellingSyncpackVersionGroupSnapshot,
 };
 
+/// Read and parse the `.syncpackrc` at `app_root_rel_path` from `crawl`,
+/// returning a surface-state describing what was found.
 pub(crate) fn ingest_syncpack_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -37,8 +39,12 @@ pub(crate) fn ingest_syncpack_config(
             reason: reason.to_owned(),
         };
     }
-    let typed = syncpack_config_parser::typed(&document)
-        .expect("parsed Syncpack config document should stay typed");
+    let Some(typed) = syncpack_config_parser::typed(&document) else {
+        return G3TsSpellingSyncpackSurfaceState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "parsed Syncpack config document is not typed".to_owned(),
+        };
+    };
     G3TsSpellingSyncpackSurfaceState::Parsed {
         snapshot: G3TsSpellingSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
@@ -53,11 +59,15 @@ pub(crate) fn ingest_syncpack_config(
     }
 }
 
+/// Whether `entry` is an included file (used to skip directories and
+/// ignored entries when matching `.syncpackrc`).
 fn included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
         && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
 }
 
+/// Project a parsed Syncpack version-group into the spelling-specific
+/// snapshot variant retained for downstream checks.
 fn syncpack_version_group(
     group: syncpack_config_parser::types::SyncpackVersionGroup,
 ) -> G3TsSpellingSyncpackVersionGroupSnapshot {

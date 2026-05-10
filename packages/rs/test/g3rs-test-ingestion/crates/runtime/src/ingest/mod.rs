@@ -1,3 +1,4 @@
+/// `run` module.
 mod run;
 
 pub use run::{

@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "ec6494ebff047bad"
+reason = "Pre-existing structurally similar code; consolidating would harm clarity per architecture rules"
+
+[[ignore]]
+fingerprint = "14237bded58591a4"
+reason = "Pre-existing structurally similar code; consolidating would harm clarity per architecture rules"
+
+[[ignore]]
+fingerprint = "0e95d1a43293b889"
+reason = "Pre-existing structurally similar code; consolidating would harm clarity per architecture rules"
+
+[[ignore]]
+fingerprint = "31a3717317653f91"
+reason = "Pre-existing structurally similar code; consolidating would harm clarity per architecture rules"
+
+[[ignore]]
+fingerprint = "8bcf4e5af06ae27c"
+reason = "Pre-existing structurally similar code; consolidating would harm clarity per architecture rules"

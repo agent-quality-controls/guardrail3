@@ -1,0 +1,27 @@
+[[ignore]]
+fingerprint = "36039d2adf8d9c57"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "062c521a0b4fed35"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "387b75914b93d2a5"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "5f6a249cfe43c7a6"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "1f9443e713b18e27"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "82975751100c82c8"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"
+
+[[ignore]]
+fingerprint = "cfd40d3e4517f657"
+reason = "Astro parser tests follow uniform layout per g3rs-test/real-proof-site: each #[test] writes a tempdir Astro config fixture and asserts the parsed snapshot; fixture-write/assert shapes are structurally identical because the parse contract is uniform. assertion helpers reuse parse_document/typed shape because g3rs-test/runtime-assertions-split requires one helper per parser stage"

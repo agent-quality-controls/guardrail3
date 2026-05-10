@@ -2,8 +2,10 @@ use g3ts_astro_content_types::G3TsAstroContentIntegrationContractInput;
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-content/route-scope-overlap";
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroContentIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -46,14 +48,14 @@ pub(crate) fn check(
             ID,
             "Astro content and non-content route scopes overlap",
             format!(
-                "`{}` matches these discovered route pages as both content and non-content: {}. Adjust `[ts.astro.routes].content` or `[ts.astro.routes].non_content` so each route has exactly one policy role.",
-                rel_path.unwrap_or("guardrail3-ts.toml"),
-                format_paths(&overlapping_routes)
+                "`{rel_path}` matches these discovered route pages as both content and non-content: {paths}. Adjust `[ts.astro.routes].content` or `[ts.astro.routes].non_content` so each route has exactly one policy role.",
+                paths = format_paths(&overlapping_routes)
             ),
-            rel_path,
+            Some(rel_path),
         ));
 }
 
+/// Internal function `glob_set`.
 fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
     let mut builder = GlobSetBuilder::new();
     for pattern in patterns {
@@ -62,18 +64,19 @@ fn glob_set(patterns: &[String]) -> Result<GlobSet, globset::Error> {
     builder.build()
 }
 
-fn invalid_glob_error(rel_path: Option<&str>) -> G3CheckResult {
+/// Internal function `invalid_glob_error`.
+fn invalid_glob_error(rel_path: &str) -> G3CheckResult {
     crate::support::error(
         ID,
         "Astro route scope policy contains an invalid glob",
         format!(
-            "`{}` contains a `[ts.astro.routes].content` or `[ts.astro.routes].non_content` entry that `globset` cannot compile. Use valid app-relative glob syntax.",
-            rel_path.unwrap_or("guardrail3-ts.toml")
+            "`{rel_path}` contains a `[ts.astro.routes].content` or `[ts.astro.routes].non_content` entry that `globset` cannot compile. Use valid app-relative glob syntax."
         ),
-        rel_path,
+        Some(rel_path),
     )
 }
 
+/// Internal function `format_paths`.
 fn format_paths(paths: &[String]) -> String {
     paths
         .iter()

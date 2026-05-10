@@ -2,8 +2,10 @@ use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_toml_parser::types::RustProfile;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deps/cargo-lock-present";
 
+/// Emits a finding when the workspace root is missing `Cargo.lock`.
 pub(crate) fn check(input: &G3RsDepsFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.cargo_lock_exists {
         results.push(

@@ -1,6 +1,8 @@
 use g3rs_code_types::G3RsCodeConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Run extracted code config checks.
+#[must_use]
 pub fn check(input: &G3RsCodeConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 

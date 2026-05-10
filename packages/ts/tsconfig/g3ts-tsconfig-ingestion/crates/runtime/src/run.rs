@@ -4,6 +4,7 @@ use g3_workspace_crawl::{
 use g3ts_tsconfig_types::{G3TsTsconfigChecksInput, G3TsTsconfigState, inline_strict_flags};
 use tsconfig_json_parser::{from_path_document, parse_error_reason};
 
+#[must_use]
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksInput {
     let Some(entry) = select_root_tsconfig(crawl) else {
         return G3TsTsconfigChecksInput {
@@ -55,7 +56,9 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksI
     }
 }
 
-fn select_root_tsconfig<'a>(crawl: &'a G3WorkspaceCrawl) -> Option<&'a G3WorkspaceEntry> {
+/// Select the root tsconfig from `crawl`, preferring `tsconfig.json` over
+/// `tsconfig.base.json`.
+fn select_root_tsconfig(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
     root_file(crawl, "tsconfig.json").or_else(|| root_file(crawl, "tsconfig.base.json"))
 }
 

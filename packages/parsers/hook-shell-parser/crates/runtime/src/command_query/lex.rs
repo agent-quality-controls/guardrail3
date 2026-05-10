@@ -1,3 +1,12 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::arithmetic_side_effects,
+    clippy::indexing_slicing,
+    clippy::string_slice,
+    clippy::excessive_nesting,
+    reason = "lex.rs IS the bash-style tokenizer; byte offsets, slicing, and arithmetic mirror the lexer's character-stream invariants"
+)]
+
 use super::api::CommandSegment;
 
 pub(super) fn split_command_segments(raw: &str) -> Vec<CommandSegment> {

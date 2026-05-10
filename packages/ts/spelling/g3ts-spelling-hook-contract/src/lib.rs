@@ -1,3 +1,4 @@
+/// Hook contract definition for the spelling checks hook.
 #[cfg(feature = "api")]
 mod contract;
 

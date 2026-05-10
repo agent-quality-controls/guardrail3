@@ -7,27 +7,29 @@ use g3ts_typecov_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-pub(crate) fn parsed_package(
+/// Returns the parsed package snapshot when the surface state is `Parsed`.
+pub(crate) const fn parsed_package(
     package: &G3TsTypecovPackageSurfaceState,
 ) -> Option<&G3TsTypecovPackageSurfaceSnapshot> {
-    match package {
-        G3TsTypecovPackageSurfaceState::Parsed { snapshot } => Some(snapshot),
-        G3TsTypecovPackageSurfaceState::Missing { .. }
-        | G3TsTypecovPackageSurfaceState::Unreadable { .. }
-        | G3TsTypecovPackageSurfaceState::ParseError { .. } => None,
+    if let G3TsTypecovPackageSurfaceState::Parsed { snapshot } = package {
+        Some(snapshot)
+    } else {
+        None
     }
 }
 
-pub(crate) fn package_rel_path(package: &G3TsTypecovPackageSurfaceState) -> Option<&str> {
+/// Returns the workspace-relative path of the package surface for any state.
+pub(crate) fn package_rel_path(package: &G3TsTypecovPackageSurfaceState) -> &str {
     match package {
         G3TsTypecovPackageSurfaceState::Missing { rel_path }
         | G3TsTypecovPackageSurfaceState::Unreadable { rel_path, .. }
-        | G3TsTypecovPackageSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsTypecovPackageSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsTypecovPackageSurfaceState::ParseError { rel_path, .. } => rel_path.as_str(),
+        G3TsTypecovPackageSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
-pub(crate) fn parsed_syncpack(
+/// Returns the parsed syncpack snapshot when the surface state is `Parsed`.
+pub(crate) const fn parsed_syncpack(
     state: &G3TsTypecovSyncpackSurfaceState,
 ) -> Option<&g3ts_typecov_types::G3TsTypecovSyncpackSnapshot> {
     match state {
@@ -38,15 +40,17 @@ pub(crate) fn parsed_syncpack(
     }
 }
 
-pub(crate) fn syncpack_rel_path(state: &G3TsTypecovSyncpackSurfaceState) -> Option<&str> {
+/// Returns the workspace-relative path of the syncpack surface for any state.
+pub(crate) fn syncpack_rel_path(state: &G3TsTypecovSyncpackSurfaceState) -> &str {
     match state {
+        G3TsTypecovSyncpackSurfaceState::Parsed { snapshot } => snapshot.rel_path.as_str(),
         G3TsTypecovSyncpackSurfaceState::Missing { rel_path }
         | G3TsTypecovSyncpackSurfaceState::Unreadable { rel_path, .. }
-        | G3TsTypecovSyncpackSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsTypecovSyncpackSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsTypecovSyncpackSurfaceState::ParseError { rel_path, .. } => rel_path,
     }
 }
 
+/// Returns true when the package directly depends on `dependency` in any dependency list.
 pub(crate) fn package_has_dependency(
     package: &G3TsTypecovPackageSurfaceSnapshot,
     dependency: &str,
@@ -58,6 +62,7 @@ pub(crate) fn package_has_dependency(
         .any(|candidate| candidate == dependency)
 }
 
+/// Returns true when `script_name` invokes `type-coverage --at-least 100` fail-closed.
 pub(crate) fn script_invokes_type_coverage(
     package: &G3TsTypecovPackageSurfaceSnapshot,
     script_name: &str,
@@ -72,6 +77,7 @@ pub(crate) fn script_invokes_type_coverage(
         })
 }
 
+/// Returns true when the `validate` script reaches a fail-closed `typecov` invocation.
 pub(crate) fn validate_runs_typecov(package: &G3TsTypecovPackageSurfaceSnapshot) -> bool {
     if !package.script_names.iter().any(|name| name == "validate") {
         return false;
@@ -96,6 +102,7 @@ pub(crate) fn validate_runs_typecov(package: &G3TsTypecovPackageSurfaceSnapshot)
     })
 }
 
+/// Builds an inventoried info-severity check result.
 pub(crate) fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -108,10 +115,12 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: Option<&str>) -
     .into_inventory()
 }
 
+/// Builds an error-severity check result.
 pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
+    let severity = G3Severity::Error;
     G3CheckResult::new(
         id.to_owned(),
-        G3Severity::Error,
+        severity,
         title.to_owned(),
         message,
         file.map(str::to_owned),
@@ -119,6 +128,7 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
     )
 }
 
+/// Returns true when the invocation is `type-coverage --at-least 100`.
 fn type_coverage_invocation_at_100(invocation: &G3TsTypecovPackageScriptToolInvocation) -> bool {
     let Some(args) = type_coverage_args(invocation) else {
         return false;
@@ -129,6 +139,7 @@ fn type_coverage_invocation_at_100(invocation: &G3TsTypecovPackageScriptToolInvo
     })
 }
 
+/// Returns true when no invocation in `script_name` uses an `||` separator.
 fn script_has_no_or_separator(
     package: &G3TsTypecovPackageSurfaceSnapshot,
     script_name: &str,
@@ -143,6 +154,7 @@ fn script_has_no_or_separator(
         })
 }
 
+/// Returns the args slice when the invocation invokes `type-coverage` directly or through a runner.
 fn type_coverage_args(invocation: &G3TsTypecovPackageScriptToolInvocation) -> Option<&[String]> {
     if invocation.executable == "type-coverage" {
         return Some(&invocation.args);
@@ -159,6 +171,7 @@ fn type_coverage_args(invocation: &G3TsTypecovPackageScriptToolInvocation) -> Op
     None
 }
 
+/// Returns the script names transitively reachable from `root_script_name`.
 fn reachable_script_names(
     package: &G3TsTypecovPackageSurfaceSnapshot,
     root_script_name: &str,
@@ -182,6 +195,7 @@ fn reachable_script_names(
     reachable
 }
 
+/// Returns the script name targeted by a package-script invocation, when applicable.
 fn package_script_target(invocation: &G3TsTypecovPackageScriptToolInvocation) -> Option<String> {
     if invocation.executable == "package-script" {
         return invocation.args.first().cloned();

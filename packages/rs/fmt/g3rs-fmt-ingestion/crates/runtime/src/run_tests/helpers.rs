@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures need direct filesystem and process access to build temp workspaces"
+)]
+
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -19,5 +24,9 @@ pub(super) fn write(path: impl AsRef<Path>, content: &str) {
 }
 
 pub(super) fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+    // Tests intentionally exercise workspaces with and without a root `Cargo.toml`
+    // (the fmt rules emit `Missing` state for the absent case). Use `crawl_any_root`
+    // so the crawl boundary does not reject manifestless fixtures.
+    g3rs_workspace_crawl::crawl_any_root(root)
+        .expect("crawl should succeed on valid test workspace")
 }

@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/docs-rs-metadata";
 
+/// `check` function.
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
     if !crate::support::crate_publishable(krate) || !krate.is_library {
         return;
@@ -36,7 +38,13 @@ mod rule_tests;
 pub(crate) fn run_check(cargo_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
     let input = crate::test_support::config_input_for_publishable_crate(cargo_toml, None);
     let mut results = Vec::new();
-    crate::docs_rs_metadata::check(&input.crate_checks[0], &mut results);
+    crate::docs_rs_metadata::check(
+        input
+            .crates
+            .first()
+            .expect("test fixture must include a crate"),
+        &mut results,
+    );
     results
 }
 

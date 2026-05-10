@@ -1,0 +1,51 @@
+[[ignore]]
+fingerprint = "4a1746c274ac4137"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "03b239145824959a"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "602191bdb8a78460"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "6567e2fd4f394380"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "69cab458cd0a7458"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "98ab662ef1102f3d"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "9eba619fbf73dda7"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "afe6fcf8ff2ef9d2"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "b9e3bc222f963cfb"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "be24092436c3878b"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "e4f3b7d6c4629251"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "e72a2178c75fdefd"
+reason = "per-rule baseline check / per-rule single-violation test: each rule emits distinct findings; deduping would couple unrelated rule checks, conflicts with runtime-assertions-split contract"

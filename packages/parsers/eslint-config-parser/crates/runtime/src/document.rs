@@ -3,13 +3,15 @@ use eslint_config_parser_types::document::{
     EslintProbeKind, EslintRuleSetting,
 };
 
-pub fn typed(document: &EslintConfigDocument) -> Option<&EslintConfigSnapshot> {
+#[must_use]
+pub const fn typed(document: &EslintConfigDocument) -> Option<&EslintConfigSnapshot> {
     match &document.typed {
         EslintConfigParseState::Parsed(snapshot) => Some(snapshot),
         EslintConfigParseState::Invalid(_) => None,
     }
 }
 
+#[must_use]
 pub fn parse_error_reason(document: &EslintConfigDocument) -> Option<&str> {
     match &document.typed {
         EslintConfigParseState::Parsed(_) => None,
@@ -17,6 +19,7 @@ pub fn parse_error_reason(document: &EslintConfigDocument) -> Option<&str> {
     }
 }
 
+#[must_use]
 pub fn probe(
     document: &EslintConfigDocument,
     probe_kind: EslintProbeKind,
@@ -27,6 +30,7 @@ pub fn probe(
         .find(|probe| probe.probe == probe_kind)
 }
 
+#[must_use]
 pub fn rule_setting<'a>(
     document: &'a EslintConfigDocument,
     probe_kind: EslintProbeKind,

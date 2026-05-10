@@ -9,15 +9,3 @@ allowed_deps = [
 
 [checks]
 hooks = false
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "Runtime crate intentionally keeps one hook source rule per module and owns the hook command analysis surface."
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/assertions/Cargo.toml"
-selector = "structural-split"
-reason = "Assertions crate intentionally keeps one shared proof module per hook source rule so internal and external tests use the same proof surface."

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "parser document model types intentionally include the parser domain (CargoToml) and document role"
+)]
+
 use toml::Value;
 
 use crate::cargo_toml::{CargoToml, ToolLints};
@@ -10,7 +15,7 @@ pub struct CargoTomlDocument {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CargoTomlParseState {
-    Parsed(CargoToml),
+    Parsed(Box<CargoToml>),
     Invalid(String),
 }
 

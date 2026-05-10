@@ -1,3 +1,9 @@
+#![expect(
+    clippy::excessive_nesting,
+    clippy::too_many_lines,
+    reason = "the unknown-keys check walks the full deny.toml schema (bans, bans.skip, bans.allow, bans.deny[].wrappers, bans.features, bans.build.bypass[].allow[], licenses.exceptions, licenses.clarify.license-files[], advisories.ignore[], sources, ...). Nesting depth and the linear walker length reflect the source schema's depth; flattening would either duplicate every walker into per-section helpers (10+ for-loops, no shared state) or hide the parallel structure that makes drift between schema and walker visible at a glance"
+)]
+
 use deny_toml_parser::types::{BanDenyEntry, BanSkipEntry, DenyToml};
 use guardrail3_check_types::G3CheckResult;
 
@@ -5,8 +11,10 @@ use crate::support::findings::warn;
 use crate::support::identities::{feature_entry_name, license_exception_name};
 use crate::support::unknown_keys;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/unknown-keys";
 
+/// Implements `warn unknown key`.
 fn warn_unknown_key(
     results: &mut Vec<G3CheckResult>,
     rel_path: &str,
@@ -16,6 +24,7 @@ fn warn_unknown_key(
     results.push(warn(ID, title, message, rel_path));
 }
 
+/// Implements `warn unsupported schema`.
 fn warn_unsupported_schema(
     results: &mut Vec<G3CheckResult>,
     rel_path: &str,
@@ -30,6 +39,7 @@ fn warn_unsupported_schema(
     ));
 }
 
+/// Implements `warn unsupported entry schema`.
 fn warn_unsupported_entry_schema(
     results: &mut Vec<G3CheckResult>,
     rel_path: &str,
@@ -47,6 +57,7 @@ fn warn_unsupported_entry_schema(
     ));
 }
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     for key in deny.extra.keys() {
         if !unknown_keys::known_top_level_keys().contains(key.as_str()) {

@@ -1,0 +1,15 @@
+[[ignore]]
+fingerprint = "7c7c43c7f600da35"
+reason = "clippy.toml assertion helpers each cover a distinct clippy lint scope (let_else / inherent_impl_lint_scope / pub_underscore_fields / module_items_ordered); they reuse field assertion shape because each helper is a separate proof site per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "32c33815dec3515f"
+reason = "clippy.toml rejection tests share parse_error_message shape; each #[test] proves a distinct invalid-input rejection path (disallowed-field / unknown-key / invalid-macro)"
+
+[[ignore]]
+fingerprint = "52b46745f14bef7e"
+reason = "manual Serialize impls for SourceItemOrdering / SourceItemOrderingModuleItemGroupings / SourceItemOrderingTraitAssocItemKinds share serialize_seq shape because the serde Serializer surface for a flat seq-of-strings is identical across the three list-typed enums"
+
+[[ignore]]
+fingerprint = "034a954b409ab31d"
+reason = "From<toml::de::Error> and From<std::io::Error> are single-statement variant constructors that always look structurally identical"

@@ -1,8 +1,10 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_media_types::{G3TsAstroMediaPolicySnapshot, G3TsAstroMediaPolicySurfaceState};
 
+/// `GUARDRAIL_CONFIG_REL_PATH` constant.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 
+/// `ingest_media_policy_surface`: ingest media policy surface.
 pub(crate) fn ingest_media_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,

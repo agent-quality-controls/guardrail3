@@ -4,6 +4,7 @@ use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::types::{ClippyToml, DisallowedPath};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `CORE_METHOD_BANS` constant.
 pub(crate) const CORE_METHOD_BANS: &[&str] = &[
     "serde_json::from_str",
     "serde_json::from_slice",
@@ -14,8 +15,10 @@ pub(crate) const CORE_METHOD_BANS: &[&str] = &[
     "serde_yaml::from_reader",
 ];
 
+/// `REQWEST_JSON_BAN` constant.
 pub(crate) const REQWEST_JSON_BAN: &str = "reqwest::Response::json";
 
+/// `ADDITIONAL_METHOD_BANS` constant.
 pub(crate) const ADDITIONAL_METHOD_BANS: &[&str] = &[
     "serde_qs::from_str",
     "serde_qs::from_bytes",
@@ -55,6 +58,7 @@ pub(crate) const ADDITIONAL_METHOD_BANS: &[&str] = &[
     "figment::Figment::extract",
 ];
 
+/// `EXTRACTOR_TYPE_BANS` constant.
 pub(crate) const EXTRACTOR_TYPE_BANS: &[&str] = &[
     "axum::extract::Json",
     "axum::Json",
@@ -73,6 +77,7 @@ pub(crate) const EXTRACTOR_TYPE_BANS: &[&str] = &[
     "axum_extra::extract::MsgPack",
 ];
 
+/// `has_garde_dependency` helper.
 pub(crate) fn has_garde_dependency(cargo: &CargoToml) -> bool {
     cargo.dependencies.contains_key("garde")
         || cargo
@@ -81,14 +86,17 @@ pub(crate) fn has_garde_dependency(cargo: &CargoToml) -> bool {
             .is_some_and(|workspace| workspace.dependencies.contains_key("garde"))
 }
 
+/// `disallowed_method_paths` helper.
 pub(crate) fn disallowed_method_paths(clippy: &ClippyToml) -> BTreeSet<String> {
     extract_disallowed_paths(&clippy.disallowed_methods)
 }
 
+/// `disallowed_type_paths` helper.
 pub(crate) fn disallowed_type_paths(clippy: &ClippyToml) -> BTreeSet<String> {
     extract_disallowed_paths(&clippy.disallowed_types)
 }
 
+/// `missing_bans` helper.
 pub(crate) fn missing_bans<'a>(found: &BTreeSet<String>, expected: &'a [&'a str]) -> Vec<&'a str> {
     expected
         .iter()
@@ -97,6 +105,7 @@ pub(crate) fn missing_bans<'a>(found: &BTreeSet<String>, expected: &'a [&'a str]
         .collect()
 }
 
+/// `error` helper.
 pub(crate) fn error(
     id: &str,
     title: impl Into<String>,
@@ -113,6 +122,7 @@ pub(crate) fn error(
     )
 }
 
+/// `warn` helper.
 pub(crate) fn warn(
     id: &str,
     title: impl Into<String>,
@@ -129,6 +139,7 @@ pub(crate) fn warn(
     )
 }
 
+/// `info` helper.
 pub(crate) fn info(
     id: &str,
     title: impl Into<String>,
@@ -146,6 +157,7 @@ pub(crate) fn info(
     .into_inventory()
 }
 
+/// Extract disallowed paths from clippy entries.
 fn extract_disallowed_paths(entries: &[DisallowedPath]) -> BTreeSet<String> {
     entries
         .iter()

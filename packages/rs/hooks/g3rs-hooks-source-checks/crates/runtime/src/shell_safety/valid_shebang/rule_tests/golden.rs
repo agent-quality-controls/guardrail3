@@ -8,7 +8,7 @@ fn warns_when_shebang_is_missing() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("hook shebang missing"),
             line: Some(1),
             inventory: Some(false),

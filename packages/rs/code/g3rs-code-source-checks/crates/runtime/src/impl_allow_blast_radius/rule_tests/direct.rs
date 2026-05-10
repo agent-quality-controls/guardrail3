@@ -4,7 +4,7 @@ use g3rs_code_source_checks_assertions::impl_allow_blast_radius::rule::{
 
 #[test]
 fn errors_on_impl_allow_covering_more_than_three_methods() {
-    let content = r#"
+    let content = r"
 struct Foo;
 
 #[allow(clippy::too_many_lines)]
@@ -14,7 +14,7 @@ impl Foo {
     fn c(&self) {}
     fn d(&self) {}
 }
-"#;
+";
     let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(
@@ -34,7 +34,7 @@ impl Foo {
 
 #[test]
 fn errors_on_impl_expect_covering_more_than_three_methods() {
-    let content = r#"
+    let content = r"
 struct Foo;
 
 #[expect(clippy::too_many_lines)]
@@ -44,7 +44,7 @@ impl Foo {
     fn c(&self) {}
     fn d(&self) {}
 }
-"#;
+";
     let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(

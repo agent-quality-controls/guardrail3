@@ -1,3 +1,4 @@
+/// `error` module.
 mod error;
 
 #[cfg(feature = "api")]

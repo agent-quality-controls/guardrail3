@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+]
+
+[checks]
+garde = false
+
+[[waivers]]
+rule = "g3rs-cargo/approved-allow-inventory"
+file = "Cargo.toml"
+selector = "clippy:module_name_repetitions"
+reason = "Shared topology type names intentionally repeat the family context."

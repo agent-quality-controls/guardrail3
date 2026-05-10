@@ -1,8 +1,10 @@
 use g3rs_toolchain_types::G3RsToolchainFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-toolchain/legacy-file";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsToolchainFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if let (Some(legacy_rel_path), Some(_modern_rel_path)) = (
         input.legacy_toolchain_rel_path.as_deref(),

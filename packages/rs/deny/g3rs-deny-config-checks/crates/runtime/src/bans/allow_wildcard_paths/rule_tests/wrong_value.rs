@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn errors_when_allow_wildcard_paths_is_false() {
     let results = run_check(
-        r#"
+        r"
 [bans]
 allow-wildcard-paths = false
-"#,
+",
     );
 
     assertions::assert_findings(

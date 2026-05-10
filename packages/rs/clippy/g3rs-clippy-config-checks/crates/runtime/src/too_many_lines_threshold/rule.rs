@@ -4,8 +4,10 @@ use guardrail3_check_types::G3CheckResult;
 use crate::baseline::TOO_MANY_LINES_THRESHOLD;
 use crate::support::{check_threshold, typed_clippy};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/too-many-lines-threshold";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(clippy) = typed_clippy(input) else {
         return;

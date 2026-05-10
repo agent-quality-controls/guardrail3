@@ -8,7 +8,6 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsStyleConfigChec
         contracts: style_roots
             .iter()
             .cloned()
-            .into_iter()
             .map(|app_root_rel_path| {
                 let policy = crate::policy::ingest_policy(crawl, &app_root_rel_path);
                 let package = crate::package::ingest_package_surface(crawl, &app_root_rel_path);

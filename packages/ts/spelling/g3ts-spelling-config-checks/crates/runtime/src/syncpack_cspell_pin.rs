@@ -1,6 +1,7 @@
 use g3ts_spelling_types::G3TsSpellingContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// `check`: check.
 pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
     let rel_path = crate::common::syncpack_rel_path(&contract.syncpack_config);
     let Some(snapshot) = crate::common::parsed_syncpack(&contract.syncpack_config) else {
@@ -8,10 +9,9 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
             "g3ts-spelling/syncpack-cspell-pin",
             "cspell Syncpack pin cannot be checked",
             format!(
-                "`{}` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.",
-                rel_path.unwrap_or(".syncpackrc")
+                "`{rel_path}` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack."
             ),
-            rel_path,
+            Some(rel_path),
         );
     };
     if snapshot.version_groups.iter().any(|group| {

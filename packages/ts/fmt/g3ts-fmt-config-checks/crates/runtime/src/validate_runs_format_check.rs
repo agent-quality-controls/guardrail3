@@ -1,6 +1,7 @@
 use g3ts_fmt_types::G3TsFmtContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs the corresponding fmt config check.
 pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
     let rel_path = crate::common::package_rel_path(&contract.package);
     let Some(package) = crate::common::parsed_package(&contract.package) else {
@@ -8,10 +9,9 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
             "g3ts-fmt/validate-runs-format-check",
             "Validate script cannot be checked",
             format!(
-                "`{}` must be readable and parseable so G3TS can prove `validate` runs formatting fail-closed.",
-                rel_path.unwrap_or("package.json")
+                "`{rel_path}` must be readable and parseable so G3TS can prove `validate` runs formatting fail-closed."
             ),
-            rel_path,
+            Some(rel_path),
         );
     };
     if crate::common::validate_runs_format_check(package) {

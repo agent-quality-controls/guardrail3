@@ -4,13 +4,13 @@ use g3rs_clippy_config_checks_assertions::test_relaxations::rule as assertions;
 #[test]
 fn flags_wrong_test_relaxation_values() {
     let results = run_check(
-        r#"
+        r"
 allow-dbg-in-tests = true
 allow-expect-in-tests = false
 allow-panic-in-tests = true
 allow-print-in-tests = true
 allow-unwrap-in-tests = true
-"#,
+",
     );
 
     assertions::assert_findings(

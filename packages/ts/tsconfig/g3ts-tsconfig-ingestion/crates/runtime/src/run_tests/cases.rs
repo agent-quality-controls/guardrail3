@@ -1,6 +1,24 @@
+#![expect(
+    clippy::too_many_lines,
+    reason = "Test cases inline their fixture construction so each test reads top-to-bottom; \
+              extracting fixture builders would require shared mutable state and obscure the \
+              one-test-one-scenario architecture"
+)]
+#![expect(
+    clippy::panic,
+    reason = "Test cases panic to surface unexpected fixture state; this is the standard \
+              pattern for variant assertions inside #[test] functions"
+)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Test fixtures write into tempdirs via std::fs; routing through the production \
+              fs port would require the test sidecar to call a sibling module, which is \
+              forbidden by the runtime-assertions-split rule"
+)]
+
 use std::path::Path;
 
-use g3_workspace_crawl::crawl;
+use g3_workspace_crawl::crawl_any_root as crawl;
 use g3ts_tsconfig_ingestion_assertions::run::{
     assert_effective_flags, assert_missing, assert_parse_error, assert_parsed_root_rel_path,
 };

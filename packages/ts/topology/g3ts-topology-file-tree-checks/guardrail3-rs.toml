@@ -1,0 +1,14 @@
+profile = "library"
+
+allowed_deps = [
+  "g3ts-topology-ingestion",
+  "g3ts-topology-types",
+  "guardrail3-check-types",
+  "tempfile",
+]
+
+[[waivers]]
+rule = "multiple_crate_versions"
+file = "Cargo.toml"
+selector = "lint:clippy::multiple_crate_versions"
+reason = "This internal workspace package intentionally depends on shared internal crates with overlapping transitive versions."

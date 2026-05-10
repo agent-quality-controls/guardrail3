@@ -8,8 +8,10 @@ use super::support::{
 };
 use crate::baseline::JS_CARVEOUT_TYPED_RULES;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/js-carveout";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if parsed_document(input).is_none() {
         return;

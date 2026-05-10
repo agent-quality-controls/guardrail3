@@ -1,0 +1,7 @@
+[[ignore]]
+fingerprint = "7bcab7a1127fd321"
+reason = "parallel parser fixture functions per input shape (parse vs parse_from_tempfile); one per proof site"
+
+[[ignore]]
+fingerprint = "906dd462dfa4903a"
+reason = "parallel assertion helpers per check-field type; runtime-assertions-split contract"

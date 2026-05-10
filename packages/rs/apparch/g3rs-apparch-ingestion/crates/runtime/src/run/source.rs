@@ -1,3 +1,11 @@
+#![allow(
+    clippy::missing_errors_doc,
+    clippy::excessive_nesting,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    reason = "source ingestion walks syn AST trees; the inherent nesting matches Rust's syntactic structure (mod -> item -> impl -> fn -> ...), flattening would require continuation-passing rewrites. argument count threads the apparch fact accumulator and crawl context through each AST walker. Errors are returned via crate-defined G3RsApparchIngestionError whose variants are self-documenting."
+)]
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use g3rs_apparch_types as apparch;
@@ -27,8 +35,7 @@ pub fn ingest_for_source_checks(
         .filter(|record| {
             matches!(
                 record.krate.layer,
-                Some(apparch::G3RsApparchLayer::IoInbound)
-                    | Some(apparch::G3RsApparchLayer::IoOutbound)
+                Some(apparch::G3RsApparchLayer::IoInbound | apparch::G3RsApparchLayer::IoOutbound)
             )
         })
         .map(|record| {
@@ -313,7 +320,7 @@ enum ChildModuleVisibility {
 }
 
 impl ChildModuleVisibility {
-    fn apply(self, parent_is_public: bool, visibility: &syn::Visibility) -> bool {
+    const fn apply(self, parent_is_public: bool, visibility: &syn::Visibility) -> bool {
         match self {
             Self::IntersectWithParent => {
                 parent_is_public && matches!(visibility, syn::Visibility::Public(_))

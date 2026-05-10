@@ -1,8 +1,10 @@
 use g3rs_cargo_types::{G3RsCargoMissingMember, G3RsCargoPolicyRootKind};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/missing-member-cargo";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsCargoMissingMember, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(
         ID.to_owned(),
@@ -17,6 +19,7 @@ pub(crate) fn check(input: &G3RsCargoMissingMember, results: &mut Vec<G3CheckRes
     ));
 }
 
+/// check inventory fn.
 pub(crate) fn check_inventory(
     kind: Option<G3RsCargoPolicyRootKind>,
     cargo_rel_path: &str,

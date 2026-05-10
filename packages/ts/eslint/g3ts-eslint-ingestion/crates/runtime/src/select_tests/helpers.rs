@@ -1,8 +1,9 @@
 use tempfile::TempDir;
 
 use g3_workspace_crawl::{
-    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
-    G3WorkspacePath,
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntry as G3WorkspaceEntry,
+    G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
+    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState, G3RsWorkspacePath as G3WorkspacePath,
 };
 
 pub(super) fn fake_root() -> TempDir {
@@ -19,9 +20,12 @@ pub(super) fn crawl_with_entries(root: &TempDir, rel_paths: &[&str]) -> G3Worksp
     }
 }
 
+/// `(rel_path, ignore_state, readable)` triple used when seeding a test workspace crawl.
+type CustomEntrySpec<'a> = (&'a str, G3WorkspaceIgnoreState, bool);
+
 pub(super) fn crawl_with_custom_entries(
     root: &TempDir,
-    entries: &[(&str, G3WorkspaceIgnoreState, bool)],
+    entries: &[CustomEntrySpec<'_>],
 ) -> G3WorkspaceCrawl {
     G3WorkspaceCrawl {
         root_abs_path: root.path().to_path_buf(),

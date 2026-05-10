@@ -8,7 +8,7 @@ fn warns_when_gitleaks_only_appears_in_comment() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             inventory: Some(false),
             title: Some("gitleaks step missing"),
             ..Default::default()

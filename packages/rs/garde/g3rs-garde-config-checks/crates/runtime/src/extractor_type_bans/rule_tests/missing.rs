@@ -15,7 +15,7 @@ fn warns_when_extractor_bans_missing() {
 
     assertions::assert_contains(
         &results,
-        assertions::warn(
+        &assertions::warn(
             "missing garde extractor bans",
             "Missing extractor type bans from `disallowed-types`: axum::extract::Multipart. Add these entries to `disallowed-types` in clippy.toml.",
             "clippy.toml",

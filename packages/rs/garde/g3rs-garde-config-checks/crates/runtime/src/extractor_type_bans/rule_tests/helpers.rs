@@ -24,6 +24,10 @@ pub(crate) fn canonical_clippy_toml() -> String {
     format!("disallowed-types = [\n    {entries}\n]\n")
 }
 
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test fixture mutator: synthesizes clippy.toml variants for unit tests; not a runtime parser"
+)]
 pub(crate) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
     let mut parsed = toml::from_str::<toml::Value>(clippy_toml)
         .expect("extractor type ban fixture should parse");

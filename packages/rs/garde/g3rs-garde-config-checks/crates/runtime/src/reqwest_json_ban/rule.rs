@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{REQWEST_JSON_BAN, disallowed_method_paths, info, warn};
 
+/// Rule identifier.
 const ID: &str = "g3rs-garde/reqwest-json-ban";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Vec<G3CheckResult>) {
     let found = disallowed_method_paths(clippy);
 
@@ -26,6 +28,7 @@ pub(crate) fn check(clippy_rel_path: &str, clippy: &ClippyToml, results: &mut Ve
     ));
 }
 
+/// Emit an info finding when the rule cannot verify its inputs.
 pub(crate) fn check_unverifiable(
     clippy_rel_path: Option<&str>,
     message: &str,

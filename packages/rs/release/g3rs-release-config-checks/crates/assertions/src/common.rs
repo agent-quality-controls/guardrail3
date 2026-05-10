@@ -2,14 +2,20 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// `severity` field.
     severity: G3Severity,
+    /// `title` field.
     title: &'a str,
+    /// `message` field.
     message: &'a str,
+    /// `file` field.
     file: Option<&'a str>,
+    /// `inventory` field.
     inventory: bool,
 }
 
 #[must_use]
+/// `findings` function.
 pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
         .iter()
@@ -41,6 +47,7 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
+/// `assert_findings` function.
 pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let mut expected_vec = expected.to_vec();
     expected_vec.sort_by(|left, right| {
@@ -59,13 +66,22 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
                 right.inventory,
             ))
     });
-    assert_eq!(findings(results, id), expected_vec);
+    assert_eq!(
+        findings(results, id),
+        expected_vec,
+        "findings for id `{id}` did not match expected set",
+    );
 }
 
+/// `assert_no_findings` function.
 pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
-    assert!(findings(results, id).is_empty());
+    assert!(
+        findings(results, id).is_empty(),
+        "expected no findings for id `{id}`",
+    );
 }
 
+/// `assert_contains` function.
 pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let findings = findings(results, id);
     for expected_finding in expected {
@@ -77,6 +93,7 @@ pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &[F
 }
 
 #[must_use]
+/// `count_titles_with_prefix` function.
 pub(crate) fn count_titles_with_prefix(results: &[G3CheckResult], id: &str, prefix: &str) -> usize {
     findings(results, id)
         .iter()
@@ -85,7 +102,8 @@ pub(crate) fn count_titles_with_prefix(results: &[G3CheckResult], id: &str, pref
 }
 
 #[must_use]
-pub(crate) fn finding<'a>(
+/// `fn` function.
+pub(crate) const fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
@@ -104,29 +122,29 @@ pub(crate) fn finding<'a>(
 #[macro_export]
 macro_rules! define_result_assertions {
     ($id:literal) => {
-        pub use crate::common::Finding;
+        pub use $crate::common::Finding;
 
         #[must_use]
         pub fn findings(results: &[guardrail3_check_types::G3CheckResult]) -> Vec<Finding<'_>> {
-            crate::common::findings(results, $id)
+            $crate::common::findings(results, $id)
         }
 
         pub fn assert_findings(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
-            crate::common::assert_findings(results, $id, expected);
+            $crate::common::assert_findings(results, $id, expected);
         }
 
         pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
-            crate::common::assert_no_findings(results, $id);
+            $crate::common::assert_no_findings(results, $id);
         }
 
         pub fn assert_contains(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
-            crate::common::assert_contains(results, $id, expected);
+            $crate::common::assert_contains(results, $id, expected);
         }
 
         pub fn assert_title_count(
@@ -135,20 +153,20 @@ macro_rules! define_result_assertions {
             expected_count: usize,
         ) {
             assert_eq!(
-                crate::common::count_titles_with_prefix(results, $id, prefix),
+                $crate::common::count_titles_with_prefix(results, $id, prefix),
                 expected_count,
                 "unexpected title count for prefix `{prefix}`",
             );
         }
 
         #[must_use]
-        pub fn error<'a>(
+        pub const fn error<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
@@ -158,13 +176,13 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn warn<'a>(
+        pub const fn warn<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Warn,
                 title,
                 message,
@@ -174,13 +192,13 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info<'a>(
+        pub const fn info<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,

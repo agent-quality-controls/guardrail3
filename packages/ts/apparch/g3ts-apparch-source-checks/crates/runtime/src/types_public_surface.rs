@@ -3,8 +3,10 @@ use g3ts_apparch_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable identifier for the types-public-surface rule.
 const ID: &str = "g3ts-apparch/types-public-surface";
 
+/// Flags exported functions or classes from the `types` layer and emits inventory when clean.
 pub(crate) fn check(input: &G3TsApparchSourceChecksInput, results: &mut Vec<G3CheckResult>) {
     let violating = input
         .public_items

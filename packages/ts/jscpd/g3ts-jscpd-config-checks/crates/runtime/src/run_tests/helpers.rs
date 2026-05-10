@@ -38,15 +38,9 @@ pub(super) fn golden_root() -> G3TsJscpdChecksInput {
 }
 
 pub(super) fn weak_threshold() -> G3TsJscpdChecksInput {
-    parsed_snapshot(G3TsJscpdRootSnapshot {
-        rel_path: ".jscpd.json".to_owned(),
-        threshold: Some(1),
-        min_tokens: Some(50),
-        absolute: Some(true),
-        format: vec!["typescript".to_owned()],
-        ignore: required_ignores(),
-        extra_keys: Vec::new(),
-    })
+    let mut snapshot = baseline_snapshot();
+    snapshot.threshold = Some(1);
+    parsed_snapshot(snapshot)
 }
 
 pub(super) fn missing_absolute() -> G3TsJscpdChecksInput {
@@ -74,15 +68,21 @@ pub(super) fn missing_ignores() -> G3TsJscpdChecksInput {
 }
 
 pub(super) fn missing_typescript_format() -> G3TsJscpdChecksInput {
-    parsed_snapshot(G3TsJscpdRootSnapshot {
+    let mut snapshot = baseline_snapshot();
+    snapshot.format = vec!["rust".to_owned()];
+    parsed_snapshot(snapshot)
+}
+
+fn baseline_snapshot() -> G3TsJscpdRootSnapshot {
+    G3TsJscpdRootSnapshot {
         rel_path: ".jscpd.json".to_owned(),
         threshold: Some(0),
         min_tokens: Some(50),
         absolute: Some(true),
-        format: vec!["rust".to_owned()],
+        format: vec!["typescript".to_owned()],
         ignore: required_ignores(),
         extra_keys: Vec::new(),
-    })
+    }
 }
 
 pub(super) fn extra_inventory_key() -> G3TsJscpdChecksInput {

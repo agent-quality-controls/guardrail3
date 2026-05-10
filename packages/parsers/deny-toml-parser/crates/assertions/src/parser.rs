@@ -2,7 +2,8 @@
     clippy::expect_used,
     clippy::missing_const_for_fn,
     clippy::missing_panics_doc,
-    reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
+    clippy::missing_assert_message,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses; assert_eq! mismatch output already pinpoints the failing field"
 )]
 
 use deny_toml_parser_runtime::types::{

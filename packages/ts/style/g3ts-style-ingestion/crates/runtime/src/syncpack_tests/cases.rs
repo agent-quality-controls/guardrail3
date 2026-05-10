@@ -17,8 +17,5 @@ fn syncpack_version_group_is_normalized_without_policy_verdicts() {
         &normalized,
         "g3ts-eslint-plugin-style-policy",
     );
-    g3ts_style_ingestion_assertions::syncpack::assert_version_group_pin(
-        &normalized,
-        "0.1.3",
-    );
+    g3ts_style_ingestion_assertions::syncpack::assert_version_group_pin(&normalized, "0.1.3");
 }

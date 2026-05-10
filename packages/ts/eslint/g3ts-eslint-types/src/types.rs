@@ -9,13 +9,13 @@ pub struct G3TsEslintSelectedConfig {
     pub kind: EslintConfigFileKind,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsEslintRuleSetting {
     pub severity: EslintRuleSeverity,
     pub options: Vec<Value>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsEslintEffectiveConfigProbe {
     pub probe: EslintProbeKind,
     pub rel_path: String,
@@ -25,13 +25,13 @@ pub struct G3TsEslintEffectiveConfigProbe {
     pub project_service: Option<bool>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsEslintConfigSnapshot {
     pub selected_config: G3TsEslintSelectedConfig,
     pub probes: Vec<G3TsEslintEffectiveConfigProbe>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsEslintConfigState {
     Missing,
     Unreadable { rel_path: String, reason: String },
@@ -39,7 +39,7 @@ pub enum G3TsEslintConfigState {
     Parsed { snapshot: G3TsEslintConfigSnapshot },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsEslintConfigChecksInput {
     pub config: G3TsEslintConfigState,
 }

@@ -1,5 +1,11 @@
 use std::collections::BTreeMap;
 
+/// One entry from `package.json` `scripts`: `(name, body)`.
+pub type G3TsAstroPackageScriptBody = (String, String);
+
+/// Mapping from public `ESLint` plugin alias to the plugin's package name(s).
+pub type G3TsAstroPublicPluginPackageNames = BTreeMap<String, Vec<String>>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroPackageSurfaceSnapshot {
     pub rel_path: String,
@@ -9,7 +15,7 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub optional_dependencies: Vec<String>,
     pub peer_dependencies: Vec<String>,
     pub script_names: Vec<String>,
-    pub script_bodies: Vec<(String, String)>,
+    pub script_bodies: Vec<G3TsAstroPackageScriptBody>,
     pub script_commands: Vec<G3TsAstroPackageScriptCommand>,
     pub script_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsAstroPackageScriptParseBlocker>,
@@ -48,6 +54,10 @@ pub struct G3TsAstroPackageScriptParseBlocker {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Parsed carries the rich snapshot payload; this enum is constructed and pattern-matched by named field across many out-of-scope consumers (mdx/setup/content/i18n ingestion + checks), so boxing here would force breaking changes outside this workspace"
+)]
 pub enum G3TsAstroPackageSurfaceState {
     Missing {
         rel_path: String,
@@ -110,7 +120,7 @@ pub enum G3TsAstroStaticValue {
     Number(f64),
     String(String),
     Null,
-    Array(Vec<G3TsAstroStaticValue>),
+    Array(Vec<Self>),
     Object(Vec<G3TsAstroStaticObjectProperty>),
     ImportedIdentifier {
         local_name: String,
@@ -147,6 +157,10 @@ pub enum G3TsAstroConfigSurfaceState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Parsed carries the policy snapshot payload; this enum is constructed and pattern-matched by named field across out-of-scope consumers, so boxing here would force breaking changes outside this workspace"
+)]
 pub enum G3TsAstroMediaPolicySurfaceState {
     Missing {
         rel_path: String,
@@ -176,7 +190,7 @@ pub struct G3TsAstroMediaEslintSurfaceSnapshot {
     pub public_probe_present: bool,
     pub public_probe_ignored: bool,
     pub public_plugins: Vec<String>,
-    pub public_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub public_plugin_package_names: G3TsAstroPublicPluginPackageNames,
     pub public_error_rules: Vec<String>,
     pub public_restricted_disable_patterns: Vec<String>,
     pub public_media_policy_rules: Vec<String>,

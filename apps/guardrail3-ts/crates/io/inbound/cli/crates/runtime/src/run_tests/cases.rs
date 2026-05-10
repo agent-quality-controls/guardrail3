@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test-fixture: these cases write real package.json files and TS source layouts into tempdirs to drive CLI run() through its on-disk crawl entry; no centralized fs write helper exists in this CLI"
+)]
+
 use std::path::Path;
 
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
@@ -46,6 +51,8 @@ fn run_command_sends_failures_to_stderr() {
             path: ".".into(),
             family: Vec::new(),
             inventory: false,
+            staged: false,
+            rules_only: true,
         },
         &StubCrawler,
         &StubFamilyRunner,
@@ -72,13 +79,15 @@ fn run_command_uses_real_eslint_wiring_for_missing_config() {
         path: tempdir.path().to_path_buf(),
         family: Vec::new(),
         inventory: false,
+        staged: false,
+        rules_only: true,
     });
 
     guardrail3_ts_assertions::run::assert_cli_output(
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== fmt ==\n[Error] g3ts-fmt/prettier-package-present package.json Prettier package is missing\n  `package.json` must install `prettier` directly so formatting is reproducible for this app/package root.\n[Error] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n[Error] g3ts-fmt/format-scripts package.json Format scripts are incomplete\n  `package.json` must define `format` as `prettier --write ...` and a parseable `format:check` script.\n[Error] g3ts-fmt/format-check-fail-closed package.json Format check script is not fail-closed\n  `package.json` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.\n[Error] g3ts-fmt/validate-runs-format-check package.json Validate script does not run format check\n  `package.json` must define a fail-closed `validate` script that invokes `format:check` through a package-manager run command or directly invokes `prettier --check`.\n[Error] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack.\n== spelling ==\n[Error] g3ts-spelling/cspell-package-present package.json cspell package is missing\n  `package.json` must install `cspell` directly so spelling is reproducible for this app/package root.\n[Error] g3ts-spelling/cspell-config-present cspell.config.* cspell config is missing\n  `cspell.config.*` must exist. Add a local cspell config instead of relying on implicit spelling defaults.\n[Error] g3ts-spelling/spellcheck-script package.json Spellcheck script is missing or unparseable\n  `package.json` must define `spellcheck` as `cspell ...`.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Error] g3ts-spelling/validate-runs-spellcheck package.json Validate script does not run spellcheck\n  `package.json` must define a fail-closed `validate` script that invokes `spellcheck` through a package-manager run command or directly invokes `cspell`.\n[Error] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.\n== typecov ==\n[Error] g3ts-typecov/package-present package.json type-coverage package is missing\n  `package.json` must install `type-coverage` directly so typecov is reproducible for this app/package root.\n[Error] g3ts-typecov/script-present package.json Typecov script is missing or unparseable\n  `package.json` must define `typecov` as `type-coverage ...`.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Error] g3ts-typecov/validate-runs-typecov package.json Validate script does not run typecov\n  `package.json` must define a fail-closed `validate` script that invokes `typecov` through a package-manager run command or directly invokes `type-coverage --at-least 100`.\n[Error] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `type-coverage` is pinned by Syncpack.\n== hooks ==\n[Error] g3ts-hooks/pre-commit-exists - pre-commit hook is missing\n  TypeScript projects must have a selected pre-commit hook. Configure `git config core.hooksPath .githooks` and create `.githooks/pre-commit`.\n[Error] g3ts-hooks/hooks-path-configured - git hooks path is not .githooks\n  Git must use the repo-owned hook directory: run `git config core.hooksPath .githooks`. Other hook locations can bypass G3TS without changing repo files.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== fmt ==\n[Error] g3ts-fmt/prettier-package-present package.json Prettier package is missing\n  `package.json` must install `prettier` directly so formatting is reproducible for this app/package root.\n[Error] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n[Error] g3ts-fmt/format-scripts package.json Format scripts are incomplete\n  `package.json` must define `format` as `prettier --write ...` and a parseable `format:check` script.\n[Error] g3ts-fmt/format-check-fail-closed package.json Format check script is not fail-closed\n  `package.json` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.\n[Error] g3ts-fmt/validate-runs-format-check package.json Validate script does not run format check\n  `package.json` must define a fail-closed `validate` script that invokes `format:check` through a package-manager run command or directly invokes `prettier --check`.\n[Error] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack.\n== spelling ==\n[Error] g3ts-spelling/cspell-package-present package.json cspell package is missing\n  `package.json` must install `cspell` directly so spelling is reproducible for this app/package root.\n[Error] g3ts-spelling/cspell-config-present cspell.config.* cspell config is missing\n  `cspell.config.*` must exist. Add a local cspell config instead of relying on implicit spelling defaults.\n[Error] g3ts-spelling/spellcheck-script package.json Spellcheck script is missing or unparseable\n  `package.json` must define `spellcheck` as `cspell ...`.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Error] g3ts-spelling/validate-runs-spellcheck package.json Validate script does not run spellcheck\n  `package.json` must define a fail-closed `validate` script that invokes `spellcheck` through a package-manager run command or directly invokes `cspell`.\n[Error] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.\n== typecov ==\n[Error] g3ts-typecov/package-present package.json type-coverage package is missing\n  `package.json` must install `type-coverage` directly so typecov is reproducible for this app/package root.\n[Error] g3ts-typecov/script-present package.json Typecov script is missing or unparseable\n  `package.json` must define `typecov` as `type-coverage ...`.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Error] g3ts-typecov/validate-runs-typecov package.json Validate script does not run typecov\n  `package.json` must define a fail-closed `validate` script that invokes `typecov` through a package-manager run command or directly invokes `type-coverage --at-least 100`.\n[Error] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `type-coverage` is pinned by Syncpack.\n",
         "",
         1,
     );
@@ -106,6 +115,8 @@ fn run_command_normalizes_relative_validate_path_before_crawling() {
         path: std::path::PathBuf::from(name),
         family: Vec::new(),
         inventory: false,
+        staged: false,
+        rules_only: true,
     });
 
     std::env::set_current_dir(original_cwd).expect("test should restore original cwd");
@@ -114,7 +125,7 @@ fn run_command_normalizes_relative_validate_path_before_crawling() {
         &output.stdout,
         &output.stderr,
         output.exit_code,
-        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== fmt ==\n[Error] g3ts-fmt/prettier-package-present package.json Prettier package is missing\n  `package.json` must install `prettier` directly so formatting is reproducible for this app/package root.\n[Error] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n[Error] g3ts-fmt/format-scripts package.json Format scripts are incomplete\n  `package.json` must define `format` as `prettier --write ...` and a parseable `format:check` script.\n[Error] g3ts-fmt/format-check-fail-closed package.json Format check script is not fail-closed\n  `package.json` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.\n[Error] g3ts-fmt/validate-runs-format-check package.json Validate script does not run format check\n  `package.json` must define a fail-closed `validate` script that invokes `format:check` through a package-manager run command or directly invokes `prettier --check`.\n[Error] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack.\n== spelling ==\n[Error] g3ts-spelling/cspell-package-present package.json cspell package is missing\n  `package.json` must install `cspell` directly so spelling is reproducible for this app/package root.\n[Error] g3ts-spelling/cspell-config-present cspell.config.* cspell config is missing\n  `cspell.config.*` must exist. Add a local cspell config instead of relying on implicit spelling defaults.\n[Error] g3ts-spelling/spellcheck-script package.json Spellcheck script is missing or unparseable\n  `package.json` must define `spellcheck` as `cspell ...`.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Error] g3ts-spelling/validate-runs-spellcheck package.json Validate script does not run spellcheck\n  `package.json` must define a fail-closed `validate` script that invokes `spellcheck` through a package-manager run command or directly invokes `cspell`.\n[Error] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.\n== typecov ==\n[Error] g3ts-typecov/package-present package.json type-coverage package is missing\n  `package.json` must install `type-coverage` directly so typecov is reproducible for this app/package root.\n[Error] g3ts-typecov/script-present package.json Typecov script is missing or unparseable\n  `package.json` must define `typecov` as `type-coverage ...`.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Error] g3ts-typecov/validate-runs-typecov package.json Validate script does not run typecov\n  `package.json` must define a fail-closed `validate` script that invokes `typecov` through a package-manager run command or directly invokes `type-coverage --at-least 100`.\n[Error] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `type-coverage` is pinned by Syncpack.\n== hooks ==\n[Error] g3ts-hooks/pre-commit-exists - pre-commit hook is missing\n  TypeScript projects must have a selected pre-commit hook. Configure `git config core.hooksPath .githooks` and create `.githooks/pre-commit`.\n[Error] g3ts-hooks/hooks-path-configured - git hooks path is not .githooks\n  Git must use the repo-owned hook directory: run `git config core.hooksPath .githooks`. Other hook locations can bypass G3TS without changing repo files.\n",
+        "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n== fmt ==\n[Error] g3ts-fmt/prettier-package-present package.json Prettier package is missing\n  `package.json` must install `prettier` directly so formatting is reproducible for this app/package root.\n[Error] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n[Error] g3ts-fmt/format-scripts package.json Format scripts are incomplete\n  `package.json` must define `format` as `prettier --write ...` and a parseable `format:check` script.\n[Error] g3ts-fmt/format-check-fail-closed package.json Format check script is not fail-closed\n  `package.json` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.\n[Error] g3ts-fmt/validate-runs-format-check package.json Validate script does not run format check\n  `package.json` must define a fail-closed `validate` script that invokes `format:check` through a package-manager run command or directly invokes `prettier --check`.\n[Error] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `prettier` is pinned by Syncpack.\n== spelling ==\n[Error] g3ts-spelling/cspell-package-present package.json cspell package is missing\n  `package.json` must install `cspell` directly so spelling is reproducible for this app/package root.\n[Error] g3ts-spelling/cspell-config-present cspell.config.* cspell config is missing\n  `cspell.config.*` must exist. Add a local cspell config instead of relying on implicit spelling defaults.\n[Error] g3ts-spelling/spellcheck-script package.json Spellcheck script is missing or unparseable\n  `package.json` must define `spellcheck` as `cspell ...`.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Error] g3ts-spelling/validate-runs-spellcheck package.json Validate script does not run spellcheck\n  `package.json` must define a fail-closed `validate` script that invokes `spellcheck` through a package-manager run command or directly invokes `cspell`.\n[Error] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.\n== typecov ==\n[Error] g3ts-typecov/package-present package.json type-coverage package is missing\n  `package.json` must install `type-coverage` directly so typecov is reproducible for this app/package root.\n[Error] g3ts-typecov/script-present package.json Typecov script is missing or unparseable\n  `package.json` must define `typecov` as `type-coverage ...`.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Error] g3ts-typecov/validate-runs-typecov package.json Validate script does not run typecov\n  `package.json` must define a fail-closed `validate` script that invokes `typecov` through a package-manager run command or directly invokes `type-coverage --at-least 100`.\n[Error] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage Syncpack pin cannot be checked\n  `.syncpackrc` must be readable and parseable so G3TS can prove `type-coverage` is pinned by Syncpack.\n",
         "",
         1,
     );
@@ -133,6 +144,8 @@ fn run_command_uses_real_arch_wiring_for_missing_entrypoint() {
         path: tempdir.path().to_path_buf(),
         family: vec![super::super::super::cli::FamilyArg::Arch],
         inventory: false,
+        staged: false,
+        rules_only: true,
     });
 
     guardrail3_ts_assertions::run::assert_cli_output(
@@ -169,6 +182,8 @@ fn run_command_uses_real_apparch_wiring_for_forbidden_types_dependency() {
         path: tempdir.path().to_path_buf(),
         family: vec![super::super::super::cli::FamilyArg::Apparch],
         inventory: false,
+        staged: false,
+        rules_only: true,
     });
 
     guardrail3_ts_assertions::run::assert_cli_output(
@@ -202,6 +217,8 @@ fn run_command_uses_structure_runner_for_astro_family() {
         path: tempdir.path().to_path_buf(),
         family: vec![super::super::super::cli::FamilyArg::Astro],
         inventory: false,
+        staged: false,
+        rules_only: true,
     });
 
     assert!(
@@ -210,8 +227,7 @@ fn run_command_uses_structure_runner_for_astro_family() {
             && output.stdout.contains("== astro-mdx ==")
             && output.stdout.contains("== astro-seo ==")
             && output.stdout.contains("== astro-state =="),
-        "expected astro findings on stdout, got: {:?}",
-        output
+        "expected astro findings on stdout, got: {output:?}"
     );
     let mut last_index = 0;
     for prefix in [
@@ -221,10 +237,13 @@ fn run_command_uses_structure_runner_for_astro_family() {
         "g3ts-astro-seo/",
         "g3ts-astro-state/",
     ] {
-        let relative_index = output.stdout[last_index..]
-            .find(prefix)
-            .unwrap_or_else(|| panic!("expected `{prefix}` after byte {last_index}: {output:?}"));
-        last_index += relative_index;
+        let tail = output.stdout.get(last_index..).unwrap_or("");
+        let relative_index = tail.find(prefix);
+        assert!(
+            relative_index.is_some(),
+            "expected `{prefix}` after byte {last_index}: {output:?}"
+        );
+        last_index += relative_index.unwrap_or_default();
     }
 }
 

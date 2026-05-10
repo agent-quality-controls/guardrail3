@@ -8,12 +8,6 @@ allowed_deps = [
   "url",
 ]
 
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "SEO config keeps one rule per file at runtime root; the package boundary is already SEO-specific and splitting the rule files again would be artificial."
-
 [checks]
 garde = false
 

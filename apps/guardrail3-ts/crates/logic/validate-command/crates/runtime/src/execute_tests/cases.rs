@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test-fixture: these cases write real package.json files into tempdirs to drive execute() through its on-disk crawl entry; no centralized fs write helper exists in this CLI"
+)]
+
 use std::path::Path;
 
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
@@ -30,169 +35,85 @@ impl FamilyRunner for StubFamilyRunner {
         family: SupportedFamily,
         _crawl: &G3WorkspaceCrawl,
     ) -> Result<Vec<G3CheckResult>, FamilyRunError> {
-        let results = match family {
-            SupportedFamily::Eslint => vec![
-                G3CheckResult::new(
-                    "g3ts-eslint/exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("eslint.config.mjs".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-                G3CheckResult::new(
-                    "g3ts-eslint/parseable".to_owned(),
-                    G3Severity::Warn,
-                    "warn".to_owned(),
-                    "warn".to_owned(),
-                    Some("eslint.config.mjs".to_owned()),
-                    None,
-                ),
-            ],
-            SupportedFamily::AstroSetup => {
-                astro_inventory("g3ts-astro-setup/astro-package-present")
-            }
-            SupportedFamily::AstroContent => {
-                astro_inventory("g3ts-astro-content/pipeline-plugin-package-present")
-            }
-            SupportedFamily::AstroMdx => {
-                astro_inventory("g3ts-astro-mdx/mdx-eslint-plugin-package-present")
-            }
-            SupportedFamily::AstroI18n => {
-                astro_inventory("g3ts-astro-i18n/strict-policy-configured")
-            }
-            SupportedFamily::AstroMedia => {
-                astro_inventory("g3ts-astro-media/strict-policy-configured")
-            }
-            SupportedFamily::AstroSeo => astro_inventory("g3ts-astro-seo/nuasite-checks"),
-            SupportedFamily::AstroState => {
-                astro_inventory("g3ts-astro-state/no-legacy-parallel-state")
-            }
-            SupportedFamily::Arch => vec![
-                G3CheckResult::new(
-                    "g3ts-arch/root-manifest-exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("package.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Apparch => vec![
-                G3CheckResult::new(
-                    "g3ts-apparch/types-dependency-direction".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("src/types/model.ts".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Tsconfig => vec![
-                G3CheckResult::new(
-                    "g3ts-tsconfig/exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("tsconfig.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Package => vec![
-                G3CheckResult::new(
-                    "g3ts-package/root-exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("package.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Npmrc => vec![
-                G3CheckResult::new(
-                    "g3ts-npmrc/root-exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some(".npmrc".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Jscpd => vec![
-                G3CheckResult::new(
-                    "g3ts-jscpd/root-exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some(".jscpd.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Style => vec![
-                G3CheckResult::new(
-                    "g3ts-style/strict-policy-configured".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("guardrail3-ts.toml".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Fmt => vec![
-                G3CheckResult::new(
-                    "g3ts-fmt/prettier-package-present".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("package.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Spelling => vec![
-                G3CheckResult::new(
-                    "g3ts-spelling/cspell-package-present".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("package.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Typecov => vec![
-                G3CheckResult::new(
-                    "g3ts-typecov/package-present".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some("package.json".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-            SupportedFamily::Hooks => vec![
-                G3CheckResult::new(
-                    "g3ts-hooks/pre-commit-exists".to_owned(),
-                    G3Severity::Info,
-                    "inventory".to_owned(),
-                    "inventory".to_owned(),
-                    Some(".githooks/pre-commit".to_owned()),
-                    None,
-                )
-                .into_inventory(),
-            ],
-        };
+        Ok(stub_results_for(family))
+    }
+}
 
-        Ok(results)
+/// Single inventory `G3CheckResult` for the given `(id, file)` pair.
+fn inventory_for(id: &str, file: &str) -> Vec<G3CheckResult> {
+    vec![
+        G3CheckResult::new(
+            id.to_owned(),
+            G3Severity::Info,
+            "inventory".to_owned(),
+            "inventory".to_owned(),
+            Some(file.to_owned()),
+            None,
+        )
+        .into_inventory(),
+    ]
+}
+
+/// Stub results returned for each family by the test `FamilyRunner`. Eslint
+/// returns two entries (inventory + warn) so the suite can prove inventory
+/// suppression for exit codes; every other family returns a single inventory
+/// entry.
+fn stub_results_for(family: SupportedFamily) -> Vec<G3CheckResult> {
+    match family {
+        SupportedFamily::Eslint => vec![
+            G3CheckResult::new(
+                "g3ts-eslint/exists".to_owned(),
+                G3Severity::Info,
+                "inventory".to_owned(),
+                "inventory".to_owned(),
+                Some("eslint.config.mjs".to_owned()),
+                None,
+            )
+            .into_inventory(),
+            G3CheckResult::new(
+                "g3ts-eslint/parseable".to_owned(),
+                G3Severity::Warn,
+                "warn".to_owned(),
+                "warn".to_owned(),
+                Some("eslint.config.mjs".to_owned()),
+                None,
+            ),
+        ],
+        SupportedFamily::AstroSetup => astro_inventory("g3ts-astro-setup/astro-package-present"),
+        SupportedFamily::AstroContent => {
+            astro_inventory("g3ts-astro-content/pipeline-plugin-package-present")
+        }
+        SupportedFamily::AstroMdx => {
+            astro_inventory("g3ts-astro-mdx/mdx-eslint-plugin-package-present")
+        }
+        SupportedFamily::AstroI18n => astro_inventory("g3ts-astro-i18n/strict-policy-configured"),
+        SupportedFamily::AstroMedia => astro_inventory("g3ts-astro-media/strict-policy-configured"),
+        SupportedFamily::AstroSeo => astro_inventory("g3ts-astro-seo/nuasite-checks"),
+        SupportedFamily::AstroState => astro_inventory("g3ts-astro-state/no-legacy-parallel-state"),
+        SupportedFamily::Arch => inventory_for("g3ts-arch/root-manifest-exists", "package.json"),
+        SupportedFamily::Apparch => inventory_for(
+            "g3ts-apparch/types-dependency-direction",
+            "src/types/model.ts",
+        ),
+        SupportedFamily::Tsconfig => inventory_for("g3ts-tsconfig/exists", "tsconfig.json"),
+        SupportedFamily::Package => inventory_for("g3ts-package/root-exists", "package.json"),
+        SupportedFamily::Npmrc => inventory_for("g3ts-npmrc/root-exists", ".npmrc"),
+        SupportedFamily::Jscpd => inventory_for("g3ts-jscpd/root-exists", ".jscpd.json"),
+        SupportedFamily::Style => {
+            inventory_for("g3ts-style/strict-policy-configured", "guardrail3-ts.toml")
+        }
+        SupportedFamily::Fmt => inventory_for("g3ts-fmt/prettier-package-present", "package.json"),
+        SupportedFamily::Spelling => {
+            inventory_for("g3ts-spelling/cspell-package-present", "package.json")
+        }
+        SupportedFamily::Typecov => inventory_for("g3ts-typecov/package-present", "package.json"),
+        SupportedFamily::Hooks => {
+            inventory_for("g3ts-hooks/pre-commit-exists", ".githooks/pre-commit")
+        }
+        SupportedFamily::Topology => inventory_for(
+            "g3ts-topology/no-nested-guardrail3-ts-toml",
+            "guardrail3-ts.toml",
+        ),
     }
 }
 
@@ -363,7 +284,7 @@ fn execute_defaults_to_all_supported_families() {
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        "runs=19 inventory=false",
+        "runs=18 inventory=false",
         "",
         0,
     );
@@ -423,6 +344,9 @@ impl FamilyRunner for ErroringFamilyRunner {
             }),
             SupportedFamily::Hooks => Err(FamilyRunError {
                 message: "hooks runner exploded".to_owned(),
+            }),
+            SupportedFamily::Topology => Err(FamilyRunError {
+                message: "topology runner exploded".to_owned(),
             }),
         }
     }

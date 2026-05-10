@@ -1,3 +1,4 @@
+/// Top-level orchestration for hooks config checks.
 #[cfg(feature = "api")]
 mod run;
 

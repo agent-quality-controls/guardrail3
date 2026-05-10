@@ -3,93 +3,19 @@ use g3ts_astro_setup_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/syncpack-forbidden-deps";
+/// Static rule data.
 const ASTRO_SEO_BAN_REASON: &str = "`astro-seo` is forbidden because `astro-seo@1.1.0` exports TypeScript source directly from the package entry point. Astro apps must use the approved SEO path instead: typed content/layout data, `schema-dts` for JSON-LD types, `@nuasite/checks` with `g3ts-astro-nuasite-checks` for rendered-output verification, `@astrojs/sitemap`, and `astro-robots`.";
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
 ) {
     match &contract.syncpack_config {
         G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
-            let package_path =
-                crate::support::package_rel_path(&contract.package).unwrap_or("package.json");
-            let active_forbidden_deps = active_forbidden_deps(contract);
-            let listed_forbidden_deps = listed_forbidden_deps(contract, &active_forbidden_deps);
-            if !listed_forbidden_deps.is_empty() {
-                results.push(crate::support::error(
-                    ID,
-                    "Forbidden Astro deps are installed",
-                    format!(
-                        "`{package_path}` still lists forbidden Astro deps: {}. Remove them and remove any old Syncpack pin groups for those dependency names; Syncpack bans prevent future additions but an existing direct dependency is already a violation.{}",
-                        active_forbidden_deps_message(&listed_forbidden_deps),
-                        forbidden_dependency_explanation_from_strs(&listed_forbidden_deps)
-                    ),
-                    Some(package_path),
-                ));
-            }
-            if !snapshot.source_covers_package_manifest {
-                let expected_source = crate::support::expected_syncpack_source_entry(
-                    &snapshot.rel_path,
-                    package_path,
-                )
-                .unwrap_or_else(|| package_path.to_owned());
-                results.push(crate::support::error(
-                        ID,
-                        "Syncpack does not ban forbidden Astro deps",
-                        format!(
-                            "`{}` does not include exact `source` entry `{expected_source}` for `{package_path}`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}",
-                            snapshot.rel_path,
-                        ),
-                        Some(&snapshot.rel_path),
-                    ));
-            }
-
-            let missing_forbidden_bans = snapshot
-                .missing_forbidden_bans
-                .iter()
-                .filter(|dependency| {
-                    active_forbidden_deps
-                        .iter()
-                        .any(|active| *active == dependency.as_str())
-                })
-                .cloned()
-                .collect::<Vec<_>>();
-
-            if missing_forbidden_bans.is_empty()
-                && snapshot.source_covers_package_manifest
-                && listed_forbidden_deps.is_empty()
-            {
-                results.push(crate::support::info(
-                    ID,
-                    "Syncpack bans forbidden Astro deps",
-                    format!(
-                        "`{}` bans forbidden Astro deps through Syncpack: {}.",
-                        snapshot.rel_path,
-                        active_forbidden_deps_message(&active_forbidden_deps)
-                    ),
-                    &snapshot.rel_path,
-                ));
-                return;
-            }
-
-            if !missing_forbidden_bans.is_empty() {
-                results.push(crate::support::error(
-                        ID,
-                        "Syncpack does not ban forbidden Astro deps",
-                        format!(
-                            "`{}` is missing Syncpack banned versionGroups for: {}. Remove any old pinned versionGroups for those dependencies, then add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.{}",
-                            snapshot.rel_path,
-                            missing_forbidden_bans
-                                .iter()
-                                .map(|dependency| format!("`{dependency}`"))
-                                .collect::<Vec<_>>()
-                                .join(", "),
-                            forbidden_dependency_explanation(&missing_forbidden_bans)
-                        ),
-                        Some(&snapshot.rel_path),
-                    ));
-            }
+            check_parsed_syncpack(contract, snapshot, results);
         }
         G3TsAstroSyncpackConfigState::Missing { rel_path } => {
             push_unavailable_error(contract, rel_path, "is missing", results);
@@ -101,14 +27,92 @@ pub(crate) fn check(
     }
 }
 
+/// Validates a parsed Syncpack config snapshot.
+fn check_parsed_syncpack(
+    contract: &G3TsAstroSetupIntegrationContractInput,
+    snapshot: &g3ts_astro_setup_types::G3TsAstroSyncpackConfigSnapshot,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let package_path = crate::support::package_rel_path(&contract.package);
+    let active_forbidden_deps = active_forbidden_deps(contract);
+    let listed_forbidden_deps = listed_forbidden_deps(contract, &active_forbidden_deps);
+    if !listed_forbidden_deps.is_empty() {
+        results.push(crate::support::error(
+            ID,
+            "Forbidden Astro deps are installed",
+            format!(
+                "`{package_path}` still lists forbidden Astro deps: {}. Remove them and remove any old Syncpack pin groups for those dependency names; Syncpack bans prevent future additions but an existing direct dependency is already a violation.{}",
+                active_forbidden_deps_message(&listed_forbidden_deps),
+                forbidden_dependency_explanation_from_strs(&listed_forbidden_deps)
+            ),
+            Some(package_path),
+        ));
+    }
+    if !snapshot.source_covers_package_manifest {
+        let expected_source =
+            crate::support::expected_syncpack_source_entry(&snapshot.rel_path, package_path);
+        results.push(crate::support::error(
+                ID,
+                "Syncpack does not ban forbidden Astro deps",
+                format!(
+                    "`{}` does not include exact `source` entry `{expected_source}` for `{package_path}`, so `syncpack lint` cannot reject forbidden dependencies for this Astro app. {ASTRO_SEO_BAN_REASON}",
+                    snapshot.rel_path,
+                ),
+                Some(&snapshot.rel_path),
+            ));
+    }
+
+    let missing_forbidden_bans = snapshot
+        .missing_forbidden_bans
+        .iter()
+        .filter(|dependency| active_forbidden_deps.contains(&dependency.as_str()))
+        .cloned()
+        .collect::<Vec<_>>();
+
+    if missing_forbidden_bans.is_empty()
+        && snapshot.source_covers_package_manifest
+        && listed_forbidden_deps.is_empty()
+    {
+        results.push(crate::support::info(
+            ID,
+            "Syncpack bans forbidden Astro deps",
+            format!(
+                "`{}` bans forbidden Astro deps through Syncpack: {}.",
+                snapshot.rel_path,
+                active_forbidden_deps_message(&active_forbidden_deps)
+            ),
+            &snapshot.rel_path,
+        ));
+        return;
+    }
+
+    if !missing_forbidden_bans.is_empty() {
+        results.push(crate::support::error(
+                ID,
+                "Syncpack does not ban forbidden Astro deps",
+                format!(
+                    "`{}` is missing Syncpack banned versionGroups for: {}. Remove any old pinned versionGroups for those dependencies, then add exactly one canonical banned versionGroup per listed dependency, with exact `dependencies`, `dependencyTypes` containing exactly `prod`, `dev`, `optional`, and `peer`, `isBanned: true`, and no `packages` or `specifierTypes`.{}",
+                    snapshot.rel_path,
+                    missing_forbidden_bans
+                        .iter()
+                        .map(|dependency| format!("`{dependency}`"))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                    forbidden_dependency_explanation(&missing_forbidden_bans)
+                ),
+                Some(&snapshot.rel_path),
+            ));
+    }
+}
+
+/// Internal helper used by the rule.
 fn push_unavailable_error(
     contract: &G3TsAstroSetupIntegrationContractInput,
     rel_path: &str,
     reason: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let package_path =
-        crate::support::package_rel_path(&contract.package).unwrap_or("package.json");
+    let package_path = crate::support::package_rel_path(&contract.package);
     results.push(crate::support::error(
         ID,
         "Syncpack does not ban forbidden Astro deps",
@@ -120,6 +124,7 @@ fn push_unavailable_error(
     ));
 }
 
+/// Internal helper used by the rule.
 fn active_forbidden_deps(contract: &G3TsAstroSetupIntegrationContractInput) -> Vec<&str> {
     contract
         .forbidden_syncpack_deps
@@ -128,6 +133,7 @@ fn active_forbidden_deps(contract: &G3TsAstroSetupIntegrationContractInput) -> V
         .collect()
 }
 
+/// Returns forbidden deps actually declared in the package contract.
 fn listed_forbidden_deps<'a>(
     contract: &'a G3TsAstroSetupIntegrationContractInput,
     active_forbidden_deps: &[&'a str],
@@ -151,6 +157,7 @@ fn listed_forbidden_deps<'a>(
         .collect()
 }
 
+/// Internal helper used by the rule.
 fn active_forbidden_deps_message(dependencies: &[&str]) -> String {
     dependencies
         .iter()
@@ -159,6 +166,7 @@ fn active_forbidden_deps_message(dependencies: &[&str]) -> String {
         .join(", ")
 }
 
+/// Internal helper used by the rule.
 fn forbidden_dependency_explanation(missing_forbidden_bans: &[String]) -> String {
     if missing_forbidden_bans
         .iter()
@@ -170,6 +178,7 @@ fn forbidden_dependency_explanation(missing_forbidden_bans: &[String]) -> String
     }
 }
 
+/// Internal helper used by the rule.
 fn forbidden_dependency_explanation_from_strs(dependencies: &[&str]) -> String {
     if dependencies.contains(&"astro-seo") {
         format!(" {ASTRO_SEO_BAN_REASON}")

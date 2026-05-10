@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::info;
 
+/// Stable rule identifier reported on each emitted result.
 const ID: &str = "g3ts-jscpd/root-parseable";
 
+/// Run the rule and append any results to `results`.
 pub(crate) fn check(input: &G3TsJscpdChecksInput, results: &mut Vec<G3CheckResult>) {
     match &input.root {
         G3TsJscpdRootState::Missing => {}

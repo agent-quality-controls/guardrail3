@@ -5,11 +5,11 @@ use super::helpers::run_check;
 #[test]
 fn no_default_features_true() {
     let results = run_check(
-        r#"
+        r"
 [graph]
 all-features = true
 no-default-features = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -25,10 +25,10 @@ no-default-features = true
 #[test]
 fn no_default_features_missing_from_graph() {
     let results = run_check(
-        r#"
+        r"
 [graph]
 all-features = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,

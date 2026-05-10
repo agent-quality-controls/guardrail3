@@ -1,19 +1,24 @@
 use g3ts_astro_mdx_types::{G3TsAstroMdxEslintPluginContractInput, G3TsAstroMdxEslintSurfaceState};
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-mdx/protected-mdx-rule-disables-restricted";
+/// Internal constant `RESTRICT_RULE`.
 const RESTRICT_RULE: &str = "@eslint-community/eslint-comments/no-restricted-disable";
+/// Internal constant `MDX_CONTENT_PROTECTED_RULES`.
 const MDX_CONTENT_PROTECTED_RULES: [&str; 4] = [
     "mdx/remark",
     "astro-pipeline/mdx-component-imports-from-approved-map",
     "astro-pipeline/mdx-imports-only-approved-components",
     "astro-pipeline/no-raw-mdx-images",
 ];
+/// Internal constant `COMPONENT_MAP_PROTECTED_RULES`.
 const COMPONENT_MAP_PROTECTED_RULES: [&str; 2] = [
     "astro-pipeline/mdx-component-map-no-raw-ui-exports",
     "astro-pipeline/mdx-component-wrapper-requires-zod-parse",
 ];
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroMdxEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -23,7 +28,7 @@ pub(crate) fn check(
             ID,
             "MDX protected-disable policy cannot be checked",
             "G3TS could not parse the Astro MDX ESLint effective config. Configure `@eslint-community/eslint-comments/no-restricted-disable` for MDX content and MDX component-map probes.".to_owned(),
-            config_rel_path(&contract.config),
+            Some(config_rel_path(&contract.config)),
         ));
         return;
     };
@@ -62,6 +67,7 @@ pub(crate) fn check(
     ));
 }
 
+/// Internal function `lane_is_restricted`.
 fn lane_is_restricted(
     warn_or_error_rules: &[String],
     patterns: &[String],
@@ -75,6 +81,7 @@ fn lane_is_restricted(
         })
 }
 
+/// Internal function `pattern_covers_rule`.
 fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
     pattern == rule
         || pattern == "*"
@@ -83,11 +90,12 @@ fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
             .is_some_and(|prefix| rule.starts_with(prefix))
 }
 
-fn config_rel_path(config: &G3TsAstroMdxEslintSurfaceState) -> Option<&str> {
+/// Internal function `config_rel_path`.
+fn config_rel_path(config: &G3TsAstroMdxEslintSurfaceState) -> &str {
     match config {
         G3TsAstroMdxEslintSurfaceState::Missing { rel_path }
         | G3TsAstroMdxEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroMdxEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroMdxEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }

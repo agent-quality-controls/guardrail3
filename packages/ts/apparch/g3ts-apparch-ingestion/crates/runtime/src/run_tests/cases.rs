@@ -1,6 +1,11 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixture builders use std::fs directly to set up temp workspaces; not production code"
+)]
+
 use std::fs;
 
-use g3_workspace_crawl::crawl;
+use g3_workspace_crawl::crawl_any_root as crawl;
 
 #[test]
 fn ingest_collects_internal_edge_for_alias_import() {
@@ -83,8 +88,7 @@ fn ingest_accepts_valid_tsx_with_ampersand_in_jsx_text() {
 
     assert!(
         input.is_ok(),
-        "expected valid TSX with JSX text ampersand to ingest cleanly, got {:?}",
-        input
+        "expected valid TSX with JSX text ampersand to ingest cleanly, got {input:?}"
     );
 }
 
@@ -105,8 +109,7 @@ fn ingest_accepts_valid_tsx_with_ampersand_phrase_in_jsx_text() {
 
     assert!(
         input.is_ok(),
-        "expected valid TSX with JSX text ampersand phrase to ingest cleanly, got {:?}",
-        input
+        "expected valid TSX with JSX text ampersand phrase to ingest cleanly, got {input:?}"
     );
 }
 

@@ -5,8 +5,10 @@ use crate::support::{
     CargoRole, cargo_role, error, info, lint_level, policy_lints, policy_lints_table_label,
 };
 
+/// I D const.
 const ID: &str = "g3rs-cargo/disallowed-macros-deny";
 
+/// check fn.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     if matches!(cargo_role(cargo), CargoRole::Other) {
         return;

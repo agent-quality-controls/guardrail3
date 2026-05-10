@@ -9,6 +9,7 @@ use package_script_command_parser::types::{
     PackageScriptParseState, PackageScriptToolInvocation,
 };
 
+/// `ingest_package_surface`: ingest package surface.
 pub(crate) fn ingest_package_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -86,6 +87,7 @@ pub(crate) fn ingest_package_surface(
     }
 }
 
+/// `parse_package_script`: parse package script.
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     match package_script_command_parser::parse(name, body) {
         Ok(fact) => fact,
@@ -101,6 +103,7 @@ fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     }
 }
 
+/// `script_commands`: script commands.
 fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsAstroPackageScriptCommand> {
     fact.commands
         .iter()
@@ -108,6 +111,7 @@ fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsAstroPackageScriptC
         .collect()
 }
 
+/// `script_command`: script command.
 fn script_command(
     script_name: &str,
     command: &PackageScriptCommand,
@@ -121,7 +125,8 @@ fn script_command(
     }
 }
 
-fn script_command_separator(
+/// `script_command_separator`: script command separator.
+const fn script_command_separator(
     separator: PackageScriptCommandSeparator,
 ) -> G3TsAstroPackageScriptCommandSeparator {
     match separator {
@@ -130,6 +135,7 @@ fn script_command_separator(
     }
 }
 
+/// `script_tool_invocations`: script tool invocations.
 fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsAstroPackageScriptToolInvocation> {
@@ -139,6 +145,7 @@ fn script_tool_invocations(
         .collect()
 }
 
+/// `script_tool_invocation`: script tool invocation.
 fn script_tool_invocation(
     invocation: &PackageScriptToolInvocation,
 ) -> G3TsAstroPackageScriptToolInvocation {
@@ -153,6 +160,7 @@ fn script_tool_invocation(
     }
 }
 
+/// `script_parse_blocker`: script parse blocker.
 fn script_parse_blocker(
     fact: &PackageScriptParseFact,
 ) -> Option<G3TsAstroPackageScriptParseBlocker> {

@@ -40,12 +40,7 @@ pub fn run(
                     });
                 }
             };
-            let filetree_input =
-                g3rs_fmt_ingestion::ingest_for_file_tree_checks(crawl).map_err(|error| {
-                    FamilyRunError {
-                        message: format!("{error:?}"),
-                    }
-                })?;
+            let filetree_input = g3rs_fmt_ingestion::ingest_for_file_tree_checks(crawl);
             results.extend(g3rs_fmt_filetree_checks::check(&filetree_input));
             Ok(results)
         }

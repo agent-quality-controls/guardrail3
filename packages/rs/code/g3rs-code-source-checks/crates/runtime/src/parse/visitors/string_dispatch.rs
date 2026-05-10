@@ -1,3 +1,12 @@
+#![allow(
+    clippy::wildcard_enum_match_arm,
+    clippy::match_wildcard_for_single_variants,
+    clippy::missing_docs_in_private_items,
+    clippy::arithmetic_side_effects,
+    clippy::type_complexity,
+    reason = "code-source-checks parse visitors walk every variant of upstream syntax-tree enums (syn::*); module-level allow lets the visitor stay aligned with upstream syn versions without churning the lint floor each upgrade"
+)]
+
 use quote::ToTokens;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -18,8 +27,11 @@ pub(super) fn find_string_dispatch_sites(
     visitor.out
 }
 
+/// Struct `StringDispatchVisitor` used by this module.
 struct StringDispatchVisitor {
+    /// Field `out`.
     out: Vec<StringDispatchInfo>,
+    /// Field `in_test_context`.
     in_test_context: bool,
 }
 
@@ -95,6 +107,7 @@ impl<'source> Visit<'source> for StringDispatchVisitor {
     }
 }
 
+/// Implements `string literal patterns`.
 fn string_literal_patterns(pat: &syn::Pat) -> usize {
     match pat {
         syn::Pat::Lit(expr_lit) => usize::from(matches!(expr_lit.lit, syn::Lit::Str(_))),
@@ -105,6 +118,7 @@ fn string_literal_patterns(pat: &syn::Pat) -> usize {
     }
 }
 
+/// Implements `if else chain string dispatch count`.
 fn if_else_chain_string_dispatch_count(expr_if: &syn::ExprIf) -> Option<usize> {
     let (base_expr, first_matches) = string_equality_branch(&expr_if.cond)?;
     let mut count = first_matches;
@@ -128,6 +142,7 @@ fn if_else_chain_string_dispatch_count(expr_if: &syn::ExprIf) -> Option<usize> {
     Some(count)
 }
 
+/// Implements `string equality branch`.
 fn string_equality_branch(expr: &syn::Expr) -> Option<(String, usize)> {
     let syn::Expr::Binary(binary) = expr else {
         return None;
@@ -148,7 +163,8 @@ fn string_equality_branch(expr: &syn::Expr) -> Option<(String, usize)> {
     None
 }
 
-fn is_string_literal_expr(expr: &syn::Expr) -> bool {
+/// Implements `is string literal expr`.
+const fn is_string_literal_expr(expr: &syn::Expr) -> bool {
     matches!(
         expr,
         syn::Expr::Lit(syn::ExprLit {
@@ -158,6 +174,7 @@ fn is_string_literal_expr(expr: &syn::Expr) -> bool {
     )
 }
 
+/// Implements `normalize expr without strings`.
 fn normalize_expr_without_strings(expr: &syn::Expr) -> Option<String> {
     if is_string_literal_expr(expr) {
         return None;

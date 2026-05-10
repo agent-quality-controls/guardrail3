@@ -23,9 +23,8 @@ pub(crate) fn check(input: &G3RsApparchCratePurityChecksInput, results: &mut Vec
         return;
     }
 
-    let allowed = match allowed_dependencies(&input.rust_policy, krate, results) {
-        Some(allowed) => allowed,
-        None => return,
+    let Some(allowed) = allowed_dependencies(&input.rust_policy, krate, results) else {
+        return;
     };
     let violating = input
         .external_dependencies

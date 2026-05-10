@@ -149,6 +149,10 @@ pub(super) fn local_pg_dependency_allowed() -> G3TsPackageChecksInput {
     }
 }
 
+#[allow(
+    clippy::fn_params_excessive_bools,
+    reason = "test helper takes four orthogonal toggles to construct fixture variants; collapsing into a struct only displaces the bools"
+)]
 fn root_snapshot(
     has_syncpack_dependency: bool,
     safely_runs_only_allow_pnpm: bool,

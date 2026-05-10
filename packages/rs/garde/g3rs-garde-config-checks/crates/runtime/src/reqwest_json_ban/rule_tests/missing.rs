@@ -15,7 +15,7 @@ fn warns_when_reqwest_json_ban_missing() {
 
     assertions::assert_contains(
         &results,
-        assertions::warn(
+        &assertions::warn(
             "missing reqwest garde ban",
             "Missing `reqwest::Response::json` from `disallowed-methods`. Add it to `disallowed-methods` in clippy.toml.",
             "clippy.toml",

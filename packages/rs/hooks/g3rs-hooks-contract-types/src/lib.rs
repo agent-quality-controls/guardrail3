@@ -1,3 +1,5 @@
+//! Shared types for the g3rs hooks contract.
+
 #[cfg(feature = "api")]
 mod types;
 

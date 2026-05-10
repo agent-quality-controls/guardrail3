@@ -17,15 +17,22 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
     pub(crate) waivers: Vec<g3rs_code_types::G3RsCodeWaiver>,
 }
 
+/// List of selected Rust source files (with their classifier metadata) for the `code` source lane.
+pub(crate) type SelectedCodeSourceFiles<'a> = Vec<SelectedCodeSourceFile<'a>>;
+
 /// Select all owned Rust source files for the `code` source lane.
 pub(crate) fn select_source_files(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<SelectedCodeSourceFile<'_>>, IngestionError> {
+) -> Result<SelectedCodeSourceFiles<'_>, IngestionError> {
     let source_entries = crawl
         .entries
         .iter()
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
-        .filter(|entry| entry.path.rel_path.ends_with(".rs"))
+        .filter(|entry| {
+            std::path::Path::new(entry.path.rel_path.as_str())
+                .extension()
+                .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
+        })
         .filter(|entry| !crate::classify::is_fixture_path(entry.path.rel_path.as_str()))
         .collect::<Vec<_>>();
 

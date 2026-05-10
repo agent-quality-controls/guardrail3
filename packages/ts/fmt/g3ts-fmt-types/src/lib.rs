@@ -1,3 +1,4 @@
+/// Public input contract types for g3ts fmt config checks.
 #[cfg(feature = "api")]
 mod types;
 

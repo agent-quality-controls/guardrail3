@@ -1,0 +1,34 @@
+[package]
+name = "g3rs-rust-family-contracts-tooling"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "Hook contracts for tool-driven Rust families (toolchain, fmt, cargo, clippy, deny, code, deps, garde, test, release)"
+publish = false
+readme = "README.md"
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hooks-contract-types = { path = "../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }
+g3rs-cargo-hook-contract = { path = "../../../cargo/g3rs-cargo-hook-contract", version = "0.1.0" }
+g3rs-clippy-hook-contract = { path = "../../../clippy/g3rs-clippy-hook-contract", version = "0.1.0" }
+g3rs-code-hook-contract = { path = "../../../code/g3rs-code-hook-contract", version = "0.1.0" }
+g3rs-deny-hook-contract = { path = "../../../deny/g3rs-deny-hook-contract", version = "0.1.0" }
+g3rs-deps-hook-contract = { path = "../../../deps/g3rs-deps-hook-contract", version = "0.1.0" }
+g3rs-fmt-hook-contract = { path = "../../../fmt/g3rs-fmt-hook-contract", version = "0.1.0" }
+g3rs-garde-hook-contract = { path = "../../../garde/g3rs-garde-hook-contract", version = "0.1.0" }
+g3rs-release-hook-contract = { path = "../../../release/g3rs-release-hook-contract", version = "0.1.0" }
+g3rs-test-hook-contract = { path = "../../../test/g3rs-test-hook-contract", version = "0.1.0" }
+g3rs-toolchain-hook-contract = { path = "../../../toolchain/g3rs-toolchain-hook-contract", version = "0.1.0" }

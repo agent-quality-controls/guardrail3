@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info, parsed_root};
 
+/// `ID` constant.
 const ID: &str = "g3ts-package/root-engines";
 
+/// `check`: check.
 pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(snapshot) = parsed_root(input) else {
         return;

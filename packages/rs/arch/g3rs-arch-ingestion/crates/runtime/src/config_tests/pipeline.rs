@@ -56,6 +56,10 @@ fn config_pipeline_reports_missing_shared_and_feature_contract_rules() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn config_ingestion_stays_inside_the_pointed_workspace() {
     let root = temp_workspace_root();
 
@@ -93,6 +97,10 @@ fn config_ingestion_stays_inside_the_pointed_workspace() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn config_ingestion_respects_workspace_exclude() {
     let root = temp_workspace_root();
 
@@ -177,6 +185,10 @@ fn split_rule_allows_explicit_dependency_count_waiver() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
     let root = temp_workspace_root();
 
@@ -203,6 +215,10 @@ fn split_rule_ignores_dev_dependencies_in_hard_config_cap() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn split_rule_counts_cfg_target_dependencies_in_production_cap() {
     let root = temp_workspace_root();
 

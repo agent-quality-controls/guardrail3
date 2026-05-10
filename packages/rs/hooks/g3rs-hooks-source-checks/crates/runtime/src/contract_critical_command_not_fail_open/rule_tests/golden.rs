@@ -145,12 +145,12 @@ fn negated_if_with_failure_helper_is_not_fail_open() {
 #[test]
 fn called_function_with_contract_critical_fail_open_is_reported() {
     let results = run_case(
-        r#"#!/bin/sh
+        r"#!/bin/sh
 run_clippy() {
     cargo clippy -- -D warnings || true
 }
 run_clippy
-"#,
+",
         vec![requirement(G3HookCriticalCommand::CargoSubcommand(
             "clippy".to_owned(),
         ))],

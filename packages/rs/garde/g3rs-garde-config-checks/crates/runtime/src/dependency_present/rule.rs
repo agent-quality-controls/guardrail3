@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, has_garde_dependency, info};
 
+/// Rule identifier.
 const ID: &str = "g3rs-garde/dependency-present";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     if has_garde_dependency(cargo) {
         results.push(info(

@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures need direct filesystem access to build temp workspaces"
+)]
+
 use std::fs;
 
 use g3rs_deny_ingestion_assertions::run as assertions;

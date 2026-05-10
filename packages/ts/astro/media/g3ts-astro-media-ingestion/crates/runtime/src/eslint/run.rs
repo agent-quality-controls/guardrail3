@@ -10,6 +10,7 @@ use g3ts_astro_media_types::{
     G3TsAstroMediaPolicySurfaceState,
 };
 
+/// `ingest_media_eslint_surface`: ingest media eslint surface.
 pub(crate) fn ingest_media_eslint_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -44,6 +45,7 @@ pub(crate) fn ingest_media_eslint_surface(
     }
 }
 
+/// `map_raw_state`: map raw state.
 fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroMediaEslintSurfaceState {
     match raw {
         G3TsAstroRawEslintConfigState::Missing { rel_path } => {
@@ -64,6 +66,7 @@ fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroMediaEslintSurf
     }
 }
 
+/// `active_probes`: active probes.
 fn active_probes<'a>(
     typed: &'a eslint_config_parser::types::EslintConfigSnapshot,
     targets: &[eslint_config_parser::types::EslintProbeTarget],
@@ -80,6 +83,7 @@ fn active_probes<'a>(
         .collect()
 }
 
+/// `probes_missing_or_ignored`: probes missing or ignored.
 fn probes_missing_or_ignored(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     targets: &[eslint_config_parser::types::EslintProbeTarget],

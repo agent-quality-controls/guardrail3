@@ -3,8 +3,11 @@ use g3ts_astro_seo_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/trailing-slash-policy";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -41,6 +44,7 @@ pub(crate) fn check(
     }
 }
 
+/// Internal helper used by the rule.
 fn push_unavailable(rel_path: &str, reason: &str, results: &mut Vec<G3CheckResult>) {
     results.push(crate::support::error(
         ID,

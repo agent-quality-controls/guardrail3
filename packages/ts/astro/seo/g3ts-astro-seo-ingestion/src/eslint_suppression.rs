@@ -1,3 +1,4 @@
+/// `active_warn_or_error_rules`: active warn or error rules.
 pub(crate) fn active_warn_or_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -13,6 +14,7 @@ pub(crate) fn active_warn_or_error_rules(
     })
 }
 
+/// `restricted_disable_patterns`: restricted disable patterns.
 pub(crate) fn restricted_disable_patterns(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {

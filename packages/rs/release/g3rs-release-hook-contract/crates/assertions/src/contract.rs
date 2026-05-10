@@ -2,6 +2,10 @@ use g3rs_hooks_contract_types::{
     G3HookCommandRequirement, G3HookCriticalCommand, G3HookRequirement, G3HookTriggerPattern,
 };
 
+/// Assert that the runtime hook contract matches the expected release-family policy.
+///
+/// # Panics
+/// Panics if the runtime contract differs from the expected requirement set.
 pub fn assert_contract_matches_expected_policy() {
     assert_eq!(
         g3rs_release_hook_contract_runtime::hook_contract(),
@@ -24,6 +28,7 @@ pub fn assert_contract_matches_expected_policy() {
             ],
             required_commands: vec![G3HookCommandRequirement::G3RsValidatePath,],
             critical_commands: vec![G3HookCriticalCommand::Binary("g3rs".to_owned()),],
-        }]
+        }],
+        "release hook contract diverged from expected policy",
     );
 }

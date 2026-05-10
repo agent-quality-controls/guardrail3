@@ -1,8 +1,10 @@
 use g3rs_arch_types::types::{G3RsArchFacadeSurface, G3RsArchSourceCrate};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-arch/feature-gated-exports";
 
+/// check fn.
 pub(crate) fn check(
     node: &G3RsArchSourceCrate,
     surface: Option<&G3RsArchFacadeSurface>,

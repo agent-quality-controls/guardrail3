@@ -3,15 +3,18 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/publish-dry-run-workflow";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if input.has_publish_dry_run_workflow {
+    if input.workflow_flags.has_publish_dry_run_workflow {
         results.push(info(
             ID,
             "Publish dry-run workflow present",
             String::new(),
-            input.publish_dry_run_workflow_rel_path
+            input
+                .publish_dry_run_workflow_rel_path
                 .as_deref()
                 .unwrap_or(input.cargo_rel_path.as_str()),
         ));

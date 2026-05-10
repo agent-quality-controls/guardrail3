@@ -1,11 +1,11 @@
-use std::collections::BTreeSet;
-
 use deny_toml_parser::types::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
 use crate::support::findings::warn;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/copyleft-allowlist";
+/// Constant value used by the surrounding module.
 const COPYLEFT_LICENSES: &[&str] = &[
     "GPL-2.0-only",
     "GPL-2.0-or-later",
@@ -26,12 +26,13 @@ const COPYLEFT_LICENSES: &[&str] = &[
     "EUPL-1.2",
 ];
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(licenses) = deny.licenses.as_ref() else {
         return;
     };
 
-    for license in licenses.allow.iter().cloned().collect::<BTreeSet<_>>() {
+    for license in &licenses.allow {
         if COPYLEFT_LICENSES.contains(&license.as_str()) {
             results.push(warn(
                 ID,

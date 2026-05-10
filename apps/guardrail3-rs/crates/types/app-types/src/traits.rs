@@ -12,6 +12,16 @@ pub trait WorkspaceCrawler {
     ///
     /// Returns [`WorkspaceCrawlError`] when the workspace cannot be crawled.
     fn crawl(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError>;
+
+    /// Builds a snapshot for an arbitrary root (no Cargo.toml requirement).
+    ///
+    /// Used by repo-level commands that operate on the repo root rather than a
+    /// specific Rust workspace root.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`WorkspaceCrawlError`] when the path is not a directory.
+    fn crawl_any(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError>;
 }
 
 /// Runs one selected family against a prepared workspace crawl.

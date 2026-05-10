@@ -15,14 +15,3 @@ pub fn assert_root_cargo_paths(input: &code_types::G3RsCodeFileTreeChecksInput, 
         .collect::<Vec<_>>();
     assert_eq!(actual, expected, "{input:#?}");
 }
-
-pub fn assert_single_zero_structural_root(
-    input: &code_types::G3RsCodeFileTreeChecksInput,
-    cargo_rel_path: &str,
-) {
-    assert_eq!(input.roots.len(), 1, "{input:#?}");
-    assert_eq!(input.roots[0].cargo_rel_path, cargo_rel_path);
-    assert_eq!(input.roots[0].max_module_depth, 0);
-    assert_eq!(input.roots[0].max_sibling_dirs, 0);
-    assert_eq!(input.roots[0].max_sibling_rs_files, 0);
-}

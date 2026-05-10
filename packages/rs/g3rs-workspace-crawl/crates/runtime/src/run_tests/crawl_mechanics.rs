@@ -1,28 +1,9 @@
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent).expect("create parent directory for fixture");
-    }
-    fs::write(path, content).expect("write fixture file");
-}
-
-fn write_root_manifest(root: &Path) {
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
-}
+use super::fixtures::{git_init, write, write_root_manifest};
 
 #[test]
 fn rejects_non_workspace_root_even_when_nested_rust_workspaces_exist() {

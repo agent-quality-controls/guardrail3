@@ -1,5 +1,7 @@
+//! Workspace traversal helpers shared by the source, file-tree, and config tiers.
+
+/// Implementation of the workspace traversal primitives re-exported from this module.
 mod run;
-mod structure;
 
 pub(crate) use run::{
     collect_crate_nodes, collect_dirs_recursive, collect_rs_files_recursive, is_inside,

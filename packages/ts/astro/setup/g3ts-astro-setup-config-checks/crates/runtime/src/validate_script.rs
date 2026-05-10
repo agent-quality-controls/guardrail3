@@ -5,7 +5,9 @@ use g3ts_astro_setup_types::{
 use guardrail3_check_types::G3CheckResult;
 use std::collections::BTreeSet;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/validate-script";
+/// Static rule data.
 const VALIDATION_LIKE_SCRIPTS: [&str; 7] = [
     "prevalidate",
     "postvalidate",
@@ -16,6 +18,7 @@ const VALIDATION_LIKE_SCRIPTS: [&str; 7] = [
     "lint:all",
 ];
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -26,7 +29,7 @@ pub(crate) fn check(
             ID,
             "Astro app validate script cannot be checked",
             "The Astro validate script contract could not be checked because `package.json` was not parsed. Restore the app package manifest and add a fail-closed `validate` script.".to_owned(),
-            rel_path,
+            Some(rel_path),
         ));
         return;
     };
@@ -55,6 +58,7 @@ pub(crate) fn check(
     ));
 }
 
+/// Internal helper used by the rule.
 fn validate_contract_is_satisfied(package: &G3TsAstroPackageSurfaceSnapshot) -> bool {
     if !package.script_names.iter().any(|name| name == "validate") {
         return false;
@@ -75,10 +79,12 @@ fn validate_contract_is_satisfied(package: &G3TsAstroPackageSurfaceSnapshot) -> 
         && reachable_safely_runs_tool(package, &reachable, "astro", "build")
 }
 
+/// Internal helper used by the rule.
 fn script_exists(package: &G3TsAstroPackageSurfaceSnapshot, script_name: &str) -> bool {
     package.script_names.iter().any(|name| name == script_name)
 }
 
+/// Internal helper used by the rule.
 fn script_graph_is_safe(package: &G3TsAstroPackageSurfaceSnapshot, script_name: &str) -> bool {
     let reachable = reachable_script_names(package, script_name);
     if reachable.is_empty() || !reachable.iter().any(|name| name == script_name) {
@@ -113,6 +119,7 @@ fn script_graph_is_safe(package: &G3TsAstroPackageSurfaceSnapshot, script_name: 
         .all(|target| script_exists(package, &target))
 }
 
+/// Internal helper used by the rule.
 fn reachable_script_names(
     package: &G3TsAstroPackageSurfaceSnapshot,
     root_script_name: &str,
@@ -142,6 +149,7 @@ fn reachable_script_names(
     reachable
 }
 
+/// Internal helper used by the rule.
 fn package_script_target(invocation: &G3TsAstroPackageScriptToolInvocation) -> Option<String> {
     if invocation.executable != "package-script" {
         return None;
@@ -155,6 +163,7 @@ fn package_script_target(invocation: &G3TsAstroPackageScriptToolInvocation) -> O
         .map(str::to_owned)
 }
 
+/// Internal helper used by the rule.
 fn reachable_safely_runs_executable(
     package: &G3TsAstroPackageSurfaceSnapshot,
     reachable: &BTreeSet<String>,
@@ -168,6 +177,7 @@ fn reachable_safely_runs_executable(
     })
 }
 
+/// Internal helper used by the rule.
 fn reachable_safely_runs_tool(
     package: &G3TsAstroPackageSurfaceSnapshot,
     reachable: &BTreeSet<String>,

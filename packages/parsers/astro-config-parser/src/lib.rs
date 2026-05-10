@@ -1,3 +1,9 @@
+//! Facade crate for typed Astro config parsing.
+#![allow(
+    clippy::multiple_crate_versions,
+    reason = "swc_common pins siphasher 0.3.11 while criterion (dev-tree transitive) pulls siphasher 1.0.2; resolving requires upstream swc bump"
+)]
+
 #[cfg(feature = "api")]
 pub mod types;
 

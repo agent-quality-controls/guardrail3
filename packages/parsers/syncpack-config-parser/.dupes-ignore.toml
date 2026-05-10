@@ -1,0 +1,15 @@
+[[ignore]]
+fingerprint = "dee9fd50a6bcb320"
+reason = "syncpack rejection tests share parse_error_message shape; each #[test] proves a distinct invalid-input rejection path (root / version_groups / group entry / dependency entry)"
+
+[[ignore]]
+fingerprint = "d6eda12bbd9602c7"
+reason = "one-line .map_err(Error::from) closures in fs/parser layers necessarily look identical"
+
+[[ignore]]
+fingerprint = "151fbdc5628d7fe7"
+reason = "syncpack rejects_non_array_source and rejects_invalid_pin_version_and_banned_types are distinct rejection proofs; their bodies share parse_error_message shape"
+
+[[ignore]]
+fingerprint = "ebe9cdcd68088843"
+reason = "from_path and from_path_document are the canonical ingress functions; both must read the file then delegate to in-memory parser, so their bodies converge"

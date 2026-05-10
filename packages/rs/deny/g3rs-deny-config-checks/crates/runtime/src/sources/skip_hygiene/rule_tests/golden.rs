@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn empty_skip_produces_no_findings() {
     let results = run_check(
-        r#"
+        r"
 [bans]
 skip = []
-"#,
+",
     );
     assertions::assert_no_findings(&results);
 }

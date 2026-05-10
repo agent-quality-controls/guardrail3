@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{rust_policy_failure, rust_policy_rel_path};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/policy-context-parseable";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     match rust_policy_failure(input) {
         Some((rel_path, reason)) => results.push(G3CheckResult::new(

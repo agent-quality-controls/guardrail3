@@ -2,18 +2,25 @@ use cargo_toml_parser::types::CargoToml;
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 
+/// Result type returned by member-rel and pattern-expansion helpers; `Err` carries a human-readable reason.
+type MemberRelsResult = Result<Vec<String>, String>;
+
+/// `select_cargo_toml` function.
 pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
+/// `select_release_plz_toml` function.
 pub(crate) fn select_release_plz_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "release-plz.toml")
 }
 
+/// `select_cliff_toml` function.
 pub(crate) fn select_cliff_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "cliff.toml")
 }
 
+/// `select_member_manifest` function.
 pub(crate) fn select_member_manifest<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     member_rel: &str,
@@ -23,6 +30,7 @@ pub(crate) fn select_member_manifest<'a>(
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
 }
 
+/// `select_workflow_entries` function.
 pub(crate) fn select_workflow_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspaceEntry> {
     let mut entries = crawl
         .entries
@@ -42,10 +50,11 @@ pub(crate) fn select_workflow_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
     entries
 }
 
+/// `collect_member_rels` function.
 pub(crate) fn collect_member_rels(
     crawl: &G3RsWorkspaceCrawl,
     root_cargo: &CargoToml,
-) -> Result<Vec<String>, String> {
+) -> MemberRelsResult {
     let workspace = root_cargo
         .workspace
         .as_ref()
@@ -77,7 +86,8 @@ pub(crate) fn collect_member_rels(
     Ok(members.into_iter().collect())
 }
 
-fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> Result<Vec<String>, String> {
+/// `expand_member_pattern` function.
+fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> MemberRelsResult {
     let normalized = normalize_member_rel(pattern);
     if looks_like_glob(&normalized) {
         let compiled = Pattern::new(&normalized)
@@ -95,10 +105,12 @@ fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> Result<Ve
     }
 }
 
+/// `looks_like_glob` function.
 fn looks_like_glob(pattern: &str) -> bool {
     pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
 }
 
+/// `normalize_member_rel` function.
 pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
     let stripped = trimmed
@@ -113,6 +125,7 @@ pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     }
 }
 
+/// `member_manifest_rel_path` function.
 pub(crate) fn member_manifest_rel_path(member_rel: &str) -> String {
     if member_rel.is_empty() {
         "Cargo.toml".to_owned()

@@ -2,24 +2,30 @@ use g3rs_workspace_crawl::{
     G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
 };
 
+/// `CrawlView` struct.
 #[derive(Debug)]
 pub(crate) struct CrawlView<'a> {
+    /// `crawl` item.
     crawl: &'a G3RsWorkspaceCrawl,
 }
 
 impl<'a> CrawlView<'a> {
-    pub(crate) fn new(crawl: &'a G3RsWorkspaceCrawl) -> Self {
+    /// `new` function.
+    pub(crate) const fn new(crawl: &'a G3RsWorkspaceCrawl) -> Self {
         Self { crawl }
     }
 
+    /// `root_abs_path` method.
     pub(crate) fn root_abs_path(&self) -> &std::path::Path {
         self.crawl.root_abs_path.as_path()
     }
 
+    /// `entry` method.
     pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
         g3rs_workspace_crawl::entry(self.crawl, rel_path)
     }
 
+    /// `included_file_entries` method.
     pub(crate) fn included_file_entries(&self) -> impl Iterator<Item = &'a G3RsWorkspaceEntry> {
         self.crawl.entries.iter().filter(|entry| {
             entry.kind == G3RsWorkspaceEntryKind::File
@@ -27,6 +33,7 @@ impl<'a> CrawlView<'a> {
         })
     }
 
+    /// `read_file` method.
     pub(crate) fn read_file(&self, rel_path: &str) -> Result<String, std::io::Error> {
         let path = g3rs_workspace_crawl::entry(self.crawl, rel_path)
             .map(|entry| entry.path.abs_path.clone())

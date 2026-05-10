@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn unknown_top_level_section_warns() {
     let results = run_check(
-        r#"
+        r"
 [foo]
 bar = 1
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -24,13 +24,13 @@ bar = 1
 #[test]
 fn multiple_unknown_top_level_keys_warns_each() {
     let results = run_check(
-        r#"
+        r"
 [foo]
 bar = 1
 
 [zzz]
 aaa = 2
-"#,
+",
     );
     assertions::assert_findings(
         &results,

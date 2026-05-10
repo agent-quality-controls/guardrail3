@@ -61,10 +61,10 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
     let crawl = crawl(root);
 
     let config = super::super::config_result(&crawl).expect("config ingestion should succeed");
-    assert_eq!(config.crate_checks.len(), 1);
-    assert_eq!(config.crate_checks[0].name, "demo");
+    assert_eq!(config.crates.len(), 1);
+    assert_eq!(config.crates[0].name, "demo");
     assert!(matches!(
-        config.crate_checks[0]
+        config.crates[0]
             .cargo
             .package
             .as_ref()
@@ -73,8 +73,8 @@ include = ["src/**", "Cargo.toml", "README.md", "LICENSE"]
             cargo_toml_parser::types::VecStringOrBool::Bool(true)
         ))
     ));
-    assert!(config.repo_checks[0].release_plz_exists);
-    assert!(config.repo_checks[0].cliff_exists);
+    assert!(config.repos[0].release_plz_exists);
+    assert!(config.repos[0].cliff_exists);
 
     let filetree =
         super::super::filetree_result(&crawl).expect("filetree ingestion should succeed");
@@ -287,7 +287,7 @@ resolver = "2"
 
     std::env::set_current_dir(original_dir).expect("restore current directory");
 
-    let dry_run = config.crate_checks[0]
+    let dry_run = config.crates[0]
         .dry_run
         .as_ref()
         .expect("published crate should have dry-run result");

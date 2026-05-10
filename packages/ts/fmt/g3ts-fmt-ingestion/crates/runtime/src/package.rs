@@ -8,6 +8,7 @@ use package_script_command_parser::types::{
     PackageScriptToolInvocation,
 };
 
+/// Ingests `package.json` under `app_root_rel_path` into a surface state.
 pub(crate) fn ingest_package_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -73,6 +74,7 @@ pub(crate) fn ingest_package_surface(
     }
 }
 
+/// Parses a single `package.json` script body into a structured fact.
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     match package_script_command_parser::parse(name, body) {
         Ok(fact) => fact,
@@ -88,6 +90,7 @@ fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     }
 }
 
+/// Maps a parse fact's tool invocations into the contract type.
 fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsFmtPackageScriptToolInvocation> {
@@ -97,6 +100,7 @@ fn script_tool_invocations(
         .collect()
 }
 
+/// Converts a single tool invocation into the contract type.
 fn script_tool_invocation(
     invocation: &PackageScriptToolInvocation,
 ) -> G3TsFmtPackageScriptToolInvocation {
@@ -109,7 +113,8 @@ fn script_tool_invocation(
     }
 }
 
-fn script_command_separator(
+/// Maps a parser command separator into the contract enum.
+const fn script_command_separator(
     separator: PackageScriptCommandSeparator,
 ) -> G3TsFmtPackageScriptCommandSeparator {
     match separator {
@@ -118,6 +123,7 @@ fn script_command_separator(
     }
 }
 
+/// Returns a parse blocker for `fact` if its parse state is unsuccessful.
 fn script_parse_blocker(fact: &PackageScriptParseFact) -> Option<G3TsFmtPackageScriptParseBlocker> {
     match &fact.state {
         PackageScriptParseState::Unsupported { reason }

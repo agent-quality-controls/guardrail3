@@ -1,23 +1,24 @@
 use g3ts_astro_media_types::G3TsAstroMediaIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-media/media-assets-integration-wired";
+/// Internal constant `PACKAGE_NAME`.
 const PACKAGE_NAME: &str = "g3ts-astro-media-assets";
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroMediaIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
 ) {
     let rel_path = crate::support::astro_config_rel_path(&contract.astro_config);
     if integration_matches_policy(contract) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Astro media assets integration is wired",
-                format!("`{rel_path}` wires `{PACKAGE_NAME}` with favicon, appIcons, defaultSocialImage, and allowSvgIcons matching `[ts.astro.media]`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Astro media assets integration is wired",
+            format!("`{rel_path}` wires `{PACKAGE_NAME}` with favicon, appIcons, defaultSocialImage, and allowSvgIcons matching `[ts.astro.media]`."),
+            rel_path,
+        ));
         return;
     }
 
@@ -25,13 +26,13 @@ pub(crate) fn check(
             ID,
             "Astro media assets integration is not wired",
             format!(
-            "`{}` must add `g3tsAstroMediaAssets(...)` from `{PACKAGE_NAME}` to Astro integrations. Its `favicon`, `appIcons`, `defaultSocialImage`, and `allowSvgIcons` options must exactly match `[ts.astro.media]`. `favicon`, `appIcons`, and `defaultSocialImage` are root-relative public output paths like `/favicon.svg`; they are not app-relative source paths.",
-            rel_path.unwrap_or("astro.config.*")
+            "`{rel_path}` must add `g3tsAstroMediaAssets(...)` from `{PACKAGE_NAME}` to Astro integrations. Its `favicon`, `appIcons`, `defaultSocialImage`, and `allowSvgIcons` options must exactly match `[ts.astro.media]`. `favicon`, `appIcons`, and `defaultSocialImage` are root-relative public output paths like `/favicon.svg`; they are not app-relative source paths."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal function `integration_matches_policy`.
 fn integration_matches_policy(contract: &G3TsAstroMediaIntegrationContractInput) -> bool {
     let Some(config) = crate::support::parsed_astro_config(&contract.astro_config) else {
         return false;

@@ -8,15 +8,22 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::collect::{WorkflowFacts, input_failure};
 
-pub(super) fn parse_release_plz(
-    crawl: &G3RsWorkspaceCrawl,
-    failures: &mut Vec<G3RsReleaseInputFailure>,
-) -> (
+/// `(file exists, rel path, parsed config, declared package names)`.
+type ReleasePlzParse = (
     bool,
     String,
     Option<release_plz_toml_parser::types::ReleasePlzToml>,
     BTreeSet<String>,
-) {
+);
+
+/// `(file exists, rel path, parsed config)`.
+type CliffParse = (bool, String, Option<cliff_toml_parser::types::CliffToml>);
+
+/// `parse_release_plz` function.
+pub(super) fn parse_release_plz(
+    crawl: &G3RsWorkspaceCrawl,
+    failures: &mut Vec<G3RsReleaseInputFailure>,
+) -> ReleasePlzParse {
     let rel_path = "release-plz.toml".to_owned();
     let Some(entry) = crate::select::select_release_plz_toml(crawl) else {
         return (false, rel_path, None, BTreeSet::new());
@@ -57,10 +64,11 @@ pub(super) fn parse_release_plz(
     }
 }
 
+/// `parse_cliff` function.
 pub(super) fn parse_cliff(
     crawl: &G3RsWorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
-) -> (bool, String, Option<cliff_toml_parser::types::CliffToml>) {
+) -> CliffParse {
     let rel_path = "cliff.toml".to_owned();
     let Some(entry) = crate::select::select_cliff_toml(crawl) else {
         return (false, rel_path, None);
@@ -94,6 +102,7 @@ pub(super) fn parse_cliff(
     }
 }
 
+/// `collect_workflows` function.
 pub(super) fn collect_workflows(
     crawl: &G3RsWorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
@@ -135,6 +144,7 @@ pub(super) fn collect_workflows(
     workflows
 }
 
+/// `tool_is_available` function.
 pub(super) fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
     let Some(path_env) = path_env else {
         return false;
@@ -160,6 +170,11 @@ pub(super) fn tool_is_available(tool: &str, path_env: Option<&OsStr>) -> bool {
     })
 }
 
+/// `run_publish_dry_run` function.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "repo.rs is the centralized process boundary for invoking cargo from release ingestion"
+)]
 pub(super) fn run_publish_dry_run(manifest_path: &Path) -> G3RsReleaseDryRunOutcome {
     let manifest_dir = manifest_path.parent().unwrap_or_else(|| Path::new("."));
     let manifest_name = manifest_path

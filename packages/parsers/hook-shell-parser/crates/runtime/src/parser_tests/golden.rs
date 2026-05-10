@@ -32,10 +32,10 @@ guardrail3 rs validate --staged .
 #[test]
 fn extracts_wrapped_guardrail_command_from_if_block() {
     let parsed = parse_script(
-        r#"if ! guardrail3 rs validate --staged .; then
+        r"if ! guardrail3 rs validate --staged .; then
     exit 1
 fi
-"#,
+",
     );
 
     assert_script_matches(
@@ -342,8 +342,8 @@ fn strips_inline_comments_from_executable_commands() {
 #[test]
 fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
     let parsed = parse_script(
-        r#"echo \# g3rs validate --path .
-"#,
+        r"echo \# g3rs validate --path .
+",
     );
 
     assert_script_matches(
@@ -352,7 +352,7 @@ fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
             None,
             &[CommandExpectation::new(
                 "echo",
-                Some(r#"echo \# g3rs validate --path ."#),
+                Some(r"echo \# g3rs validate --path ."),
                 None,
                 None,
                 None,
@@ -365,8 +365,8 @@ fn preserves_escaped_hash_outside_quotes_in_executable_commands() {
 #[test]
 fn preserves_escaped_space_before_hash_outside_quotes_in_executable_commands() {
     let parsed = parse_script(
-        r#"echo foo\ # g3rs validate --path .
-"#,
+        r"echo foo\ # g3rs validate --path .
+",
     );
 
     assert_script_matches(
@@ -375,7 +375,7 @@ fn preserves_escaped_space_before_hash_outside_quotes_in_executable_commands() {
             None,
             &[CommandExpectation::new(
                 "echo",
-                Some(r#"echo foo\ # g3rs validate --path ."#),
+                Some(r"echo foo\ # g3rs validate --path ."),
                 None,
                 None,
                 None,

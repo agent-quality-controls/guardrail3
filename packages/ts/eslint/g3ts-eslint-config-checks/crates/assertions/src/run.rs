@@ -10,6 +10,10 @@ pub struct Finding<'a> {
     pub inventory: bool,
 }
 
+/// Fails the calling test when `results` does not contain every finding in `expected`.
+///
+/// # Panics
+/// Panics on missing expected finding, which the assertion treats as a test failure.
 pub fn assert_contains(results: &[G3CheckResult], expected: &[Finding<'_>]) {
     let actual = results
         .iter()
@@ -31,6 +35,10 @@ pub fn assert_contains(results: &[G3CheckResult], expected: &[Finding<'_>]) {
     }
 }
 
+/// Fails the calling test when `results` does not exactly match `expected` in content and order.
+///
+/// # Panics
+/// Panics on mismatch, which the assertion treats as a test failure.
 pub fn assert_exact(results: &[G3CheckResult], expected: &[Finding<'_>]) {
     let actual = results
         .iter()
@@ -47,11 +55,19 @@ pub fn assert_exact(results: &[G3CheckResult], expected: &[Finding<'_>]) {
     assert_eq!(actual, expected, "exact findings mismatch");
 }
 
+/// Fails the calling test when `results` ids do not match `expected` exactly and in order.
+///
+/// # Panics
+/// Panics on id mismatch, which the assertion treats as a test failure.
 pub fn assert_exact_ids(results: &[G3CheckResult], expected: &[&str]) {
     let actual = results.iter().map(G3CheckResult::id).collect::<Vec<_>>();
     assert_eq!(actual, expected, "exact finding id order mismatch");
 }
 
+/// Fails the calling test when `results` contains any finding with `id`.
+///
+/// # Panics
+/// Panics when matching findings are present, which the assertion treats as a test failure.
 pub fn assert_no_findings_for_id(results: &[G3CheckResult], id: &str) {
     let matching = results
         .iter()
@@ -64,7 +80,7 @@ pub fn assert_no_findings_for_id(results: &[G3CheckResult], id: &str) {
 }
 
 #[must_use]
-pub fn error<'a>(
+pub const fn error<'a>(
     id: &'a str,
     title: &'a str,
     message: &'a str,
@@ -82,7 +98,7 @@ pub fn error<'a>(
 }
 
 #[must_use]
-pub fn info<'a>(
+pub const fn info<'a>(
     id: &'a str,
     title: &'a str,
     message: &'a str,

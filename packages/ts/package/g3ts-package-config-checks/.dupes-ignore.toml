@@ -1,0 +1,27 @@
+[[ignore]]
+fingerprint = "81f82385d7f197f3"
+reason = "Parallel test cases for distinct check scenarios share validator contract structure by design (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "9c33782d97b364da"
+reason = "Single-line assertion entry-points for distinct check rules"
+
+[[ignore]]
+fingerprint = "10e788520f39a16a"
+reason = "Parallel single-finding-extraction helpers for distinct check rules"
+
+[[ignore]]
+fingerprint = "5d6fad465068ff54"
+reason = "Distinct fixture-construction test cases sharing inventory-assertion structure"
+
+[[ignore]]
+fingerprint = "98ab662ef1102f3d"
+reason = "Parallel severity-band assertion helpers"
+
+[[ignore]]
+fingerprint = "b9e3bc222f963cfb"
+reason = "Parallel closures over distinct severity bands"
+
+[[ignore]]
+fingerprint = "be3c7297fce07f17"
+reason = "Parallel scenario fixture builders sharing input-construction shape"

@@ -1,3 +1,4 @@
+/// Hook contract definition for the typecov hook.
 #[cfg(feature = "api")]
 mod contract;
 

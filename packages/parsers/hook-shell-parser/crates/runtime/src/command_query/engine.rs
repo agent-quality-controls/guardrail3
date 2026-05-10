@@ -1,3 +1,15 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    clippy::arithmetic_side_effects,
+    clippy::indexing_slicing,
+    clippy::excessive_nesting,
+    clippy::match_same_arms,
+    clippy::needless_pass_by_value,
+    reason = "engine.rs walks a parsed bash-like script using a single visitor; merging its per-shape branches into helpers would obscure the per-construct semantic decisions"
+)]
+
 use crate::types::ParsedShellScript;
 
 use super::{CommandQueryOptions, CommandVisit, ResolvedCommand, ShellEnvState};

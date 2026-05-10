@@ -1,13 +1,21 @@
 use g3ts_astro_seo_types::G3TsAstroSeoIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const SITEMAP_GENERATOR_ID: &str = "g3ts-astro-seo/sitemap-generator-package-present";
+/// Static rule data.
 const ROBOTS_GENERATOR_ID: &str = "g3ts-astro-seo/robots-generator-package-present";
+/// Static rule data.
 const SITEMAP_ID: &str = "g3ts-astro-seo/sitemap-auditor-package-present";
+/// Static rule data.
 const ROBOTS_ID: &str = "g3ts-astro-seo/robots-auditor-package-present";
+/// Static rule data.
 const LLMS_ID: &str = "g3ts-astro-seo/llms-auditor-package-present";
+/// Static rule data.
 const LLMS_GENERATOR_ID: &str = "g3ts-astro-seo/llms-generator-package-present";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -27,6 +35,7 @@ pub(crate) fn check(
     }
 }
 
+/// Internal helper used by the rule.
 fn check_required(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -35,14 +44,12 @@ fn check_required(
 ) {
     let rel_path = crate::support::package_rel_path(&contract.package);
     if crate::support::package_has_dependency(&contract.package, dependency_name) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                id,
-                "Astro site artifact package is present",
-                format!("`{rel_path}` lists `{dependency_name}`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            id,
+            "Astro site artifact package is present",
+            format!("`{rel_path}` lists `{dependency_name}`."),
+            rel_path,
+        ));
         return;
     }
 
@@ -50,6 +57,6 @@ fn check_required(
         id,
         "Astro site artifact package is missing",
         format!("This Astro app must list `{dependency_name}`."),
-        rel_path,
+        Some(rel_path),
     ));
 }

@@ -1,16 +1,22 @@
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 
+/// Alias for fallible normalization helpers returning member-rel strings.
+type StringVecResult = Result<Vec<String>, String>;
+
+/// select root cargo toml fn.
 pub(crate) fn select_root_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
+/// select root rust policy toml fn.
 pub(crate) fn select_root_rust_policy_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
+/// select member manifest fn.
 pub(crate) fn select_member_manifest<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     member_rel: &str,
@@ -20,10 +26,11 @@ pub(crate) fn select_member_manifest<'a>(
         .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
 }
 
+/// collect declared member rels fn.
 pub(crate) fn collect_declared_member_rels(
     crawl: &G3RsWorkspaceCrawl,
     root_raw: &toml::Value,
-) -> Result<Vec<String>, String> {
+) -> StringVecResult {
     let member_patterns = parse_string_array(
         root_raw
             .get("workspace")
@@ -61,6 +68,7 @@ pub(crate) fn collect_declared_member_rels(
     Ok(members.into_iter().collect())
 }
 
+/// workspace root kind fn.
 pub(crate) fn workspace_root_kind(
     root_raw: &toml::Value,
 ) -> g3rs_cargo_types::G3RsCargoPolicyRootKind {
@@ -73,7 +81,8 @@ pub(crate) fn workspace_root_kind(
     }
 }
 
-fn parse_string_array(value: Option<&toml::Value>, label: &str) -> Result<Vec<String>, String> {
+/// parse string array fn.
+fn parse_string_array(value: Option<&toml::Value>, label: &str) -> StringVecResult {
     let Some(value) = value else {
         return Ok(Vec::new());
     };
@@ -82,16 +91,16 @@ fn parse_string_array(value: Option<&toml::Value>, label: &str) -> Result<Vec<St
     };
     array
         .iter()
-        .map(|value| {
-            value
-                .as_str()
+        .map(|item| {
+            item.as_str()
                 .map(str::to_owned)
                 .ok_or_else(|| format!("{label} must contain only string entries."))
         })
         .collect()
 }
 
-fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> Result<Vec<String>, String> {
+/// expand member pattern fn.
+fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> StringVecResult {
     let normalized = normalize_member_rel(pattern);
     if looks_like_glob(&normalized) {
         let compiled = Pattern::new(&normalized)
@@ -109,10 +118,12 @@ fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> Result<Ve
     }
 }
 
+/// looks like glob fn.
 fn looks_like_glob(pattern: &str) -> bool {
     pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
 }
 
+/// normalize member rel fn.
 pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
     let stripped = trimmed
@@ -127,6 +138,7 @@ pub(crate) fn normalize_member_rel(pattern: &str) -> String {
     }
 }
 
+/// member manifest rel path fn.
 pub(crate) fn member_manifest_rel_path(member_rel: &str) -> String {
     if member_rel.is_empty() {
         "Cargo.toml".to_owned()

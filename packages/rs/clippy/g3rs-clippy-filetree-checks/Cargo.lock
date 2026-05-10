@@ -3,6 +3,52 @@
 version = 4
 
 [[package]]
+name = "cargo-config-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-config-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-config-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-runtime",
+]
+
+[[package]]
+name = "cargo-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "cargo-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "cargo-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "clippy-toml-parser"
 version = "0.1.0"
 dependencies = [
@@ -61,9 +107,10 @@ dependencies = [
 name = "g3rs-clippy-types"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
+ "cargo-toml-parser",
  "clippy-toml-parser",
  "guardrail3-rs-toml-parser",
- "toml",
 ]
 
 [[package]]

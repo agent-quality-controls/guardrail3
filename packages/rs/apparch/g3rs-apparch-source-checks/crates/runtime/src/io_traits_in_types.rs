@@ -3,8 +3,10 @@ use g3rs_apparch_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-apparch/io-traits-in-types";
 
+/// Pushes a violation when an io-port trait surfaces from a `*-types` package.
 pub(crate) fn check(
     input: &G3RsApparchIoTraitsSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
@@ -12,7 +14,7 @@ pub(crate) fn check(
     let krate = &input.krate;
     if !matches!(
         krate.layer,
-        Some(G3RsApparchLayer::IoInbound) | Some(G3RsApparchLayer::IoOutbound)
+        Some(G3RsApparchLayer::IoInbound | G3RsApparchLayer::IoOutbound)
     ) {
         return;
     }

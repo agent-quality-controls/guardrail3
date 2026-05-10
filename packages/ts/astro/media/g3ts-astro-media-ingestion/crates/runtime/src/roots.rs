@@ -7,6 +7,7 @@ use g3ts_astro_media_types::G3TsAstroPackageSurfaceState;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// `ROOT_ASTRO_CONFIGS` constant.
 const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.js",
     "astro.config.mjs",
@@ -17,6 +18,7 @@ const ROOT_ASTRO_CONFIGS: [&str; 6] = [
 ];
 
 #[must_use]
+/// `astro_app_roots`: astro app roots.
 pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
 
@@ -37,11 +39,13 @@ pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// `is_included_file`: is included file.
 pub(crate) fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
+/// `select_astro_config`: select astro config.
 pub(crate) fn select_astro_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -54,6 +58,7 @@ pub(crate) fn select_astro_config<'a>(
     })
 }
 
+/// `exact_included_file`: exact included file.
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,
@@ -65,6 +70,7 @@ fn exact_included_file<'crawl>(
     })
 }
 
+/// `root_astro_config_file`: root astro config file.
 fn root_astro_config_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -72,6 +78,7 @@ fn root_astro_config_file(rel_path: &str) -> bool {
         .is_some_and(|file_name| ROOT_ASTRO_CONFIGS.contains(&file_name))
 }
 
+/// `package_json_file`: package json file.
 fn package_json_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -79,6 +86,7 @@ fn package_json_file(rel_path: &str) -> bool {
         == Some("package.json")
 }
 
+/// `parent_rel_path`: parent rel path.
 fn parent_rel_path(rel_path: &str) -> String {
     Path::new(rel_path)
         .parent()
@@ -88,6 +96,7 @@ fn parent_rel_path(rel_path: &str) -> String {
         .to_owned()
 }
 
+/// `package_has_astro_dependency`: package has astro dependency.
 fn package_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {
     match package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => snapshot

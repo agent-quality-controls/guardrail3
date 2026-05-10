@@ -1,0 +1,115 @@
+[[ignore]]
+fingerprint = "425b55c60ce30e13"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "38144c4c7f19a88e"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "4fd5bc0505a590b7"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "6ce248c297fbd4af"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "7aecbd0765c3ae23"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "092dee7d31822b9c"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "21ca89ff911d45aa"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "4f77fed1c382597f"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "8b795824f24959cd"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "05da73b94fb9182e"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "1feec08fa4e92e83"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "23e495534f39a924"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "33d58022b2600386"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "35cf5714148d9358"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "451226c294d40b3e"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "55ec2f972b20f61b"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "70bd420f45d719d6"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "7c3ed55317e7b50f"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "7d46bc95a1d5ca54"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "a5ea6f1310790dec"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "b39ab26bb752143b"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "bcd8b797ef15187f"
+reason = "apparch rule families share a uniform test+helper layout per g3rs-test/runtime-assertions-split and g3rs-test/real-proof-site: each rule has its own crate_input/run_rule/assertion helpers and each #[test] is a separate proof site; per-rule duplication is structural and cannot be deduplicated without violating the one-helper-per-rule contract"
+
+[[ignore]]
+fingerprint = "c0e8ef5bd5e2c271"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "c35d2fdf77b1e63e"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "df3b1dfe155a4a06"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "e3aa76b6b96324f2"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "ed38fc96701d12f5"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "f6fa352780f6a2b6"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"
+
+[[ignore]]
+fingerprint = "fa8efff12e68a793"
+reason = "per-rule test helpers (input/closures) are isolated per g3rs-test/real-proof-site; they share fixture-build shape because each rule consumes the same G3RsApparchCrateDependencyChecksInput shape"

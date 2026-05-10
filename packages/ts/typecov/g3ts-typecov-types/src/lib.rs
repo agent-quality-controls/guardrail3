@@ -1,3 +1,4 @@
+/// Public type definitions for the typecov surface contract.
 #[cfg(feature = "api")]
 mod types;
 

@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "29c6bbb40196ca9b"
+reason = "g3rs-test/runtime-assertions-split: parallel typed-input getters per check input type"
+
+[[ignore]]
+fingerprint = "15454e94f5e4376a"
+reason = "g3rs-test/runtime-assertions-split: parallel rel_path/parsed getters across hook fact types"
+
+[[ignore]]
+fingerprint = "d0f576cb647a2aff"
+reason = "g3rs-test/runtime-assertions-split: parallel selected_hook / pre_commit / hooks_path getters"
+
+[[ignore]]
+fingerprint = "1262aa476eb7d129"
+reason = "g3rs-test/runtime-assertions-split: parallel none()/all() constructors on EnabledCategories"
+
+[[ignore]]
+fingerprint = "9cc08286a1028dc3"
+reason = "g3rs-test/runtime-assertions-split: parallel replace_requirements getters on config/source checks input types"

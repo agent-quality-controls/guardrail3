@@ -7,8 +7,10 @@ use crate::support::{
     member_override_lints, member_override_lints_state, policy_override_lints,
 };
 
+/// I D const.
 const ID: &str = "g3rs-cargo/no-weakened-overrides";
 
+/// check fn.
 pub(crate) fn check(
     root: &G3RsCargoPolicyRoot,
     member: &G3RsCargoWorkspaceMember,
@@ -26,33 +28,33 @@ pub(crate) fn check(
     let workspace_policy_complete =
         workspace_rust_lints.is_some() && workspace_clippy_lints.is_some();
 
-    let mut violations = 0usize;
-    violations += check_family_shape(
+    let mut violations: usize = 0;
+    violations = violations.saturating_add(check_family_shape(
         &member.cargo_rel_path,
         "rust",
         member_override_lints_state(member, "rust"),
         results,
-    );
-    violations += check_family_shape(
+    ));
+    violations = violations.saturating_add(check_family_shape(
         &member.cargo_rel_path,
         "clippy",
         member_override_lints_state(member, "clippy"),
         results,
-    );
-    violations += check_family(
+    ));
+    violations = violations.saturating_add(check_family(
         &member.cargo_rel_path,
         "rust",
         workspace_rust_lints,
         member_override_lints(member, "rust"),
         results,
-    );
-    violations += check_family(
+    ));
+    violations = violations.saturating_add(check_family(
         &member.cargo_rel_path,
         "clippy",
         workspace_clippy_lints,
         member_override_lints(member, "clippy"),
         results,
-    );
+    ));
 
     if violations == 0 && workspace_policy_complete {
         results.push(crate::support::info(
@@ -67,6 +69,7 @@ pub(crate) fn check(
     }
 }
 
+/// check family shape fn.
 fn check_family_shape(
     file: &str,
     family: &str,
@@ -87,6 +90,7 @@ fn check_family_shape(
     1
 }
 
+/// check family fn.
 fn check_family(
     file: &str,
     family: &str,
@@ -100,7 +104,7 @@ fn check_family(
     let mut violations = 0usize;
     for (lint_name, member_value) in member_lints {
         let Some(member_level) = lint_level_for_name(member_lints, lint_name) else {
-            violations += 1;
+            violations = violations.saturating_add(1);
             results.push(crate::support::error(
                 ID,
                 format!("invalid member {family} override"),
@@ -112,7 +116,7 @@ fn check_family(
             continue;
         };
         if !has_valid_lint_level(member_value) || !is_valid_lint_level(member_level.as_str()) {
-            violations += 1;
+            violations = violations.saturating_add(1);
             results.push(crate::support::error(
                 ID,
                 format!("invalid member {family} override"),
@@ -128,7 +132,7 @@ fn check_family(
         };
 
         if is_weaker(workspace_level.as_str(), member_level.as_str()) {
-            violations += 1;
+            violations = violations.saturating_add(1);
             results.push(crate::support::error(
                 ID,
                 format!("weakened member {family} override"),

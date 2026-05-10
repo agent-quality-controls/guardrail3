@@ -15,7 +15,7 @@ fn warns_when_additional_bans_missing() {
 
     assertions::assert_contains(
         &results,
-        assertions::warn(
+        &assertions::warn(
             "missing additional garde method bans",
             "Missing additional deserialization bans from `disallowed-methods`: serde_qs::from_bytes. Add these entries to `disallowed-methods` in clippy.toml.",
             "clippy.toml",

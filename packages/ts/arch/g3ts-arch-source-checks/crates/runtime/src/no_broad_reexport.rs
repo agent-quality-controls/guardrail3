@@ -1,8 +1,10 @@
 use g3ts_arch_types::{G3TsArchFacadeFileState, G3TsArchSourceChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable identifier for the no-broad-reexport rule.
 const ID: &str = "g3ts-arch/no-broad-reexport";
 
+/// Flags facade files that re-export the entire package surface.
 pub(crate) fn check(input: &G3TsArchSourceChecksInput, results: &mut Vec<G3CheckResult>) {
     for facade in &input.facades {
         let G3TsArchFacadeFileState::Parsed { surface } = facade else {

@@ -1,5 +1,10 @@
+//! Reason policy validation primitives shared across guardrail3 families.
+
+/// Reason validation issue variants surfaced to callers.
 mod issue;
+/// Reason policy configuration values and defaults.
 mod policy;
+/// Reason text validation against the active policy.
 mod validation;
 
 #[cfg(feature = "api")]

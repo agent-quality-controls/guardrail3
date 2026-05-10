@@ -1,3 +1,4 @@
+/// `active_error_rules` helper.
 pub(crate) fn active_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -13,6 +14,7 @@ pub(crate) fn active_error_rules(
     })
 }
 
+/// `active_warn_or_error_rules` helper.
 pub(crate) fn active_warn_or_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -28,6 +30,7 @@ pub(crate) fn active_warn_or_error_rules(
     })
 }
 
+/// `restricted_disable_patterns` helper.
 pub(crate) fn restricted_disable_patterns(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -53,6 +56,7 @@ pub(crate) fn restricted_disable_patterns(
         .collect()
 }
 
+/// `unused_disable_fail_closed` helper.
 pub(crate) fn unused_disable_fail_closed(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> bool {

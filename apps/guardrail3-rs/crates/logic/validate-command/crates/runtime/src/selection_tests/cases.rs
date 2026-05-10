@@ -11,6 +11,8 @@ fn selected_families_follow_canonical_order() {
             SupportedFamily::Toolchain,
         ],
         include_inventory: false,
+        staged: false,
+        rules_only: true,
     };
 
     assertions::assert_selected_families(

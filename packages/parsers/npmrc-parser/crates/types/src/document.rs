@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "parser document model types intentionally include the parser domain (Npmrc) and document role"
+)]
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NpmrcDocument {
     pub raw: String,

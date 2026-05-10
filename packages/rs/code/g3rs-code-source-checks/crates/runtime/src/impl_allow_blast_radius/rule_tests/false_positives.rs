@@ -2,7 +2,7 @@ use g3rs_code_source_checks_assertions::impl_allow_blast_radius::rule::assert_ru
 
 #[test]
 fn skips_threshold_and_method_level_cases() {
-    let threshold = r#"
+    let threshold = r"
 struct Foo;
 #[allow(clippy::too_many_lines)]
 impl Foo {
@@ -10,8 +10,8 @@ impl Foo {
     fn b(&self) {}
     fn c(&self) {}
 }
-"#;
-    let method_level = r#"
+";
+    let method_level = r"
 struct Foo;
 impl Foo {
     #[allow(clippy::too_many_lines)]
@@ -20,7 +20,7 @@ impl Foo {
     fn c(&self) {}
     fn d(&self) {}
 }
-"#;
+";
 
     assert_rule_results(
         &super::super::check_source("src/foo.rs", threshold, false),

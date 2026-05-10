@@ -3,9 +3,12 @@ use g3ts_astro_media_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `STRICT_ID`.
 const STRICT_ID: &str = "g3ts-astro-media/strict-policy-configured";
+/// Internal constant `PATHS_ID`.
 const PATHS_ID: &str = "g3ts-astro-media/policy-paths-valid";
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroMediaIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -16,10 +19,9 @@ pub(crate) fn check(
             STRICT_ID,
             "Astro media strict policy is missing",
             format!(
-                "`{}` must define `[ts.astro.media]` with explicit `favicon`, `app_icons`, `default_social_image`, `allow_svg_icons`, `public_source_globs`, `media_helper_modules`, `approved_media_helpers`, `content_image_components`, `content_image_key_props`, `banned_image_source_props`, `banned_image_alt_props`, `allowed_public_image_paths`, `checked_image_extensions`, and `metadata_image_property_names`. G3TS does not invent media defaults.",
-                rel_path.unwrap_or("guardrail3-ts.toml")
+                "`{rel_path}` must define `[ts.astro.media]` with explicit `favicon`, `app_icons`, `default_social_image`, `allow_svg_icons`, `public_source_globs`, `media_helper_modules`, `approved_media_helpers`, `content_image_components`, `content_image_key_props`, `banned_image_source_props`, `banned_image_alt_props`, `allowed_public_image_paths`, `checked_image_extensions`, and `metadata_image_property_names`. G3TS does not invent media defaults."
             ),
-            rel_path,
+            Some(rel_path),
         ));
         return;
     };
@@ -28,6 +30,7 @@ pub(crate) fn check(
     check_paths(policy, results);
 }
 
+/// Internal function `check_required_fields`.
 fn check_required_fields(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let missing = missing_fields(policy);
     if missing.is_empty() && policy.extra_fields.is_empty() {
@@ -72,6 +75,7 @@ fn check_required_fields(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Ve
     ));
 }
 
+/// Internal function `missing_fields`.
 fn missing_fields(policy: &G3TsAstroMediaPolicySnapshot) -> Vec<&'static str> {
     let mut missing = Vec::new();
     if policy.favicon.trim().is_empty() {
@@ -119,10 +123,12 @@ fn missing_fields(policy: &G3TsAstroMediaPolicySnapshot) -> Vec<&'static str> {
     missing
 }
 
+/// Internal function `has_empty_value`.
 fn has_empty_value(values: &[String]) -> bool {
     values.is_empty() || values.iter().any(|value| value.trim().is_empty())
 }
 
+/// Internal function `check_paths`.
 fn check_paths(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let invalid = policy
         .app_icons
@@ -178,6 +184,7 @@ fn check_paths(policy: &G3TsAstroMediaPolicySnapshot, results: &mut Vec<G3CheckR
     ));
 }
 
+/// Internal function `invalid_output_asset_path`.
 fn invalid_output_asset_path(path: &str) -> bool {
     let trimmed = path.trim();
     invalid_common_path(trimmed)
@@ -186,11 +193,13 @@ fn invalid_output_asset_path(path: &str) -> bool {
         || external_url(trimmed)
 }
 
+/// Internal function `invalid_app_relative_path`.
 fn invalid_app_relative_path(path: &str) -> bool {
     let trimmed = path.trim();
     invalid_common_path(trimmed) || trimmed.starts_with('/') || external_url(trimmed)
 }
 
+/// Internal function `invalid_common_path`.
 fn invalid_common_path(path: &str) -> bool {
     path.is_empty()
         || path.contains('\\')
@@ -200,6 +209,7 @@ fn invalid_common_path(path: &str) -> bool {
         || path.split('/').any(|part| part == "..")
 }
 
+/// Internal function `has_encoded_parent_segment`.
 fn has_encoded_parent_segment(path: &str) -> bool {
     path.split('/').any(|part| {
         let lower = part.to_ascii_lowercase();
@@ -207,6 +217,7 @@ fn has_encoded_parent_segment(path: &str) -> bool {
     })
 }
 
+/// Internal function `external_url`.
 fn external_url(path: &str) -> bool {
     path.contains("://")
         || path.split_once(':').is_some_and(|(scheme, _)| {

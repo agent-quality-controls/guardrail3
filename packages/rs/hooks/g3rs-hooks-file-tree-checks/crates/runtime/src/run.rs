@@ -1,6 +1,7 @@
 use g3rs_hooks_types::G3RsHooksFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsHooksFileTreeChecksInput) -> Vec<G3CheckResult> {
     if !input.active {
         return Vec::new();

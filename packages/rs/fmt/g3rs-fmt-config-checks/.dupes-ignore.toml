@@ -1,0 +1,39 @@
+[[ignore]]
+fingerprint = "2f56a9ecd235de28"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "b071703ff315129c"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "f2b13ad7fb4a02bc"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "801a6317a78ef308"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "3b7a3a02062c06ee"
+reason = "Parallel rule helpers (check_string/check_int/check_bool) by value type"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "2508e0aaed717f19"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "a20b4faf6a33c716"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "bd7eae568fa45232"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "c9ecfd790d79e25a"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"

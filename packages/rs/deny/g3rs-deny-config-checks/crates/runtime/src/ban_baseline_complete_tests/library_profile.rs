@@ -7,7 +7,7 @@ use super::helpers;
 #[test]
 fn stays_quiet_for_canonical_library_bans() {
     let results = run(
-        &helpers::library_canonical_bans_toml(),
+        helpers::library_canonical_bans_toml(),
         Some(guardrail3_rs_toml_parser::types::RustProfile::Library),
         true,
         crate::ban_baseline_complete::check,

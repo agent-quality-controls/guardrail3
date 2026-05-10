@@ -1,3 +1,8 @@
+/// Assert a non-inventory finding with the given id is present.
+///
+/// # Panics
+///
+/// Panics if no matching error finding is present in `results`.
 pub fn assert_has_error(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results
@@ -7,6 +12,11 @@ pub fn assert_has_error(results: &[guardrail3_check_types::G3CheckResult], id: &
     );
 }
 
+/// Assert an inventory finding with the given id is present.
+///
+/// # Panics
+///
+/// Panics if no matching inventory finding is present in `results`.
 pub fn assert_has_inventory(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results
@@ -16,6 +26,11 @@ pub fn assert_has_inventory(results: &[guardrail3_check_types::G3CheckResult], i
     );
 }
 
+/// Assert no finding with the given id is present.
+///
+/// # Panics
+///
+/// Panics if any finding in `results` has the given id.
 pub fn assert_missing(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results.iter().all(|result| result.id() != id),

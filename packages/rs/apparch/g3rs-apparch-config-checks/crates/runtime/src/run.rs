@@ -2,6 +2,7 @@ use g3rs_apparch_types::G3RsApparchConfigChecksInput;
 use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer};
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsApparchConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
@@ -31,7 +32,7 @@ pub(crate) fn display_crate(krate: &G3RsApparchCrate) -> &str {
     }
 }
 
-pub(crate) fn layer_label(layer: G3RsApparchLayer) -> &'static str {
+pub(crate) const fn layer_label(layer: G3RsApparchLayer) -> &'static str {
     match layer {
         G3RsApparchLayer::Types => "types",
         G3RsApparchLayer::Logic => "logic",
@@ -40,7 +41,7 @@ pub(crate) fn layer_label(layer: G3RsApparchLayer) -> &'static str {
     }
 }
 
-pub(crate) fn forbidden_runtime_dependency(
+pub(crate) const fn forbidden_runtime_dependency(
     source_layer: G3RsApparchLayer,
     target_layer: G3RsApparchLayer,
 ) -> bool {

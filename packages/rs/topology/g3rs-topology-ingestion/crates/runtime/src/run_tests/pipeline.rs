@@ -1,3 +1,7 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures must use std::fs and std::process::Command directly to seed and tear down filesystem state"
+)]
 use std::fs;
 
 use g3rs_topology_file_tree_checks::check;

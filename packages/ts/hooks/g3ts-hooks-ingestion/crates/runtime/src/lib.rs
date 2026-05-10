@@ -1,5 +1,8 @@
+/// Internal module `fs`.
 mod fs;
+/// Internal module `process`.
 mod process;
+/// Internal module `run`.
 mod run;
 
 #[cfg(feature = "api")]

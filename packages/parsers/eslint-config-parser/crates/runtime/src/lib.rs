@@ -1,5 +1,8 @@
+/// Document accessors that wrap a parsed `ESLint` config document.
 mod document;
+/// Error types returned by the `ESLint` config parser runtime.
 mod error;
+/// Parser entry points that turn `ESLint` config input into a typed document.
 mod parser;
 
 #[cfg(feature = "api")]

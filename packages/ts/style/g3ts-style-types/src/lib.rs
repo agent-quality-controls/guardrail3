@@ -1,3 +1,6 @@
+//! Shared types for g3ts style hooks.
+
+/// Public input/state/snapshot types for the style check family.
 #[cfg(feature = "api")]
 mod types;
 

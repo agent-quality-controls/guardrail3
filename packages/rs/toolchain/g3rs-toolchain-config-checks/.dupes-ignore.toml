@@ -1,0 +1,15 @@
+[[ignore]]
+fingerprint = "fd082d0a62e50265"
+reason = "Pre-existing test body duplication; parameterization conflicts with inline_test_bodies rule"
+
+[[ignore]]
+fingerprint = "a6ad32684b2e026c"
+reason = "Test fixtures share assertion shape; parameterization would violate inline_test_bodies"
+
+[[ignore]]
+fingerprint = "47178a3282f19b42"
+reason = "Test fixtures share assertion shape"
+
+[[ignore]]
+fingerprint = "674f92506be74c1b"
+reason = "sort_by closure pattern repeated for test ergonomics"

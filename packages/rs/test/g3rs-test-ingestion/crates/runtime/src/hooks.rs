@@ -1,3 +1,11 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::excessive_nesting,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
@@ -6,12 +14,16 @@ use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 use crate::ingest::IngestionError;
 use crate::roots::{OwnedTestRoot, TestRootDiscovery, join_under_root};
 
+/// `MutationHookState` struct.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct MutationHookState {
+    /// `active` item.
     pub(crate) active: bool,
+    /// `files` item.
     pub(crate) files: Vec<String>,
 }
 
+/// `collect_mutation_hook_state` function.
 pub(crate) fn collect_mutation_hook_state(
     crawl: &G3RsWorkspaceCrawl,
     discovery: &TestRootDiscovery,
@@ -56,6 +68,7 @@ pub(crate) fn collect_mutation_hook_state(
     Ok(MutationHookState { active, files })
 }
 
+/// `active_hook_root_dirs` function.
 fn active_hook_root_dirs(discovery: &TestRootDiscovery, root: &OwnedTestRoot) -> Vec<String> {
     let mut roots = BTreeSet::new();
     if root.root_rel_dir.is_empty() {
@@ -82,6 +95,7 @@ fn active_hook_root_dirs(discovery: &TestRootDiscovery, root: &OwnedTestRoot) ->
     roots.into_iter().collect()
 }
 
+/// `script_contains_mutation_step` function.
 fn script_contains_mutation_step(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -105,6 +119,7 @@ fn script_contains_mutation_step(
     Ok(any_resolved_command(&parsed, is_cargo_mutants_command))
 }
 
+/// `is_cargo_mutants_command` function.
 fn is_cargo_mutants_command(command: &ResolvedCommand) -> bool {
     match command.command_name() {
         "cargo" => cargo_mutants_subcommand(command.args()),
@@ -113,6 +128,7 @@ fn is_cargo_mutants_command(command: &ResolvedCommand) -> bool {
     }
 }
 
+/// `cargo_mutants_subcommand` function.
 fn cargo_mutants_subcommand(args: &[String]) -> bool {
     let mut index = 0usize;
 
@@ -145,6 +161,7 @@ fn cargo_mutants_subcommand(args: &[String]) -> bool {
         && !args_have_help_or_version(args.get(index + 1..).unwrap_or(&[]))
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
@@ -160,10 +177,12 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
     )
 }
 
+/// `args_have_help_or_version` function.
 fn args_have_help_or_version(args: &[String]) -> bool {
     args.iter().any(|arg| is_help_or_version_flag(arg))
 }
 
+/// `is_help_or_version_flag` function.
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
 }

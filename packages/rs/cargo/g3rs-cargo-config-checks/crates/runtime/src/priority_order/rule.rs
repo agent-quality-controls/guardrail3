@@ -6,8 +6,10 @@ use crate::support::{
     warn,
 };
 
+/// I D const.
 const ID: &str = "g3rs-cargo/priority-order";
 
+/// check fn.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     if matches!(cargo_role(cargo), CargoRole::Other) {
         return;
@@ -20,7 +22,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
     let mut violations = 0usize;
     for lint_name in EXPECTED_CLIPPY_DENY {
         if lint_priority(clippy_lints, lint_name).is_some_and(|priority| priority < 0) {
-            violations += 1;
+            violations = violations.saturating_add(1);
             results.push(warn(
                 ID,
                 format!("specific lint `{lint_name}` has negative priority"),

@@ -1,6 +1,12 @@
 use crate::ReasonIssue;
 use crate::ReasonPolicy;
 
+#[cfg(test)]
+pub(super) use crate::policy::DEFAULT_MIN_REASON_CHARS;
+#[cfg(test)]
+pub(super) use crate::policy::DEFAULT_MIN_REASON_WORDS;
+
+/// Lowercased phrases treated as non-informative reason placeholders.
 const PLACEHOLDERS: &[&str] = &[
     "ok",
     "okay",
@@ -23,10 +29,18 @@ const PLACEHOLDERS: &[&str] = &[
     "...",
 ];
 
+/// Validates `reason` against the default reason policy.
+///
+/// # Errors
+/// Returns the first [`ReasonIssue`] detected in `reason` under the default policy.
 pub fn validate_reason_text(reason: &str) -> Result<(), ReasonIssue> {
     validate_reason_text_with_policy(reason, ReasonPolicy::default())
 }
 
+/// Validates `reason` against the supplied [`ReasonPolicy`].
+///
+/// # Errors
+/// Returns the first [`ReasonIssue`] detected in `reason` under `policy`.
 pub fn validate_reason_text_with_policy(
     reason: &str,
     policy: ReasonPolicy,
@@ -60,6 +74,7 @@ pub fn validate_reason_text_with_policy(
     Ok(())
 }
 
+/// Returns `true` when `reason` passes the default reason policy.
 #[must_use]
 pub fn reason_text_is_useful(reason: &str) -> bool {
     validate_reason_text(reason).is_ok()

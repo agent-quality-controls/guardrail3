@@ -1,8 +1,10 @@
 use g3rs_release_types::G3RsReleaseFileTreeRepo;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3rs-release/release-plz-exists";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckResult>) {
     if repo.publishable_count == 0 {
         return;

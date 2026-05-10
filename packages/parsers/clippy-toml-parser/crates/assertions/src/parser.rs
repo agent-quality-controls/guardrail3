@@ -2,6 +2,7 @@
     clippy::expect_used,
     clippy::missing_const_for_fn,
     clippy::missing_panics_doc,
+    clippy::panic,
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
@@ -123,8 +124,7 @@ pub fn assert_first_detailed_method(
     allow_invalid: Option<bool>,
 ) {
     let Some(DisallowedPath::Detailed(detail)) = cfg.disallowed_methods.first() else {
-        assert!(false, "first disallowed method should be detailed");
-        return;
+        panic!("first disallowed method should be detailed");
     };
 
     assert_eq!(detail.path, path, "ban path mismatch");
@@ -147,8 +147,7 @@ pub fn assert_first_detailed_field(
     allow_invalid: Option<bool>,
 ) {
     let Some(DisallowedField::Detailed(detail)) = cfg.disallowed_fields.first() else {
-        assert!(false, "disallowed field should be detailed");
-        return;
+        panic!("disallowed field should be detailed");
     };
 
     assert_eq!(detail.path, path, "field path mismatch");

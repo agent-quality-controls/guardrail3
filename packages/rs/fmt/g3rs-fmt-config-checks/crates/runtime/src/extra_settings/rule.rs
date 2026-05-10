@@ -5,8 +5,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::rustfmt;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-fmt/rustfmt-extra-settings-inventory";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(_rustfmt) = rustfmt(input) else {
         return;
@@ -32,6 +34,7 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
     }
 }
 
+/// Implements `expected keys`.
 fn expected_keys() -> BTreeSet<&'static str> {
     [
         "edition",

@@ -2,10 +2,17 @@ use g3ts_style_types::G3TsStyleContractInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use std::collections::BTreeSet;
 
-const REQUIRED_SYNCPACK_PINS: [(&str, &str); 1] =
-    [("g3ts-eslint-plugin-style-policy", "0.1.3")];
+/// `REQUIRED_SYNCPACK_PINS` constant.
+#[expect(
+    clippy::type_complexity,
+    reason = "Compile-time tuple table of (package_name, pinned_version); decomposing into \
+              named types would not add clarity for a one-entry array"
+)]
+const REQUIRED_SYNCPACK_PINS: [(&str, &str); 1] = [("g3ts-eslint-plugin-style-policy", "0.1.3")];
+/// `PIN_DEPENDENCY_TYPES` constant.
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
 
+/// `check_syncpack_style_policy_pin`: check syncpack style policy pin.
 pub(crate) fn check_syncpack_style_policy_pin(
     contract: &G3TsStyleContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -63,6 +70,7 @@ pub(crate) fn check_syncpack_style_policy_pin(
     }
 }
 
+/// `missing_required_pins`: missing required pins.
 fn missing_required_pins(
     snapshot: &g3ts_style_types::G3TsStyleSyncpackSnapshot,
 ) -> Vec<g3ts_style_types::G3TsStyleSyncpackRequiredPin> {
@@ -76,13 +84,16 @@ fn missing_required_pins(
                 &PIN_DEPENDENCY_TYPES,
             )
         })
-        .map(|(dependency, version)| g3ts_style_types::G3TsStyleSyncpackRequiredPin {
-            dependency: (*dependency).to_owned(),
-            version: (*version).to_owned(),
-        })
+        .map(
+            |(dependency, version)| g3ts_style_types::G3TsStyleSyncpackRequiredPin {
+                dependency: (*dependency).to_owned(),
+                version: (*version).to_owned(),
+            },
+        )
         .collect()
 }
 
+/// `package_rel_path`: package rel path.
 fn package_rel_path(contract: &G3TsStyleContractInput) -> String {
     match &contract.package {
         g3ts_style_types::G3TsStylePackageSurfaceState::Missing { rel_path }
@@ -96,6 +107,7 @@ fn package_rel_path(contract: &G3TsStyleContractInput) -> String {
     }
 }
 
+/// `syncpack_source_covers_package`: syncpack source covers package.
 fn syncpack_source_covers_package(
     source: &[String],
     syncpack_rel_path: &str,
@@ -106,6 +118,7 @@ fn syncpack_source_covers_package(
         && syncpack_config_is_app_local(syncpack_rel_path, package_rel_path)
 }
 
+/// `has_one_canonical_pin_group`: has one canonical pin group.
 fn has_one_canonical_pin_group(
     version_groups: &[g3ts_style_types::G3TsStyleSyncpackVersionGroupSnapshot],
     dependency: &str,
@@ -123,6 +136,7 @@ fn has_one_canonical_pin_group(
     matching_groups.next().is_none() && canonical_pin_group(group, version, dependency_types)
 }
 
+/// `group_targets_dependency`: group targets dependency.
 fn group_targets_dependency(
     group: &g3ts_style_types::G3TsStyleSyncpackVersionGroupSnapshot,
     dependency: &str,
@@ -130,6 +144,7 @@ fn group_targets_dependency(
     string_sets_match_exactly(&group.dependencies, &[dependency])
 }
 
+/// `canonical_pin_group`: canonical pin group.
 fn canonical_pin_group(
     group: &g3ts_style_types::G3TsStyleSyncpackVersionGroupSnapshot,
     version: &str,
@@ -143,12 +158,14 @@ fn canonical_pin_group(
         && group.pin_version.as_deref() == Some(version)
 }
 
+/// `string_sets_match_exactly`: string sets match exactly.
 fn string_sets_match_exactly(left: &[String], right: &[&str]) -> bool {
     left.len() == right.len()
-        && BTreeSet::from_iter(left.iter().map(String::as_str))
-            == BTreeSet::from_iter(right.iter().copied())
+        && left.iter().map(String::as_str).collect::<BTreeSet<_>>()
+            == right.iter().copied().collect::<BTreeSet<_>>()
 }
 
+/// `syncpack_config_is_app_local`: syncpack config is app local.
 fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
     let expected_rel_path = package_rel_path.strip_suffix("/package.json").map_or_else(
         || ".syncpackrc".to_owned(),
@@ -158,7 +175,8 @@ fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str)
     syncpack_rel_path == expected_rel_path
 }
 
-fn parsed_syncpack(
+/// `parsed_syncpack`: parsed syncpack.
+const fn parsed_syncpack(
     config: &g3ts_style_types::G3TsStyleSyncpackSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStyleSyncpackSnapshot> {
     match config {
@@ -169,6 +187,13 @@ fn parsed_syncpack(
     }
 }
 
+/// `syncpack_rel_path`: syncpack rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn syncpack_rel_path(config: &g3ts_style_types::G3TsStyleSyncpackSurfaceState) -> Option<&str> {
     match config {
         g3ts_style_types::G3TsStyleSyncpackSurfaceState::Missing { rel_path }
@@ -182,6 +207,7 @@ fn syncpack_rel_path(config: &g3ts_style_types::G3TsStyleSyncpackSurfaceState) -
     }
 }
 
+/// `info`: info.
 fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -194,6 +220,7 @@ fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckRe
     .into_inventory()
 }
 
+/// `error`: error.
 fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

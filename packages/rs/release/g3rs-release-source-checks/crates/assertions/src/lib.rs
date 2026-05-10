@@ -1,3 +1,6 @@
+use g3rs_release_source_checks_runtime as _;
+
+/// Shared assertion helpers and macros.
 mod common;
 
 #[cfg(feature = "checks")]

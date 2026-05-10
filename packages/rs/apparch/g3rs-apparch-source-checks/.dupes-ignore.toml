@@ -1,0 +1,31 @@
+[[ignore]]
+fingerprint = "d3a1aca36a5051d9"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "23e495534f39a924"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "80c6a11079a37a43"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "b395a469695a28d3"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "c35d2fdf77b1e63e"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "c39d9bb6edec1fdd"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "ee9a3888d158bee5"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"
+
+[[ignore]]
+fingerprint = "fab4fad0fc7bb1b7"
+reason = "g3rs-apparch source-check rules and their tests share rule-emission shape; each #[test] proves a different rule path and the per-rule helpers mirror that shape on the assertion side"

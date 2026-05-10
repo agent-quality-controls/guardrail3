@@ -11,7 +11,7 @@ fn inventories_when_all_core_bans_present() {
 
     assertions::assert_contains(
         &results,
-        assertions::info(
+        &assertions::info(
             "core garde method bans present",
             "All core serde/toml/yaml deserialization bans are present in the covering clippy configuration.",
             "clippy.toml",

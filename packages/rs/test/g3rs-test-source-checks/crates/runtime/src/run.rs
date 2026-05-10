@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use g3rs_test_types::{G3RsTestFileKind, G3RsTestSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsTestSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 

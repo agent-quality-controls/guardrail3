@@ -1,9 +1,15 @@
+#[must_use]
 pub fn check(
     input: &g3rs_test_types::G3RsTestFileTreeChecksInput,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
     g3rs_test_file_tree_checks_runtime::check(input)
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_result(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,
@@ -24,6 +30,11 @@ pub fn assert_has_result(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_inventory(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,

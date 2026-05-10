@@ -30,6 +30,11 @@ pub fn assert_library_profile_warning(results: &[guardrail3_check_types::G3Check
     );
 }
 
+/// Assert that the result set contains the cargo-config-override parse-error finding.
+///
+/// # Panics
+///
+/// Panics when no matching finding is present.
 pub fn assert_override_surface_parse_error(results: &[guardrail3_check_types::G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -53,6 +58,11 @@ pub fn assert_config_parse_error_contains(
     );
 }
 
+/// Assert the input snapshot has exactly one waiver matching the expected fields.
+///
+/// # Panics
+///
+/// Panics when the waivers vec is not length 1 or any field mismatches.
 pub fn assert_single_waiver(
     input: &g3rs_clippy_types::G3RsClippyConfigChecksInput,
     rule: &str,
@@ -61,8 +71,11 @@ pub fn assert_single_waiver(
     reason: &str,
 ) {
     assert_eq!(input.waivers.len(), 1, "{input:#?}");
-    assert_eq!(input.waivers[0].rule, rule, "{input:#?}");
-    assert_eq!(input.waivers[0].file, file, "{input:#?}");
-    assert_eq!(input.waivers[0].selector, selector, "{input:#?}");
-    assert_eq!(input.waivers[0].reason, reason, "{input:#?}");
+    let [waiver] = input.waivers.as_slice() else {
+        return;
+    };
+    assert_eq!(waiver.rule, rule, "{input:#?}");
+    assert_eq!(waiver.file, file, "{input:#?}");
+    assert_eq!(waiver.selector, selector, "{input:#?}");
+    assert_eq!(waiver.reason, reason, "{input:#?}");
 }

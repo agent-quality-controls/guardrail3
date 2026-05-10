@@ -13,7 +13,7 @@ fn run_dispatches_prebound_source_inputs() {
         io_traits_checks: vec![G3RsApparchIoTraitsSourceChecksInput {
             krate: io_crate.clone(),
             public_traits: vec![G3RsApparchPublicItem {
-                cargo_rel_path: io_crate.cargo_rel_path.clone(),
+                cargo_rel_path: io_crate.cargo_rel_path,
                 rel_path: "io/outbound/db/src/lib.rs".to_owned(),
                 item_name: "DbPort".to_owned(),
                 owner_name: None,
@@ -23,7 +23,7 @@ fn run_dispatches_prebound_source_inputs() {
         types_public_surface_checks: vec![G3RsApparchTypesPublicSurfaceChecksInput {
             krate: types_crate.clone(),
             public_behavior_items: vec![G3RsApparchPublicItem {
-                cargo_rel_path: types_crate.cargo_rel_path.clone(),
+                cargo_rel_path: types_crate.cargo_rel_path,
                 rel_path: "types/contracts/src/lib.rs".to_owned(),
                 item_name: "choose_retry_strategy".to_owned(),
                 owner_name: None,

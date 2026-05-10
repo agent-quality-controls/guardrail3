@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "6d9761ec83f8c4a4"
+reason = "Parallel happy-path and parse-error ingestion test cases share fixture-build/crawl/assert structure by design (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "8a6dd3f734acfac5"
+reason = "Parallel not-package-manager-root and missing test cases share fixture-build/crawl/assert structure by design (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "a073bfa30bebaec6"
+reason = "Parallel single-line assertion wrappers around assert_root_kind for two distinct expected variants"
+
+[[ignore]]
+fingerprint = "0cd8e180375bd6b7"
+reason = "Parallel happy-path and parse-error ingestion test cases share fixture-build/crawl/assert structure by design (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "84cb607dfdda99b9"
+reason = "Parallel not-package-manager-root and missing test cases share fixture-build/crawl/assert structure by design (test architecture: one test per scenario)"

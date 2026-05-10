@@ -1,6 +1,7 @@
 use g3ts_package_types::G3TsPackageChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3TsPackageChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::root_exists::check(input, &mut results);

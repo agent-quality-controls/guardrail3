@@ -1,5 +1,6 @@
 use g3rs_release_config_checks_runtime as _;
 
+/// `common` module.
 mod common;
 
 #[cfg(feature = "checks")]

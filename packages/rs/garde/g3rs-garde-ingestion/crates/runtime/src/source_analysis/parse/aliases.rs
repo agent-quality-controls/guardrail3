@@ -1,7 +1,16 @@
+#![expect(
+    clippy::wildcard_enum_match_arm,
+    clippy::match_wildcard_for_single_variants,
+    clippy::too_many_arguments,
+    clippy::arithmetic_side_effects,
+    reason = "alias resolution walks every variant of `syn::Type`, `syn::UseTree`, `proc_macro2::TokenTree` and similar large external enums; matching every variant explicitly would couple this crate to upstream crate-version drift without value, and the alias-registration helper carries one parameter per scope element which is structural to the canonical-name composition"
+)]
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use quote::ToTokens;
 
+/// Implements `self ty name`.
 pub(crate) fn self_ty_name(ty: &syn::Type) -> Option<String> {
     match ty {
         syn::Type::Path(type_path) => Some(
@@ -17,6 +26,7 @@ pub(crate) fn self_ty_name(ty: &syn::Type) -> Option<String> {
     }
 }
 
+/// Implements `collect use aliases`.
 pub(crate) fn collect_use_aliases(
     tree: &syn::UseTree,
     boundary_derive_aliases: &mut BTreeSet<String>,
@@ -36,6 +46,7 @@ pub(crate) fn collect_use_aliases(
     );
 }
 
+/// Implements `collect use aliases with prefix`.
 fn collect_use_aliases_with_prefix(
     tree: &syn::UseTree,
     prefix: &[String],
@@ -103,6 +114,7 @@ fn collect_use_aliases_with_prefix(
     }
 }
 
+/// Implements `register canonical alias`.
 fn register_canonical_alias(
     prefix: &[String],
     target: &str,
@@ -135,6 +147,7 @@ fn register_canonical_alias(
     }
 }
 
+/// Implements `qualified use target`.
 fn qualified_use_target(prefix: &[String], target: &str) -> String {
     if prefix.is_empty() {
         target.to_owned()
@@ -143,6 +156,7 @@ fn qualified_use_target(prefix: &[String], target: &str) -> String {
     }
 }
 
+/// Implements `is deserialize trait path`.
 pub(crate) fn is_deserialize_trait_path(
     path: &syn::Path,
     aliases: &BTreeSet<String>,
@@ -151,6 +165,7 @@ pub(crate) fn is_deserialize_trait_path(
     is_canonical_or_aliased_path(path, aliases, module_path_aliases, "serde::Deserialize")
 }
 
+/// Implements `is validate trait path`.
 pub(crate) fn is_validate_trait_path(
     path: &syn::Path,
     aliases: &BTreeSet<String>,
@@ -159,6 +174,7 @@ pub(crate) fn is_validate_trait_path(
     is_canonical_or_aliased_path(path, aliases, module_path_aliases, "garde::Validate")
 }
 
+/// Implements `is canonical or aliased path`.
 fn is_canonical_or_aliased_path(
     path: &syn::Path,
     aliases: &BTreeSet<String>,
@@ -176,6 +192,7 @@ fn is_canonical_or_aliased_path(
             .is_some_and(|segment| aliases.contains(&segment.ident.to_string()))
 }
 
+/// Implements `is sqlx query as macro path`.
 pub(crate) fn is_sqlx_query_as_macro_path(
     path: &syn::Path,
     module_path_aliases: &BTreeMap<String, String>,
@@ -188,6 +205,7 @@ pub(crate) fn is_sqlx_query_as_macro_path(
     )
 }
 
+/// Implements `resolve path string aliases`.
 pub(crate) fn resolve_path_string_aliases(
     path: &str,
     module_path_aliases: &BTreeMap<String, String>,
@@ -212,10 +230,12 @@ pub(crate) fn resolve_path_string_aliases(
     resolved.join("::")
 }
 
+/// Implements `path to string`.
 pub(crate) fn path_to_string(path: &syn::Path) -> String {
     path.to_token_stream().to_string().replace(' ', "")
 }
 
+/// Implements `normalized path idents`.
 fn normalized_path_idents(
     path: &syn::Path,
     module_path_aliases: &BTreeMap<String, String>,
@@ -239,6 +259,7 @@ fn normalized_path_idents(
     resolved
 }
 
+/// Implements `token stream uses ctx variable`.
 pub(crate) fn token_stream_uses_ctx_variable(stream: proc_macro2::TokenStream) -> bool {
     let tokens: Vec<_> = stream.into_iter().collect();
     for (index, token) in tokens.iter().enumerate() {
@@ -259,6 +280,7 @@ pub(crate) fn token_stream_uses_ctx_variable(stream: proc_macro2::TokenStream) -
     false
 }
 
+/// Implements `ctx token is path segment`.
 fn ctx_token_is_path_segment(tokens: &[proc_macro2::TokenTree], index: usize) -> bool {
     preceding_double_colon(tokens, index)
         || following_double_colon(tokens, index)
@@ -268,6 +290,7 @@ fn ctx_token_is_path_segment(tokens: &[proc_macro2::TokenTree], index: usize) ->
         )
 }
 
+/// Implements `preceding double colon`.
 fn preceding_double_colon(tokens: &[proc_macro2::TokenTree], index: usize) -> bool {
     matches!(
         (index.checked_sub(2).and_then(|i| tokens.get(i)), index.checked_sub(1).and_then(|i| tokens.get(i))),
@@ -278,6 +301,7 @@ fn preceding_double_colon(tokens: &[proc_macro2::TokenTree], index: usize) -> bo
     )
 }
 
+/// Implements `following double colon`.
 fn following_double_colon(tokens: &[proc_macro2::TokenTree], index: usize) -> bool {
     matches!(
         (tokens.get(index + 1), tokens.get(index + 2)),

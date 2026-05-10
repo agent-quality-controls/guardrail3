@@ -87,7 +87,10 @@ fn removed_checker_cli_nested_script_targets_fail() {
 fn forbidden_deps_fail_from_optional_and_peer_dependencies() {
     for dependency_field in ["optional", "peer"] {
         let mut input = super::helpers::golden();
-        input.integration_contracts[0]
+        input
+            .integration_contracts
+            .first_mut()
+            .expect("setup test fixture must declare at least one integration_contracts entry")
             .forbidden_syncpack_deps
             .push("g3ts-astro-sitemap-checks".to_owned());
         let package = super::helpers::parsed_package_mut(&mut input);
@@ -127,10 +130,14 @@ fn eslint_comments_plugin_package_must_be_installed() {
 #[test]
 fn eslint_disable_descriptions_must_be_error_on_source_lanes() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot
         .tsx_source_error_rules
@@ -146,10 +153,14 @@ fn eslint_disable_descriptions_must_be_error_on_source_lanes() {
 #[test]
 fn unused_eslint_disables_must_fail_closed_on_source_lanes() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot.ts_source_unused_disable_fail_closed = false;
 
@@ -163,10 +174,14 @@ fn unused_eslint_disables_must_fail_closed_on_source_lanes() {
 #[test]
 fn eslint_disable_descriptions_accepts_namespace_when_package_identity_is_unavailable() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot.ts_source_plugin_package_names.clear();
 
@@ -180,10 +195,14 @@ fn eslint_disable_descriptions_accepts_namespace_when_package_identity_is_unavai
 #[test]
 fn eslint_disable_descriptions_rejects_missing_plugin_namespace() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot
         .ts_source_plugins
@@ -199,10 +218,14 @@ fn eslint_disable_descriptions_rejects_missing_plugin_namespace() {
 #[test]
 fn protected_setup_rule_disables_must_cover_astro_valid_compile() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot
         .astro_source_restricted_disable_patterns
@@ -218,10 +241,14 @@ fn protected_setup_rule_disables_must_cover_astro_valid_compile() {
 #[test]
 fn protected_setup_rule_disables_requires_restrict_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot
         .ts_source_warn_or_error_rules
@@ -272,7 +299,7 @@ fn unrelated_start_script_parse_blocker_does_not_break_validation_tools() {
     package.script_names.push("start".to_owned());
     package.script_bodies.push((
         "start".to_owned(),
-        "astro preview --port ${PORT:-3001}".to_owned(),
+        format!("astro preview --port {}", "${PORT:-3001}"),
     ));
     package.script_parse_blockers.push(
         g3ts_astro_setup_types::G3TsAstroPackageScriptParseBlocker {
@@ -462,10 +489,14 @@ fn validation_like_sibling_scripts_must_be_safe() {
 #[test]
 fn astro_plugin_wiring_rejects_missing_effective_package_identity() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("setup test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_setup_types::G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } = config
     else {
-        panic!("golden setup eslint config should be parsed");
+        unreachable!("golden setup eslint config should be parsed");
     };
     snapshot.astro_source_plugin_package_names.clear();
 

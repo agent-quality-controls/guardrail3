@@ -2,6 +2,11 @@ use g3rs_hooks_contract_types::{
     G3HookCommandRequirement, G3HookCriticalCommand, G3HookRequirement, G3HookTriggerPattern,
 };
 
+/// Asserts the g3rs test family hook contract matches the expected policy.
+///
+/// # Panics
+///
+/// Panics when the runtime contract differs from the expected policy.
 pub fn assert_contract_matches_expected_policy() {
     assert_eq!(
         g3rs_test_hook_contract_runtime::hook_contract(),
@@ -15,6 +20,7 @@ pub fn assert_contract_matches_expected_policy() {
             ],
             required_commands: vec![G3HookCommandRequirement::CargoTest,],
             critical_commands: vec![G3HookCriticalCommand::CargoSubcommand("test".to_owned()),],
-        }]
+        }],
+        "test family hook contract drifted from expected policy",
     );
 }

@@ -8,7 +8,7 @@ fn warns_when_conflict_check_only_appears_in_comment() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
             message_contains: Some("<<<<<<<"),
             inventory: Some(false),
@@ -52,7 +52,7 @@ fn warns_when_only_echo_mentions_conflict_markers() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()
@@ -66,7 +66,7 @@ fn warns_when_grep_only_mentions_merge_conflict_prose() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("missing merge-conflict marker scan in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()

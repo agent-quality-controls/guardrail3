@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "nextest.toml schema mirror: profile module exposes Profile* types that intentionally repeat the nextest.toml table name"
+)]
+
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};

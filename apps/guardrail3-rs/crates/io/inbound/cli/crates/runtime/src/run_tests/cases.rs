@@ -14,6 +14,12 @@ impl WorkspaceCrawler for StubCrawler {
             message: "crawl failed".to_owned(),
         })
     }
+
+    fn crawl_any(&self, _root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
+        Err(WorkspaceCrawlError {
+            message: "crawl failed".to_owned(),
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -45,6 +51,8 @@ fn run_command_sends_failures_to_stderr() {
             path: ".".into(),
             family: Vec::new(),
             inventory: false,
+            staged: false,
+            rules_only: true,
         },
         &StubCrawler,
         &StubFamilyRunner,

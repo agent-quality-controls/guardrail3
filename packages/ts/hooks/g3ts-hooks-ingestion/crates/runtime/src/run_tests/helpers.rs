@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test-helper file: writes temp pre-commit hook + verifier script fixtures with std::fs and shells out to git via std::process::Command to set up the test workspace; production code uses the centralized fs and process modules"
+)]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;

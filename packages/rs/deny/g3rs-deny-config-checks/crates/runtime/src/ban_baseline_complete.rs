@@ -5,8 +5,10 @@ use crate::support::expectations::expected_bans;
 use crate::support::identities::ban_name;
 use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/ban-baseline-complete";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;
@@ -28,7 +30,7 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         .deny
         .bans
         .as_ref()
-        .is_some_and(|bans| bans.deny.is_empty())
+        .is_some_and(|section| section.deny.is_empty())
     {
         results.push(G3CheckResult::new(
             ID.to_owned(),

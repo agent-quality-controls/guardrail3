@@ -44,15 +44,7 @@ pub fn ingest_for_config_checks(
     let clippy_input = if applicability == G3RsGardeApplicability::Inactive {
         G3RsGardeClippyInput::Missing
     } else if let Some(entry) = crate::select::select_clippy_toml(crawl) {
-        if !entry.readable {
-            G3RsGardeClippyInput::Invalid {
-                rel_path: entry.path.rel_path.clone(),
-                message: format!(
-                    "Failed to read `{}` for garde clippy-ban validation: file is not readable",
-                    entry.path.rel_path
-                ),
-            }
-        } else {
+        if entry.readable {
             match crate::parse::parse_clippy_toml(&entry.path.abs_path) {
                 Ok(parsed) => G3RsGardeClippyInput::Parsed {
                     rel_path: entry.path.rel_path.clone(),
@@ -74,6 +66,14 @@ pub fn ingest_for_config_checks(
                 },
                 Err(other) => return Err(other),
             }
+        } else {
+            G3RsGardeClippyInput::Invalid {
+                rel_path: entry.path.rel_path.clone(),
+                message: format!(
+                    "Failed to read `{}` for garde clippy-ban validation: file is not readable",
+                    entry.path.rel_path
+                ),
+            }
         }
     } else {
         G3RsGardeClippyInput::Missing
@@ -88,6 +88,9 @@ pub fn ingest_for_config_checks(
 }
 
 /// Ingest garde source input from a workspace crawl.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
 pub fn ingest_for_source_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeSourceChecksInput, IngestionError> {
@@ -129,6 +132,7 @@ pub fn ingest_for_source_checks(
     })
 }
 
+/// Implements `has garde dependency`.
 fn has_garde_dependency(cargo: &CargoToml) -> bool {
     cargo.dependencies.contains_key("garde")
         || cargo
@@ -137,6 +141,7 @@ fn has_garde_dependency(cargo: &CargoToml) -> bool {
             .is_some_and(|workspace| workspace.dependencies.contains_key("garde"))
 }
 
+/// Implements `parse rust policy`.
 fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
     let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
         return G3RsGardeRustPolicyInput::Missing;
@@ -181,13 +186,15 @@ fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
     }
 }
 
-fn rust_policy_enables_garde(policy: &G3RsGardeRustPolicyInput) -> bool {
+/// Implements `rust policy enables garde`.
+const fn rust_policy_enables_garde(policy: &G3RsGardeRustPolicyInput) -> bool {
     match policy {
         G3RsGardeRustPolicyInput::Parsed { garde_enabled, .. } => *garde_enabled,
         G3RsGardeRustPolicyInput::Missing | G3RsGardeRustPolicyInput::Invalid { .. } => false,
     }
 }
 
+/// Implements `collect waivers`.
 fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<G3RsGardeWaiver> {
     parsed
         .waivers
@@ -202,7 +209,10 @@ fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<G3RsGardeWaiver> {
 }
 
 /// Stub file-tree ingestion entry point for the garde family.
-pub fn ingest_for_file_tree_checks(
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
+pub const fn ingest_for_file_tree_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)

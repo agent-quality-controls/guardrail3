@@ -1,10 +1,15 @@
 use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/llms-integration-present";
+/// Static rule data.
 const GENERATOR_DEPENDENCY_NAME: &str = "g3ts-astro-llms-generator";
+/// Static rule data.
 const AUDITOR_DEPENDENCY_NAME: &str = "g3ts-astro-llms-auditor";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -25,14 +30,12 @@ pub(crate) fn check(
     };
 
     if has_generator && has_auditor {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Astro llms integration is wired",
-                format!("`{rel_path}` wires `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` with static required config for strict AI-readable output."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Astro llms integration is wired",
+            format!("`{rel_path}` wires `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` with static required config for strict AI-readable output."),
+            rel_path,
+        ));
         return;
     }
 
@@ -40,10 +43,11 @@ pub(crate) fn check(
         ID,
         "Astro llms integration is not wired",
         format!("Strict AI-readable policy requires `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` as Astro integrations. Both integrations must use static config objects; the auditor config must include HTTPS `site`, `requiredSections`, `requiredRoutePatterns`, `allowedExternalUrls`, `allowedNonPageUrls`, and `ignoredHtmlFiles`."),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal helper used by the rule.
 fn llms_generator_config_is_strict(
     snapshot: &g3ts_astro_seo_types::G3TsAstroConfigSurfaceSnapshot,
 ) -> bool {
@@ -68,6 +72,7 @@ fn llms_generator_config_is_strict(
             .is_some_and(|sections| !sections.is_empty())
 }
 
+/// Internal helper used by the rule.
 fn llms_auditor_config_is_strict(
     snapshot: &g3ts_astro_seo_types::G3TsAstroConfigSurfaceSnapshot,
 ) -> bool {

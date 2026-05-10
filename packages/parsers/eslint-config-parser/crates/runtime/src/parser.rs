@@ -10,7 +10,8 @@ pub(crate) use crate::types::{
     EslintConfigFileKind, EslintProbeKind, EslintReportUnusedSetting, EslintRuleSeverity,
 };
 
-const NODE_HELPER: &str = r#"
+/// `JavaScript` helper script that probes `ESLint`'s flat-config resolution and emits a typed snapshot.
+const NODE_HELPER: &str = r"
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -245,8 +246,13 @@ for (const probe of probes) {
 }
 
 console.log(JSON.stringify(payload));
-"#;
+";
 
+/// Resolves the `ESLint` flat config at `config_rel_path` (relative to `workspace_root`) into a typed snapshot.
+///
+/// # Errors
+/// Returns `Error::Json` when the helper output cannot be deserialized into the snapshot schema, or
+/// `Error::Helper` when the `Node` helper process itself fails.
 pub fn parse(
     workspace_root: impl AsRef<Path>,
     config_rel_path: &str,
@@ -259,6 +265,14 @@ pub fn parse(
     }
 }
 
+/// Resolves the `ESLint` flat config into a `EslintConfigDocument`, capturing typed-parse failures as `Invalid`.
+///
+/// # Errors
+/// Returns `Error::Helper` when the `Node` helper process fails to produce raw JSON output.
+#[allow(
+    clippy::disallowed_methods,
+    reason = "parser.rs IS the centralized ESLint config parser and owns the serde_json typed conversion boundary"
+)]
 pub fn parse_document(
     workspace_root: impl AsRef<Path>,
     config_rel_path: &str,
@@ -272,6 +286,10 @@ pub fn parse_document(
     Ok(EslintConfigDocument { raw, typed })
 }
 
+/// Reads the `ESLint` flat config at `config_rel_path` and resolves it into a typed snapshot.
+///
+/// # Errors
+/// Returns `Error::Json` when the helper output cannot be deserialized, or `Error::Helper` when the `Node` helper fails.
 pub fn from_path(
     workspace_root: impl AsRef<Path>,
     config_rel_path: &str,
@@ -280,6 +298,11 @@ pub fn from_path(
     parse(workspace_root, config_rel_path, probes)
 }
 
+/// Spawns the `Node` helper script that resolves the `ESLint` flat config and returns its raw JSON output.
+#[allow(
+    clippy::disallowed_methods,
+    reason = "parser.rs IS the centralized ESLint config parser and owns the Node-helper subprocess + JSON boundary"
+)]
 fn evaluate(
     workspace_root: &Path,
     config_rel_path: &str,

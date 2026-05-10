@@ -4,8 +4,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{allowlist_present, allowlisted, dependencies_in_section, error, info};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deps/dependencies-allowlisted";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsDepsConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !allowlist_present(input) {
         return;

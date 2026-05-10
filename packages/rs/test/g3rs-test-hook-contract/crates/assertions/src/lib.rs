@@ -1,3 +1,5 @@
+//! Contract assertions for the g3rs test family hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

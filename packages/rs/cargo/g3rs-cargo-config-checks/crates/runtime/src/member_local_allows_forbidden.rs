@@ -9,8 +9,10 @@ use crate::support::{
     waiver_reason,
 };
 
+/// I D const.
 const ID: &str = "g3rs-cargo/member-local-allows-forbidden";
 
+/// check fn.
 pub(crate) fn check(
     root: &G3RsCargoPolicyRoot,
     member: &G3RsCargoWorkspaceMember,
@@ -35,65 +37,22 @@ pub(crate) fn check(
     .into_iter()
     .all(lints_are_well_formed);
 
-    let mut documented_count = 0usize;
-    let mut missing_reason_count = 0usize;
-    let mut weak_reason_count = 0usize;
+    let mut counts = AllowCounts::default();
     for (family, lints) in [
         ("rust", member_override_lints(member, "rust")),
         ("clippy", member_override_lints(member, "clippy")),
     ] {
         for lint_name in explicit_allow_entries(lints) {
-            let selector = allow_selector(family, &lint_name);
-            match waiver_reason(
-                rust_policy_waivers(root),
-                ID,
-                &member.cargo_rel_path,
-                &selector,
-            ) {
-                None => {
-                    missing_reason_count += 1;
-                    results.push(crate::support::error(
-                        ID,
-                        "member-local allow entry missing reason",
-                        format!(
-                            "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
-                            member.cargo_rel_path
-                        ),
-                        &member.cargo_rel_path,
-                    ));
-                }
-                Some(reason) => match validate_reason_text(reason) {
-                    Ok(()) => {
-                        documented_count += 1;
-                        results.push(crate::support::error(
-                            ID,
-                            "member-local allow entry forbidden",
-                            format!(
-                                "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}`. Remove this `allow` override from the member crate.",
-                                member.cargo_rel_path
-                            ),
-                            &member.cargo_rel_path,
-                        ));
-                    }
-                    Err(issue) => {
-                        weak_reason_count += 1;
-                        results.push(crate::support::error(
-                            ID,
-                            "member-local allow entry reason too weak",
-                            format!(
-                                "`{}` sets `{lint_name}` to `allow` in `{family}` with a weak reason: {}.",
-                                member.cargo_rel_path,
-                                issue.message()
-                            ),
-                            &member.cargo_rel_path,
-                        ));
-                    }
-                },
-            }
+            classify_member_allow(root, member, family, &lint_name, &mut counts, results);
         }
     }
 
-    let total = documented_count + missing_reason_count + weak_reason_count;
+    let total = counts
+        .documented
+        .saturating_add(counts.missing_reason.saturating_add(counts.weak_reason));
+    let documented_count = counts.documented;
+    let missing_reason_count = counts.missing_reason;
+    let weak_reason_count = counts.weak_reason;
     if total == 0 && workspace_policy_complete && member_override_shapes_valid {
         results.push(crate::support::info(
             ID,
@@ -117,6 +76,76 @@ pub(crate) fn check(
     }
 }
 
+/// Counts of member-local `allow` entries classified by waiver-reason status.
+#[derive(Default)]
+struct AllowCounts {
+    /// Member-local `allow` entries with a useful waiver reason.
+    documented: usize,
+    /// Member-local `allow` entries that lacked any waiver reason.
+    missing_reason: usize,
+    /// Member-local `allow` entries with a waiver reason judged too weak.
+    weak_reason: usize,
+}
+
+/// Classify a single member-local `allow` entry and emit the matching finding.
+fn classify_member_allow(
+    root: &G3RsCargoPolicyRoot,
+    member: &G3RsCargoWorkspaceMember,
+    family: &str,
+    lint_name: &str,
+    counts: &mut AllowCounts,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let selector = allow_selector(family, lint_name);
+    match waiver_reason(
+        rust_policy_waivers(root),
+        ID,
+        &member.cargo_rel_path,
+        &selector,
+    ) {
+        None => {
+            counts.missing_reason = counts.missing_reason.saturating_add(1);
+            results.push(crate::support::error(
+                ID,
+                "member-local allow entry missing reason",
+                format!(
+                    "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
+                    member.cargo_rel_path
+                ),
+                &member.cargo_rel_path,
+            ));
+        }
+        Some(reason) => match validate_reason_text(reason) {
+            Ok(()) => {
+                counts.documented = counts.documented.saturating_add(1);
+                results.push(crate::support::error(
+                    ID,
+                    "member-local allow entry forbidden",
+                    format!(
+                        "`{}` uses `[lints] workspace = true` but still sets `{lint_name}` to `allow` in `{family}`. Remove this `allow` override from the member crate.",
+                        member.cargo_rel_path
+                    ),
+                    &member.cargo_rel_path,
+                ));
+            }
+            Err(issue) => {
+                counts.weak_reason = counts.weak_reason.saturating_add(1);
+                results.push(crate::support::error(
+                    ID,
+                    "member-local allow entry reason too weak",
+                    format!(
+                        "`{}` sets `{lint_name}` to `allow` in `{family}` with a weak reason: {}.",
+                        member.cargo_rel_path,
+                        issue.message()
+                    ),
+                    &member.cargo_rel_path,
+                ));
+            }
+        },
+    }
+}
+
+/// lints are well formed fn.
 fn lints_are_well_formed(lints: CargoLintTableState<'_>) -> bool {
     match lints {
         CargoLintTableState::Missing => true,

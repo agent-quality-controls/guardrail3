@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, has_ts_plugin, info, parsed_document, selected_rel_path};
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/ts-plugin-present";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if parsed_document(input).is_none() {
         return;

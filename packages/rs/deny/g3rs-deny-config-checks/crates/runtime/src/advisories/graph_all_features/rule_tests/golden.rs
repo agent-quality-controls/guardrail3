@@ -5,11 +5,11 @@ use super::helpers::run_check;
 #[test]
 fn all_features_true() {
     let results = run_check(
-        r#"
+        r"
 [graph]
 all-features = true
 no-default-features = false
-"#,
+",
     );
     assertions::assert_no_findings(&results);
 }

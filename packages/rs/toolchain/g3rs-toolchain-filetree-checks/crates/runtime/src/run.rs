@@ -1,6 +1,7 @@
 use g3rs_toolchain_types::G3RsToolchainFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsToolchainFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 

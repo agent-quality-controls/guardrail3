@@ -10,9 +10,9 @@ use super::super::check;
 pub(super) fn run_check(rustfmt_toml: &str, waivers: Vec<G3RsFmtWaiver>) -> Vec<G3CheckResult> {
     let input = G3RsFmtConfigChecksInput {
         rustfmt_rel_path: "rustfmt.toml".to_owned(),
-        rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(
+        rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(Box::new(
             parse_rustfmt_toml(rustfmt_toml).expect("rustfmt fixture should parse"),
-        ),
+        )),
         rustfmt_explicit_keys: Vec::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
         cargo_state: G3RsFmtCargoState::Missing,

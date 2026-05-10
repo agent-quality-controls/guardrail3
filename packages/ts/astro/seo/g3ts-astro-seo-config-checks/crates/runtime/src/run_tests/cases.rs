@@ -31,9 +31,13 @@ fn golden_seo_package_reports_owned_ids() {
 #[test]
 fn protected_seo_rule_disables_must_cover_json_ld_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden seo eslint config should be parsed");
+        unreachable!("golden seo eslint config should be parsed");
     };
     snapshot
         .tsx_source_restricted_disable_patterns
@@ -48,9 +52,13 @@ fn protected_seo_rule_disables_must_cover_json_ld_rule() {
 #[test]
 fn protected_seo_rule_disables_requires_restrict_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden seo eslint config should be parsed");
+        unreachable!("golden seo eslint config should be parsed");
     };
     snapshot
         .ts_source_warn_or_error_rules
@@ -66,9 +74,13 @@ fn protected_seo_rule_disables_requires_restrict_rule() {
 #[test]
 fn protected_seo_rule_disables_accept_pipeline_wildcard() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
+    let config = &mut input
+        .eslint_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one eslint_contracts entry")
+        .config;
     let g3ts_astro_seo_types::G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden seo eslint config should be parsed");
+        unreachable!("golden seo eslint config should be parsed");
     };
     snapshot.astro_source_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
     snapshot.ts_source_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
@@ -128,8 +140,11 @@ fn eslint_disable_inventory_fails_closed_on_seo_parse_error() {
 #[test]
 fn missing_site_fails_canonical_site_config() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.site = None;
     }
@@ -140,8 +155,11 @@ fn missing_site_fails_canonical_site_config() {
 #[test]
 fn http_site_fails_canonical_site_config() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.site = Some("http://example.com".to_owned());
     }
@@ -152,8 +170,11 @@ fn http_site_fails_canonical_site_config() {
 #[test]
 fn missing_static_output_fails_static_output_config() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.output = None;
     }
@@ -164,8 +185,11 @@ fn missing_static_output_fails_static_output_config() {
 #[test]
 fn missing_trailing_slash_fails_trailing_slash_policy() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.trailing_slash = None;
     }
@@ -176,8 +200,11 @@ fn missing_trailing_slash_fails_trailing_slash_policy() {
 #[test]
 fn ignored_trailing_slash_fails_trailing_slash_policy() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.trailing_slash = Some(g3ts_astro_seo_types::G3TsAstroTrailingSlashPolicy::Ignore);
     }
@@ -236,8 +263,11 @@ fn missing_robots_integration_fails() {
 #[test]
 fn never_trailing_slash_fails_trailing_slash_policy() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot.trailing_slash = Some(g3ts_astro_seo_types::G3TsAstroTrailingSlashPolicy::Never);
     }
@@ -248,8 +278,11 @@ fn never_trailing_slash_fails_trailing_slash_policy() {
 #[test]
 fn strict_ai_readable_requires_llms_generator_auditor_and_integrations() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
+    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_policy
     {
         snapshot.strict_ai_readable = true;
         snapshot.llms_required_sections = vec!["Docs".to_owned()];
@@ -264,15 +297,21 @@ fn strict_ai_readable_requires_llms_generator_auditor_and_integrations() {
 #[test]
 fn strict_ai_readable_passes_when_llms_generator_auditor_and_integrations_are_present() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
+    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_policy
     {
         snapshot.strict_ai_readable = true;
     }
     add_dev_dependency(&mut input, "g3ts-astro-llms-generator");
     add_dev_dependency(&mut input, "g3ts-astro-llms-auditor");
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot
             .integrations
@@ -358,15 +397,21 @@ fn robots_auditor_config_rejects_unknown_keys() {
 #[test]
 fn llms_configs_reject_unknown_keys() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
+    if let g3ts_astro_seo_types::G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_policy
     {
         snapshot.strict_ai_readable = true;
     }
     add_dev_dependency(&mut input, "g3ts-astro-llms-generator");
     add_dev_dependency(&mut input, "g3ts-astro-llms-auditor");
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot
             .integrations
@@ -376,11 +421,12 @@ fn llms_configs_reject_unknown_keys() {
                 imported_name: None,
                 call: Some(g3ts_astro_seo_types::G3TsAstroCallSnapshot {
                     first_arg: Some(g3ts_astro_seo_types::G3TsAstroStaticValue::Object({
-                        let mut properties = match llms_generator_options() {
-                            g3ts_astro_seo_types::G3TsAstroStaticValue::Object(properties) => {
-                                properties
-                            }
-                            _ => unreachable!(),
+                        let g3ts_astro_seo_types::G3TsAstroStaticValue::Object(mut properties) =
+                            llms_generator_options()
+                        else {
+                            unreachable!(
+                                "llms_generator_options must return an object literal for tests"
+                            );
                         };
                         properties.push(static_property(
                             "extra",
@@ -416,8 +462,11 @@ fn broad_agentmarkup_generator_fails() {
 #[test]
 fn required_auditor_package_in_optional_dependencies_does_not_satisfy_installed_contract() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].package
+    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .package
     {
         snapshot
             .dev_dependencies
@@ -433,8 +482,11 @@ fn required_auditor_package_in_optional_dependencies_does_not_satisfy_installed_
 #[test]
 fn broad_agentmarkup_generator_fails_from_optional_dependencies() {
     let mut input = super::helpers::golden();
-    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].package
+    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .package
     {
         snapshot
             .optional_dependencies
@@ -535,23 +587,26 @@ fn append_integration_option(
     module: &str,
     property: g3ts_astro_seo_types::G3TsAstroStaticObjectProperty,
 ) {
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         let Some(integration) = snapshot
             .integrations
             .iter_mut()
             .find(|integration| integration.source_module.as_deref() == Some(module))
         else {
-            panic!("golden config should contain integration {module}");
+            unreachable!("golden config should contain integration {module}");
         };
         let Some(call) = &mut integration.call else {
-            panic!("golden integration should be called");
+            unreachable!("golden integration should be called");
         };
         let Some(g3ts_astro_seo_types::G3TsAstroStaticValue::Object(properties)) =
             &mut call.first_arg
         else {
-            panic!("golden integration should have object options");
+            unreachable!("golden integration should have object options");
         };
         properties.push(property);
     }
@@ -561,8 +616,11 @@ fn remove_dev_dependency(
     input: &mut g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     dependency_name: &str,
 ) {
-    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].package
+    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .package
     {
         snapshot
             .dev_dependencies
@@ -574,8 +632,11 @@ fn add_dev_dependency(
     input: &mut g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     dependency_name: &str,
 ) {
-    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].package
+    if let g3ts_astro_seo_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .package
     {
         snapshot.dev_dependencies.push(dependency_name.to_owned());
     }
@@ -585,8 +646,11 @@ fn remove_integration(
     input: &mut g3ts_astro_seo_types::G3TsAstroSeoConfigChecksInput,
     source_module: &str,
 ) {
-    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
+    if let g3ts_astro_seo_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } = &mut input
+        .integration_contracts
+        .first_mut()
+        .expect("seo test fixture must declare at least one integration_contracts entry")
+        .astro_config
     {
         snapshot
             .integrations

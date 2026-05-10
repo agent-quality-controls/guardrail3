@@ -9,22 +9,34 @@ pub(crate) struct G3RsCodeSourceFileAst {
 }
 
 #[derive(Debug)]
+/// Struct `CodeInputFailureRuleInput` used by this module.
 pub(crate) struct CodeInputFailureRuleInput {
+    /// Field `rel_path`.
     pub(crate) rel_path: String,
+    /// Field `message`.
     pub(crate) message: String,
 }
 
 #[derive(Clone, Copy)]
+/// Struct `CodeSourceRuleInput` used by this module.
 pub(crate) struct CodeSourceRuleInput<'a> {
+    /// Field `rel_path`.
     pub(crate) rel_path: &'a str,
+    /// Field `content`.
     pub(crate) content: &'a str,
+    /// Field `source`.
     pub(crate) source: &'a syn::File,
+    /// Field `is_test`.
     pub(crate) is_test: bool,
+    /// Field `is_shared_crate`.
     pub(crate) is_shared_crate: bool,
+    /// Field `waivers`.
     pub(crate) waivers: &'a [G3RsCodeWaiver],
     #[allow(dead_code)] // reason: retained for upcoming profile-sensitive code source rules
+    /// Field `profile_name`.
     pub(crate) profile_name: Option<&'a str>,
     #[allow(dead_code)] // reason: retained for upcoming lib.rs-only code source rules
+    /// Field `is_library_root`.
     pub(crate) is_library_root: bool,
 }
 
@@ -44,6 +56,7 @@ impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
     }
 }
 
+/// Implements `has matching waiver`.
 pub(crate) fn has_matching_waiver(
     input: &CodeSourceRuleInput<'_>,
     rule: &str,
@@ -54,6 +67,7 @@ pub(crate) fn has_matching_waiver(
     })
 }
 
+/// Implements `rule input`.
 pub(crate) fn rule_input(
     input: &G3RsCodeSourceChecksInput,
 ) -> Result<CodeSourceRuleInput<'_>, CodeInputFailureRuleInput> {

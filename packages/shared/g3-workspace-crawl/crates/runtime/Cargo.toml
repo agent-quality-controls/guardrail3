@@ -1,0 +1,32 @@
+[package]
+name = "g3-workspace-crawl-runtime"
+version = "0.1.0"
+edition = "2024"
+description = "Runtime implementation for neutral guardrail3 workspace crawl"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+readme = "README.md"
+keywords = ["guardrail3", "workspace", "crawl"]
+categories = ["development-tools"]
+publish = false
+
+[features]
+default = ["all"]
+all = ["crawl"]
+crawl = []
+
+[lints]
+workspace = true
+
+[package.metadata.guardrail3]
+shared = true
+
+[dependencies]
+g3-workspace-crawl-types = { path = "../types", version = "0.1.0" }
+ignore = "0.4"
+walkdir = "2"
+
+[dev-dependencies]
+g3-workspace-crawl-assertions = { path = "../assertions" }
+tempfile = "3"

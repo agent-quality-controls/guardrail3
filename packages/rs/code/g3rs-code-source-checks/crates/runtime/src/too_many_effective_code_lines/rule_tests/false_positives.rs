@@ -1,3 +1,9 @@
+#![allow(
+    clippy::format_collect,
+    clippy::format_in_format_args,
+    reason = "test fixtures synthesize large source bodies via format! over an iterator; the simpler iterator-collect form is intentional"
+)]
+
 #[test]
 fn skips_test_files() {
     let content = (0..600)

@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, selected_rel_path};
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/exists";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(rel_path) = selected_rel_path(input) else {
         results.push(G3CheckResult::new(

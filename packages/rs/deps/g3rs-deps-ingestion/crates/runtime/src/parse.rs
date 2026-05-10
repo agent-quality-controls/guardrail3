@@ -41,17 +41,28 @@ pub(crate) fn parse_guardrail3_rs_toml(
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
         })?;
-    let raw =
-        toml::from_str::<toml::Value>(&content).map_err(|err| IngestionError::ParseFailed {
-            path: abs_path.to_path_buf(),
-            reason: err.to_string(),
-        })?;
-    let allowlist_present = raw
-        .as_table()
-        .is_some_and(|table| table.contains_key("allowed_deps"));
+    let allowlist_present = explicit_allowlist_present(&content, abs_path)?;
 
     Ok(ParsedGuardrail3RsToml {
         config,
         allowlist_present,
     })
+}
+
+/// Reports whether `allowed_deps` is an explicit top-level key in the source TOML document,
+/// distinct from the typed view in `Guardrail3RsToml` which cannot represent the
+/// set-vs-default distinction needed by the deps allowlist policy.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "deps allowlist policy needs the explicit-presence signal that the typed `Guardrail3RsToml` cannot encode; the central guardrail3-rs parser uses toml::de under the same justification, so the duplicate raw-Value parse here is the local fallback until the parser exposes a presence API"
+)]
+fn explicit_allowlist_present(content: &str, abs_path: &Path) -> Result<bool, IngestionError> {
+    let raw =
+        toml::from_str::<toml::Value>(content).map_err(|err| IngestionError::ParseFailed {
+            path: abs_path.to_path_buf(),
+            reason: err.to_string(),
+        })?;
+    Ok(raw
+        .as_table()
+        .is_some_and(|table| table.contains_key("allowed_deps")))
 }

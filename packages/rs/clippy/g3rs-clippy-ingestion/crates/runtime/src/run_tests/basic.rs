@@ -23,7 +23,9 @@ fn clippy_conf_dir_override_rel_paths(
                 rel_path,
                 cargo_config,
             } if cargo_config.env.contains_key("CLIPPY_CONF_DIR") => Some(rel_path.as_str()),
-            _ => None,
+            g3rs_clippy_types::G3RsClippyCargoConfigState::Parsed { .. }
+            | g3rs_clippy_types::G3RsClippyCargoConfigState::Unreadable { .. }
+            | g3rs_clippy_types::G3RsClippyCargoConfigState::ParseError { .. } => None,
         })
         .collect()
 }
@@ -140,18 +142,24 @@ fn keeps_raw_parseable_but_typed_invalid_clippy_for_config_checks() {
     let input = result.expect(
         "config ingestion should preserve raw-parseable clippy.toml for parseability and section-shape checks instead of aborting on typed parse failure",
     );
-    match input.clippy {
-        G3RsClippyConfigState::Parsed(document) => {
-            match clippy_toml_parser::parse_error_reason(&document) {
-                Some(reason) => assert!(
-                    reason.contains("path"),
-                    "typed parse error should preserve the parser reason: {reason}"
-                ),
-                None => panic!("expected typed parse error document"),
-            }
-        }
-        other => panic!("expected raw-parseable typed-invalid clippy state, got {other:#?}"),
-    }
+    assert!(
+        matches!(input.clippy, G3RsClippyConfigState::Parsed(_)),
+        "expected raw-parseable typed-invalid clippy state, got {:#?}",
+        input.clippy
+    );
+    let G3RsClippyConfigState::Parsed(document) = input.clippy else {
+        return;
+    };
+    let reason = clippy_toml_parser::parse_error_reason(&document);
+    assert!(
+        reason.is_some(),
+        "expected typed parse error document: {document:#?}"
+    );
+    let Some(reason) = reason else { return };
+    assert!(
+        reason.contains("path"),
+        "typed parse error should preserve the parser reason: {reason}"
+    );
 }
 
 #[test]
@@ -428,11 +436,16 @@ fn surfaces_guardrail3_rs_parse_errors_in_policy_state() {
     let input = crate::run::ingest_for_config_checks(&crawl)
         .expect("invalid guardrail3-rs.toml should be preserved in clippy policy state");
 
-    match input.rust_policy {
-        G3RsClippyRustPolicyState::ParseError { rel_path, .. } => {
-            assert_eq!(rel_path, "guardrail3-rs.toml");
-        }
-        other => panic!("expected ParseError policy state, got {other:#?}"),
+    assert!(
+        matches!(
+            input.rust_policy,
+            G3RsClippyRustPolicyState::ParseError { .. }
+        ),
+        "expected ParseError policy state, got {:#?}",
+        input.rust_policy
+    );
+    if let G3RsClippyRustPolicyState::ParseError { rel_path, .. } = input.rust_policy {
+        assert_eq!(rel_path, "guardrail3-rs.toml");
     }
 }
 

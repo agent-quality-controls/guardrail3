@@ -1,0 +1,14 @@
+profile = "library"
+
+allowed_deps = [
+  "g3-workspace-crawl",
+  "g3-workspace-crawl-assertions",
+  "g3-workspace-crawl-runtime",
+  "g3-workspace-crawl-types",
+  "ignore",
+  "tempfile",
+  "walkdir",
+]
+
+[checks]
+garde = false

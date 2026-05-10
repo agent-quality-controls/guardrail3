@@ -2,6 +2,7 @@ use crate::types::{G3TsTsconfigBoolState, G3TsTsconfigInlineStrictFlags};
 use tsconfig_json_parser::bool_field_state;
 use tsconfig_json_parser::types::{TsconfigBoolFieldState, TsconfigDocument};
 
+#[must_use]
 pub fn inline_strict_flags(document: &TsconfigDocument) -> G3TsTsconfigInlineStrictFlags {
     G3TsTsconfigInlineStrictFlags {
         strict: map_bool_state(bool_field_state(document, "strict")),
@@ -34,7 +35,8 @@ pub fn inline_strict_flags(document: &TsconfigDocument) -> G3TsTsconfigInlineStr
     }
 }
 
-fn map_bool_state(state: TsconfigBoolFieldState<'_>) -> G3TsTsconfigBoolState {
+/// Map an internal tsconfig bool field state to the public contract enum.
+const fn map_bool_state(state: TsconfigBoolFieldState<'_>) -> G3TsTsconfigBoolState {
     match state {
         TsconfigBoolFieldState::Missing => G3TsTsconfigBoolState::Missing,
         TsconfigBoolFieldState::Value(value) => G3TsTsconfigBoolState::Value(value),

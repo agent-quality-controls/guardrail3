@@ -5,8 +5,10 @@ use crate::support::expectations::expected_tokio_allowed_features;
 use crate::support::findings::warn;
 use crate::support::identities::{feature_entry_name, join_set};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/tokio-full-ban";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(bans) = deny.bans.as_ref() else {
         results.push(warn(

@@ -8,8 +8,22 @@ use super::support::{
     project_service_enabled_for, selected_rel_path, threshold_matches,
 };
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/tsx-source-parity";
 
+/// Collected drift findings for the TSX source probe baseline parity check.
+struct TsxBaselineDrift {
+    /// Threshold rules whose value or option keys disagree with the baseline.
+    wrong_thresholds: Vec<String>,
+    /// Required presence rules that are missing at error severity.
+    missing_presence_rules: Vec<String>,
+    /// Plugins required for TSX-source parity that are not active on the probe.
+    missing_plugins: Vec<String>,
+    /// Grouped baseline rules that are missing at error severity.
+    missing_rules: Vec<String>,
+}
+
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if parsed_document(input).is_none() || !has_tsx_source_probe(input) {
         return;
@@ -19,6 +33,31 @@ pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3Che
         return;
     };
 
+    let drift = collect_drift(input);
+    let project_service = project_service_enabled_for(input, EslintProbeKind::TsxSource);
+
+    if project_service && drift.is_clean() {
+        results.push(info(
+            ID,
+            "TSX source baseline matches TS source baseline",
+            "The TSX source probe keeps the same typed-lint, threshold, plugin, and grouped-rule baseline as the TS source probe."
+                .to_owned(),
+            rel_path,
+        ));
+        return;
+    }
+
+    let message = render_drift_message(&drift, project_service);
+    results.push(error(
+        ID,
+        "TSX source baseline drift detected",
+        message,
+        rel_path,
+    ));
+}
+
+/// Collects all baseline drift findings for the TSX source probe.
+fn collect_drift(input: &G3TsEslintConfigChecksInput) -> TsxBaselineDrift {
     let wrong_thresholds = super::baseline::THRESHOLD_RULES
         .iter()
         .filter(|(rule_name, expected, keys)| {
@@ -51,59 +90,58 @@ pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3Che
     .flatten()
     .collect::<Vec<_>>();
 
-    if project_service_enabled_for(input, EslintProbeKind::TsxSource)
-        && wrong_thresholds.is_empty()
-        && missing_presence_rules.is_empty()
-        && missing_plugins.is_empty()
-        && missing_rules.is_empty()
-    {
-        results.push(info(
-            ID,
-            "TSX source baseline matches TS source baseline",
-            "The TSX source probe keeps the same typed-lint, threshold, plugin, and grouped-rule baseline as the TS source probe."
-                .to_owned(),
-            rel_path,
-        ));
-        return;
+    TsxBaselineDrift {
+        wrong_thresholds,
+        missing_presence_rules,
+        missing_plugins,
+        missing_rules,
     }
+}
 
+impl TsxBaselineDrift {
+    /// Returns `true` when no drift findings are recorded.
+    fn is_clean(&self) -> bool {
+        self.wrong_thresholds.is_empty()
+            && self.missing_presence_rules.is_empty()
+            && self.missing_plugins.is_empty()
+            && self.missing_rules.is_empty()
+    }
+}
+
+/// Renders the human-readable error message from a `TsxBaselineDrift`.
+fn render_drift_message(drift: &TsxBaselineDrift, project_service: bool) -> String {
     let mut parts = Vec::new();
-    if !project_service_enabled_for(input, EslintProbeKind::TsxSource) {
+    if !project_service {
         parts.push("The TSX source probe must enable `projectService: true`.".to_owned());
     }
-    if !wrong_thresholds.is_empty() {
+    if !drift.wrong_thresholds.is_empty() {
         parts.push(format!(
             "Wrong or missing threshold settings on the TSX source probe: {}.",
-            wrong_thresholds
+            drift
+                .wrong_thresholds
                 .iter()
                 .map(|item| format!("`{item}`"))
                 .collect::<Vec<_>>()
                 .join(", ")
         ));
     }
-    if !missing_presence_rules.is_empty() {
+    if !drift.missing_presence_rules.is_empty() {
         parts.push(format!(
             "Missing required error rules on the TSX source probe: {}.",
-            format_rule_list(&missing_presence_rules)
+            format_rule_list(&drift.missing_presence_rules)
         ));
     }
-    if !missing_plugins.is_empty() {
+    if !drift.missing_plugins.is_empty() {
         parts.push(format!(
             "The TSX source probe must activate these plugins: {}.",
-            format_plugin_list(&missing_plugins)
+            format_plugin_list(&drift.missing_plugins)
         ));
     }
-    if !missing_rules.is_empty() {
+    if !drift.missing_rules.is_empty() {
         parts.push(format!(
             "The TSX source probe must enforce these grouped baseline rules at error severity: {}.",
-            format_rule_list(&missing_rules)
+            format_rule_list(&drift.missing_rules)
         ));
     }
-
-    results.push(error(
-        ID,
-        "TSX source baseline drift detected",
-        parts.join(" "),
-        rel_path,
-    ));
+    parts.join(" ")
 }

@@ -3,9 +3,12 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info, parsed_document, rule_is_error, selected_rel_path};
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/no-explicit-any-error";
+/// Internal constant `RULE_NAME`.
 const RULE_NAME: &str = "@typescript-eslint/no-explicit-any";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if parsed_document(input).is_none() {
         return;

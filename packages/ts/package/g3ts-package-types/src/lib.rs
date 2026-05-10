@@ -1,6 +1,8 @@
+/// Conversion helpers between raw inputs and surface snapshot types.
 #[cfg(feature = "api")]
 mod convert;
 
+/// Type definitions for package surface snapshots and check inputs.
 #[cfg(feature = "api")]
 mod types;
 

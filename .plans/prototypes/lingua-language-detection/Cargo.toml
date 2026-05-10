@@ -1,0 +1,16 @@
+[package]
+name = "lingua-language-detection-prototype"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+lingua = { version = "1.8.0", default-features = false, features = [
+    "english",
+    "russian",
+    "german",
+    "french",
+    "spanish",
+    "portuguese",
+    "indonesian",
+] }

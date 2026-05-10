@@ -43,7 +43,9 @@ pub(crate) fn check(
         else {
             continue;
         };
-        let layer = first.layer.expect("component should have a layer");
+        let Some(layer) = first.layer else {
+            continue;
+        };
         let members = component
             .iter()
             .filter_map(|path| crates_by_path.get(path).copied())
@@ -107,6 +109,14 @@ fn strongly_connected_components(adjacency: &BTreeMap<String, Vec<String>>) -> V
     components
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Tarjan's SCC requires threading 8 mutable working sets (index, indices, lowlinks, stack, on_stack, components) through the recursion; packing into a struct would obscure the canonical algorithm"
+)]
+#[allow(
+    clippy::arithmetic_side_effects,
+    reason = "Tarjan's SCC index is bounded by adjacency.len() (the node count); usize overflow is impossible in any reachable workspace"
+)]
 fn strong_connect(
     node: &str,
     adjacency: &BTreeMap<String, Vec<String>>,

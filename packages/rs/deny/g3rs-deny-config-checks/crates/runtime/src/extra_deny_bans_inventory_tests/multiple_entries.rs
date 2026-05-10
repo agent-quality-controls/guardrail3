@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixture intentionally uses toml::from_str to mutate baseline deny.toml shards before re-serializing them; this is the same approach the production baseline parser uses"
+)]
+
 use g3rs_deny_config_checks_assertions::extra_deny_bans_inventory as assertions;
 
 use test_support::run;
@@ -6,7 +11,7 @@ use super::helpers;
 
 #[test]
 fn inventories_extra_deny_bans_beyond_the_managed_baseline() {
-    let mut parsed = toml::from_str::<toml::Value>(&helpers::service_canonical_bans_toml())
+    let mut parsed = toml::from_str::<toml::Value>(helpers::service_canonical_bans_toml())
         .expect("valid deny fixture");
     let deny_entries = parsed
         .get_mut("bans")

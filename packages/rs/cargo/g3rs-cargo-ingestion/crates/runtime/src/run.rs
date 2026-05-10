@@ -1,14 +1,25 @@
 use g3rs_cargo_types::{
-    G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput, G3RsCargoPolicyRootKind,
-    G3RsCargoRustPolicyState, G3RsCargoSourceChecksInput,
+    G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput, G3RsCargoInputFailure,
+    G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoSourceChecksInput,
+    G3RsCargoWorkspaceMember,
 };
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use g3rs_cargo_ingestion_types::G3RsCargoIngestionError as IngestionError;
 
+/// Alias for fallible ingestion outputs of this crate.
+type IngestResult<T> = Result<T, IngestionError>;
+
+/// Build the config-checks input for a workspace crawl.
+///
+/// # Errors
+///
+/// Returns an error when the workspace root `Cargo.toml` is missing, unreadable,
+/// or fails strict parsing, or when workspace-member resolution surfaces a
+/// non-recoverable error.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsCargoConfigChecksInput, IngestionError> {
+) -> IngestResult<G3RsCargoConfigChecksInput> {
     let root_entry =
         crate::select::select_root_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
     if !root_entry.readable {
@@ -35,160 +46,230 @@ pub fn ingest_for_config_checks(
     })
 }
 
-pub fn ingest_for_source_checks(
+/// Build the source-checks input for a workspace crawl.
+///
+/// # Errors
+///
+/// Currently always returns [`IngestionError::SourceIngestionNotImplemented`].
+pub const fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsCargoSourceChecksInput, IngestionError> {
+) -> IngestResult<G3RsCargoSourceChecksInput> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
+/// Build the file-tree-checks input for a workspace crawl.
+///
+/// # Errors
+///
+/// Returns an error only for non-recoverable ingestion failures; soft failures
+/// (parse error, unreadable) are converted into `input_failures` entries.
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsCargoFileTreeChecksInput, IngestionError> {
+) -> IngestResult<G3RsCargoFileTreeChecksInput> {
     let root_entry =
         crate::select::select_root_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
     let rust_policy_rel_path =
         crate::select::select_root_rust_policy_toml(crawl).map(|entry| entry.path.rel_path.clone());
-    let mut input_failures = Vec::new();
-    let mut missing_members = Vec::new();
-    let mut kind = None;
-    let mut members_parse_error = false;
 
-    if !root_entry.readable {
-        input_failures.push(crate::ingest::input_failure(
+    let mut acc = FileTreeIngestAccumulator::default();
+    if root_entry.readable {
+        ingest_root_for_file_tree(crawl, root_entry, &mut acc)?;
+    } else {
+        acc.input_failures.push(crate::ingest::input_failure(
             root_entry.path.rel_path.clone(),
             "Failed to parse owned policy-root Cargo.toml for cargo lint policy checks: file is not readable.",
         ));
-    } else {
-        match crate::parse::parse_raw_toml(&root_entry.path.abs_path) {
-            Ok(raw_cargo) => {
-                kind = Some(crate::select::workspace_root_kind(&raw_cargo));
-                match crate::parse::parse_root_cargo_toml(&root_entry.path.abs_path) {
-                    Ok(_) => {}
-                    Err(IngestionError::ParseFailed { reason, .. }) => {
-                        input_failures.push(crate::ingest::input_failure(
-                            root_entry.path.rel_path.clone(),
-                            format!(
-                                "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo config checks: {reason}"
-                            ),
-                        ));
-                    }
-                    Err(IngestionError::Unreadable { reason, .. }) => {
-                        input_failures.push(crate::ingest::input_failure(
-                            root_entry.path.rel_path.clone(),
-                            format!(
-                                "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo config checks: {reason}"
-                            ),
-                        ));
-                    }
-                    Err(other) => return Err(other),
-                }
-
-                if kind == Some(G3RsCargoPolicyRootKind::WorkspaceRoot) {
-                    match crate::select::collect_declared_member_rels(crawl, &raw_cargo) {
-                        Ok(member_rels) => {
-                            for member_rel in member_rels {
-                                match crate::select::select_member_manifest(crawl, &member_rel) {
-                                    Some(member_entry) if !member_entry.readable => {
-                                        input_failures.push(crate::ingest::input_failure(
-                                            member_entry.path.rel_path.clone(),
-                                            "Failed to parse workspace member Cargo.toml for cargo lint policy checks: file is not readable.",
-                                        ));
-                                    }
-                                    Some(member_entry) => {
-                                        if let Err(error) = crate::parse::parse_raw_toml(
-                                            &member_entry.path.abs_path,
-                                        ) {
-                                            match error {
-                                                IngestionError::ParseFailed { reason, .. } => {
-                                                    input_failures.push(crate::ingest::input_failure(
-                                                        member_entry.path.rel_path.clone(),
-                                                        format!(
-                                                            "Failed to parse workspace member Cargo.toml for cargo lint policy checks: {reason}"
-                                                        ),
-                                                    ));
-                                                }
-                                                IngestionError::Unreadable { reason, .. } => {
-                                                    input_failures.push(crate::ingest::input_failure(
-                                                        member_entry.path.rel_path.clone(),
-                                                        format!(
-                                                            "Failed to parse workspace member Cargo.toml for cargo lint policy checks: {reason}"
-                                                        ),
-                                                    ));
-                                                }
-                                                other => return Err(other),
-                                            }
-                                        }
-                                    }
-                                    None => {
-                                        missing_members
-                                            .push(crate::ingest::missing_member(member_rel));
-                                    }
-                                }
-                            }
-                        }
-                        Err(reason) => {
-                            members_parse_error = true;
-                            input_failures.push(crate::ingest::input_failure(
-                                root_entry.path.rel_path.clone(),
-                                format!(
-                                    "Failed to parse `[workspace].members` for cargo workspace membership checks: {reason}"
-                                ),
-                            ));
-                        }
-                    }
-                }
-            }
-            Err(IngestionError::ParseFailed { reason, .. }) => {
-                input_failures.push(crate::ingest::input_failure(
-                    root_entry.path.rel_path.clone(),
-                    format!(
-                        "Failed to parse owned policy-root Cargo.toml for cargo lint policy checks: {reason}"
-                    ),
-                ));
-            }
-            Err(IngestionError::Unreadable { reason, .. }) => {
-                input_failures.push(crate::ingest::input_failure(
-                    root_entry.path.rel_path.clone(),
-                    format!(
-                        "Failed to parse owned policy-root Cargo.toml for cargo lint policy checks: {reason}"
-                    ),
-                ));
-            }
-            Err(other) => return Err(other),
-        }
     }
 
-    match read_rust_policy_state(crawl) {
-        G3RsCargoRustPolicyState::Missing | G3RsCargoRustPolicyState::Parsed { .. } => {}
-        G3RsCargoRustPolicyState::Unreadable { rel_path, reason } => {
-            input_failures.push(crate::ingest::input_failure(
-                rel_path,
-                format!(
-                    "Failed to parse root-local guardrail3-rs.toml for cargo Rust policy resolution: {reason}"
-                ),
-            ));
-        }
-        G3RsCargoRustPolicyState::ParseError { rel_path, reason } => {
-            input_failures.push(crate::ingest::input_failure(
-                rel_path,
-                format!(
-                    "Failed to parse root-local guardrail3-rs.toml for cargo Rust policy resolution: {reason}"
-                ),
-            ));
-        }
-    }
+    append_rust_policy_input_failures(crawl, &mut acc.input_failures);
 
     Ok(G3RsCargoFileTreeChecksInput {
-        root: crate::ingest::filetree_root(kind, rust_policy_rel_path, members_parse_error),
-        missing_members,
-        input_failures,
+        root: crate::ingest::filetree_root(acc.kind, rust_policy_rel_path, acc.members_parse_error),
+        missing_members: acc.missing_members,
+        input_failures: acc.input_failures,
     })
 }
 
+/// Accumulator for the file-tree ingestion pass.
+#[derive(Default)]
+struct FileTreeIngestAccumulator {
+    /// Detected policy-root kind, if the root Cargo.toml parsed successfully.
+    kind: Option<G3RsCargoPolicyRootKind>,
+    /// Soft failures to surface as `input_failures`.
+    input_failures: Vec<G3RsCargoInputFailure>,
+    /// Declared workspace members that were not found in the crawl.
+    missing_members: Vec<g3rs_cargo_types::G3RsCargoMissingMember>,
+    /// `true` when the `[workspace].members` array itself failed to parse.
+    members_parse_error: bool,
+}
+
+/// Ingest the workspace root Cargo.toml into the file-tree accumulator.
+fn ingest_root_for_file_tree(
+    crawl: &G3RsWorkspaceCrawl,
+    root_entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    acc: &mut FileTreeIngestAccumulator,
+) -> IngestResult<()> {
+    let raw_cargo = match crate::parse::parse_raw_toml(&root_entry.path.abs_path) {
+        Ok(raw_cargo) => raw_cargo,
+        Err(error) => {
+            push_root_parse_failure(error, &root_entry.path.rel_path, &mut acc.input_failures)?;
+            return Ok(());
+        }
+    };
+    acc.kind = Some(crate::select::workspace_root_kind(&raw_cargo));
+
+    if let Err(error) = crate::parse::parse_root_cargo_toml(&root_entry.path.abs_path) {
+        push_root_typed_parse_failure(error, &root_entry.path.rel_path, &mut acc.input_failures)?;
+    }
+
+    if acc.kind == Some(G3RsCargoPolicyRootKind::WorkspaceRoot) {
+        ingest_workspace_members_for_file_tree(crawl, &raw_cargo, root_entry, acc)?;
+    }
+    Ok(())
+}
+
+/// Push an input failure for a raw-parse failure on the policy root, or return
+/// a hard error for other ingestion variants.
+fn push_root_parse_failure(
+    error: IngestionError,
+    rel_path: &str,
+    input_failures: &mut Vec<G3RsCargoInputFailure>,
+) -> IngestResult<()> {
+    match error {
+        IngestionError::ParseFailed { reason, .. } | IngestionError::Unreadable { reason, .. } => {
+            input_failures.push(crate::ingest::input_failure(
+                rel_path.to_owned(),
+                format!(
+                    "Failed to parse owned policy-root Cargo.toml for cargo lint policy checks: {reason}"
+                ),
+            ));
+            Ok(())
+        }
+        other @ (IngestionError::CargoTomlNotFound
+        | IngestionError::SourceIngestionNotImplemented
+        | IngestionError::FileTreeIngestionNotImplemented
+        | IngestionError::NormalizationFailed { .. }) => Err(other),
+    }
+}
+
+/// Push an input failure for a typed-parse failure on the policy root, or
+/// return a hard error for other ingestion variants.
+fn push_root_typed_parse_failure(
+    error: IngestionError,
+    rel_path: &str,
+    input_failures: &mut Vec<G3RsCargoInputFailure>,
+) -> IngestResult<()> {
+    match error {
+        IngestionError::ParseFailed { reason, .. } | IngestionError::Unreadable { reason, .. } => {
+            input_failures.push(crate::ingest::input_failure(
+                rel_path.to_owned(),
+                format!(
+                    "Failed to parse owned policy-root Cargo.toml against cargo-toml-parser for cargo config checks: {reason}"
+                ),
+            ));
+            Ok(())
+        }
+        other @ (IngestionError::CargoTomlNotFound
+        | IngestionError::SourceIngestionNotImplemented
+        | IngestionError::FileTreeIngestionNotImplemented
+        | IngestionError::NormalizationFailed { .. }) => Err(other),
+    }
+}
+
+/// Ingest declared workspace members into the file-tree accumulator.
+fn ingest_workspace_members_for_file_tree(
+    crawl: &G3RsWorkspaceCrawl,
+    raw_cargo: &toml::Value,
+    root_entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    acc: &mut FileTreeIngestAccumulator,
+) -> IngestResult<()> {
+    let member_rels = match crate::select::collect_declared_member_rels(crawl, raw_cargo) {
+        Ok(member_rels) => member_rels,
+        Err(reason) => {
+            acc.members_parse_error = true;
+            acc.input_failures.push(crate::ingest::input_failure(
+                root_entry.path.rel_path.clone(),
+                format!(
+                    "Failed to parse `[workspace].members` for cargo workspace membership checks: {reason}"
+                ),
+            ));
+            return Ok(());
+        }
+    };
+
+    for member_rel in member_rels {
+        match crate::select::select_member_manifest(crawl, &member_rel) {
+            Some(member_entry) if !member_entry.readable => {
+                acc.input_failures.push(crate::ingest::input_failure(
+                    member_entry.path.rel_path.clone(),
+                    "Failed to parse workspace member Cargo.toml for cargo lint policy checks: file is not readable.",
+                ));
+            }
+            Some(member_entry) => {
+                if let Err(error) = crate::parse::parse_raw_toml(&member_entry.path.abs_path) {
+                    push_member_parse_failure(
+                        error,
+                        &member_entry.path.rel_path,
+                        &mut acc.input_failures,
+                    )?;
+                }
+            }
+            None => {
+                acc.missing_members
+                    .push(crate::ingest::missing_member(member_rel));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Push an input failure for a member parse failure, or return a hard error.
+fn push_member_parse_failure(
+    error: IngestionError,
+    rel_path: &str,
+    input_failures: &mut Vec<G3RsCargoInputFailure>,
+) -> IngestResult<()> {
+    match error {
+        IngestionError::ParseFailed { reason, .. } | IngestionError::Unreadable { reason, .. } => {
+            input_failures.push(crate::ingest::input_failure(
+                rel_path.to_owned(),
+                format!(
+                    "Failed to parse workspace member Cargo.toml for cargo lint policy checks: {reason}"
+                ),
+            ));
+            Ok(())
+        }
+        other @ (IngestionError::CargoTomlNotFound
+        | IngestionError::SourceIngestionNotImplemented
+        | IngestionError::FileTreeIngestionNotImplemented
+        | IngestionError::NormalizationFailed { .. }) => Err(other),
+    }
+}
+
+/// Append rust-policy soft-failure entries to the `input_failures` vec.
+fn append_rust_policy_input_failures(
+    crawl: &G3RsWorkspaceCrawl,
+    input_failures: &mut Vec<G3RsCargoInputFailure>,
+) {
+    match read_rust_policy_state(crawl) {
+        G3RsCargoRustPolicyState::Missing | G3RsCargoRustPolicyState::Parsed { .. } => {}
+        G3RsCargoRustPolicyState::Unreadable { rel_path, reason }
+        | G3RsCargoRustPolicyState::ParseError { rel_path, reason } => {
+            input_failures.push(crate::ingest::input_failure(
+                rel_path,
+                format!(
+                    "Failed to parse root-local guardrail3-rs.toml for cargo Rust policy resolution: {reason}"
+                ),
+            ));
+        }
+    }
+}
+
+/// collect config members fn.
 fn collect_config_members(
     crawl: &G3RsWorkspaceCrawl,
     raw_cargo: &toml::Value,
-) -> Result<Vec<g3rs_cargo_types::G3RsCargoWorkspaceMember>, IngestionError> {
+) -> IngestResult<Vec<G3RsCargoWorkspaceMember>> {
     let member_rels =
         crate::select::collect_declared_member_rels(crawl, raw_cargo).map_err(|reason| {
             IngestionError::NormalizationFailed {
@@ -221,6 +302,7 @@ fn collect_config_members(
     Ok(members)
 }
 
+/// Read the parsed rust-policy state for the workspace, if any.
 fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsCargoRustPolicyState {
     let Some(entry) = crate::select::select_root_rust_policy_toml(crawl) else {
         return G3RsCargoRustPolicyState::Missing;

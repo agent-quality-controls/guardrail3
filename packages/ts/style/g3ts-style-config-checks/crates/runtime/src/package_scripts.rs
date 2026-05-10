@@ -2,6 +2,7 @@ use g3ts_style_types::{G3TsStyleContractInput, G3TsStylePackageSurfaceState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use std::collections::BTreeSet;
 
+/// `check_validate_runs_css_lint`: check validate runs css lint.
 pub(crate) fn check_validate_runs_css_lint(
     contract: &G3TsStyleContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -42,9 +43,8 @@ pub(crate) fn check_validate_runs_css_lint(
     }
 }
 
-fn validate_runs_css_lint(
-    package: &g3ts_style_types::G3TsStylePackageSurfaceSnapshot,
-) -> bool {
+/// `validate_runs_css_lint`: validate runs css lint.
+fn validate_runs_css_lint(package: &g3ts_style_types::G3TsStylePackageSurfaceSnapshot) -> bool {
     if !package.script_names.iter().any(|name| name == "validate") {
         return false;
     }
@@ -78,6 +78,7 @@ fn validate_runs_css_lint(
     })
 }
 
+/// `reachable_script_names`: reachable script names.
 fn reachable_script_names(
     package: &g3ts_style_types::G3TsStylePackageSurfaceSnapshot,
     root_script_name: &str,
@@ -111,6 +112,7 @@ fn reachable_script_names(
     reachable
 }
 
+/// `package_script_target`: package script target.
 fn package_script_target(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
 ) -> Option<String> {
@@ -139,6 +141,7 @@ fn package_script_target(
     None
 }
 
+/// `stylelint_invocation_is_fail_closed`: stylelint invocation is fail closed.
 fn stylelint_invocation_is_fail_closed(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
 ) -> bool {
@@ -153,14 +156,17 @@ fn stylelint_invocation_is_fail_closed(
             != Some(g3ts_style_types::G3TsStylePackageScriptCommandSeparator::Or)
 }
 
+/// `stylelint_args`: stylelint args.
 fn stylelint_args(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
 ) -> Option<&[String]> {
     if invocation.executable == "stylelint" {
         return Some(&invocation.args);
     }
-    if matches!(invocation.executable.as_str(), "pnpm" | "npm" | "yarn" | "bun" | "npx" | "bunx")
-    {
+    if matches!(
+        invocation.executable.as_str(),
+        "pnpm" | "npm" | "yarn" | "bun" | "npx" | "bunx"
+    ) {
         let (tool, args) = invocation.args.split_first()?;
         if tool == "stylelint" {
             return Some(args);
@@ -169,7 +175,8 @@ fn stylelint_args(
     None
 }
 
-fn parsed_package(
+/// `parsed_package`: parsed package.
+const fn parsed_package(
     package: &G3TsStylePackageSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStylePackageSurfaceSnapshot> {
     match package {
@@ -180,6 +187,13 @@ fn parsed_package(
     }
 }
 
+/// `package_rel_path`: package rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn package_rel_path(package: &G3TsStylePackageSurfaceState) -> Option<&str> {
     match package {
         G3TsStylePackageSurfaceState::Missing { rel_path }
@@ -189,6 +203,7 @@ fn package_rel_path(package: &G3TsStylePackageSurfaceState) -> Option<&str> {
     }
 }
 
+/// `info`: info.
 fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -201,6 +216,7 @@ fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckRe
     .into_inventory()
 }
 
+/// `error`: error.
 fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

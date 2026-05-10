@@ -2,10 +2,10 @@ use g3ts_package_types::{G3TsPackageChecksInput, G3TsPackageRootSnapshot, G3TsPa
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[must_use]
+/// `root_rel_path`: root rel path.
 pub(crate) fn root_rel_path(input: &G3TsPackageChecksInput) -> Option<&str> {
     match &input.root {
-        G3TsPackageRootState::NotPackageManagerRoot => None,
-        G3TsPackageRootState::Missing => None,
+        G3TsPackageRootState::NotPackageManagerRoot | G3TsPackageRootState::Missing => None,
         G3TsPackageRootState::Unreadable { rel_path, .. }
         | G3TsPackageRootState::ParseError { rel_path, .. } => Some(rel_path),
         G3TsPackageRootState::Parsed { snapshot } => Some(&snapshot.rel_path),
@@ -13,17 +13,21 @@ pub(crate) fn root_rel_path(input: &G3TsPackageChecksInput) -> Option<&str> {
 }
 
 #[must_use]
-pub(crate) fn parsed_root(input: &G3TsPackageChecksInput) -> Option<&G3TsPackageRootSnapshot> {
+/// `parsed_root`: parsed root.
+pub(crate) const fn parsed_root(
+    input: &G3TsPackageChecksInput,
+) -> Option<&G3TsPackageRootSnapshot> {
     match &input.root {
-        G3TsPackageRootState::NotPackageManagerRoot => None,
         G3TsPackageRootState::Parsed { snapshot } => Some(snapshot),
-        G3TsPackageRootState::Missing
+        G3TsPackageRootState::NotPackageManagerRoot
+        | G3TsPackageRootState::Missing
         | G3TsPackageRootState::Unreadable { .. }
         | G3TsPackageRootState::ParseError { .. } => None,
     }
 }
 
 #[must_use]
+/// `root_has_dependency`: root has dependency.
 pub(crate) fn root_has_dependency(snapshot: &G3TsPackageRootSnapshot, dependency: &str) -> bool {
     snapshot
         .dependencies
@@ -33,6 +37,7 @@ pub(crate) fn root_has_dependency(snapshot: &G3TsPackageRootSnapshot, dependency
 }
 
 #[must_use]
+/// `root_invokes_tool`: root invokes tool.
 pub(crate) fn root_invokes_tool(
     snapshot: &G3TsPackageRootSnapshot,
     executable: &str,
@@ -45,6 +50,7 @@ pub(crate) fn root_invokes_tool(
 }
 
 #[must_use]
+/// `forbidden_syncpack_deps_message`: forbidden syncpack deps message.
 pub(crate) fn forbidden_syncpack_deps_message(input: &G3TsPackageChecksInput) -> String {
     input
         .forbidden_syncpack_deps
@@ -55,6 +61,7 @@ pub(crate) fn forbidden_syncpack_deps_message(input: &G3TsPackageChecksInput) ->
 }
 
 #[must_use]
+/// `is_pinned_pnpm_package_manager`: is pinned pnpm package manager.
 pub(crate) fn is_pinned_pnpm_package_manager(value: Option<&str>) -> bool {
     let Some(value) = value else {
         return false;
@@ -68,6 +75,7 @@ pub(crate) fn is_pinned_pnpm_package_manager(value: Option<&str>) -> bool {
 }
 
 #[must_use]
+/// `info`: info.
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -81,6 +89,7 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3Chec
 }
 
 #[must_use]
+/// `error`: error.
 pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

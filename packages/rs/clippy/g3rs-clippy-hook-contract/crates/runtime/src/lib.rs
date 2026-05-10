@@ -1,3 +1,6 @@
+//! Clippy hook contract runtime crate.
+
+/// Clippy hook contract definition.
 mod contract;
 
 #[cfg(feature = "api")]

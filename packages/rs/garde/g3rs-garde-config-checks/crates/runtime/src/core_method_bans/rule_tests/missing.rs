@@ -15,7 +15,7 @@ fn warns_when_core_bans_missing() {
 
     assertions::assert_contains(
         &results,
-        assertions::warn(
+        &assertions::warn(
             "missing core garde method bans",
             "Missing core deserialization bans from `disallowed-methods`: serde_json::from_reader. Add these entries to `disallowed-methods` in clippy.toml.",
             "clippy.toml",

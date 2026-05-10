@@ -1,0 +1,43 @@
+[[ignore]]
+fingerprint = "4a7282e85aa38879"
+reason = "real-proof-site duplication across distinct ingestion test bodies; g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "4d65ec2aecbeb9d3"
+reason = "real-proof-site duplication across distinct ingestion test bodies; g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "66f718c8d2e565d2"
+reason = "real-proof-site duplication across distinct ingestion test bodies; g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "6a40b69ee6fd8c52"
+reason = "select-helper duplication: distinct selector entry points (root cargo.toml vs root clippy.toml) share body shape but encode independent selection contracts"
+
+[[ignore]]
+fingerprint = "73190a7850b27284"
+reason = "real-proof-site duplication across distinct pipeline test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "7f6206fc47a67aec"
+reason = "parse-error closure shapes for distinct workspace pattern contexts (member vs exclude); each encodes its own parse-failed message and must stay co-located with its call site"
+
+[[ignore]]
+fingerprint = "80602a026be291dd"
+reason = "real-proof-site duplication: distinct test bodies asserting workspace-inherited publish=true vs publish=false; g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "83a2164f1ecfd6c8"
+reason = "assertion-helper duplication across distinct rules (too-many-lines-threshold vs avoid-breaking-exported-api); g3rs-test/runtime-assertions-split forbids extraction"
+
+[[ignore]]
+fingerprint = "8a2bbb7185ec7202"
+reason = "real-proof-site duplication: distinct typed parse error test bodies (unknown fields vs wrong value type); g3rs-test/real-proof-site forbids extraction"
+
+[[ignore]]
+fingerprint = "9d627e5129cd962d"
+reason = "parse-state closure shapes for distinct cargo entry points (root vs member) that share construction but encode independent invariants"
+
+[[ignore]]
+fingerprint = "9e19ef60a5aed056"
+reason = "real-proof-site duplication: distinct policy test bodies asserting library profile detection from distinct config files; g3rs-test/real-proof-site forbids extraction"

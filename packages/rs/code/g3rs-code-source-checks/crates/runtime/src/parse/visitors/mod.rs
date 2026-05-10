@@ -1,4 +1,6 @@
+/// Rule implementation for `core`.
 mod core;
+/// Rule implementation for `string dispatch`.
 mod string_dispatch;
 
 pub(crate) use core::{

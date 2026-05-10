@@ -39,10 +39,12 @@ pub enum SupportedFamily {
     Typecov,
     /// Git hook contract checks.
     Hooks,
+    /// Repo-wide topology checks (run by validate-repo).
+    Topology,
 }
 
 /// Stable family iteration order used by the app.
-pub const SUPPORTED_FAMILIES: [SupportedFamily; 19] = [
+pub const SUPPORTED_FAMILIES: [SupportedFamily; 20] = [
     SupportedFamily::Eslint,
     SupportedFamily::AstroSetup,
     SupportedFamily::AstroContent,
@@ -62,4 +64,5 @@ pub const SUPPORTED_FAMILIES: [SupportedFamily; 19] = [
     SupportedFamily::Spelling,
     SupportedFamily::Typecov,
     SupportedFamily::Hooks,
+    SupportedFamily::Topology,
 ];

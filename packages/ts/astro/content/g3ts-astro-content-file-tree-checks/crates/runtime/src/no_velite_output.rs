@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3ts-astro-content/no-velite-output";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(
     app_root_rel_path: &str,
     velite_output_rel_path: &str,

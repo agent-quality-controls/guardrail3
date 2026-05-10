@@ -109,6 +109,10 @@ fn source_pipeline_allows_mod_dispatcher_with_restricted_use() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn source_ingestion_stays_inside_the_pointed_workspace() {
     let root = temp_workspace_root();
 
@@ -146,6 +150,10 @@ fn source_ingestion_stays_inside_the_pointed_workspace() {
 }
 
 #[test]
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 fn source_ingestion_does_not_recurse_into_excluded_nested_crates() {
     let root = temp_workspace_root();
 

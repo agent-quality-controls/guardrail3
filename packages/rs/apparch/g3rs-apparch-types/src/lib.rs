@@ -1,3 +1,5 @@
+//! Shared types for the g3rs apparch family.
+
 #[cfg(feature = "api")]
 mod types;
 

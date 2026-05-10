@@ -1,3 +1,11 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::{BTreeMap, BTreeSet};
 
 use g3rs_test_types::G3RsTestAnalyzedSourceFile;
@@ -5,6 +13,7 @@ use g3rs_test_types::ast::{FunctionInfo, UseBinding};
 
 use super::pipeline::qualified_assertion_name;
 
+/// `collect_local_proof_helper_functions` function.
 pub(super) fn collect_local_proof_helper_functions(
     file: &G3RsTestAnalyzedSourceFile,
 ) -> BTreeSet<String> {
@@ -55,6 +64,7 @@ pub(super) fn collect_local_proof_helper_functions(
     helpers
 }
 
+/// `looks_like_proof_helper_name` function.
 fn looks_like_proof_helper_name(name: &str) -> bool {
     name.split('_').any(|segment| {
         matches!(
@@ -77,6 +87,7 @@ fn looks_like_proof_helper_name(name: &str) -> bool {
     })
 }
 
+/// `collect_local_import_paths` function.
 fn collect_local_import_paths(imports: &[UseBinding]) -> BTreeMap<String, String> {
     let mut local_imports = BTreeMap::new();
     for binding in imports {
@@ -97,6 +108,7 @@ fn collect_local_import_paths(imports: &[UseBinding]) -> BTreeMap<String, String
     local_imports
 }
 
+/// `function_calls_local_proof_helper` function.
 fn function_calls_local_proof_helper(
     function: &FunctionInfo,
     file_function_names: &BTreeSet<String>,
@@ -139,6 +151,7 @@ fn function_calls_local_proof_helper(
     })
 }
 
+/// `function_calls_owned_assertion_proof` function.
 fn function_calls_owned_assertion_proof(
     function: &FunctionInfo,
     imports: &[UseBinding],
@@ -198,6 +211,7 @@ fn function_calls_owned_assertion_proof(
         })
 }
 
+/// `path_is_owned_assertion_call` function.
 fn path_is_owned_assertion_call(
     path: &[String],
     root_prefixes: &BTreeMap<String, Vec<String>>,

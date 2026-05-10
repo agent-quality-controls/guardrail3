@@ -1,8 +1,10 @@
 use g3ts_astro_content_types::G3TsAstroContentAdapterSourceInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-content/content-adapter-astro-content";
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroContentAdapterSourceInput,
     results: &mut Vec<G3CheckResult>,

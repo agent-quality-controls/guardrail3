@@ -2,8 +2,13 @@ use cargo_toml_parser::{types::CargoToml, types::InheritableValue};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3rs-toolchain/msrv-consistency";
 
+/// Parsed semver tuple `(major, minor, patch)`.
+type ParsedVersion = (u64, u64, u64);
+
+/// Validates that the pinned toolchain channel matches Cargo's `rust-version`.
 pub(crate) fn check(
     toolchain_rel_path: &str,
     toolchain_toml: &RustToolchainToml,
@@ -83,6 +88,7 @@ pub(crate) fn check(
     }
 }
 
+/// Returns the effective Cargo `rust-version` declared on workspace or package.
 fn cargo_rust_version(cargo: &CargoToml) -> Option<&str> {
     cargo
         .workspace
@@ -97,6 +103,7 @@ fn cargo_rust_version(cargo: &CargoToml) -> Option<&str> {
         })
 }
 
+/// Resolves an [`InheritableValue<String>`] to its concrete value, if any.
 fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> {
     match value {
         Some(InheritableValue::Value(value)) => Some(value.as_str()),
@@ -104,7 +111,8 @@ fn inheritable_string(value: Option<&InheritableValue<String>>) -> Option<&str> 
     }
 }
 
-fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
+/// Parses a pinned stable channel `MAJOR.MINOR[.PATCH]` into a [`ParsedVersion`].
+fn parse_pinned_stable_version(raw: &str) -> Option<ParsedVersion> {
     let normalized = raw.trim().to_ascii_lowercase();
     if normalized.split_once('-').is_some() {
         return None;
@@ -120,7 +128,8 @@ fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
     Some((major, minor, patch))
 }
 
-fn parse_manifest_version(raw: &str) -> Option<(u64, u64, u64)> {
+/// Parses a Cargo manifest `rust-version` into a [`ParsedVersion`].
+fn parse_manifest_version(raw: &str) -> Option<ParsedVersion> {
     let normalized = raw.trim().trim_start_matches('v');
     let mut parts = normalized.split('.');
     let major = parts.next()?.parse().ok()?;

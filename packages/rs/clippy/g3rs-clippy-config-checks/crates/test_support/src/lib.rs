@@ -1,3 +1,6 @@
+//! Test-support fixture builders for `g3rs-clippy-config-checks` rule tests.
+
+/// Fixture builders for clippy/cargo policy state shapes.
 mod input;
 
 #[cfg(feature = "support")]

@@ -3,8 +3,10 @@ use g3ts_arch_types::{
     G3TsArchConfigChecksInput, G3TsArchFileTreeChecksInput, G3TsArchSourceChecksInput,
 };
 
+/// Error type for ingestion failures.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsArchIngestionError {
+    /// Human-readable failure description.
     pub message: String,
 }
 
@@ -16,31 +18,31 @@ impl std::fmt::Display for G3TsArchIngestionError {
 
 impl std::error::Error for G3TsArchIngestionError {}
 
-pub fn ingest_for_config_checks(
-    crawl: &G3WorkspaceCrawl,
-) -> Result<G3TsArchConfigChecksInput, G3TsArchIngestionError> {
-    Ok(G3TsArchConfigChecksInput {
+/// Ingest config-checks input from a workspace crawl.
+#[must_use]
+pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsArchConfigChecksInput {
+    G3TsArchConfigChecksInput {
         manifest: crate::manifest::ingest_manifest_state(crawl),
-    })
+    }
 }
 
-pub fn ingest_for_file_tree_checks(
-    crawl: &G3WorkspaceCrawl,
-) -> Result<G3TsArchFileTreeChecksInput, G3TsArchIngestionError> {
+/// Ingest file-tree-checks input from a workspace crawl.
+#[must_use]
+pub fn ingest_for_file_tree_checks(crawl: &G3WorkspaceCrawl) -> G3TsArchFileTreeChecksInput {
     let manifest = crate::manifest::ingest_manifest_state(crawl);
-    Ok(G3TsArchFileTreeChecksInput {
+    G3TsArchFileTreeChecksInput {
         existing_entrypoints: crate::file_tree::existing_entrypoints(crawl, &manifest),
         manifest,
-    })
+    }
 }
 
-pub fn ingest_for_source_checks(
-    crawl: &G3WorkspaceCrawl,
-) -> Result<Vec<G3TsArchSourceChecksInput>, G3TsArchIngestionError> {
+/// Ingest source-checks inputs (one per facade) from a workspace crawl.
+#[must_use]
+pub fn ingest_for_source_checks(crawl: &G3WorkspaceCrawl) -> Vec<G3TsArchSourceChecksInput> {
     let manifest = crate::manifest::ingest_manifest_state(crawl);
-    Ok(vec![G3TsArchSourceChecksInput {
+    vec![G3TsArchSourceChecksInput {
         facades: crate::source::facade_states(crawl, &manifest),
-    }])
+    }]
 }
 
 #[cfg(test)]

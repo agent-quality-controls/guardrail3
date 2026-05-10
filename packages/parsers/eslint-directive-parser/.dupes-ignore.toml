@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "a537e2ab4c1cba8b"
+reason = "ESLint directive parser tests share assert-error shape; each #[test] is a separate proof site for a different directive shape"
+
+[[ignore]]
+fingerprint = "bf824029f0a38e57"
+reason = "assertion helpers share parsed-document assert shape because g3rs-test/runtime-assertions-split requires each Document state to have its own assertion helper"
+
+[[ignore]]
+fingerprint = "5faed2a6e5fbec94"
+reason = "parser tests for unsupported/ambiguous/unterminated cases share the parse-error proof shape; each #[test] is a distinct directive failure path"
+
+[[ignore]]
+fingerprint = "1b50b8da90b8b51b"
+reason = "extension predicates is_mdx/is_astro are one-liners that classify file extensions; they look structurally identical because each maps a fixed extension list to bool"
+
+[[ignore]]
+fingerprint = "6946f9346205bb1f"
+reason = "from_path and from_path_document are the canonical ingress functions; both must read the file then delegate to in-memory parser, so their bodies converge"

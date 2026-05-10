@@ -1,3 +1,19 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::string_slice,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::too_many_arguments,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use std::collections::BTreeSet;
 
 use crate::compat::{G3CheckResult, G3Severity};
@@ -6,8 +22,10 @@ use g3rs_hooks_contract_types::G3HookCriticalCommand;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_line_in_context};
 use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/contract-critical-command-not-fail-open";
 
+/// `check` function.
 pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckResult>) {
     let critical = critical_commands(input);
     if critical.is_empty() {
@@ -27,8 +45,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
             G3Severity::Error,
             "contract-critical hook command is fail-open".to_owned(),
             format!(
-                "Critical hook command `{}` is softened by a fail-open wrapper. Critical commands come from family hook contracts; do not hide failures with `|| true`, `|| echo ...`, or equivalent wrappers.",
-                command_text
+                "Critical hook command `{command_text}` is softened by a fail-open wrapper. Critical commands come from family hook contracts; do not hide failures with `|| true`, `|| echo ...`, or equivalent wrappers."
             ),
             Some(input.rel_path.to_owned()),
             Some(line_no),
@@ -37,6 +54,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
+/// `critical_commands` function.
 fn critical_commands(input: &FailOpenWrapperInput<'_>) -> Vec<G3HookCriticalCommand> {
     let mut commands = BTreeSet::from([
         G3HookCriticalCommand::Binary("g3rs".to_owned()),
@@ -48,6 +66,7 @@ fn critical_commands(input: &FailOpenWrapperInput<'_>) -> Vec<G3HookCriticalComm
     commands.into_iter().collect()
 }
 
+/// `first_fail_open_critical_command` function.
 fn first_fail_open_critical_command(
     local: &ParsedShellScript,
     root: &ParsedShellScript,
@@ -74,7 +93,7 @@ fn first_fail_open_critical_command(
                 |command| command_matches_critical(command, critical),
             )
         {
-            return Some((absolute_line_no, line.command_text.to_owned()));
+            return Some((absolute_line_no, line.command_text.clone()));
         }
         if negated_if_failure_branch_is_softened(local, line.line_no)
             && any_resolved_command_on_line_in_context(
@@ -86,10 +105,10 @@ fn first_fail_open_critical_command(
                 |command| command_matches_critical(command, critical),
             )
         {
-            return Some((absolute_line_no, line.command_text.to_owned()));
+            return Some((absolute_line_no, line.command_text.clone()));
         }
         if positive_availability_guard_is_softened(local, line.line_no, critical) {
-            return Some((absolute_line_no, line.command_text.to_owned()));
+            return Some((absolute_line_no, line.command_text.clone()));
         }
         if let Some(found) = called_function_fail_open(
             local,
@@ -108,6 +127,7 @@ fn first_fail_open_critical_command(
     None
 }
 
+/// `positive_availability_guard_is_softened` function.
 fn positive_availability_guard_is_softened(
     script: &ParsedShellScript,
     line_no: usize,
@@ -123,6 +143,7 @@ fn positive_availability_guard_is_softened(
     !branch_has_failure_terminator(&else_branch, script, line_no)
 }
 
+/// `positive_availability_guard_tool` function.
 fn positive_availability_guard_tool(script: &ParsedShellScript, line_no: usize) -> Option<String> {
     let raw = script
         .source_lines
@@ -134,7 +155,13 @@ fn positive_availability_guard_tool(script: &ParsedShellScript, line_no: usize) 
     if !trimmed.starts_with("if ") || !trimmed.contains("then") {
         return None;
     }
-    let words = hook_shell_parser::command_query::shell_words(trimmed.strip_prefix("if ")?.trim());
+    let after_if = trimmed.strip_prefix("if ")?.trim_start();
+    // A negated `if ! ...; then exit 1; fi` is the failure-handler shape, not a positive
+    // availability guard. The negated form is analysed by `negated_if_failure_branch_is_softened`.
+    if after_if.starts_with('!') {
+        return None;
+    }
+    let words = hook_shell_parser::command_query::shell_words(after_if);
     if words.first().is_some_and(|word| word == "command")
         && words.get(1).is_some_and(|word| word == "-v")
     {
@@ -143,6 +170,7 @@ fn positive_availability_guard_tool(script: &ParsedShellScript, line_no: usize) 
     None
 }
 
+/// `positive_if_else_branch` function.
 fn positive_if_else_branch(script: &ParsedShellScript, line_no: usize) -> Option<String> {
     let mut found_then = false;
     let mut found_else = false;
@@ -180,6 +208,7 @@ fn positive_if_else_branch(script: &ParsedShellScript, line_no: usize) -> Option
     found_else.then_some(branch)
 }
 
+/// `tool_matches_critical` function.
 fn tool_matches_critical(tool: &str, critical: &[G3HookCriticalCommand]) -> bool {
     critical.iter().any(|expected| match expected {
         G3HookCriticalCommand::Binary(binary) => binary == tool,
@@ -187,6 +216,7 @@ fn tool_matches_critical(tool: &str, critical: &[G3HookCriticalCommand]) -> bool
     })
 }
 
+/// `negated_if_failure_branch_is_softened` function.
 fn negated_if_failure_branch_is_softened(script: &ParsedShellScript, line_no: usize) -> bool {
     let Some(branch) = negated_if_failure_branch(script, line_no) else {
         return false;
@@ -194,6 +224,7 @@ fn negated_if_failure_branch_is_softened(script: &ParsedShellScript, line_no: us
     !branch_has_failure_terminator(&branch, script, line_no)
 }
 
+/// `negated_if_failure_branch` function.
 fn negated_if_failure_branch(script: &ParsedShellScript, line_no: usize) -> Option<String> {
     let start = script
         .source_lines
@@ -239,6 +270,7 @@ fn negated_if_failure_branch(script: &ParsedShellScript, line_no: usize) -> Opti
     found_then.then_some(branch)
 }
 
+/// `starts_negated_if` function.
 fn starts_negated_if(raw: &str) -> bool {
     let trimmed = raw.trim_start();
     trimmed
@@ -246,6 +278,7 @@ fn starts_negated_if(raw: &str) -> bool {
         .is_some_and(|tail| tail.trim_start().starts_with('!'))
 }
 
+/// `split_control_token` function.
 fn split_control_token<'a>(text: &'a str, token: &str) -> Option<(&'a str, &'a str)> {
     for (index, _) in text.match_indices(token) {
         let before = &text[..index];
@@ -265,6 +298,7 @@ fn split_control_token<'a>(text: &'a str, token: &str) -> Option<(&'a str, &'a s
     None
 }
 
+/// `branch_has_failure_terminator` function.
 fn branch_has_failure_terminator(
     branch: &str,
     root: &ParsedShellScript,
@@ -279,6 +313,7 @@ fn branch_has_failure_terminator(
     })
 }
 
+/// `called_function_terminates_failure` function.
 fn called_function_terminates_failure(
     parsed: &ParsedShellScript,
     command_name: &str,
@@ -294,6 +329,7 @@ fn called_function_terminates_failure(
         })
 }
 
+/// `command_second_word_is_nonzero` function.
 fn command_second_word_is_nonzero(command_text: &str) -> bool {
     command_text
         .split_whitespace()
@@ -302,6 +338,7 @@ fn command_second_word_is_nonzero(command_text: &str) -> bool {
         .is_some_and(|value| value != 0)
 }
 
+/// `called_function_fail_open` function.
 fn called_function_fail_open(
     local: &ParsedShellScript,
     root: &ParsedShellScript,
@@ -324,7 +361,7 @@ fn called_function_fail_open(
         return None;
     }
 
-    visiting.push(function.name.to_owned());
+    visiting.push(function.name.clone());
     let found = first_fail_open_critical_command(
         &function.parsed_body,
         root,
@@ -337,6 +374,7 @@ fn called_function_fail_open(
     found
 }
 
+/// `command_matches_critical` function.
 fn command_matches_critical(command: &ResolvedCommand, critical: &[G3HookCriticalCommand]) -> bool {
     critical.iter().any(|expected| match expected {
         G3HookCriticalCommand::Binary(binary) => command.command_name() == binary,
@@ -346,6 +384,7 @@ fn command_matches_critical(command: &ResolvedCommand, critical: &[G3HookCritica
     })
 }
 
+/// `first_cargo_subcommand` function.
 fn first_cargo_subcommand(command: &ResolvedCommand) -> Option<&String> {
     let args = command.args();
     let mut index = 0usize;
@@ -379,6 +418,7 @@ fn first_cargo_subcommand(command: &ResolvedCommand) -> Option<&String> {
     args.get(index)
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
@@ -394,7 +434,8 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
     )
 }
 
-fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
+/// `function_body_absolute_base` function.
+const fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
     absolute_base
         + if function.body_starts_on_definition_line {
             function.line_no.saturating_sub(1)
@@ -403,6 +444,7 @@ fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -
         }
 }
 
+/// `resolve_visible_function` function.
 fn resolve_visible_function<'a>(
     local: &'a ParsedShellScript,
     root: &'a ParsedShellScript,
@@ -434,6 +476,10 @@ fn resolve_visible_function<'a>(
         .map(|function| (function, function_body_absolute_base(1, function)))
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "API takes owned Vec to keep signature stable across the contract surface; downstream callers pass ownership"
+)]
 #[cfg(test)]
 pub(crate) fn run_case(
     content: &str,

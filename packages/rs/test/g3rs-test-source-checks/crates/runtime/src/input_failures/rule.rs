@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/source-input-failures";
 
+/// `check` function.
 pub(crate) fn check(
     _root_rel_dir: &str,
     rel_path: &str,

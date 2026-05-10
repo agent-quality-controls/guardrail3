@@ -66,7 +66,7 @@ deny = [
     { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
     # --- Parsing: use structured parsers, never regex ---
-    { name = "regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "regex", wrappers = ["tree-sitter"], reason = "Ban direct regex use; tree-sitter owns regex transitively for structured shell parsing" },
     { name = "fancy-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "onig", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "pcre2", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },

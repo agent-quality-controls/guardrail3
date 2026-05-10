@@ -1,8 +1,10 @@
 use g3ts_arch_types::{G3TsArchConfigChecksInput, G3TsArchManifestSnapshot, G3TsArchManifestState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Borrow the parsed manifest snapshot if `input.manifest` is in the
+/// `Parsed` state, returning `None` otherwise.
 #[must_use]
-pub(crate) fn parsed_manifest(
+pub(crate) const fn parsed_manifest(
     input: &G3TsArchConfigChecksInput,
 ) -> Option<&G3TsArchManifestSnapshot> {
     match &input.manifest {
@@ -13,6 +15,8 @@ pub(crate) fn parsed_manifest(
     }
 }
 
+/// Returns `true` when `rel_path` matches one of the canonical facade
+/// entry-point locations (`src/index.ts(x)` or `index.ts(x)`).
 #[must_use]
 pub(crate) fn canonical_entrypoint(rel_path: &str) -> bool {
     matches!(
@@ -21,6 +25,7 @@ pub(crate) fn canonical_entrypoint(rel_path: &str) -> bool {
     )
 }
 
+/// Build an `Error`-severity check result tagged with `file`.
 #[must_use]
 pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
@@ -33,6 +38,7 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3Che
     )
 }
 
+/// Build an inventory-tagged `Info` check result for `file`.
 #[must_use]
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(

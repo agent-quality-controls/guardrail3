@@ -1,0 +1,3 @@
+[[ignore]]
+fingerprint = "967937520aec7fc1"
+reason = "real-proof-site duplication: distinct test bodies asserting inventory-only output through different entry points (clean workspace vs explicit clean assertion); g3rs-test/real-proof-site forbids extracting these into a shared helper since each must independently invoke the public check API"

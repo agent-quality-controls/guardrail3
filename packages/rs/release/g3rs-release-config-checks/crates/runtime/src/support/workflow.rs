@@ -6,6 +6,7 @@ use g3rs_release_types::{
     G3RsReleaseWorkflowJob, G3RsReleaseWorkflowStep,
 };
 
+/// `crate_binary_release_workflow_present` function.
 pub(crate) fn crate_binary_release_workflow_present(
     repo: &G3RsReleaseConfigRepo,
     krate: &G3RsReleaseConfigCrate,
@@ -22,6 +23,7 @@ pub(crate) fn crate_binary_release_workflow_present(
     })
 }
 
+/// `crate_linux_release_target_present` function.
 pub(crate) fn crate_linux_release_target_present(
     repo: &G3RsReleaseConfigRepo,
     krate: &G3RsReleaseConfigCrate,
@@ -38,6 +40,7 @@ pub(crate) fn crate_linux_release_target_present(
     })
 }
 
+/// `binary_release_present` function.
 fn binary_release_present(
     workflow: &G3RsReleaseWorkflowAnalysis,
     crate_name: &str,
@@ -59,6 +62,7 @@ fn binary_release_present(
     })
 }
 
+/// `linux_target_present` function.
 fn linux_target_present(
     workflow: &G3RsReleaseWorkflowAnalysis,
     crate_name: &str,
@@ -91,6 +95,7 @@ fn linux_target_present(
     })
 }
 
+/// `release_path_build_job_indices` function.
 fn release_path_build_job_indices(
     workflow: &G3RsReleaseWorkflowAnalysis,
     index: usize,
@@ -122,6 +127,7 @@ fn release_path_build_job_indices(
         .collect()
 }
 
+/// `release_path_job_indices` function.
 fn release_path_job_indices(
     workflow: &G3RsReleaseWorkflowAnalysis,
     start_index: usize,
@@ -149,6 +155,7 @@ fn release_path_job_indices(
     visited
 }
 
+/// `job_has_linux_target_for_crate` function.
 fn job_has_linux_target_for_crate(
     job: &G3RsReleaseWorkflowJob,
     crate_name: &str,
@@ -167,6 +174,7 @@ fn job_has_linux_target_for_crate(
     })
 }
 
+/// `step_uses_release_action` function.
 fn step_uses_release_action(step: &G3RsReleaseWorkflowStep) -> bool {
     step.uses.as_deref().is_some_and(|uses| {
         uses == "taiki-e/upload-rust-binary-action@v1"
@@ -174,6 +182,7 @@ fn step_uses_release_action(step: &G3RsReleaseWorkflowStep) -> bool {
     })
 }
 
+/// `step_builds_release_binary_for` function.
 fn step_builds_release_binary_for(
     step: &G3RsReleaseWorkflowStep,
     crate_name: &str,
@@ -185,7 +194,7 @@ fn step_builds_release_binary_for(
         line_has_command(line, |command, args| {
             command_basename(command) == "cargo"
                 && cargo_subcommand(args) == Some("build")
-                && args.iter().any(|arg| *arg == "--release")
+                && args.contains(&"--release")
                 && command_mentions_crate(
                     args,
                     crate_name,
@@ -197,6 +206,7 @@ fn step_builds_release_binary_for(
     })
 }
 
+/// `step_targets_linux_binary_for` function.
 fn step_targets_linux_binary_for(
     step: &G3RsReleaseWorkflowStep,
     crate_name: &str,
@@ -208,7 +218,7 @@ fn step_targets_linux_binary_for(
         line_has_command(line, |command, args| {
             command_basename(command) == "cargo"
                 && cargo_subcommand(args) == Some("build")
-                && args.iter().any(|arg| *arg == "--target")
+                && args.contains(&"--target")
                 && args.iter().any(|arg| arg.contains("linux"))
                 && command_mentions_crate(
                     args,
@@ -226,6 +236,7 @@ fn step_targets_linux_binary_for(
             .is_some_and(|target| target.contains("linux"))
 }
 
+/// `command_mentions_crate` function.
 fn command_mentions_crate(
     args: &[&str],
     crate_name: &str,
@@ -246,14 +257,17 @@ fn command_mentions_crate(
         .any(|window| matches!(window, ["--bin", value] if binary_target_names.contains(*value)))
 }
 
+/// `manifest_path_matches` function.
 fn manifest_path_matches(value: &str, cargo_rel_path: &str) -> bool {
     Path::new(value).ends_with(Path::new(cargo_rel_path))
 }
 
+/// `cargo_subcommand` function.
 fn cargo_subcommand<'a>(args: &'a [&'a str]) -> Option<&'a str> {
     args.iter().copied().find(|arg| !arg.starts_with('-'))
 }
 
+/// `command_basename` function.
 fn command_basename(command: &str) -> &str {
     Path::new(command)
         .file_name()
@@ -261,6 +275,7 @@ fn command_basename(command: &str) -> &str {
         .unwrap_or(command)
 }
 
+/// `line_has_command` function.
 fn line_has_command<F>(line: &str, predicate: F) -> bool
 where
     F: Fn(&str, &[&str]) -> bool,

@@ -3,20 +3,25 @@ use g3ts_astro_setup_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/protected-setup-rule-disables-restricted";
+/// Static rule data.
 const RESTRICT_RULE: &str = "@eslint-community/eslint-comments/no-restricted-disable";
+/// Static rule data.
 const ASTRO_SOURCE_PROTECTED_RULES: [&str; 4] = [
     "astro/valid-compile",
     "@eslint-community/eslint-comments/no-restricted-disable",
     "@eslint-community/eslint-comments/no-unused-disable",
     "@eslint-community/eslint-comments/require-description",
 ];
+/// Static rule data.
 const TS_SOURCE_PROTECTED_RULES: [&str; 3] = [
     "@eslint-community/eslint-comments/no-restricted-disable",
     "@eslint-community/eslint-comments/no-unused-disable",
     "@eslint-community/eslint-comments/require-description",
 ];
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -26,7 +31,7 @@ pub(crate) fn check(
             ID,
             "Setup protected-disable policy cannot be checked",
             "G3TS could not parse the Astro setup ESLint effective config. Configure `@eslint-community/eslint-comments/no-restricted-disable` on Astro, TS, and TSX source lanes for setup-owned delegated rules.".to_owned(),
-            config_rel_path(&contract.config),
+            Some(config_rel_path(&contract.config)),
         ));
         return;
     };
@@ -64,6 +69,7 @@ pub(crate) fn check(
     ));
 }
 
+/// Internal helper used by the rule.
 fn lane_is_restricted(
     warn_or_error_rules: &[String],
     patterns: &[String],
@@ -77,6 +83,7 @@ fn lane_is_restricted(
         })
 }
 
+/// Internal helper used by the rule.
 fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
     pattern == rule
         || pattern == "*"
@@ -85,11 +92,12 @@ fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
             .is_some_and(|prefix| rule.starts_with(prefix))
 }
 
-fn config_rel_path(config: &G3TsAstroSetupEslintSurfaceState) -> Option<&str> {
+/// Internal helper used by the rule.
+fn config_rel_path(config: &G3TsAstroSetupEslintSurfaceState) -> &str {
     match config {
         G3TsAstroSetupEslintSurfaceState::Missing { rel_path }
         | G3TsAstroSetupEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroSetupEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroSetupEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroSetupEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }

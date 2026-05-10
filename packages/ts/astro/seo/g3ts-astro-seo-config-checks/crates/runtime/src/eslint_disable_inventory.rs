@@ -1,8 +1,10 @@
 use g3ts_astro_seo_types::G3TsAstroSeoEslintDirectiveInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/eslint-disable-inventory";
 
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check_all(
     directives: &[G3TsAstroSeoEslintDirectiveInput],
     results: &mut Vec<G3CheckResult>,
@@ -22,6 +24,7 @@ pub(crate) fn check_all(
     }
 }
 
+/// Internal helper used by the rule.
 fn check(directive: &G3TsAstroSeoEslintDirectiveInput, results: &mut Vec<G3CheckResult>) {
     if let Some(reason) = directive.parse_error() {
         results.push(crate::support::error(
@@ -50,6 +53,7 @@ fn check(directive: &G3TsAstroSeoEslintDirectiveInput, results: &mut Vec<G3Check
     ));
 }
 
+/// Internal helper used by the rule.
 fn disabled_rules(directive: &G3TsAstroSeoEslintDirectiveInput) -> String {
     if directive.all_rules() {
         return "all rules".to_owned();

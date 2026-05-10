@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "640c3f82b7b969d5"
+reason = "Parallel single-line assert_error entrypoints for distinct check rules"
+
+[[ignore]]
+fingerprint = "14f5d2cff6d98657"
+reason = "Parallel test cases for distinct scenarios sharing fixture/assert structure (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "32ba71506d9724fc"
+reason = "Parallel invocation helpers for distinct check rules"
+
+[[ignore]]
+fingerprint = "5a442887ad6a9152"
+reason = "Parallel constructors for parsed package vs syncpack snapshot fixtures"
+
+[[ignore]]
+fingerprint = "bef2dfa76bcef2b4"
+reason = "Parallel severity-band runtime-error/runtime-info assertion helpers"
+
+[[ignore]]
+fingerprint = "ebca207f47110b29"
+reason = "Parallel rel_path extractors for distinct snapshot kinds"

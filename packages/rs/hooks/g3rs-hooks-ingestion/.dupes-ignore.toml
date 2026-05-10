@@ -1,0 +1,39 @@
+[[ignore]]
+fingerprint = "5155ca17c39506db"
+reason = "pipeline integration tests share the same fixture-build/run/assert structure; one test per real-artifact proof site as required by g3rs-test/real-proof-site"
+
+[[ignore]]
+fingerprint = "9aaa1f563cdb86ba"
+reason = "pipeline inventory tests share the same fixture-build/run/assert structure; one test per inventory-reporting variant"
+
+[[ignore]]
+fingerprint = "0db218693ee2088d"
+reason = "parallel real-artifact proof sites for hook vs verifier upward-walk discovery; cannot dedup without violating g3rs-test/real-proof-site"
+
+[[ignore]]
+fingerprint = "4a7282e85aa38879"
+reason = "centralized fs wrappers around std::fs::read_to_string and std::fs::metadata are intentional thin shells with identical disallowed-methods boundary shape"
+
+[[ignore]]
+fingerprint = "507687f766f66e49"
+reason = "pipeline integration tests with parallel scenarios; one fixture per proof site"
+
+[[ignore]]
+fingerprint = "652aa01e788e0097"
+reason = "parallel real-artifact proof sites for workspace-local hook vs verifier ingestion"
+
+[[ignore]]
+fingerprint = "90ec6c7dc6497d93"
+reason = "upward-walk match closures share the same Option<Action> shape per filesystem-entry kind"
+
+[[ignore]]
+fingerprint = "9e548c6d63f65abf"
+reason = "parallel pipeline tests for hook-rs-10 quiet vs rs-config trigger; distinct rule scopes require separate fixtures"
+
+[[ignore]]
+fingerprint = "c1b3474a493f8f01"
+reason = "synthetic_file_entry vs synthetic_dir_entry helpers build parallel fixture entries with distinct kinds; cannot merge without losing call-site clarity"
+
+[[ignore]]
+fingerprint = "ea2242115366b472"
+reason = "findings vs non_inventory share the same sort-by-tuple closure shape; assertion-helper duplication is required by g3rs-test/runtime-assertions-split"

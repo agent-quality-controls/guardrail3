@@ -1,8 +1,11 @@
 use g3ts_arch_types::{G3TsArchConfigChecksInput, G3TsArchManifestState};
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier reported on each emitted result.
 const ID: &str = "g3ts-arch/root-manifest-parseable";
 
+/// Run the rule, reporting unreadable, parse-error, or successful parsed
+/// states for the root `package.json` manifest.
 pub(crate) fn check(input: &G3TsArchConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     match &input.manifest {
         G3TsArchManifestState::Missing => {}
@@ -12,7 +15,7 @@ pub(crate) fn check(input: &G3TsArchConfigChecksInput, results: &mut Vec<G3Check
                 "root package.json unreadable",
                 format!("Root package manifest `{rel_path}` is unreadable: {reason}."),
                 rel_path,
-            ))
+            ));
         }
         G3TsArchManifestState::ParseError { rel_path, reason } => {
             results.push(crate::support::error(
@@ -20,7 +23,7 @@ pub(crate) fn check(input: &G3TsArchConfigChecksInput, results: &mut Vec<G3Check
                 "root package.json parse failed",
                 format!("Root package manifest `{rel_path}` could not be parsed: {reason}."),
                 rel_path,
-            ))
+            ));
         }
         G3TsArchManifestState::Parsed { snapshot } => results.push(crate::support::info(
             ID,

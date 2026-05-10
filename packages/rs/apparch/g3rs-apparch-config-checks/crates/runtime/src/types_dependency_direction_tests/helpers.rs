@@ -14,7 +14,7 @@ fn crate_input(name: &str, layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3R
 }
 
 pub(super) fn input(edges: &[(&str, &str)]) -> G3RsApparchCrateDependencyChecksInput {
-    let crates = vec![
+    let crates = [
         crate_input("core", G3RsApparchLayer::Types, "types/core/Cargo.toml"),
         crate_input("shared", G3RsApparchLayer::Types, "types/shared/Cargo.toml"),
         crate_input(

@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "a29642a2d6ed6ac2"
+reason = "rustfmt.toml field assertion helpers share field-equality shape; each (edition / newline_style / use_small_heuristics / color / emit_mode) is a distinct proof site per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "0d1cf753c4c15065"
+reason = "rustfmt.toml rejection tests share parse_error_message shape; each #[test] proves a distinct invalid-input rejection path"
+
+[[ignore]]
+fingerprint = "e28bbdcf55b40fe8"
+reason = "From<toml::de::Error> and From<std::io::Error> are single-statement variant constructors that always look structurally identical"

@@ -1,11 +1,25 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::indexing_slicing,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::unnecessary_wraps,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use crate::compat::{G3CheckResult, G3Severity};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_relaxed};
 use hook_shell_parser::types::ParsedShellScript;
 
 use crate::inputs::RustHookCommandInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/cargo-dupes-excludes";
 
+/// `check` function.
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = script_contains_cargo_dupes_with_exclude_tests(input.parsed);
 
@@ -37,19 +51,23 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
+/// `script_contains_cargo_dupes_with_exclude_tests` function.
 pub(crate) fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript) -> bool {
     any_resolved_command_relaxed(parsed, cargo_dupes_with_exclude_tests)
         && !any_resolved_command_relaxed(parsed, cargo_dupes_without_exclude_tests)
 }
 
+/// `cargo_dupes_with_exclude_tests` function.
 fn cargo_dupes_with_exclude_tests(command: &ResolvedCommand) -> bool {
     cargo_dupes_exclude_state(command) == Some(true)
 }
 
+/// `cargo_dupes_without_exclude_tests` function.
 fn cargo_dupes_without_exclude_tests(command: &ResolvedCommand) -> bool {
     cargo_dupes_exclude_state(command) == Some(false)
 }
 
+/// `cargo_dupes_exclude_state` function.
 fn cargo_dupes_exclude_state(command: &ResolvedCommand) -> Option<bool> {
     match command.command_name() {
         "cargo-dupes" => cargo_dupes_binary_exclude_state(command.args()),
@@ -58,6 +76,7 @@ fn cargo_dupes_exclude_state(command: &ResolvedCommand) -> Option<bool> {
     }
 }
 
+/// `cargo_dupes_binary_exclude_state` function.
 fn cargo_dupes_binary_exclude_state(args: &[String]) -> Option<bool> {
     let mut index = 0usize;
     let Some(subcommand) = args.get(index).map(String::as_str) else {
@@ -71,6 +90,7 @@ fn cargo_dupes_binary_exclude_state(args: &[String]) -> Option<bool> {
     dupes_flag_state(&args[index..])
 }
 
+/// `cargo_dupes_subcommand_exclude_state` function.
 fn cargo_dupes_subcommand_exclude_state(args: &[String]) -> Option<bool> {
     let mut index = 0usize;
 
@@ -120,6 +140,7 @@ fn cargo_dupes_subcommand_exclude_state(args: &[String]) -> Option<bool> {
     dupes_flag_state(args.get(index..).unwrap_or(&[]))
 }
 
+/// `dupes_flag_state` function.
 fn dupes_flag_state(args: &[String]) -> Option<bool> {
     let mut index = 0usize;
     let mut exclude_tests = false;
@@ -155,6 +176,7 @@ fn dupes_flag_state(args: &[String]) -> Option<bool> {
     Some(exclude_tests)
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
@@ -170,10 +192,12 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
     )
 }
 
+/// `is_help_or_version_flag` function.
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
 }
 
+/// `dupes_flag_takes_value` function.
 fn dupes_flag_takes_value(flag: &str) -> bool {
     matches!(flag, "--max-exact" | "--max-exact-percent")
 }

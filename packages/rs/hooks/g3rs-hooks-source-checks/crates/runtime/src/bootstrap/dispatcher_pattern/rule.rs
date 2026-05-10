@@ -2,8 +2,10 @@ use crate::compat::{G3CheckResult, G3Severity};
 
 use crate::inputs::DispatcherSyntaxInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/dispatcher-pattern";
 
+/// `check` function.
 pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !input.has_modular_dir {
         results.push(
@@ -55,6 +57,7 @@ pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3Check
     }
 }
 
+/// `targets_pre_commit_dir` function.
 fn targets_pre_commit_dir(raw: &str) -> bool {
     let normalized = raw.replace(['"', '\''], "");
     normalized.contains("pre-commit.d/") || normalized.ends_with("pre-commit.d")

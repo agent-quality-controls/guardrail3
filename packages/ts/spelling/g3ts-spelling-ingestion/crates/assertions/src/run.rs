@@ -1,3 +1,8 @@
+/// Assert that ingesting `crawl` yields exactly `expected` contracts.
+///
+/// # Panics
+///
+/// Panics when the ingested contract count differs from `expected`.
 pub fn assert_ingests_contract_count(
     crawl: &g3_workspace_crawl::G3RsWorkspaceCrawl,
     expected: usize,

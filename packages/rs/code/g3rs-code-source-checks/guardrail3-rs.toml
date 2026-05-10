@@ -16,18 +16,6 @@ allowed_deps = [
 garde = false
 
 [[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "Rule runtime crate intentionally keeps one source rule module per file."
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/assertions/Cargo.toml"
-selector = "structural-split"
-reason = "Assertions crate intentionally keeps one shared proof module per rule."
-
-[[waivers]]
 rule = "g3rs-code/too-many-effective-code-lines"
 file = "crates/runtime/src/public_struct_named_fields/rule.rs"
 selector = "effective-code-lines"

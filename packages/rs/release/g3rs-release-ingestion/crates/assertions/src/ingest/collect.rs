@@ -3,6 +3,11 @@ pub fn count(results: &[guardrail3_check_types::G3CheckResult], id: &str) -> usi
     results.iter().filter(|result| result.id() == id).count()
 }
 
+/// Asserts that `results` contains an entry matching `id`/`title`/`file`/`inventory`.
+///
+/// # Panics
+///
+/// Panics if no matching result is found.
 pub fn assert_present(
     results: &[guardrail3_check_types::G3CheckResult],
     id: &str,
@@ -21,6 +26,11 @@ pub fn assert_present(
     );
 }
 
+/// Asserts that no result matches the given `id`.
+///
+/// # Panics
+///
+/// Panics if any result matches `id`.
 pub fn assert_no_results(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results.iter().all(|result| result.id() != id),

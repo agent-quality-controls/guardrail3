@@ -255,6 +255,7 @@ pub fn assert_pipeline_classifies_custom_target_paths_before_checks_run(results:
     }
 }
 
+/// `assert_file_result_count` test helper.
 fn assert_file_result_count(results: &[G3CheckResult], file: &str, expected: usize) {
     let actual = results
         .iter()
@@ -263,6 +264,7 @@ fn assert_file_result_count(results: &[G3CheckResult], file: &str, expected: usi
     assert_eq!(actual, expected, "{results:#?}");
 }
 
+/// `assert_has_result_id` test helper.
 fn assert_has_result_id(results: &[G3CheckResult], file: &str, id: &str) {
     assert!(
         results
@@ -272,6 +274,7 @@ fn assert_has_result_id(results: &[G3CheckResult], file: &str, id: &str) {
     );
 }
 
+/// `assert_has_result_id_with_severity` test helper.
 fn assert_has_result_id_with_severity(
     results: &[G3CheckResult],
     file: &str,
@@ -286,6 +289,7 @@ fn assert_has_result_id_with_severity(
     );
 }
 
+/// `assert_no_results_for_file` test helper.
 fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     assert!(
         !results.iter().any(|result| result.file() == Some(file)),
@@ -293,10 +297,12 @@ fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     );
 }
 
+/// `assert_result_count` test helper.
 fn assert_result_count(results: &[G3CheckResult], expected: usize) {
     assert_eq!(results.len(), expected, "{results:#?}");
 }
 
+/// Returns the first finding in `results` that points at `file`. Panics if no such finding exists.
 fn finding_for_file<'a>(results: &'a [G3CheckResult], file: &str) -> &'a G3CheckResult {
     results
         .iter()
@@ -304,6 +310,7 @@ fn finding_for_file<'a>(results: &'a [G3CheckResult], file: &str) -> &'a G3Check
         .expect("expected finding for file")
 }
 
+/// `assert_result_set` test helper.
 fn assert_result_set(results: &[G3CheckResult], file: &str, count: usize, ids: &[&str]) {
     assert_file_result_count(results, file, count);
     for id in ids {

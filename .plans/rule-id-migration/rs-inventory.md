@@ -34,8 +34,6 @@ This inventory records active old numeric IDs and their new semantic replacement
   - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/crate_has_facade.rs`
 - `RS-ARCH-FILETREE-03` -> `g3rs-arch/mod-rs-required`
   - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/mod_rs_required.rs`
-- `RS-ARCH-FILETREE-07` -> `g3rs-arch/structural-split`
-  - definition: `packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/structural_split.rs`
 - `RS-ARCH-SOURCE-02` -> `g3rs-arch/lib-facade-only`
   - definition: `packages/rs/arch/g3rs-arch-source-checks/crates/runtime/src/lib_facade_only.rs`
 - `RS-ARCH-SOURCE-04` -> `g3rs-arch/mod-facade-only`

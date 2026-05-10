@@ -1,7 +1,9 @@
 use g3ts_astro_setup_types::G3TsAstroSetupIntegrationContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/forbidden-script-targets";
+/// Static rule data.
 const FORBIDDEN_SCRIPT_TARGETS: [&str; 4] = [
     "g3ts-astro-sitemap-checks",
     "g3ts-astro-robots-checks",
@@ -9,6 +11,7 @@ const FORBIDDEN_SCRIPT_TARGETS: [&str; 4] = [
     "g3ts-astro-llms",
 ];
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,

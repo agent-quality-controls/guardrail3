@@ -7,7 +7,8 @@ use g3ts_spelling_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-pub(crate) fn parsed_package(
+/// `parsed_package`: parsed package.
+pub(crate) const fn parsed_package(
     package: &G3TsSpellingPackageSurfaceState,
 ) -> Option<&G3TsSpellingPackageSurfaceSnapshot> {
     match package {
@@ -18,16 +19,18 @@ pub(crate) fn parsed_package(
     }
 }
 
-pub(crate) fn package_rel_path(package: &G3TsSpellingPackageSurfaceState) -> Option<&str> {
+/// `package_rel_path`: package rel path.
+pub(crate) fn package_rel_path(package: &G3TsSpellingPackageSurfaceState) -> &str {
     match package {
         G3TsSpellingPackageSurfaceState::Missing { rel_path }
         | G3TsSpellingPackageSurfaceState::Unreadable { rel_path, .. }
-        | G3TsSpellingPackageSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsSpellingPackageSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsSpellingPackageSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsSpellingPackageSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
-pub(crate) fn parsed_syncpack(
+/// `parsed_syncpack`: parsed syncpack.
+pub(crate) const fn parsed_syncpack(
     state: &G3TsSpellingSyncpackSurfaceState,
 ) -> Option<&g3ts_spelling_types::G3TsSpellingSyncpackSnapshot> {
     match state {
@@ -38,15 +41,17 @@ pub(crate) fn parsed_syncpack(
     }
 }
 
-pub(crate) fn syncpack_rel_path(state: &G3TsSpellingSyncpackSurfaceState) -> Option<&str> {
+/// `syncpack_rel_path`: syncpack rel path.
+pub(crate) fn syncpack_rel_path(state: &G3TsSpellingSyncpackSurfaceState) -> &str {
     match state {
         G3TsSpellingSyncpackSurfaceState::Missing { rel_path }
         | G3TsSpellingSyncpackSurfaceState::Unreadable { rel_path, .. }
-        | G3TsSpellingSyncpackSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsSpellingSyncpackSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsSpellingSyncpackSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsSpellingSyncpackSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
+/// `package_has_dependency`: package has dependency.
 pub(crate) fn package_has_dependency(
     package: &G3TsSpellingPackageSurfaceSnapshot,
     dependency: &str,
@@ -58,6 +63,7 @@ pub(crate) fn package_has_dependency(
         .any(|candidate| candidate == dependency)
 }
 
+/// `script_invokes_cspell`: script invokes cspell.
 pub(crate) fn script_invokes_cspell(
     package: &G3TsSpellingPackageSurfaceSnapshot,
     script_name: &str,
@@ -72,6 +78,7 @@ pub(crate) fn script_invokes_cspell(
         })
 }
 
+/// `validate_runs_spellcheck`: validate runs spellcheck.
 pub(crate) fn validate_runs_spellcheck(package: &G3TsSpellingPackageSurfaceSnapshot) -> bool {
     if !package.script_names.iter().any(|name| name == "validate") {
         return false;
@@ -96,6 +103,7 @@ pub(crate) fn validate_runs_spellcheck(package: &G3TsSpellingPackageSurfaceSnaps
     })
 }
 
+/// `info`: info.
 pub(crate) fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -108,6 +116,7 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: Option<&str>) -
     .into_inventory()
 }
 
+/// `error`: error.
 pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -119,10 +128,12 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
     )
 }
 
+/// `cspell_invocation`: cspell invocation.
 fn cspell_invocation(invocation: &G3TsSpellingPackageScriptToolInvocation) -> bool {
     cspell_args(invocation).is_some()
 }
 
+/// `script_has_no_or_separator`: script has no or separator.
 fn script_has_no_or_separator(
     package: &G3TsSpellingPackageSurfaceSnapshot,
     script_name: &str,
@@ -137,6 +148,7 @@ fn script_has_no_or_separator(
         })
 }
 
+/// `cspell_args`: cspell args.
 fn cspell_args(invocation: &G3TsSpellingPackageScriptToolInvocation) -> Option<&[String]> {
     if invocation.executable == "cspell" {
         return Some(&invocation.args);
@@ -153,6 +165,7 @@ fn cspell_args(invocation: &G3TsSpellingPackageScriptToolInvocation) -> Option<&
     None
 }
 
+/// `reachable_script_names`: reachable script names.
 fn reachable_script_names(
     package: &G3TsSpellingPackageSurfaceSnapshot,
     root_script_name: &str,
@@ -176,6 +189,7 @@ fn reachable_script_names(
     reachable
 }
 
+/// `package_script_target`: package script target.
 fn package_script_target(invocation: &G3TsSpellingPackageScriptToolInvocation) -> Option<String> {
     if invocation.executable == "package-script" {
         return invocation.args.first().cloned();

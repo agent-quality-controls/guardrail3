@@ -1,8 +1,10 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/nextest-timeouts";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let async_active = input.has_tests && (input.tokio_dependency_present || input.has_tokio_tests);
     if !async_active {
@@ -76,6 +78,7 @@ pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3Check
     }
 }
 
+/// `display_root` function.
 fn display_root(rel_dir: &str) -> String {
     if rel_dir.is_empty() {
         "project root".to_owned()

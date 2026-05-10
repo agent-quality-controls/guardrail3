@@ -1,5 +1,6 @@
 use g3rs_hooks_file_tree_checks_runtime as _;
 
+/// `common` module.
 mod common;
 
 #[cfg(feature = "checks")]

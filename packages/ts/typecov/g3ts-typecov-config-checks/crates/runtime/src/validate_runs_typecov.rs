@@ -1,6 +1,7 @@
 use g3ts_typecov_types::G3TsTypecovContractInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs the typecov `validate-runs-typecov` config check.
 pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
     let rel_path = crate::common::package_rel_path(&contract.package);
     let Some(package) = crate::common::parsed_package(&contract.package) else {
@@ -8,10 +9,9 @@ pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
             "g3ts-typecov/validate-runs-typecov",
             "Validate script cannot be checked",
             format!(
-                "`{}` must be readable and parseable so G3TS can prove `validate` runs typecov fail-closed.",
-                rel_path.unwrap_or("package.json")
+                "`{rel_path}` must be readable and parseable so G3TS can prove `validate` runs typecov fail-closed."
             ),
-            rel_path,
+            Some(rel_path),
         );
     };
     if crate::common::validate_runs_typecov(package) {

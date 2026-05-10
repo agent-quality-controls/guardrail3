@@ -5,6 +5,10 @@ use std::process::Command;
 use g3rs_cargo_ingestion_assertions::run as assertions;
 use tempfile::tempdir;
 
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk git+files to exercise the workspace crawl; the centralized fs/process bans target production code paths only"
+)]
 fn git_init(path: &Path) {
     let _status = Command::new("git")
         .args(["init", "--quiet"])
@@ -13,6 +17,10 @@ fn git_init(path: &Path) {
         .expect("git init should succeed in test fixture setup");
 }
 
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk git+files to exercise the workspace crawl; the centralized fs/process bans target production code paths only"
+)]
 fn write(path: impl AsRef<Path>, content: &str) {
     if let Some(parent) = path.as_ref().parent() {
         fs::create_dir_all(parent)

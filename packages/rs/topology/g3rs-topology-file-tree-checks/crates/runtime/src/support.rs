@@ -1,10 +1,12 @@
 use g3rs_topology_types::G3RsTopologyWorkspaceFamily;
 
-pub(crate) fn display_dir(rel_dir: &str) -> &str {
+/// Returns a friendly directory label, mapping the empty string to `"."`.
+pub(crate) const fn display_dir(rel_dir: &str) -> &str {
     if rel_dir.is_empty() { "." } else { rel_dir }
 }
 
-pub(crate) fn family_label(family: G3RsTopologyWorkspaceFamily) -> &'static str {
+/// Returns the canonical label for a workspace family used in rule messages.
+pub(crate) const fn family_label(family: G3RsTopologyWorkspaceFamily) -> &'static str {
     match family {
         G3RsTopologyWorkspaceFamily::Toolchain => "toolchain",
         G3RsTopologyWorkspaceFamily::Fmt => "fmt",

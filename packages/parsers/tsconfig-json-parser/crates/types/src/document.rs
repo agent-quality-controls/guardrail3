@@ -1,12 +1,17 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "parser document model types intentionally include the parser domain (Tsconfig) and document role"
+)]
+
 use serde_json::Value;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TsconfigDocument {
     pub raw: Value,
     pub typed: TsconfigParseState,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TsconfigParseState {
     Parsed(TsconfigSnapshot),
     Invalid(String),
@@ -35,7 +40,7 @@ pub struct TsconfigCompilerOptions {
     pub allow_unused_labels: Option<bool>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TsconfigBoolFieldState<'a> {
     Missing,
     Value(bool),

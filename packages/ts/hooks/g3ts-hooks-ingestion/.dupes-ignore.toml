@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "4859aa5645a0e1d1"
+reason = "per-test fixture / per-hook-kind ingestion: each test exercises a distinct hook setup; deduping would couple unrelated ingestion paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "13f24e1ffbb5ff30"
+reason = "per-test fixture / per-hook-kind ingestion: each test exercises a distinct hook setup; deduping would couple unrelated ingestion paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "345d8be10a2968b5"
+reason = "per-test fixture / per-hook-kind ingestion: each test exercises a distinct hook setup; deduping would couple unrelated ingestion paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "7cf0767c968213c7"
+reason = "per-test fixture / per-hook-kind ingestion: each test exercises a distinct hook setup; deduping would couple unrelated ingestion paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "d013a90f73bbe25f"
+reason = "per-test fixture / per-hook-kind ingestion: each test exercises a distinct hook setup; deduping would couple unrelated ingestion paths, conflicts with real-proof-site contract"

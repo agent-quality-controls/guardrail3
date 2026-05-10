@@ -1,0 +1,79 @@
+[[ignore]]
+fingerprint = "3b7a3a02062c06ee"
+reason = "g3rs-test/real-proof-site: parallel rule test bodies (one per threshold-style rule)"
+
+[[ignore]]
+fingerprint = "7b03dcb4beed1a0c"
+reason = "g3rs-test/real-proof-site: parallel rule test bodies (cross-rule cases.rs)"
+
+[[ignore]]
+fingerprint = "1a6b121a8d48265d"
+reason = "g3rs-test/real-proof-site: parallel run_check helpers per threshold rule"
+
+[[ignore]]
+fingerprint = "1127b4f6e5c97e66"
+reason = "g3rs-test/runtime-assertions-split: parallel assertion helpers across rules"
+
+[[ignore]]
+fingerprint = "cca8845993edc65a"
+reason = "g3rs-test/real-proof-site: parallel rule check fns per threshold rule"
+
+[[ignore]]
+fingerprint = "18e2f200264202eb"
+reason = "g3rs-test/runtime-assertions-split: parallel test_support input builders"
+
+[[ignore]]
+fingerprint = "7525a021864e7d0c"
+reason = "g3rs-test/runtime-assertions-split: parallel allow_<x>_in_tests helpers"
+
+[[ignore]]
+fingerprint = "5eaa07f10af9baf1"
+reason = "g3rs-test/runtime-assertions-split: parallel assertion-helper inline closures"
+
+[[ignore]]
+fingerprint = "64a0859a82dd639e"
+reason = "g3rs-test/real-proof-site: parallel inventories_<rule> tests"
+
+[[ignore]]
+fingerprint = "a03f3a9d8f8f4f68"
+reason = "g3rs-test/runtime-assertions-split: parallel assert_<x>_count helpers across rules"
+
+[[ignore]]
+fingerprint = "c27e3450fa182e1c"
+reason = "g3rs-test/real-proof-site: parallel reports_<x> macro-bans tests"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "g3rs-test/runtime-assertions-split: parallel sort_by closures in common.rs (findings vs assert_findings)"
+
+[[ignore]]
+fingerprint = "13a846db4f0bde59"
+reason = "g3rs-test/real-proof-site: parallel missing_method_ban vs missing_type_ban check fns"
+
+[[ignore]]
+fingerprint = "2d4f6396d929a1ff"
+reason = "g3rs-test/real-proof-site: parallel test_relaxations rule-test bodies"
+
+[[ignore]]
+fingerprint = "5ebd8e2890e09a52"
+reason = "g3rs-test/runtime-assertions-split: parallel typed_clippy / typed_parse_error test_support builders"
+
+[[ignore]]
+fingerprint = "6523625d0b052319"
+reason = "g3rs-test/real-proof-site: parallel rule test bodies (unknown_keys vs ban_reason_quality)"
+
+[[ignore]]
+fingerprint = "802faf43c73c6f35"
+reason = "g3rs-test/runtime-assertions-split: parallel cargo_config / cargo_root test_support builders"
+
+[[ignore]]
+fingerprint = "c56f857b2d72c509"
+reason = "g3rs-test/real-proof-site: parallel reports_missing_baseline_<method|type>_ban tests"
+
+[[ignore]]
+fingerprint = "c571ffba013c927c"
+reason = "g3rs-test/real-proof-site: parallel forbid_clippy_conf_dir_override rule-test bodies"
+
+[[ignore]]
+fingerprint = "f8c1c289d7ef64f3"
+reason = "g3rs-test/runtime-assertions-split: parallel expected_<x>_bans helpers in support.rs"

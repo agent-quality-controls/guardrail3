@@ -6,9 +6,12 @@ use crate::support::{
     root_invokes_tool,
 };
 
+/// `ID` constant.
 const ID: &str = "g3ts-package/local-banned-dependencies";
+/// `SYNCPACK_DEPENDENCY` constant.
 const SYNCPACK_DEPENDENCY: &str = "syncpack";
 
+/// `check`: check.
 pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(root) = parsed_root(input) else {
         if matches!(
@@ -61,6 +64,7 @@ pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckRes
     ));
 }
 
+/// `syncpack_setup_message`: syncpack setup message.
 fn syncpack_setup_message(
     root: &g3ts_package_types::G3TsPackageRootSnapshot,
     has_dependency: bool,
@@ -95,6 +99,7 @@ fn syncpack_setup_message(
     }
 }
 
+/// `check_syncpack_config`: check syncpack config.
 fn check_syncpack_config(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckResult>) {
     match &input.syncpack_config {
         g3ts_package_types::G3TsPackageSyncpackConfigState::NotRequired => {}
@@ -145,6 +150,7 @@ fn check_syncpack_config(input: &G3TsPackageChecksInput, results: &mut Vec<G3Che
     }
 }
 
+/// `push_syncpack_unavailable_error`: push syncpack unavailable error.
 fn push_syncpack_unavailable_error(
     input: &G3TsPackageChecksInput,
     rel_path: &str,

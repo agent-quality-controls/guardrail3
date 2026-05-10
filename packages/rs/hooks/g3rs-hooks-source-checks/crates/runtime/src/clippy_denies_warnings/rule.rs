@@ -7,8 +7,10 @@ use hook_shell_parser::types::ParsedShellScript;
 use super::support::{EnvState, cargo_clippy_denies_warnings};
 use crate::inputs::RustHookCommandInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/clippy-denies-warnings";
 
+/// `check` function.
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
     let found = script_contains_clippy_deny(input.parsed);
 
@@ -39,6 +41,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
+/// `script_contains_clippy_deny` function.
 pub(crate) fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
     let mut found = false;
     visit_resolved_commands_with_env(

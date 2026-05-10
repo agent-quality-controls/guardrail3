@@ -1,8 +1,11 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_style_types::{G3TsStylePolicySnapshot, G3TsStylePolicySurfaceState};
 
+/// Workspace-relative file name of the g3ts policy config.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 
+/// Read and parse the `guardrail3-ts.toml` under `app_root_rel_path` from
+/// `crawl`, returning a surface-state describing what was found.
 pub(crate) fn ingest_policy(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,

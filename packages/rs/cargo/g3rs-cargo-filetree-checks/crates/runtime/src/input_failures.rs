@@ -1,8 +1,10 @@
 use g3rs_cargo_types::{G3RsCargoInputFailure, G3RsCargoPolicyRootKind};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/input-failures";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsCargoInputFailure, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(
         ID.to_owned(),
@@ -14,6 +16,7 @@ pub(crate) fn check(input: &G3RsCargoInputFailure, results: &mut Vec<G3CheckResu
     ));
 }
 
+/// check inventory fn.
 pub(crate) fn check_inventory(
     kind: Option<G3RsCargoPolicyRootKind>,
     cargo_rel_path: &str,

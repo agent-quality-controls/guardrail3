@@ -1,4 +1,8 @@
+//! Shared types for the g3rs workspace crawl shared package.
+
+/// Crawl-tree aggregate type definitions.
 mod crawl;
+/// Per-entry workspace path and metadata definitions.
 mod entry;
 
 #[cfg(feature = "api")]

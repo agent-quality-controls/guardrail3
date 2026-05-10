@@ -20,9 +20,3 @@ allowed_deps = [
 
 [checks]
 hooks = false
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "Runtime crate intentionally owns the ingestion pipeline and its close sidecars."

@@ -1,6 +1,9 @@
+/// Release-family input contract types.
 #[cfg(feature = "api")]
 mod types;
 
+#[cfg(feature = "api")]
+pub type G3RsReleaseConfigRepoWorkflowFlags = types::G3RsReleaseConfigRepoWorkflowFlags;
 #[cfg(feature = "api")]
 pub type G3RsReleaseConfigChecksInput = types::G3RsReleaseConfigChecksInput;
 #[cfg(feature = "api")]

@@ -1,6 +1,7 @@
 use g3ts_eslint_types::G3TsEslintConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3TsEslintConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::exists::check(input, &mut results);

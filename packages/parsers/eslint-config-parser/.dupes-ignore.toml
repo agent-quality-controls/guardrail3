@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "019635277c2548c0"
+reason = "ESLint assertion helpers all share find_probe + assert_eq! pattern; merging them would obscure the per-field assertion message that drives test failure clarity"
+
+[[ignore]]
+fingerprint = "b62dce5395f850a9"
+reason = "Plugin-identity test fixtures must remain separate #[test] functions for failure isolation; they are already factored through run_plugin_identity_case so only the per-fixture struct literal repeats"
+
+[[ignore]]
+fingerprint = "ce467bda19283bae"
+reason = "Rejection tests for plugin-identity must remain separate #[test] functions; they share the run_plugin_identity_case wrapper so only the per-fixture struct literal repeats"
+
+[[ignore]]
+fingerprint = "97b14341b45527db"
+reason = "write_config_file and write_source_file mirror create-then-write boilerplate that further extraction would obscure"
+
+[[ignore]]
+fingerprint = "de7dd9d52b698772"
+reason = "Plugin-identity resolution tests must remain separate #[test] functions for failure isolation; their bodies look structurally identical because each is a sequence of fs::create_dir_all/fs::write calls followed by parse + assert, but the JS strings differ per scenario"
+
+[[ignore]]
+fingerprint = "cc7e43920495405a"
+reason = "Plugin-identity rejection tests must remain separate #[test] functions; their bodies look structurally identical because each is a sequence of fs::create_dir_all/fs::write calls followed by parse + assert, but the JS strings differ per rejection scenario"

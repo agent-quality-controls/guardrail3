@@ -1,8 +1,10 @@
 use g3ts_astro_content_types::G3TsAstroRouteMarkdownPageInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3ts-astro-content/no-route-markdown-pages";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(page: &G3TsAstroRouteMarkdownPageInput, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(
         ID.to_owned(),

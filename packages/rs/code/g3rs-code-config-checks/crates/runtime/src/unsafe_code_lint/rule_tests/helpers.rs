@@ -2,9 +2,9 @@ use cargo_toml_parser::parse;
 use g3rs_code_types::{G3RsCodeConfigFile, G3RsCodeConfigFileKind};
 use guardrail3_check_types::G3CheckResult;
 
-pub(super) fn run_check(files: Vec<G3RsCodeConfigFile>) -> Vec<G3CheckResult> {
+pub(super) fn run_check(files: &[G3RsCodeConfigFile]) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
-    for file in &files {
+    for file in files {
         super::super::check(file, &mut results);
     }
     results

@@ -5,8 +5,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info, parsed_root};
 
+/// `ID` constant.
 const ID: &str = "g3ts-package/validate-script-fail-closed";
 
+/// `check`: check.
 pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(snapshot) = parsed_root(input) else {
         return;
@@ -33,6 +35,7 @@ pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckRes
     }
 }
 
+/// `validate_script_is_fail_closed`: validate script is fail closed.
 fn validate_script_is_fail_closed(snapshot: &G3TsPackageRootSnapshot) -> bool {
     snapshot
         .script_parse_blockers

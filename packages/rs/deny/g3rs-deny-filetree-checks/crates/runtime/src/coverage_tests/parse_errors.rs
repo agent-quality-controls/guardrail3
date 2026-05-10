@@ -3,27 +3,20 @@ use test_support::input;
 
 #[test]
 fn reports_selected_deny_parse_failures_without_hiding_coverage_inventory() {
-    let input = input(
-        Some("deny.toml"),
-        vec!["deny.toml"],
-        vec![(
-            "deny.toml",
-            "Failed to parse root deny config `deny.toml` for deny checks: invalid TOML.",
-        )],
-    );
+    let msg = "Failed to parse root deny config `deny.toml` for deny checks: invalid TOML.";
     let mut results = Vec::new();
-
-    crate::coverage::check(&input, &mut results);
-
+    crate::coverage::check(
+        &input(
+            Some("deny.toml"),
+            vec!["deny.toml"],
+            vec![("deny.toml", msg)],
+        ),
+        &mut results,
+    );
     assertions::assert_findings(
         &results,
         &[
-            assertions::error(
-                "deny input failure",
-                "Failed to parse root deny config `deny.toml` for deny checks: invalid TOML.",
-                "deny.toml",
-                false,
-            ),
+            assertions::error("deny input failure", msg, "deny.toml", false),
             assertions::info(
                 "workspace root covered by deny config",
                 "workspace root `.` is covered by `deny.toml`.",
@@ -36,27 +29,15 @@ fn reports_selected_deny_parse_failures_without_hiding_coverage_inventory() {
 
 #[test]
 fn reports_policy_context_failures_without_hiding_selected_coverage() {
-    let input = input(
-        Some("deny.toml"),
-        vec!["deny.toml"],
-        vec![(
-            "guardrail3-rs.toml",
-            "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid policy.",
-        )],
-    );
-    let mut results = Vec::new();
-
-    crate::coverage::check(&input, &mut results);
-
+    let path = "guardrail3-rs.toml";
+    let msg = "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid policy.";
+    let mut output = Vec::new();
+    let case = input(Some("deny.toml"), vec!["deny.toml"], vec![(path, msg)]);
+    crate::coverage::check(&case, &mut output);
     assertions::assert_findings(
-        &results,
+        &output,
         &[
-            assertions::error(
-                "deny rust policy is not parseable",
-                "Failed to parse root Rust policy `guardrail3-rs.toml` for deny profile resolution: invalid policy.",
-                "guardrail3-rs.toml",
-                false,
-            ),
+            assertions::error("deny rust policy is not parseable", msg, path, false),
             assertions::info(
                 "workspace root covered by deny config",
                 "workspace root `.` is covered by `deny.toml`.",

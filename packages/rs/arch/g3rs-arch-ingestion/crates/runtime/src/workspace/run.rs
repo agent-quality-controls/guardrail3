@@ -1,28 +1,34 @@
-use super::structure::{
-    collect_structure_root_dirs, measure_max_sibling_counts, measure_module_depth,
-};
+use std::path::Path;
 
 use glob::Pattern;
 use toml::Value;
 
 use g3rs_arch_types::types::{
-    G3RsArchCrateNode, G3RsArchCrateStructure, G3RsArchDependencyCounts, G3RsArchFeatureContract,
+    G3RsArchCrateNode, G3RsArchDependencyCounts, G3RsArchFeatureContract,
 };
 
 use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
 
-pub(crate) fn collect_crate_nodes(
-    view: &CrawlView<'_>,
-) -> Result<Vec<G3RsArchCrateNode>, G3RsArchIngestionError> {
+/// Result of a single ingestion step that may fail with `G3RsArchIngestionError`.
+type IngestResult<T> = Result<T, G3RsArchIngestionError>;
+
+/// Returns `true` when `file` ends with a `.rs` extension (case-insensitive).
+fn is_rs_file(file: &str) -> bool {
+    Path::new(file)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
+}
+
+/// collect crate nodes fn.
+pub(crate) fn collect_crate_nodes(view: &CrawlView<'_>) -> IngestResult<Vec<G3RsArchCrateNode>> {
     let mut cargo_dirs = discover_crate_dirs(view)?;
     cargo_dirs.sort();
     cargo_dirs.dedup();
-    let crate_dirs = cargo_dirs.iter().map(String::as_str).collect::<Vec<_>>();
 
     let mut nodes = cargo_dirs
         .iter()
-        .map(|dir| build_crate_node(view, dir, &crate_dirs))
+        .map(|dir| build_crate_node(view, dir))
         .collect::<Result<Vec<_>, _>>()?;
 
     let rel_dirs = nodes
@@ -39,7 +45,8 @@ pub(crate) fn collect_crate_nodes(
     Ok(nodes)
 }
 
-fn discover_crate_dirs(view: &CrawlView<'_>) -> Result<Vec<String>, G3RsArchIngestionError> {
+/// discover crate dirs fn.
+fn discover_crate_dirs(view: &CrawlView<'_>) -> IngestResult<Vec<String>> {
     let Some(root_entry) = view.entry("Cargo.toml") else {
         return Ok(Vec::new());
     };
@@ -71,10 +78,11 @@ fn discover_crate_dirs(view: &CrawlView<'_>) -> Result<Vec<String>, G3RsArchInge
     Ok(dirs)
 }
 
+/// select workspace member dirs fn.
 fn select_workspace_member_dirs(
     view: &CrawlView<'_>,
     root_manifest: &Value,
-) -> Result<Vec<String>, G3RsArchIngestionError> {
+) -> IngestResult<Vec<String>> {
     let Some(workspace) = root_manifest.get("workspace").and_then(Value::as_table) else {
         return Ok(Vec::new());
     };
@@ -154,106 +162,40 @@ fn select_workspace_member_dirs(
         .collect())
 }
 
-fn build_crate_node(
-    view: &CrawlView<'_>,
-    dir: &str,
-    crate_dirs: &[&str],
-) -> Result<G3RsArchCrateNode, G3RsArchIngestionError> {
+/// build crate node fn.
+fn build_crate_node(view: &CrawlView<'_>, dir: &str) -> IngestResult<G3RsArchCrateNode> {
     let cargo_rel_path = CrawlView::join_rel(dir, "Cargo.toml");
-    let entry = view
-        .entry(&cargo_rel_path)
-        .ok_or_else(|| G3RsArchIngestionError::Unreadable {
-            path: view.root_abs_path().join(&cargo_rel_path),
-            reason: "selected Cargo.toml missing from crawl".to_owned(),
-        })?;
-    if !entry.readable {
-        return Err(G3RsArchIngestionError::Unreadable {
-            path: entry.path.abs_path.clone(),
-            reason: "file is not readable".to_owned(),
-        });
-    }
-
-    let content =
-        view.read_file(&cargo_rel_path)
-            .map_err(|err| G3RsArchIngestionError::Unreadable {
-                path: entry.path.abs_path.clone(),
-                reason: err.to_string(),
-            })?;
+    let content = read_cargo_manifest(view, &cargo_rel_path)?;
 
     let parsed = toml::from_str::<Value>(&content).ok();
     let parse_error = toml::from_str::<Value>(&content)
         .err()
         .map(|err| err.to_string());
 
-    let has_package = parsed
-        .as_ref()
-        .and_then(|value| value.get("package"))
-        .is_some();
+    let package = parsed.as_ref().and_then(|value| value.get("package"));
+    let has_package = package.is_some();
     let has_workspace = parsed
         .as_ref()
         .and_then(|value| value.get("workspace"))
         .is_some();
-    let package_name = parsed
-        .as_ref()
-        .and_then(|value| value.get("package"))
-        .and_then(|package| package.get("name"))
+    let package_name = package
+        .and_then(|pkg| pkg.get("name"))
         .and_then(Value::as_str)
         .map(str::to_owned);
-    let shared = parsed
-        .as_ref()
-        .and_then(|value| value.get("package"))
-        .and_then(|package| package.get("metadata"))
+    let shared = package
+        .and_then(|pkg| pkg.get("metadata"))
         .and_then(|metadata| metadata.get("guardrail3"))
         .and_then(|guardrail| guardrail.get("shared"))
         .and_then(Value::as_bool)
         .unwrap_or(false);
 
-    let custom_lib_path = parsed
-        .as_ref()
-        .and_then(|value| value.get("lib"))
-        .and_then(|lib| lib.get("path"))
-        .and_then(Value::as_str);
-    let default_lib = CrawlView::join_rel(dir, "src/lib.rs");
-    let lib_rs_rel = if let Some(custom) = custom_lib_path {
-        let full = CrawlView::join_rel(dir, custom);
-        if view.file_exists(&full) {
-            Some(full)
-        } else {
-            None
-        }
-    } else if view.file_exists(&default_lib) {
-        Some(default_lib)
-    } else {
-        None
-    };
+    let lib_rs_rel = resolve_lib_rs(view, dir, parsed.as_ref());
     let has_lib_rs = lib_rs_rel.is_some();
     let has_main_rs = view.file_exists(&CrawlView::join_rel(dir, "src/main.rs"));
 
-    let features = parsed
-        .as_ref()
-        .and_then(|value| value.get("features"))
-        .and_then(Value::as_table);
-    let has_default_feature = features.is_some_and(|table| table.contains_key("default"));
-    let has_all_feature = features.is_some_and(|table| table.contains_key("all"));
-    let all_feature_deps = feature_list(features.and_then(|table| table.get("all")));
-    let default_feature_deps = feature_list(features.and_then(|table| table.get("default")));
+    let feature_contract = build_feature_contract(parsed.as_ref());
     let (production_dependency_count, dev_dependency_count) =
         parsed.as_ref().map_or((0, 0), count_dependencies);
-    let structure_roots =
-        collect_structure_root_dirs(view, dir, lib_rs_rel.as_deref(), has_main_rs);
-    let (max_sibling_rs_file_count, max_sibling_dir_count) =
-        structure_roots
-            .iter()
-            .fold((0, 0), |(max_rs, max_dirs), root_dir| {
-                let (root_max_rs, root_max_dirs) =
-                    measure_max_sibling_counts(view, root_dir, dir, crate_dirs, &structure_roots);
-                (max_rs.max(root_max_rs), max_dirs.max(root_max_dirs))
-            });
-    let max_module_depth = structure_roots
-        .iter()
-        .map(|root_dir| measure_module_depth(view, dir, root_dir, crate_dirs, &structure_roots))
-        .max()
-        .unwrap_or(0);
 
     Ok(G3RsArchCrateNode {
         rel_dir: dir.to_owned(),
@@ -266,25 +208,66 @@ fn build_crate_node(
         lib_rs_rel,
         parent_rel_dir: None,
         shared,
-        feature_contract: G3RsArchFeatureContract {
-            has_default_feature,
-            has_all_feature,
-            all_feature_deps,
-            default_feature_deps,
-        },
+        feature_contract,
         dependency_counts: G3RsArchDependencyCounts {
             production: production_dependency_count,
             dev: dev_dependency_count,
-        },
-        structure: G3RsArchCrateStructure {
-            max_sibling_rs_file_count,
-            max_sibling_dir_count,
-            max_module_depth,
         },
         cargo_parse_error: parse_error,
     })
 }
 
+/// Read the bytes of a `Cargo.toml` referenced by `cargo_rel_path` via `view`.
+fn read_cargo_manifest(view: &CrawlView<'_>, cargo_rel_path: &str) -> IngestResult<String> {
+    let entry = view
+        .entry(cargo_rel_path)
+        .ok_or_else(|| G3RsArchIngestionError::Unreadable {
+            path: view.root_abs_path().join(cargo_rel_path),
+            reason: "selected Cargo.toml missing from crawl".to_owned(),
+        })?;
+    if !entry.readable {
+        return Err(G3RsArchIngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: "file is not readable".to_owned(),
+        });
+    }
+    view.read_file(cargo_rel_path)
+        .map_err(|err| G3RsArchIngestionError::Unreadable {
+            path: entry.path.abs_path.clone(),
+            reason: err.to_string(),
+        })
+}
+
+/// Resolve the relative path to the crate's `lib.rs`, honouring `[lib] path = "..."`.
+fn resolve_lib_rs(view: &CrawlView<'_>, dir: &str, parsed: Option<&Value>) -> Option<String> {
+    let custom_lib_path = parsed
+        .and_then(|value| value.get("lib"))
+        .and_then(|lib| lib.get("path"))
+        .and_then(Value::as_str);
+    let default_lib = CrawlView::join_rel(dir, "src/lib.rs");
+    custom_lib_path.map_or_else(
+        || view.file_exists(&default_lib).then_some(default_lib),
+        |custom| {
+            let full = CrawlView::join_rel(dir, custom);
+            view.file_exists(&full).then_some(full)
+        },
+    )
+}
+
+/// Extract the `[features]` contract (default/all flags and dependency lists).
+fn build_feature_contract(parsed: Option<&Value>) -> G3RsArchFeatureContract {
+    let features = parsed
+        .and_then(|value| value.get("features"))
+        .and_then(Value::as_table);
+    G3RsArchFeatureContract {
+        has_default_feature: features.is_some_and(|table| table.contains_key("default")),
+        has_all_feature: features.is_some_and(|table| table.contains_key("all")),
+        all_feature_deps: feature_list(features.and_then(|table| table.get("all"))),
+        default_feature_deps: feature_list(features.and_then(|table| table.get("default"))),
+    }
+}
+
+/// collect rs files recursive fn.
 pub(crate) fn collect_rs_files_recursive(
     view: &CrawlView<'_>,
     root_dir: &str,
@@ -296,7 +279,7 @@ pub(crate) fn collect_rs_files_recursive(
         return;
     };
     for file in entry.files() {
-        if file.ends_with(".rs") {
+        if is_rs_file(file) {
             rel_paths.push(CrawlView::join_rel(dir, file));
         }
     }
@@ -309,6 +292,7 @@ pub(crate) fn collect_rs_files_recursive(
     }
 }
 
+/// collect dirs recursive fn.
 pub(crate) fn collect_dirs_recursive(
     view: &CrawlView<'_>,
     root_dir: &str,
@@ -329,6 +313,7 @@ pub(crate) fn collect_dirs_recursive(
     }
 }
 
+/// should stop at nested crate fn.
 pub(crate) fn should_stop_at_nested_crate(
     view: &CrawlView<'_>,
     root_dir: &str,
@@ -342,10 +327,12 @@ pub(crate) fn should_stop_at_nested_crate(
         || view.file_exists(&CrawlView::join_rel(child_dir, "Cargo.toml"))
 }
 
+/// find parent dir fn.
 pub(crate) fn find_parent_dir(rel_dir: &str, crate_nodes: &[G3RsArchCrateNode]) -> Option<String> {
     parent_of(crate_nodes, rel_dir).map(str::to_owned)
 }
 
+/// parent of fn.
 pub(crate) fn parent_of<'a>(
     crate_nodes: &'a [G3RsArchCrateNode],
     rel_dir: &str,
@@ -365,6 +352,7 @@ pub(crate) fn parent_of<'a>(
     }
 }
 
+/// is inside fn.
 pub(crate) fn is_inside(inner: &str, outer: &str) -> bool {
     if outer.is_empty() {
         return !inner.is_empty();
@@ -372,6 +360,7 @@ pub(crate) fn is_inside(inner: &str, outer: &str) -> bool {
     inner.starts_with(outer) && inner.as_bytes().get(outer.len()) == Some(&b'/')
 }
 
+/// normalize path fn.
 pub(crate) fn normalize_path(base: &str, rel: &str) -> String {
     let mut parts = if base.is_empty() {
         Vec::new()
@@ -390,24 +379,30 @@ pub(crate) fn normalize_path(base: &str, rel: &str) -> String {
     parts.join("/")
 }
 
+/// count dependencies fn.
 fn count_dependencies(parsed: &Value) -> (usize, usize) {
     let mut production_count = count_dependency_table(parsed, "dependencies");
-    production_count += count_dependency_table(parsed, "build-dependencies");
-    production_count += count_target_dependency_tables(parsed, "dependencies");
-    production_count += count_target_dependency_tables(parsed, "build-dependencies");
+    production_count =
+        production_count.saturating_add(count_dependency_table(parsed, "build-dependencies"));
+    production_count =
+        production_count.saturating_add(count_target_dependency_tables(parsed, "dependencies"));
+    production_count = production_count
+        .saturating_add(count_target_dependency_tables(parsed, "build-dependencies"));
 
     let dev_count = count_dependency_table(parsed, "dev-dependencies");
 
     (production_count, dev_count)
 }
 
+/// count dependency table fn.
 fn count_dependency_table(parsed: &Value, key: &str) -> usize {
     parsed
         .get(key)
         .and_then(Value::as_table)
-        .map_or(0, |deps| deps.len())
+        .map_or(0, toml::map::Map::len)
 }
 
+/// count target dependency tables fn.
 fn count_target_dependency_tables(parsed: &Value, key: &str) -> usize {
     parsed
         .get("target")
@@ -421,12 +416,14 @@ fn count_target_dependency_tables(parsed: &Value, key: &str) -> usize {
         })
 }
 
+/// is test or example path fn.
 pub(crate) fn is_test_or_example_path(rel_path: &str) -> bool {
     rel_path
         .split('/')
         .any(|segment| matches!(segment, "tests" | "examples" | "benches" | "target"))
 }
 
+/// is under crate src fn.
 pub(crate) fn is_under_crate_src(dir: &str, crate_nodes: &[G3RsArchCrateNode]) -> bool {
     crate_nodes.iter().any(|node| {
         let src_prefix = if node.rel_dir.is_empty() {
@@ -440,6 +437,7 @@ pub(crate) fn is_under_crate_src(dir: &str, crate_nodes: &[G3RsArchCrateNode]) -
     })
 }
 
+/// feature list fn.
 fn feature_list(value: Option<&Value>) -> Vec<String> {
     value
         .and_then(Value::as_array)

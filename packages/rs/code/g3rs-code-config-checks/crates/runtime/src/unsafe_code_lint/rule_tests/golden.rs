@@ -4,7 +4,7 @@ use super::helpers::{cargo_file, run_check};
 
 #[test]
 fn emits_inventory_info_for_forbid() {
-    let results = run_check(vec![cargo_file(
+    let results = run_check(&[cargo_file(
         "Cargo.toml",
         "[workspace]\n[workspace.lints.rust]\nunsafe_code = \"forbid\"\n",
     )]);

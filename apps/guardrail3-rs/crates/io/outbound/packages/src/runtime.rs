@@ -12,4 +12,10 @@ impl WorkspaceCrawler for PackageRuntime {
             message: error.to_string(),
         })
     }
+
+    fn crawl_any(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
+        g3rs_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
+            message: error.to_string(),
+        })
+    }
 }

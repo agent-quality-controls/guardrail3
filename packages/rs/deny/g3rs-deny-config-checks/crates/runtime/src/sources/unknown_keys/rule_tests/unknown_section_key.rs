@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn unknown_bans_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [bans]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -24,10 +24,10 @@ bogus = true
 #[test]
 fn unknown_advisories_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [advisories]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -43,10 +43,10 @@ bogus = true
 #[test]
 fn unknown_sources_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [sources]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -62,10 +62,10 @@ bogus = true
 #[test]
 fn unknown_licenses_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [licenses]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -81,10 +81,10 @@ bogus = true
 #[test]
 fn unknown_graph_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [graph]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,
@@ -100,10 +100,10 @@ bogus = true
 #[test]
 fn unknown_output_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [output]
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,

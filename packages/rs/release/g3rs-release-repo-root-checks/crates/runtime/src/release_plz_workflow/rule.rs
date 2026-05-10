@@ -3,15 +3,18 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/release-plz-workflow";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if input.has_release_plz_workflow {
+    if input.workflow_flags.has_release_plz_workflow {
         results.push(info(
             ID,
             "Release-plz workflow present",
             String::new(),
-            input.release_plz_workflow_rel_path
+            input
+                .release_plz_workflow_rel_path
                 .as_deref()
                 .unwrap_or(input.release_plz_rel_path.as_str()),
         ));

@@ -36,8 +36,8 @@ fn flags_inline_comment_teaching_no_verify() {
 #[test]
 fn ignores_escaped_hash_when_comment_text_looks_like_bypass_instruction() {
     let results = run_case(
-        r#"cargo fmt --check \# use git commit --no-verify if this gets in the way
-"#,
+        r"cargo fmt --check \# use git commit --no-verify if this gets in the way
+",
     );
     assertions::assert_rule_results(
         &results,
@@ -53,8 +53,8 @@ fn ignores_escaped_hash_when_comment_text_looks_like_bypass_instruction() {
 #[test]
 fn ignores_escaped_space_before_hash_when_comment_text_looks_like_bypass_instruction() {
     let results = run_case(
-        r#"cargo fmt --check \ # use git commit --no-verify if this gets in the way
-"#,
+        r"cargo fmt --check \ # use git commit --no-verify if this gets in the way
+",
     );
     assertions::assert_rule_results(
         &results,

@@ -45,6 +45,7 @@ allowed_deps = [
   "g3rs-hooks-file-tree-checks",
   "g3rs-hooks-ingestion",
   "g3rs-hooks-source-checks",
+  "g3rs-rust-family-contracts",
   "g3rs-release-config-checks",
   "g3rs-release-filetree-checks",
   "g3rs-release-hook-contract",
@@ -75,6 +76,8 @@ allowed_deps = [
   "guardrail3-rs-family-runner-test",
   "guardrail3-rs-packages",
   "guardrail3-rs-report",
+  "guardrail3-rs-toml-parser-runtime",
+  "guardrail3-rs-toml-parser-types",
   "guardrail3-rs-validate-command",
   "tempfile",
 ]

@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::info;
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/release-profile-inventory";
 
+/// `check` function.
 pub(crate) fn check(
     repo: &G3RsReleaseConfigRepo,
     crates: &[G3RsReleaseConfigCrate],

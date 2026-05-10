@@ -1,6 +1,7 @@
 use g3ts_style_types::{G3TsStyleContractInput, G3TsStyleEslintSurfaceState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `check_protected_style_rule_disables`: check protected style rule disables.
 pub(crate) fn check_protected_style_rule_disables(
     contract: &G3TsStyleContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -22,21 +23,20 @@ pub(crate) fn check_protected_style_rule_disables(
         return;
     };
 
-    let restricted =
-        !snapshot.source_probe_disable_policies.is_empty()
-            && snapshot.source_probe_disable_policies.iter().all(|probe| {
-                !probe.ignored
-                    && probe
-                        .warn_or_error_rules
+    let restricted = !snapshot.source_probe_disable_policies.is_empty()
+        && snapshot.source_probe_disable_policies.iter().all(|probe| {
+            !probe.ignored
+                && probe
+                    .warn_or_error_rules
+                    .iter()
+                    .any(|rule| rule == RESTRICT_RULE)
+                && PROTECTED_RULES.iter().all(|rule| {
+                    probe
+                        .restricted_disable_patterns
                         .iter()
-                        .any(|rule| rule == RESTRICT_RULE)
-                    && PROTECTED_RULES.iter().all(|rule| {
-                        probe
-                            .restricted_disable_patterns
-                            .iter()
-                            .any(|pattern| pattern_covers_rule(pattern, rule))
-                    })
-            });
+                        .any(|pattern| pattern_covers_rule(pattern, rule))
+                })
+        });
 
     if restricted {
         results.push(info(
@@ -61,6 +61,7 @@ pub(crate) fn check_protected_style_rule_disables(
     }
 }
 
+/// `check_eslint_disable_inventory`: check eslint disable inventory.
 pub(crate) fn check_eslint_disable_inventory(
     directives: &[g3ts_style_types::G3TsStyleEslintDirectiveInput],
     results: &mut Vec<G3CheckResult>,
@@ -108,7 +109,8 @@ pub(crate) fn check_eslint_disable_inventory(
     }
 }
 
-fn parsed_eslint(
+/// `parsed_eslint`: parsed eslint.
+const fn parsed_eslint(
     config: &G3TsStyleEslintSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStyleEslintSurfaceSnapshot> {
     match config {
@@ -119,6 +121,13 @@ fn parsed_eslint(
     }
 }
 
+/// `eslint_rel_path`: eslint rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn eslint_rel_path(config: &G3TsStyleEslintSurfaceState) -> Option<&str> {
     match config {
         G3TsStyleEslintSurfaceState::Missing { rel_path }
@@ -128,6 +137,7 @@ fn eslint_rel_path(config: &G3TsStyleEslintSurfaceState) -> Option<&str> {
     }
 }
 
+/// `pattern_covers_rule`: pattern covers rule.
 fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
     pattern == rule
         || pattern == "*"
@@ -136,6 +146,7 @@ fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
             .is_some_and(|prefix| rule.starts_with(prefix))
 }
 
+/// `disabled_rules`: disabled rules.
 fn disabled_rules(directive: &g3ts_style_types::G3TsStyleEslintDirectiveInput) -> String {
     if directive.all_rules {
         return "all rules".to_owned();
@@ -143,6 +154,7 @@ fn disabled_rules(directive: &g3ts_style_types::G3TsStyleEslintDirectiveInput) -
     directive.disabled_rules.join(", ")
 }
 
+/// `info`: info.
 fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -155,6 +167,7 @@ fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckRe
     .into_inventory()
 }
 
+/// `error`: error.
 fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

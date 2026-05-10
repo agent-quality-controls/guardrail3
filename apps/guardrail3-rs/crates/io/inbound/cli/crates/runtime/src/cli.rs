@@ -27,6 +27,21 @@ pub enum Command {
         /// Includes inventory findings in the rendered output.
         #[arg(long = "inventory", default_value_t = false)]
         inventory: bool,
+        /// When set, filters cargo gates by staged files. Skips cargo gates if no Rust-relevant staged paths inside `--path`.
+        #[arg(long = "staged", default_value_t = false)]
+        staged: bool,
+        /// When set, runs only static rule families and skips cargo gates entirely.
+        #[arg(long = "rules-only", default_value_t = false)]
+        rules_only: bool,
+    },
+    /// Validates the repository as a whole: hook contents, tool presence, repo-wide topology, marker-pair completeness.
+    ValidateRepo {
+        /// Optional override for the repo root. Defaults to `git rev-parse --show-toplevel`.
+        #[arg(long = "repo-root")]
+        repo_root: Option<PathBuf>,
+        /// Includes inventory findings in the rendered output.
+        #[arg(long = "inventory", default_value_t = false)]
+        inventory: bool,
     },
 }
 

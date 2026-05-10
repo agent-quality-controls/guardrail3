@@ -11,6 +11,7 @@ use rustfmt_toml_parser::parse as parse_rustfmt_toml;
 
 use crate::run::IngestionError;
 
+/// Constant value used by the surrounding module.
 const CONFIG_FILE_NAMES: &[&str] = &[
     "guardrail3-rs.toml",
     "clippy.toml",
@@ -23,6 +24,7 @@ const CONFIG_FILE_NAMES: &[&str] = &[
     "rust-toolchain",
 ];
 
+/// Implements `collect config files`.
 pub(crate) fn collect_config_files(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsCodeConfigChecksInput, IngestionError> {
@@ -62,11 +64,16 @@ pub(crate) fn collect_config_files(
     })
 }
 
+/// Optional config-file kind. `None` means the file name was recognized but the file
+/// does not contribute a typed entry (e.g. legacy `rust-toolchain` text file).
+type ParsedConfigFileKind = Result<Option<G3RsCodeConfigFileKind>, IngestionError>;
+
+/// Implements `parse config file kind`.
 fn parse_config_file_kind(
     rel_path: &str,
     abs_path: &std::path::Path,
     content: &str,
-) -> Result<Option<G3RsCodeConfigFileKind>, IngestionError> {
+) -> ParsedConfigFileKind {
     let file_name = file_name(rel_path);
 
     let kind = match file_name {
@@ -110,13 +117,13 @@ fn parse_config_file_kind(
                 }
             })?,
         }),
-        "rust-toolchain" => None,
         _ => None,
     };
 
     Ok(kind)
 }
 
+/// Implements `extract exception comments`.
 fn extract_exception_comments(rel_path: &str, content: &str) -> Vec<G3RsCodeExceptionComment> {
     let mut comments = Vec::new();
 
@@ -142,6 +149,7 @@ fn extract_exception_comments(rel_path: &str, content: &str) -> Vec<G3RsCodeExce
     comments
 }
 
+/// Implements `extract exception comment`.
 fn extract_exception_comment(line: &str) -> Option<&str> {
     #[derive(Clone, Copy)]
     enum State {
@@ -154,32 +162,32 @@ fn extract_exception_comment(line: &str) -> Option<&str> {
     let mut index = 0usize;
     let mut state = State::Normal;
 
-    while index < bytes.len() {
+    while let Some(&byte) = bytes.get(index) {
         match state {
             State::Normal => {
-                if bytes[index] == b'#' {
+                if byte == b'#' {
                     return line.get(index..).map(str::trim_start);
                 }
-                if bytes[index] == b'/' && bytes.get(index.saturating_add(1)) == Some(&b'/') {
+                if byte == b'/' && bytes.get(index.saturating_add(1)) == Some(&b'/') {
                     return line.get(index..).map(str::trim_start);
                 }
-                if bytes[index] == b'"' {
+                if byte == b'"' {
                     state = State::DoubleQuoted { escaped: false };
-                } else if bytes[index] == b'\'' {
+                } else if byte == b'\'' {
                     state = State::SingleQuoted;
                 }
             }
             State::DoubleQuoted { escaped } => {
                 if escaped {
                     state = State::DoubleQuoted { escaped: false };
-                } else if bytes[index] == b'\\' {
+                } else if byte == b'\\' {
                     state = State::DoubleQuoted { escaped: true };
-                } else if bytes[index] == b'"' {
+                } else if byte == b'"' {
                     state = State::Normal;
                 }
             }
             State::SingleQuoted => {
-                if bytes[index] == b'\'' {
+                if byte == b'\'' {
                     state = State::Normal;
                 }
             }
@@ -190,6 +198,7 @@ fn extract_exception_comment(line: &str) -> Option<&str> {
     None
 }
 
+/// Implements `file name`.
 fn file_name(rel_path: &str) -> &str {
     rel_path.rsplit('/').next().unwrap_or(rel_path)
 }

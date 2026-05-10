@@ -4,8 +4,10 @@ use guardrail3_check_types::G3CheckResult;
 use crate::support::expectations::expected_advisory_baseline;
 use crate::support::findings::inventory;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/stricter-advisories-inventory";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(advisories) = deny.advisories.as_ref() else {
         return;
@@ -14,7 +16,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
 
     check_value(
         deny_rel_path,
-        advisories.unmaintained.as_ref().map(advisory_scope_str),
+        advisories.unmaintained.map(advisory_scope_str),
         "unmaintained",
         &expected_unmaintained,
         results,
@@ -28,7 +30,8 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     );
 }
 
-const fn advisory_scope_str(scope: &AdvisoryScope) -> &'static str {
+/// Implements `advisory scope str`.
+const fn advisory_scope_str(scope: AdvisoryScope) -> &'static str {
     match scope {
         AdvisoryScope::All => "all",
         AdvisoryScope::Workspace => "workspace",
@@ -37,6 +40,7 @@ const fn advisory_scope_str(scope: &AdvisoryScope) -> &'static str {
     }
 }
 
+/// Implements `check value`.
 fn check_value(
     deny_rel_path: &str,
     actual: Option<&str>,
@@ -57,6 +61,7 @@ fn check_value(
     }
 }
 
+/// Implements `is stricter`.
 fn is_stricter(actual: Option<&str>, expected: &str) -> bool {
     match (actual, advisory_rank(expected)) {
         (Some(actual), Some(expected_rank)) => {
@@ -66,15 +71,13 @@ fn is_stricter(actual: Option<&str>, expected: &str) -> bool {
     }
 }
 
+/// Implements `advisory rank`.
 fn advisory_rank(value: &str) -> Option<u8> {
     match value {
-        "none" => Some(0),
-        "transitive" => Some(1),
-        "workspace" => Some(2),
+        "none" | "allow" => Some(0),
+        "transitive" | "warn" => Some(1),
+        "workspace" | "deny" => Some(2),
         "all" => Some(3),
-        "allow" => Some(0),
-        "warn" => Some(1),
-        "deny" => Some(2),
         _ => None,
     }
 }

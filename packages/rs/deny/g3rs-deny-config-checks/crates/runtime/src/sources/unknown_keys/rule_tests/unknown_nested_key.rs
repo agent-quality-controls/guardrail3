@@ -112,12 +112,12 @@ bogus = true
 #[test]
 fn unknown_licenses_private_key_warns() {
     let results = run_check(
-        r#"
+        r"
 [licenses]
 [licenses.private]
 ignore = true
 bogus = true
-"#,
+",
     );
     assertions::assert_findings(
         &results,

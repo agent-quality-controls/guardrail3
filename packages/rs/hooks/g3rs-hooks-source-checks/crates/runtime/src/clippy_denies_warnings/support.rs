@@ -1,7 +1,25 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::if_same_then_else,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::indexing_slicing,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::unused_peekable,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use hook_shell_parser::command_query::ShellEnvState;
 
+/// `EnvState` struct.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(super) struct EnvState {
+    /// `rustflags` item.
     pub(super) rustflags: Option<String>,
 }
 
@@ -23,12 +41,16 @@ impl ShellEnvState for EnvState {
     }
 }
 
+/// `LintEffect` struct.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(super) struct LintEffect {
+    /// `denied` item.
     pub(super) denied: bool,
+    /// `softened` item.
     pub(super) softened: bool,
 }
 
+/// `cargo_clippy_denies_warnings` function.
 pub(super) fn cargo_clippy_denies_warnings(args: &[String], env_state: &EnvState) -> bool {
     let mut index = 0usize;
 
@@ -92,10 +114,12 @@ pub(super) fn cargo_clippy_denies_warnings(args: &[String], env_state: &EnvState
     effect.denied && !effect.softened
 }
 
+/// `rustflags_tokens` function.
 fn rustflags_tokens(value: &str) -> Vec<String> {
     shell_words(value)
 }
 
+/// `lint_effect_from_tokens` function.
 fn lint_effect_from_tokens(tokens: &[&str]) -> LintEffect {
     let mut effect = LintEffect::default();
     let mut warnings_level = None;
@@ -129,6 +153,7 @@ fn lint_effect_from_tokens(tokens: &[&str]) -> LintEffect {
     effect
 }
 
+/// `split_warning_level` function.
 fn split_warning_level(token: &str, next: Option<&str>) -> Option<&'static str> {
     let level = match token {
         "-D" | "--deny" => "deny",
@@ -140,14 +165,17 @@ fn split_warning_level(token: &str, next: Option<&str>) -> Option<&'static str> 
     (next == Some("warnings")).then_some(level)
 }
 
+/// `split_force_warn` function.
 fn split_force_warn(token: &str, next: Option<&str>) -> bool {
     token == "--force-warn" && next == Some("warnings")
 }
 
+/// `soften_from_split_cap_lints` function.
 fn soften_from_split_cap_lints(token: &str, next: Option<&str>) -> bool {
     token == "--cap-lints" && next.is_some_and(|value| !matches!(value, "deny" | "forbid"))
 }
 
+/// `inline_warning_level` function.
 fn inline_warning_level(token: &str) -> Option<&'static str> {
     match token {
         "-Dwarnings" | "--deny=warnings" => Some("deny"),
@@ -158,16 +186,19 @@ fn inline_warning_level(token: &str) -> Option<&'static str> {
     }
 }
 
+/// `inline_force_warn` function.
 fn inline_force_warn(token: &str) -> bool {
     token == "--force-warn=warnings"
 }
 
+/// `soften_from_inline_cap_lints` function.
 fn soften_from_inline_cap_lints(token: &str) -> bool {
     token
         .strip_prefix("--cap-lints=")
         .is_some_and(|value| !matches!(value, "deny" | "forbid"))
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
@@ -183,19 +214,21 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
     )
 }
 
+/// `is_help_or_version_flag` function.
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
 }
 
+/// `shell_words` function.
 fn shell_words(command_text: &str) -> Vec<String> {
     let mut words = Vec::new();
-    let mut chars = command_text.chars().peekable();
+    let chars = command_text.chars().peekable();
     let mut current = String::new();
     let mut single_quoted = false;
     let mut double_quoted = false;
     let mut escaped = false;
 
-    while let Some(ch) = chars.next() {
+    for ch in chars {
         if escaped {
             current.push(ch);
             escaped = false;

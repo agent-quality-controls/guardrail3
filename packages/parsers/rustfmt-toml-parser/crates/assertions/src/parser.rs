@@ -16,10 +16,12 @@ pub use rustfmt_toml_parser_runtime::types::NewlineStyle;
 use rustfmt_toml_parser_runtime::Value;
 use rustfmt_toml_parser_runtime::types::RustfmtToml;
 
+#[must_use]
 pub fn parse_fixture(input: &str) -> RustfmtToml {
     rustfmt_toml_parser_runtime::parse(input).expect("should parse valid rustfmt.toml")
 }
 
+#[must_use]
 pub fn parse_from_tempfile(input: &str) -> RustfmtToml {
     let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
     file.write_all(input.as_bytes())

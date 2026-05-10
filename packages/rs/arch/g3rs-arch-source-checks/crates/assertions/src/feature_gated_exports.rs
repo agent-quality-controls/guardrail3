@@ -1,7 +1,13 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-arch/feature-gated-exports";
 
+/// Internal.
+///
+/// # Panics
+///
+/// See body for assertions.
 pub fn assert_ungated_exports(results: &[G3CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {
@@ -15,6 +21,11 @@ pub fn assert_ungated_exports(results: &[G3CheckResult], file: &str) {
     );
 }
 
+/// Internal.
+///
+/// # Panics
+///
+/// See body for assertions.
 pub fn assert_gated_inventory(results: &[G3CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {
@@ -28,6 +39,11 @@ pub fn assert_gated_inventory(results: &[G3CheckResult], file: &str) {
     );
 }
 
+/// Internal.
+///
+/// # Panics
+///
+/// See body for assertions.
 pub fn assert_all_gated_exports(results: &[G3CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {

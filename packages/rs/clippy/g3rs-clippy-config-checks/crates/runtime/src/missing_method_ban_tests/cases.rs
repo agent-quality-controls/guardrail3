@@ -11,7 +11,7 @@ fn reports_missing_baseline_method_ban() {
     check(&input, &mut results);
 
     assertions::assert_missing_method_ban_count(&results, 70);
-    assertions::assert_contains_missing_method_ban(&results, "serde_json::from_str");
+    assertions::assert_contains_for_path(&results, "serde_json::from_str");
 }
 
 #[test]

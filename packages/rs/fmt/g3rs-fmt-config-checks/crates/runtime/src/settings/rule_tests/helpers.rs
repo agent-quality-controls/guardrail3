@@ -18,11 +18,11 @@ pub(super) fn run_check(
         rustfmt_state,
         rustfmt_explicit_keys: Vec::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo_state: G3RsFmtCargoState::Parsed(
+        cargo_state: G3RsFmtCargoState::Parsed(Box::new(
             parse_cargo_toml(cargo_toml).expect("cargo test fixture should parse"),
-        ),
+        )),
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),
-        toolchain_state: G3RsFmtToolchainState::Parsed(
+        toolchain_state: G3RsFmtToolchainState::Parsed(Box::new(
             parse_toolchain_toml(
                 r#"
 [toolchain]
@@ -31,7 +31,7 @@ components = ["clippy", "rustfmt"]
 "#,
             )
             .expect("toolchain fixture should parse"),
-        ),
+        )),
         rust_policy: G3RsFmtRustPolicyState::Missing,
     };
     let mut results = Vec::new();
@@ -40,7 +40,7 @@ components = ["clippy", "rustfmt"]
 }
 
 pub(super) fn parsed_rustfmt(rustfmt_toml: &str) -> G3RsFmtRustfmtConfigState {
-    G3RsFmtRustfmtConfigState::Parsed(
+    G3RsFmtRustfmtConfigState::Parsed(Box::new(
         parse_rustfmt_toml(rustfmt_toml).expect("rustfmt test fixture should parse"),
-    )
+    ))
 }

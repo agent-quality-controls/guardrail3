@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "21fcad8545ddaeb0"
+reason = "assertion-helper duplication across distinct coverage assertions (clean root, plain root, missing root) that target different inventory shapes; g3rs-test/runtime-assertions-split forbids extracting these into a shared helper"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "repeated-test-body closure shapes for sorting findings vs expected; the closures encode independent comparator contracts and must stay co-located with their call sites"
+
+[[ignore]]
+fingerprint = "d3cb7ff625a3dc64"
+reason = "real-proof-site duplication: distinct test bodies asserting coverage inventory from distinct fixture roots (clean vs plain clippy.toml); g3rs-test/real-proof-site forbids extracting these tests into helpers"

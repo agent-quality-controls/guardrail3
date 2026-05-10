@@ -1,3 +1,5 @@
+//! Reusable assertion helpers for the topology hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

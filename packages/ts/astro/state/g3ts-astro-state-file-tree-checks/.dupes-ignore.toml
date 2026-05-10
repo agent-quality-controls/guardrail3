@@ -1,0 +1,3 @@
+[[ignore]]
+fingerprint = "da4092952e6c2283"
+reason = "Two file-tree state rules share check shape but emit different findings; consolidating would require type-erased iteration that hurts clarity"

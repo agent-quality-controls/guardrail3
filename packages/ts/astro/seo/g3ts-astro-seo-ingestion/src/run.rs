@@ -71,6 +71,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroSeoConfigC
     }
 }
 
+/// `missing_metadata_helper_sources`: missing metadata helper sources.
 fn missing_metadata_helper_sources(
     contract: &G3TsAstroSeoIntegrationContractInput,
 ) -> Vec<G3TsAstroSeoMissingMetadataHelperInput> {
@@ -86,6 +87,7 @@ fn missing_metadata_helper_sources(
         .collect()
 }
 
+/// `missing_json_ld_helper_sources`: missing json ld helper sources.
 fn missing_json_ld_helper_sources(
     contract: &G3TsAstroSeoIntegrationContractInput,
 ) -> Vec<G3TsAstroSeoMissingJsonLdHelperInput> {
@@ -101,6 +103,7 @@ fn missing_json_ld_helper_sources(
         .collect()
 }
 
+/// `policy_rel_path`: policy rel path.
 fn policy_rel_path(policy: &G3TsAstroSeoPolicySurfaceState) -> String {
     match policy {
         G3TsAstroSeoPolicySurfaceState::Parsed { snapshot } => snapshot.rel_path.clone(),

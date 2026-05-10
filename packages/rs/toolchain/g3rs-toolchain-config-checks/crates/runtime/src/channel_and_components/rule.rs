@@ -2,17 +2,25 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rust_toolchain_toml_parser::types::rust_toolchain_toml::ToolchainSection;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3rs-toolchain/channel-and-components";
 
+/// Classification of a `[toolchain] channel = ...` value.
 #[derive(Clone, Copy)]
 enum ChannelKind {
+    /// Channel is exactly `stable` (or stable plus a target triple).
     Stable,
+    /// Channel is a pinned stable version like `1.85.0`.
     PinnedStable,
+    /// Channel is `nightly` (optionally dated).
     Nightly,
+    /// Channel is `beta` (optionally dated).
     Beta,
+    /// Channel value is not recognized.
     Unsupported,
 }
 
+/// Validates the `[toolchain]` table's channel and components.
 pub(crate) fn check(
     toolchain_rel_path: &str,
     toolchain_toml: &RustToolchainToml,
@@ -26,14 +34,14 @@ pub(crate) fn check(
     check_components(toolchain, toolchain_rel_path, results);
 }
 
+/// Returns the `[toolchain]` section, surfacing an error finding when missing.
 fn toolchain_table<'a>(
     parsed: &'a RustToolchainToml,
     rel: &str,
     results: &mut Vec<G3CheckResult>,
 ) -> Option<&'a ToolchainSection> {
-    match parsed.toolchain.as_ref() {
-        Some(toolchain) => Some(toolchain),
-        None => {
+    parsed.toolchain.as_ref().map_or_else(
+        || {
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Error,
@@ -43,10 +51,12 @@ fn toolchain_table<'a>(
                 None,
             ));
             None
-        }
-    }
+        },
+        Some,
+    )
 }
 
+/// Inspects the channel value and surfaces inventory or violations.
 fn check_channel(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G3CheckResult>) {
     match toolchain.channel.as_deref() {
         Some(channel) => match classify_channel(channel) {
@@ -111,15 +121,18 @@ fn check_channel(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G3Ch
     }
 }
 
+/// Classifies a raw `channel` string into a [`ChannelKind`].
 fn classify_channel(raw: &str) -> ChannelKind {
     let normalized = raw.trim().to_ascii_lowercase();
     let segments = normalized.split('-').collect::<Vec<_>>();
-    let first = segments.first().copied().unwrap_or("");
+    let (first, rest) = segments
+        .split_first()
+        .map_or(("", &[][..]), |(head, tail)| (*head, tail));
 
     match first {
-        "nightly" => return classify_named_channel(ChannelKind::Nightly, &segments[1..]),
-        "beta" => return classify_named_channel(ChannelKind::Beta, &segments[1..]),
-        "stable" => return classify_named_channel(ChannelKind::Stable, &segments[1..]),
+        "nightly" => return classify_named_channel(ChannelKind::Nightly, rest),
+        "beta" => return classify_named_channel(ChannelKind::Beta, rest),
+        "stable" => return classify_named_channel(ChannelKind::Stable, rest),
         _ => {}
     }
     if parse_pinned_stable(raw).is_some() {
@@ -129,13 +142,14 @@ fn classify_channel(raw: &str) -> ChannelKind {
     ChannelKind::Unsupported
 }
 
+/// Refines `kind` based on suffix segments after the channel name.
 fn classify_named_channel(kind: ChannelKind, suffix: &[&str]) -> ChannelKind {
     if suffix.is_empty() {
         return kind;
     }
 
     if matches!(kind, ChannelKind::Nightly | ChannelKind::Beta) && suffix_starts_with_date(suffix) {
-        let target = &suffix[1..];
+        let target = suffix.get(1..).unwrap_or(&[]);
         return if target.is_empty() || is_target_suffix(target) {
             kind
         } else {
@@ -150,6 +164,7 @@ fn classify_named_channel(kind: ChannelKind, suffix: &[&str]) -> ChannelKind {
     ChannelKind::Unsupported
 }
 
+/// Returns true when `suffix` starts with a `YYYY-MM-DD` date.
 fn suffix_starts_with_date(suffix: &[&str]) -> bool {
     let [year, month, day, ..] = suffix else {
         return false;
@@ -160,6 +175,7 @@ fn suffix_starts_with_date(suffix: &[&str]) -> bool {
         .all(|(part, len)| part.len() == len && part.chars().all(|ch| ch.is_ascii_digit()))
 }
 
+/// Returns true when `suffix` is a valid LLVM target triple body.
 fn is_target_suffix(suffix: &[&str]) -> bool {
     suffix.len() >= 2
         && suffix.iter().all(|segment| {
@@ -170,7 +186,11 @@ fn is_target_suffix(suffix: &[&str]) -> bool {
         })
 }
 
-fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
+/// Parsed semver tuple of a pinned stable channel.
+type PinnedStableVersion = (u64, u64, u64);
+
+/// Parses `raw` as a pinned stable version `MAJOR.MINOR[.PATCH]`.
+fn parse_pinned_stable(raw: &str) -> Option<PinnedStableVersion> {
     let normalized = raw.trim().trim_start_matches('v');
     if normalized.split_once('-').is_some() {
         return None;
@@ -189,6 +209,7 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
     Some((major, minor, patch))
 }
 
+/// Inspects required toolchain components and surfaces inventory or warnings.
 fn check_components(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G3CheckResult>) {
     let names = toolchain
         .components

@@ -4,8 +4,10 @@ use g3_workspace_crawl::{
 };
 use g3ts_astro_mdx_types::{G3TsAstroMdxPolicySnapshot, G3TsAstroMdxPolicySurfaceState};
 
+/// `GUARDRAIL_CONFIG_REL_PATH` constant.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 
+/// `ingest_mdx_policy_surface` helper.
 pub(crate) fn ingest_mdx_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -55,6 +57,7 @@ pub(crate) fn ingest_mdx_policy_surface(
     }
 }
 
+/// `exact_included_file` helper.
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,

@@ -1,4 +1,6 @@
+/// Centralized filesystem port used by the ingestion runtime.
 mod fs;
+/// Entry point that ingests the workspace crawl into a jscpd checks input.
 mod run;
 
 #[cfg(feature = "ingest")]

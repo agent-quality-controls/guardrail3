@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "parser document model types intentionally include the parser domain (AstroConfig) and document role"
+)]
+
 #[cfg(feature = "api")]
 pub mod document;
 

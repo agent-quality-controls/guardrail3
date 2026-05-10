@@ -35,12 +35,19 @@ pub fn ingest_for_config_checks(
 }
 
 /// Stub source ingestion entry point for the deny family.
-pub fn ingest_for_source_checks(
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
+pub const fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDenySourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
+/// Implements this item.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsDenyFileTreeChecksInput, IngestionError> {
@@ -74,7 +81,7 @@ pub fn ingest_for_file_tree_checks(
                             "Failed to parse root deny config `{}` for deny checks: {reason}",
                             entry.path.rel_path
                         ),
-                    ))
+                    ));
                 }
                 IngestionError::Unreadable { reason, .. } => {
                     input_failures.push(crate::ingest::input_failure(
@@ -84,9 +91,10 @@ pub fn ingest_for_file_tree_checks(
                             "Failed to read root deny config `{}` for deny checks: {reason}",
                             entry.path.rel_path
                         ),
-                    ))
+                    ));
                 }
-                other => return Err(other),
+                other @ (IngestionError::DenyTomlNotFound
+                | IngestionError::SourceIngestionNotImplemented) => return Err(other),
             }
         }
     }
@@ -94,17 +102,8 @@ pub fn ingest_for_file_tree_checks(
     if let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) {
         match crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path) {
             G3RsDenyRustPolicyState::Missing | G3RsDenyRustPolicyState::Parsed { .. } => {}
-            G3RsDenyRustPolicyState::ParseError { reason, .. } => input_failures.push(
-                crate::ingest::input_failure(
-                    "deny rust policy is not parseable",
-                    entry.path.rel_path.clone(),
-                    format!(
-                        "Failed to parse root Rust policy `{}` for deny profile resolution: {reason}",
-                        entry.path.rel_path
-                    ),
-                ),
-            ),
-            G3RsDenyRustPolicyState::Unreadable { reason, .. } => input_failures.push(
+            G3RsDenyRustPolicyState::ParseError { reason, .. }
+            | G3RsDenyRustPolicyState::Unreadable { reason, .. } => input_failures.push(
                 crate::ingest::input_failure(
                     "deny rust policy is not parseable",
                     entry.path.rel_path.clone(),
@@ -124,6 +123,7 @@ pub fn ingest_for_file_tree_checks(
     ))
 }
 
+/// Implements `read rust policy state`.
 fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsDenyRustPolicyState {
     let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
         return G3RsDenyRustPolicyState::Missing;

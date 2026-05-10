@@ -1,8 +1,11 @@
 use g3ts_arch_types::G3TsArchConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier reported on each emitted result.
 const ID: &str = "g3ts-arch/declared-entrypoints-canonical";
 
+/// Run the rule, emitting one info or error result per declared facade
+/// entry point depending on whether each one uses a canonical path.
 pub(crate) fn check(input: &G3TsArchConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(snapshot) = crate::support::parsed_manifest(input) else {
         return;

@@ -1,5 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Asserts that `results` contains both the missing-`Cargo.lock` and ignored-`Cargo.lock` error findings.
+///
+/// # Panics
+/// Panics when either matching error finding is absent from `results`.
 pub fn assert_combined_missing_and_ignored(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

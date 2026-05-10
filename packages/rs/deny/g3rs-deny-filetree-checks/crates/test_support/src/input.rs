@@ -1,9 +1,13 @@
 use g3rs_deny_types::{G3RsDenyFileTreeChecksInput, G3RsDenyInputFailure};
 
+/// One `(rel_path, message)` pair describing a synthesized deny input failure.
+type InputFailureSpec<'a> = (&'a str, &'a str);
+
+/// Builds a [`G3RsDenyFileTreeChecksInput`] from compact test-friendly inputs.
 pub fn input(
     selected_deny_rel_path: Option<&str>,
     candidate_deny_rel_paths: Vec<&str>,
-    input_failures: Vec<(&str, &str)>,
+    input_failures: Vec<InputFailureSpec<'_>>,
 ) -> G3RsDenyFileTreeChecksInput {
     G3RsDenyFileTreeChecksInput {
         selected_deny_rel_path: selected_deny_rel_path.map(str::to_owned),

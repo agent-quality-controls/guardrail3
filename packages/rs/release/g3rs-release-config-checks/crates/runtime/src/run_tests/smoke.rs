@@ -17,7 +17,7 @@ name = "some-crate"
         ),
         Some("# empty cliff.toml\n"),
     );
-    input.crate_checks = config_input_for_crate(
+    input.crates = config_input_for_crate(
         r#"
 [package]
 name = "demo"
@@ -25,7 +25,7 @@ version = "0.1.0"
 publish = false
 "#,
     )
-    .crate_checks;
+    .crates;
 
     let results = super::super::check(&input);
 
@@ -37,7 +37,7 @@ fn config_input_for_repo(
     cliff_toml: Option<&str>,
 ) -> G3RsReleaseConfigChecksInput {
     G3RsReleaseConfigChecksInput {
-        repo_checks: vec![G3RsReleaseConfigRepo {
+        repos: vec![G3RsReleaseConfigRepo {
             cargo_rel_path: "Cargo.toml".to_owned(),
             cargo: cargo_toml_parser::parse(
                 r#"
@@ -57,48 +57,46 @@ resolver = "2"
             cliff: cliff_toml
                 .map(|value| cliff_toml_parser::parse(value).expect("cliff fixture should parse")),
             workflows: Vec::new(),
-            has_release_plz_workflow: false,
+            workflow_flags: g3rs_release_types::G3RsReleaseConfigRepoWorkflowFlags {
+                has_release_plz_workflow: false,
+                has_publish_dry_run_workflow: false,
+                has_registry_token_workflow: false,
+            },
             release_plz_workflow_rel_path: None,
-            has_publish_dry_run_workflow: false,
             publish_dry_run_workflow_rel_path: None,
-            has_registry_token_workflow: false,
             registry_token_workflow_rel_path: None,
             semver_checks_installed: false,
         }],
-        crate_checks: vec![publishable_crate("demo")],
-        edge_checks: Vec::new(),
-        input_failure_checks: Vec::new(),
+        crates: vec![publishable_crate("demo")],
+        edges: Vec::new(),
+        input_failures: Vec::new(),
     }
 }
 
 fn config_input_for_crate(cargo_toml: &str) -> G3RsReleaseConfigChecksInput {
+    let cargo = cargo_toml_parser::parse(cargo_toml).expect("cargo fixture should parse");
     G3RsReleaseConfigChecksInput {
-        repo_checks: Vec::new(),
-        crate_checks: vec![build_crate(
-            "Cargo.toml",
-            cargo_toml_parser::parse(cargo_toml).expect("cargo fixture should parse"),
-        )],
-        edge_checks: Vec::new(),
-        input_failure_checks: Vec::new(),
+        repos: Vec::new(),
+        crates: vec![build_crate("Cargo.toml", &cargo)],
+        edges: Vec::new(),
+        input_failures: Vec::new(),
     }
 }
 
 fn publishable_crate(name: &str) -> G3RsReleaseConfigCrate {
-    build_crate(
-        &format!("crates/{name}/Cargo.toml"),
-        cargo_toml_parser::parse(&format!(
-            r#"
+    let cargo = cargo_toml_parser::parse(&format!(
+        r#"
 [package]
 name = "{name}"
 version = "0.1.0"
 publish = true
 "#
-        ))
-        .expect("publishable cargo fixture should parse"),
-    )
+    ))
+    .expect("publishable cargo fixture should parse");
+    build_crate(&format!("crates/{name}/Cargo.toml"), &cargo)
 }
 
-fn build_crate(cargo_rel_path: &str, cargo: CargoToml) -> G3RsReleaseConfigCrate {
+fn build_crate(cargo_rel_path: &str, cargo: &CargoToml) -> G3RsReleaseConfigCrate {
     let name = cargo
         .package
         .as_ref()

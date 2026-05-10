@@ -1,6 +1,8 @@
 use g3rs_cargo_types::G3RsCargoFileTreeChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Run cargo file-tree checks against the input snapshot.
+#[must_use]
 pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 

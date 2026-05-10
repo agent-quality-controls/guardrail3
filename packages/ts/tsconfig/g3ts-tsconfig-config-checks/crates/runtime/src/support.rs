@@ -1,30 +1,53 @@
+//! Shared support utilities for the tsconfig config-check runtime: strict
+//! flag descriptors, finding builders, and snapshot accessors.
+
 use g3ts_tsconfig_types::{
     G3TsTsconfigBoolState, G3TsTsconfigChecksInput, G3TsTsconfigExtendsState,
     G3TsTsconfigInlineStrictFlags, G3TsTsconfigState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Identifier for each tsconfig strict-mode compiler option inspected by
+/// the strict-baseline rule.
 #[derive(Clone, Copy)]
 pub(crate) enum StrictFlag {
+    /// `strict` compiler option.
     Strict,
+    /// `noImplicitReturns` compiler option.
     NoImplicitReturns,
+    /// `noUnusedLocals` compiler option.
     NoUnusedLocals,
+    /// `noUnusedParameters` compiler option.
     NoUnusedParameters,
+    /// `noUncheckedIndexedAccess` compiler option.
     NoUncheckedIndexedAccess,
+    /// `exactOptionalPropertyTypes` compiler option.
     ExactOptionalPropertyTypes,
+    /// `noPropertyAccessFromIndexSignature` compiler option.
     NoPropertyAccessFromIndexSignature,
+    /// `noImplicitOverride` compiler option.
     NoImplicitOverride,
+    /// `noFallthroughCasesInSwitch` compiler option.
     NoFallthroughCasesInSwitch,
+    /// `forceConsistentCasingInFileNames` compiler option.
     ForceConsistentCasingInFileNames,
+    /// `allowUnreachableCode` compiler option.
     AllowUnreachableCode,
+    /// `allowUnusedLabels` compiler option.
     AllowUnusedLabels,
 }
 
+/// Pair of a strict flag and the expected boolean value the strict baseline
+/// requires.
 pub(crate) struct StrictFlagSpec {
+    /// Which strict flag this spec applies to.
     pub flag: StrictFlag,
+    /// Expected boolean value for the strict baseline.
     pub expected: bool,
 }
 
+/// Strict-baseline expectations for every tsconfig compiler option the
+/// rule inspects.
 pub(crate) const STRICT_FLAGS: [StrictFlagSpec; 12] = [
     StrictFlagSpec {
         flag: StrictFlag::Strict,
@@ -76,6 +99,8 @@ pub(crate) const STRICT_FLAGS: [StrictFlagSpec; 12] = [
     },
 ];
 
+/// Return the workspace-relative path of the root tsconfig, if any state
+/// other than `Missing` is recorded.
 pub(crate) fn root_rel_path(input: &G3TsTsconfigChecksInput) -> Option<&str> {
     match &input.config {
         G3TsTsconfigState::Missing => None,
@@ -85,6 +110,8 @@ pub(crate) fn root_rel_path(input: &G3TsTsconfigChecksInput) -> Option<&str> {
     }
 }
 
+/// Build an inventory `Info` finding carrying `id`, `title`, `message`,
+/// and the workspace-relative `file` path.
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -97,6 +124,8 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3Chec
     .into_inventory()
 }
 
+/// Enumerate human-readable descriptions of unresolved local `extends`
+/// chain entries (missing, unreadable, or invalid).
 pub(crate) fn extends_chain_issues(input: &G3TsTsconfigChecksInput) -> Vec<String> {
     let G3TsTsconfigState::Parsed { extends_chain, .. } = &input.config else {
         return Vec::new();
@@ -131,6 +160,8 @@ pub(crate) fn extends_chain_issues(input: &G3TsTsconfigChecksInput) -> Vec<Strin
         .collect()
 }
 
+/// Whether the tsconfig `extends` chain contains an external (out-of-tree)
+/// base config that the strict-baseline rule cannot inspect.
 pub(crate) fn has_external_extends(input: &G3TsTsconfigChecksInput) -> bool {
     let G3TsTsconfigState::Parsed { extends_chain, .. } = &input.config else {
         return false;
@@ -140,10 +171,12 @@ pub(crate) fn has_external_extends(input: &G3TsTsconfigChecksInput) -> bool {
         .any(|entry| matches!(entry, G3TsTsconfigExtendsState::External { .. }))
 }
 
+/// Whether every local `extends` entry resolves successfully.
 pub(crate) fn all_local_extends_resolved(input: &G3TsTsconfigChecksInput) -> bool {
     extends_chain_issues(input).is_empty()
 }
 
+/// List the strict flags whose inline value is missing or non-boolean.
 pub(crate) fn missing_inline_flags(input: &G3TsTsconfigChecksInput) -> Vec<String> {
     let G3TsTsconfigState::Parsed {
         inline_strict_flags,
@@ -164,6 +197,8 @@ pub(crate) fn missing_inline_flags(input: &G3TsTsconfigChecksInput) -> Vec<Strin
         .collect()
 }
 
+/// List the strict flags whose effective value differs from the
+/// strict-baseline expectation.
 pub(crate) fn effective_flag_mismatches(input: &G3TsTsconfigChecksInput) -> Vec<String> {
     let G3TsTsconfigState::Parsed {
         effective_compiler_options,
@@ -191,6 +226,8 @@ pub(crate) fn effective_flag_mismatches(input: &G3TsTsconfigChecksInput) -> Vec<
         .collect()
 }
 
+/// Whether the effective-compiler-options check can be meaningfully run
+/// (parsed state with all local extends resolved and no external base).
 pub(crate) fn effective_check_actionable(input: &G3TsTsconfigChecksInput) -> bool {
     let G3TsTsconfigState::Parsed { .. } = &input.config else {
         return false;
@@ -199,7 +236,9 @@ pub(crate) fn effective_check_actionable(input: &G3TsTsconfigChecksInput) -> boo
 }
 
 impl StrictFlag {
-    fn field_name(self) -> &'static str {
+    /// Return the JSON field name of this strict flag as it appears in
+    /// `tsconfig.json` compiler options.
+    const fn field_name(self) -> &'static str {
         match self {
             Self::Strict => "strict",
             Self::NoImplicitReturns => "noImplicitReturns",
@@ -216,7 +255,9 @@ impl StrictFlag {
         }
     }
 
-    fn effective_value(
+    /// Return the effective boolean value of this strict flag from the
+    /// resolved compiler-options struct, if present.
+    const fn effective_value(
         self,
         options: &tsconfig_json_parser::types::TsconfigCompilerOptions,
     ) -> Option<bool> {
@@ -238,7 +279,9 @@ impl StrictFlag {
         }
     }
 
-    fn inline_value(self, flags: &G3TsTsconfigInlineStrictFlags) -> G3TsTsconfigBoolState {
+    /// Return the inline value of this strict flag as recorded in the
+    /// tsconfig snapshot.
+    const fn inline_value(self, flags: &G3TsTsconfigInlineStrictFlags) -> G3TsTsconfigBoolState {
         match self {
             Self::Strict => flags.strict,
             Self::NoImplicitReturns => flags.no_implicit_returns,

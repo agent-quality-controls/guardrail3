@@ -4,10 +4,14 @@ use g3ts_astro_seo_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/json-ld-helper-rule";
+/// Static rule data.
 const PLUGIN_PACKAGE_NAME: &str = "g3ts-eslint-plugin-astro-pipeline";
+/// Static rule data.
 const RULE_NAME: &str = "astro-pipeline/require-approved-json-ld-helper-in-routes";
 
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check_missing_source(
     contract: &G3TsAstroSeoMissingJsonLdHelperInput,
     results: &mut Vec<G3CheckResult>,
@@ -23,35 +27,36 @@ pub(crate) fn check_missing_source(
     ));
 }
 
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check_eslint(
     contract: &G3TsAstroSeoEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
 ) {
     let rel_path = eslint_rel_path(contract);
     if json_ld_rule_effective(contract) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Astro JSON-LD helper rule is effective",
-                format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` on Astro, TS, and TSX lanes with route coverage, endpoint coverage, and non-empty `approvedJsonLdHelperModules`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Astro JSON-LD helper rule is effective",
+            format!("`{rel_path}` enforces `{RULE_NAME}` from `{PLUGIN_PACKAGE_NAME}` on Astro, TS, and TSX lanes with route coverage, endpoint coverage, and non-empty `approvedJsonLdHelperModules`."),
+            rel_path,
+        ));
         return;
     }
 
-    results.push(error(rel_path));
+    results.push(error(Some(rel_path)));
 }
 
-fn eslint_rel_path(contract: &G3TsAstroSeoEslintPluginContractInput) -> Option<&str> {
+/// Internal helper used by the rule.
+fn eslint_rel_path(contract: &G3TsAstroSeoEslintPluginContractInput) -> &str {
     match &contract.config {
         G3TsAstroSeoEslintSurfaceState::Missing { rel_path }
         | G3TsAstroSeoEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroSeoEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroSeoEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
+/// Internal helper used by the rule.
 fn json_ld_rule_effective(contract: &G3TsAstroSeoEslintPluginContractInput) -> bool {
     let G3TsAstroSeoEslintSurfaceState::Parsed { snapshot } = &contract.config else {
         return false;
@@ -74,6 +79,7 @@ fn json_ld_rule_effective(contract: &G3TsAstroSeoEslintPluginContractInput) -> b
             .any(|rule| rule == RULE_NAME)
 }
 
+/// Internal helper used by the rule.
 fn error(rel_path: Option<&str>) -> G3CheckResult {
     crate::support::error(
         ID,

@@ -1,3 +1,7 @@
+/// Fails the calling test when `results` contains no error finding with the given `id`.
+///
+/// # Panics
+/// Panics when no non-inventory finding with `id` is present, which the assertion treats as a test failure.
 pub fn assert_has_error(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results
@@ -7,6 +11,10 @@ pub fn assert_has_error(results: &[guardrail3_check_types::G3CheckResult], id: &
     );
 }
 
+/// Fails the calling test when `results` contains no inventory finding with the given `id`.
+///
+/// # Panics
+/// Panics when no inventory finding with `id` is present, which the assertion treats as a test failure.
 pub fn assert_has_inventory(results: &[guardrail3_check_types::G3CheckResult], id: &str) {
     assert!(
         results

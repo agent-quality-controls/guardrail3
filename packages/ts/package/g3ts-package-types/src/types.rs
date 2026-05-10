@@ -61,6 +61,12 @@ pub struct G3TsPackageLocalSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Parsed snapshot is the dominant runtime variant; boxing would force \
+              construction-site changes across consumer crates outside this workspace and \
+              the snapshot is short-lived at the call site"
+)]
 pub enum G3TsPackageRootState {
     NotPackageManagerRoot,
     Missing,

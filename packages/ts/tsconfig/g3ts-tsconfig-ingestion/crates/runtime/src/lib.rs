@@ -1,4 +1,8 @@
+//! Workspace ingestion runtime for g3ts tsconfig hooks.
+
+/// Resolution of the tsconfig `extends` chain.
 mod resolve;
+/// Top-level ingestion entry point.
 mod run;
 
 #[cfg(feature = "ingest")]

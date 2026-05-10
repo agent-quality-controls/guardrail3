@@ -2,6 +2,7 @@ use g3ts_astro_seo_types::{
     G3TsAstroConfigSurfaceSnapshot, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
 };
 
+/// Static rule data.
 const ALLOWED_OPTION_KEYS: [&str; 11] = [
     "mode",
     "failOnError",
@@ -16,6 +17,7 @@ const ALLOWED_OPTION_KEYS: [&str; 11] = [
     "accessibility",
 ];
 
+/// Internal helper exported within the runtime crate.
 pub(crate) fn astro_config_has_nuasite_checks_with_required_options(
     snapshot: &G3TsAstroConfigSurfaceSnapshot,
 ) -> bool {
@@ -31,6 +33,7 @@ pub(crate) fn astro_config_has_nuasite_checks_with_required_options(
     })
 }
 
+/// Internal helper exported within the runtime crate.
 pub(crate) fn checks_options_include_structured_data_check(
     snapshot: &G3TsAstroConfigSurfaceSnapshot,
 ) -> bool {
@@ -46,6 +49,7 @@ pub(crate) fn checks_options_include_structured_data_check(
     })
 }
 
+/// Internal helper used by the rule.
 fn checks_options_are_fail_closed(value: &G3TsAstroStaticValue) -> bool {
     let Some(properties) = object_properties(value) else {
         return false;
@@ -66,6 +70,7 @@ fn checks_options_are_fail_closed(value: &G3TsAstroStaticValue) -> bool {
         && checks_options_have_structured_data_custom_check(value)
 }
 
+/// Internal helper used by the rule.
 fn checks_options_have_structured_data_custom_check(value: &G3TsAstroStaticValue) -> bool {
     let Some(properties) = object_properties(value) else {
         return false;
@@ -78,9 +83,9 @@ fn checks_options_have_structured_data_custom_check(value: &G3TsAstroStaticValue
         return false;
     };
 
-    values.iter().any(|value| {
+    values.iter().any(|item| {
         matches!(
-            value,
+            item,
             G3TsAstroStaticValue::ImportedIdentifier {
                 local_name,
                 source_module: Some(source_module),
@@ -92,6 +97,7 @@ fn checks_options_have_structured_data_custom_check(value: &G3TsAstroStaticValue
     })
 }
 
+/// Internal helper used by the rule.
 fn object_properties(value: &G3TsAstroStaticValue) -> Option<&[G3TsAstroStaticObjectProperty]> {
     match value {
         G3TsAstroStaticValue::Object(properties) => Some(properties),
@@ -105,6 +111,7 @@ fn object_properties(value: &G3TsAstroStaticValue) -> Option<&[G3TsAstroStaticOb
     }
 }
 
+/// Internal generic helper used by the rule.
 fn property_value<'a>(
     properties: &'a [G3TsAstroStaticObjectProperty],
     key: &str,
@@ -115,6 +122,7 @@ fn property_value<'a>(
         .map(|property| &property.value)
 }
 
+/// Internal helper used by the rule.
 fn object_has_duplicate_keys(properties: &[G3TsAstroStaticObjectProperty]) -> bool {
     let mut seen = std::collections::BTreeSet::new();
     properties
@@ -122,12 +130,14 @@ fn object_has_duplicate_keys(properties: &[G3TsAstroStaticObjectProperty]) -> bo
         .any(|property| !seen.insert(property.key.as_str()))
 }
 
+/// Internal helper used by the rule.
 fn object_has_only_allowed_keys(properties: &[G3TsAstroStaticObjectProperty]) -> bool {
     properties
         .iter()
         .all(|property| ALLOWED_OPTION_KEYS.contains(&property.key.as_str()))
 }
 
+/// Internal helper used by the rule.
 fn property_bool(properties: &[G3TsAstroStaticObjectProperty], key: &str) -> Option<bool> {
     match property_value(properties, key) {
         Some(G3TsAstroStaticValue::Bool(value)) => Some(*value),
@@ -135,6 +145,7 @@ fn property_bool(properties: &[G3TsAstroStaticObjectProperty], key: &str) -> Opt
     }
 }
 
+/// Internal helper used by the rule.
 fn overrides_absent_or_empty(properties: &[G3TsAstroStaticObjectProperty]) -> bool {
     match property_value(properties, "overrides") {
         None => true,
@@ -143,11 +154,10 @@ fn overrides_absent_or_empty(properties: &[G3TsAstroStaticObjectProperty]) -> bo
     }
 }
 
+/// Internal helper used by the rule.
 fn validator_lane_not_disabled(properties: &[G3TsAstroStaticObjectProperty], key: &str) -> bool {
     match property_value(properties, key) {
-        None => true,
-        Some(G3TsAstroStaticValue::Bool(false)) => false,
-        Some(G3TsAstroStaticValue::Bool(true) | G3TsAstroStaticValue::Object(_)) => true,
-        Some(_) => false,
+        None | Some(G3TsAstroStaticValue::Bool(true) | G3TsAstroStaticValue::Object(_)) => true,
+        Some(G3TsAstroStaticValue::Bool(false) | _) => false,
     }
 }

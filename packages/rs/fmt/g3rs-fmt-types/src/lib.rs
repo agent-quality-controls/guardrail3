@@ -1,3 +1,5 @@
+//! Shared types for the g3rs fmt family.
+
 #[cfg(feature = "api")]
 mod types;
 

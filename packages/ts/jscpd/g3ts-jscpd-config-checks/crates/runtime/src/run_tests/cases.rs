@@ -100,81 +100,71 @@ fn golden_root_reports_expected_inventory() {
 }
 
 #[test]
-fn weak_threshold_reports_threshold_error() {
-    let results = super::super::check(&weak_threshold());
+fn rule_specific_inputs_emit_their_expected_findings() {
+    type Input = g3ts_jscpd_types::G3TsJscpdChecksInput;
+    type Build = fn() -> Input;
 
-    assertions::assert_contains(
-        &results,
-        &[assertions::error(
-            "g3ts-jscpd/threshold-zero",
-            "jscpd threshold is not zero",
-            "Root `.jscpd.json` sets `threshold` to `1`, but the current baseline requires `0`.",
-            Some(".jscpd.json"),
-            false,
-        )],
-    );
-}
+    struct Case {
+        build: Build,
+        expected: assertions::Finding<'static>,
+    }
 
-#[test]
-fn missing_absolute_reports_absolute_error() {
-    let results = super::super::check(&missing_absolute());
+    let cases = [
+        Case {
+            build: weak_threshold,
+            expected: assertions::error(
+                "g3ts-jscpd/threshold-zero",
+                "jscpd threshold is not zero",
+                "Root `.jscpd.json` sets `threshold` to `1`, but the current baseline requires `0`.",
+                Some(".jscpd.json"),
+                false,
+            ),
+        },
+        Case {
+            build: missing_absolute,
+            expected: assertions::error(
+                "g3ts-jscpd/absolute-true",
+                "jscpd absolute field missing",
+                "Root `.jscpd.json` must set `absolute: true`.",
+                Some(".jscpd.json"),
+                false,
+            ),
+        },
+        Case {
+            build: missing_ignores,
+            expected: assertions::error(
+                "g3ts-jscpd/required-ignores",
+                "jscpd required ignore patterns missing",
+                "Root `.jscpd.json` is missing required ignore patterns: **/.next/**, **/dist/**, **/target/**, **/components/ui/**.",
+                Some(".jscpd.json"),
+                false,
+            ),
+        },
+        Case {
+            build: missing_typescript_format,
+            expected: assertions::error(
+                "g3ts-jscpd/format-and-inventory",
+                "jscpd format misses typescript",
+                "Root `.jscpd.json` must include `typescript` in `format`.",
+                Some(".jscpd.json"),
+                false,
+            ),
+        },
+        Case {
+            build: extra_inventory_key,
+            expected: assertions::info(
+                "g3ts-jscpd/format-and-inventory",
+                "jscpd extra top-level key present",
+                "Extra root `.jscpd.json` key `gitignore` is outside the current wave-1 baseline. Keep it only if intentional.",
+                Some(".jscpd.json"),
+                true,
+            ),
+        },
+    ];
 
-    assertions::assert_contains(
-        &results,
-        &[assertions::error(
-            "g3ts-jscpd/absolute-true",
-            "jscpd absolute field missing",
-            "Root `.jscpd.json` must set `absolute: true`.",
-            Some(".jscpd.json"),
-            false,
-        )],
-    );
-}
-
-#[test]
-fn missing_ignores_report_ignore_error() {
-    let results = super::super::check(&missing_ignores());
-
-    assertions::assert_contains(
-        &results,
-        &[assertions::error(
-            "g3ts-jscpd/required-ignores",
-            "jscpd required ignore patterns missing",
-            "Root `.jscpd.json` is missing required ignore patterns: **/.next/**, **/dist/**, **/target/**, **/components/ui/**.",
-            Some(".jscpd.json"),
-            false,
-        )],
-    );
-}
-
-#[test]
-fn missing_typescript_format_reports_format_error() {
-    let results = super::super::check(&missing_typescript_format());
-
-    assertions::assert_contains(
-        &results,
-        &[assertions::error(
-            "g3ts-jscpd/format-and-inventory",
-            "jscpd format misses typescript",
-            "Root `.jscpd.json` must include `typescript` in `format`.",
-            Some(".jscpd.json"),
-            false,
-        )],
-    );
-}
-
-#[test]
-fn extra_inventory_key_reports_inventory_finding() {
-    let results = super::super::check(&extra_inventory_key());
-
-    assertions::assert_contains(
-        &results,
-        &[assertions::info(
-            "g3ts-jscpd/format-and-inventory",
-            "jscpd extra top-level key present",
-            "Extra root `.jscpd.json` key `gitignore` is outside the current wave-1 baseline. Keep it only if intentional.",
-            Some(".jscpd.json"),
-            true,
-        )],
-    );
+    for case in &cases {
+        let input = (case.build)();
+        let results = super::super::check(&input);
+        assertions::assert_contains(&results, std::slice::from_ref(&case.expected));
+    }
 }

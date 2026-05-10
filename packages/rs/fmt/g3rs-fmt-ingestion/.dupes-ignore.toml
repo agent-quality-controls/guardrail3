@@ -1,0 +1,47 @@
+[[ignore]]
+fingerprint = "640dc7c8b7da5c02"
+reason = "Parallel rustfmt key-detection branches structurally similar by per-key check architecture"
+
+[[ignore]]
+fingerprint = "6a40b69ee6fd8c52"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "a68576a47515d48e"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "567e0d956873cc91"
+reason = "Parallel ingestion arms (Cargo.toml, rust-toolchain.toml, rustfmt.toml) by config file"
+
+[[ignore]]
+fingerprint = "60b44dc63dd7d5f5"
+reason = "Parallel parser bodies (cargo, toolchain, rustfmt) by config file"
+
+[[ignore]]
+fingerprint = "73190a7850b27284"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "b5e77e695f651798"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "c9cc42b15ea0d8e0"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "1e8a840c142582e5"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "2cfd0594120a09a2"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "307512a6a1a30638"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "a070b01545e44922"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"

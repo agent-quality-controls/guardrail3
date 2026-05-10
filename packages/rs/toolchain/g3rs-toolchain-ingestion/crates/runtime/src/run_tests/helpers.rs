@@ -1,3 +1,8 @@
+#![allow(
+    clippy::disallowed_methods,
+    reason = "fixture helpers must call std::fs and Command directly to seed test workspaces"
+)]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -19,7 +24,8 @@ pub(super) fn write(path: impl AsRef<Path>, content: &str) {
 }
 
 pub(super) fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+    g3rs_workspace_crawl::crawl_any_root(root)
+        .expect("crawl should succeed on valid test workspace")
 }
 
 pub(super) fn packages_dir() -> PathBuf {
@@ -81,8 +87,7 @@ pub(super) fn is_supported_channel(channel: &str) -> bool {
         return false;
     }
 
-    match parts.next() {
-        Some(patch) => patch.parse::<u64>().is_ok() && parts.next().is_none(),
-        None => true,
-    }
+    parts
+        .next()
+        .is_none_or(|patch| patch.parse::<u64>().is_ok() && parts.next().is_none())
 }

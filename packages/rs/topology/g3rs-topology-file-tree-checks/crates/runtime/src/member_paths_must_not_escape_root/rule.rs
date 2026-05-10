@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::display_dir;
 
+/// Stable identifier for this rule.
 const ID: &str = "g3rs-topology/member-paths-must-not-escape-root";
 
+/// Runs this rule and appends its findings to `results`.
 pub(crate) fn check(
     input: &G3RsTopologyEscapingWorkspaceMemberPathInput,
     results: &mut Vec<G3CheckResult>,

@@ -5,6 +5,15 @@ use std::process::Command;
 use g3rs_cargo_ingestion_assertions::run as assertions;
 use tempfile::tempdir;
 
+/// Initialize a real git repo in `path` for ingestion fixtures.
+///
+/// The centralized fs/process bans apply to production code paths; these
+/// test-only fixture helpers materialize real on-disk inputs to exercise the
+/// workspace crawl end-to-end.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk git+files to exercise the workspace crawl; the centralized fs/process bans target production code paths only"
+)]
 fn git_init(path: &Path) {
     let _status = Command::new("git")
         .args(["init", "--quiet"])
@@ -13,6 +22,11 @@ fn git_init(path: &Path) {
         .expect("git init should succeed in test fixture setup");
 }
 
+/// Write a fixture file, materializing missing parent directories. See [`git_init`].
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk git+files to exercise the workspace crawl; the centralized fs/process bans target production code paths only"
+)]
 fn write(path: impl AsRef<Path>, content: &str) {
     if let Some(parent) = path.as_ref().parent() {
         fs::create_dir_all(parent)
@@ -26,6 +40,10 @@ fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
 }
 
 #[cfg(unix)]
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper that toggles real on-disk file permissions to exercise the Unreadable code paths; the centralized fs bans target production code paths only"
+)]
 fn make_unreadable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
 
@@ -36,6 +54,10 @@ fn make_unreadable(path: &Path) {
     fs::set_permissions(path, permissions).expect("chmod should succeed");
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn ingests_workspace_root_with_members_for_config_checks() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -87,6 +109,10 @@ fn ingests_workspace_root_with_members_for_config_checks() {
     ));
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn member_may_inherit_workspace_edition() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -167,6 +193,10 @@ fn ingests_hybrid_root_with_package_fallback_fields() {
     assert!(cargo_toml_parser::document::policy_lints(&input.root.cargo, "rust").is_some());
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -189,20 +219,27 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
     let input = crate::run::ingest_for_config_checks(&crawl(root))
         .expect("config ingestion should succeed with rust-only policy");
 
-    match &input.root.rust_policy {
-        g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed {
-            profile, waivers, ..
-        } => {
-            assert_eq!(
-                *profile,
-                Some(guardrail3_rs_toml_parser::types::RustProfile::Library)
-            );
-            assert_eq!(waivers.len(), 1, "{waivers:#?}");
-            assert_eq!(waivers[0].rule, "g3rs-cargo/approved-allow-inventory");
-            assert_eq!(waivers[0].selector, "clippy:module_name_repetitions");
-        }
-        other => panic!("expected parsed rust policy, got {other:#?}"),
-    }
+    assert!(
+        matches!(
+            &input.root.rust_policy,
+            g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed { .. }
+        ),
+        "expected parsed rust policy, got {:?}",
+        &input.root.rust_policy
+    );
+    let g3rs_cargo_types::G3RsCargoRustPolicyState::Parsed {
+        profile, waivers, ..
+    } = &input.root.rust_policy
+    else {
+        return;
+    };
+    assert_eq!(
+        *profile,
+        Some(guardrail3_rs_toml_parser::types::RustProfile::Library)
+    );
+    assert_eq!(waivers.len(), 1, "{waivers:#?}");
+    assert_eq!(waivers[0].rule, "g3rs-cargo/approved-allow-inventory");
+    assert_eq!(waivers[0].selector, "clippy:module_name_repetitions");
 }
 
 #[test]
@@ -401,6 +438,10 @@ fn config_ingestion_fails_closed_on_invalid_workspace_exclude_shape() {
     );
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn config_ingestion_normalizes_root_member_dot_patterns() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -434,6 +475,10 @@ fn config_ingestion_normalizes_root_member_dot_patterns() {
     assert_eq!(input.workspace_members[0].cargo_rel_path, "Cargo.toml");
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn config_ingestion_keeps_healthy_members_when_another_member_manifest_is_malformed() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -498,6 +543,10 @@ fn config_ingestion_skips_missing_declared_member_manifest() {
     );
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[test]
 fn config_ingestion_preserves_invalid_lints_workspace_shape_per_member() {
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -561,6 +610,10 @@ fn unreadable_root_cargo_toml_fails_ingestion() {
 
     make_unreadable(&cargo_path);
     let crawl = crawl(root);
+    #[expect(
+        clippy::disallowed_methods,
+        reason = "restore fixture permissions for tests that exercise unreadable code paths; centralized fs bans target production code only"
+    )]
     let _restore = fs::set_permissions(&cargo_path, fs::Permissions::from_mode(0o644));
 
     let err = crate::run::ingest_for_config_checks(&crawl)
@@ -673,6 +726,10 @@ fn config_ingestion_fails_closed_on_invalid_workspace_rust_version_before_packag
     assertions::assert_parse_failed_error(&err, "Cargo.toml");
 }
 
+#[expect(
+    clippy::indexing_slicing,
+    reason = "test asserts vec/slice length above this index access; the lint flags the index but the pre-assertion guarantees it cannot panic at runtime"
+)]
 #[cfg(unix)]
 #[test]
 fn config_ingestion_skips_unreadable_member_manifest() {
@@ -713,6 +770,10 @@ fn config_ingestion_skips_unreadable_member_manifest() {
 
     make_unreadable(&secret);
     let crawl = crawl(root);
+    #[expect(
+        clippy::disallowed_methods,
+        reason = "restore fixture permissions for tests that exercise unreadable code paths; centralized fs bans target production code only"
+    )]
     let _restore = fs::set_permissions(&secret, fs::Permissions::from_mode(0o644));
 
     let input = crate::run::ingest_for_config_checks(&crawl)
@@ -745,6 +806,10 @@ fn unreadable_guardrail3_rs_toml_degrades_to_rust_policy_unreadable() {
 
     make_unreadable(&guardrail);
     let crawl = crawl(root);
+    #[expect(
+        clippy::disallowed_methods,
+        reason = "restore fixture permissions for tests that exercise unreadable code paths; centralized fs bans target production code only"
+    )]
     let _restore = fs::set_permissions(&guardrail, fs::Permissions::from_mode(0o644));
 
     let input = crate::run::ingest_for_config_checks(&crawl)

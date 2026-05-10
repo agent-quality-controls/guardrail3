@@ -2,14 +2,20 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// Internal field `severity`.
     severity: G3Severity,
+    /// Internal field `title`.
     title: &'a str,
+    /// Internal field `message`.
     message: &'a str,
+    /// Internal field `file`.
     file: Option<&'a str>,
+    /// Internal field `inventory`.
     inventory: bool,
 }
 
 #[must_use]
+/// Internal function `findings`.
 pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
         .iter()
@@ -41,6 +47,7 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
+/// Internal function `assert_findings`.
 pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let mut expected_vec = expected.to_vec();
     expected_vec.sort_by(|left, right| {
@@ -59,13 +66,23 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
                 right.inventory,
             ))
     });
-    assert_eq!(findings(results, id), expected_vec);
+    assert_eq!(
+        findings(results, id),
+        expected_vec,
+        "findings for `{id}` do not match expected"
+    );
 }
 
+/// Internal function `assert_no_findings`.
 pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
-    assert!(findings(results, id).is_empty());
+    assert!(
+        findings(results, id).is_empty(),
+        "expected no findings for `{id}`, got: {:?}",
+        findings(results, id)
+    );
 }
 
+/// Internal function `assert_contains`.
 pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let findings = findings(results, id);
     for expected_finding in expected {
@@ -77,7 +94,8 @@ pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &[F
 }
 
 #[must_use]
-pub(crate) fn finding<'a>(
+/// Internal function `fn`.
+pub(crate) const fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
@@ -96,39 +114,39 @@ pub(crate) fn finding<'a>(
 #[macro_export]
 macro_rules! define_result_assertions {
     ($id:literal) => {
-        pub use crate::common::Finding;
+        pub use $crate::common::Finding;
 
         #[must_use]
         pub fn findings(results: &[guardrail3_check_types::G3CheckResult]) -> Vec<Finding<'_>> {
-            crate::common::findings(results, $id)
+            $crate::common::findings(results, $id)
         }
 
         pub fn assert_findings(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
-            crate::common::assert_findings(results, $id, expected);
+            $crate::common::assert_findings(results, $id, expected);
         }
 
         pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
-            crate::common::assert_no_findings(results, $id);
+            $crate::common::assert_no_findings(results, $id);
         }
 
         pub fn assert_contains(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
-            crate::common::assert_contains(results, $id, expected);
+            $crate::common::assert_contains(results, $id, expected);
         }
 
         #[must_use]
-        pub fn error<'a>(
+        pub const fn error<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
@@ -138,13 +156,13 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info<'a>(
+        pub const fn info<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,
@@ -154,8 +172,12 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn error_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
-            crate::common::finding(
+        pub const fn error_no_file<'a>(
+            title: &'a str,
+            message: &'a str,
+            inventory: bool,
+        ) -> Finding<'a> {
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
@@ -165,8 +187,12 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
-            crate::common::finding(
+        pub const fn info_no_file<'a>(
+            title: &'a str,
+            message: &'a str,
+            inventory: bool,
+        ) -> Finding<'a> {
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,

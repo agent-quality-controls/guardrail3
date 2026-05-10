@@ -3,8 +3,11 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{info, missing_inline_flags};
 
+/// Check ID emitted by this rule.
 const ID: &str = "g3ts-tsconfig/extends-or-inline";
 
+/// Emit a finding describing whether the tsconfig either extends a base
+/// config or carries inline strict flags.
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let G3TsTsconfigState::Parsed {
         rel_path,

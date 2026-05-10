@@ -1,3 +1,3 @@
 mod golden;
-mod missing;
 mod helpers;
+mod missing;

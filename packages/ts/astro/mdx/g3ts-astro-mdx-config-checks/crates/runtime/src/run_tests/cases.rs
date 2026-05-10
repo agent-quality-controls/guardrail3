@@ -25,10 +25,7 @@ fn golden_mdx_package_reports_owned_ids() {
 #[test]
 fn mdx_package_rejects_missing_dependency() {
     let mut input = super::helpers::golden();
-    let package = &mut input.integration_contracts[0].package;
-    let g3ts_astro_mdx_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } = package else {
-        panic!("golden package should be parsed");
-    };
+    let snapshot = super::helpers::package_snapshot_mut(&mut input);
     snapshot.dev_dependencies.clear();
 
     assertions::assert_runtime_check_id_severity(
@@ -41,10 +38,7 @@ fn mdx_package_rejects_missing_dependency() {
 #[test]
 fn mdx_lane_rejects_missing_effective_package_identity() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot.mdx_content_plugin_package_names.clear();
 
     assertions::assert_runtime_check_id_severity(
@@ -57,10 +51,7 @@ fn mdx_lane_rejects_missing_effective_package_identity() {
 #[test]
 fn mdx_import_name_rule_is_required() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .mdx_content_effective_named_component_import_rules
         .clear();
@@ -75,10 +66,7 @@ fn mdx_import_name_rule_is_required() {
 #[test]
 fn mdx_component_map_raw_ui_export_rule_is_required() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .component_map_effective_no_raw_ui_export_rules
         .clear();
@@ -93,10 +81,7 @@ fn mdx_component_map_raw_ui_export_rule_is_required() {
 #[test]
 fn mdx_component_wrapper_zod_parse_rule_is_required() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .component_map_effective_wrapper_zod_parse_rules
         .clear();
@@ -111,10 +96,7 @@ fn mdx_component_wrapper_zod_parse_rule_is_required() {
 #[test]
 fn mdx_raw_image_rule_is_required() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot.mdx_content_effective_no_raw_image_rules.clear();
 
     assertions::assert_runtime_check_id_severity(
@@ -127,10 +109,7 @@ fn mdx_raw_image_rule_is_required() {
 #[test]
 fn protected_mdx_rule_disables_must_cover_component_map_rules() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .component_map_restricted_disable_patterns
         .retain(|rule| rule != "astro-pipeline/mdx-component-wrapper-requires-zod-parse");
@@ -145,10 +124,7 @@ fn protected_mdx_rule_disables_must_cover_component_map_rules() {
 #[test]
 fn protected_mdx_rule_disables_requires_restrict_rule() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .mdx_content_warn_or_error_rules
         .retain(|rule| rule != "@eslint-community/eslint-comments/no-restricted-disable");
@@ -163,10 +139,7 @@ fn protected_mdx_rule_disables_requires_restrict_rule() {
 #[test]
 fn protected_mdx_rule_disables_accept_pipeline_wildcard() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot.mdx_content_restricted_disable_patterns =
         vec!["mdx/remark".to_owned(), "astro-pipeline/*".to_owned()];
     snapshot.component_map_restricted_disable_patterns = vec!["astro-pipeline/*".to_owned()];
@@ -181,10 +154,7 @@ fn protected_mdx_rule_disables_accept_pipeline_wildcard() {
 #[test]
 fn mdx_disable_descriptions_must_be_error_on_mdx_lanes() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .mdx_content_error_rules
         .retain(|rule| rule != "@eslint-community/eslint-comments/require-description");
@@ -199,10 +169,7 @@ fn mdx_disable_descriptions_must_be_error_on_mdx_lanes() {
 #[test]
 fn mdx_disable_descriptions_accepts_namespace_when_package_identity_is_unavailable() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot.mdx_content_plugin_package_names.clear();
     snapshot.component_map_plugin_package_names.clear();
 
@@ -216,10 +183,7 @@ fn mdx_disable_descriptions_accepts_namespace_when_package_identity_is_unavailab
 #[test]
 fn mdx_disable_descriptions_rejects_missing_plugin_namespace() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .component_map_plugins
         .retain(|plugin| plugin != "@eslint-community/eslint-comments");
@@ -234,10 +198,7 @@ fn mdx_disable_descriptions_rejects_missing_plugin_namespace() {
 #[test]
 fn mdx_unused_disables_must_fail_closed_on_mdx_lanes() {
     let mut input = super::helpers::golden();
-    let config = &mut input.eslint_contracts[0].config;
-    let g3ts_astro_mdx_types::G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
-        panic!("golden mdx eslint config should be parsed");
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot.component_map_unused_disable_fail_closed = false;
 
     assertions::assert_runtime_check_id_severity(

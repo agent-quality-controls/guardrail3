@@ -9,8 +9,8 @@ use super::super::run_case;
 fn reports_missing_contract_derived_tool() {
     let results = run_case(
         "#!/bin/sh\ncargo deny check\n",
-        vec!["g3rs".to_owned(), "gitleaks".to_owned()],
-        vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
+        &["g3rs".to_owned(), "gitleaks".to_owned()],
+        &[requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
     assertions::assert_contains(
@@ -27,12 +27,12 @@ fn reports_missing_contract_derived_tool() {
 fn accepts_installed_contract_derived_tool() {
     let results = run_case(
         "#!/bin/sh\ncargo deny check\n",
-        vec![
+        &[
             "cargo-deny".to_owned(),
             "g3rs".to_owned(),
             "gitleaks".to_owned(),
         ],
-        vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
+        &[requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
     assertions::assert_all_inventory(&results);
@@ -42,8 +42,8 @@ fn accepts_installed_contract_derived_tool() {
 fn reports_universal_g3rs_and_gitleaks_tools() {
     let results = run_case(
         "#!/bin/sh\ntrue\n",
-        Vec::new(),
-        vec![requirement(G3HookCommandRequirement::CargoTest)],
+        &[],
+        &[requirement(G3HookCommandRequirement::CargoTest)],
     );
 
     assertions::assert_contains(
@@ -68,8 +68,8 @@ fn reports_universal_g3rs_and_gitleaks_tools() {
 fn reports_machete_and_dupes_contract_tools() {
     let results = run_case(
         "#!/bin/sh\ntrue\n",
-        vec!["g3rs".to_owned(), "gitleaks".to_owned()],
-        vec![
+        &["g3rs".to_owned(), "gitleaks".to_owned()],
+        &[
             requirement(G3HookCommandRequirement::CargoMachete),
             requirement(G3HookCommandRequirement::CargoDupes),
             requirement(G3HookCommandRequirement::CargoDupesExcludeTests),
@@ -98,8 +98,8 @@ fn reports_machete_and_dupes_contract_tools() {
 fn path_qualified_tool_satisfies_contract() {
     let results = run_case(
         "#!/bin/sh\n/usr/local/bin/cargo-deny check\n",
-        vec!["g3rs".to_owned(), "gitleaks".to_owned()],
-        vec![requirement(G3HookCommandRequirement::CargoDenyCheck)],
+        &["g3rs".to_owned(), "gitleaks".to_owned()],
+        &[requirement(G3HookCommandRequirement::CargoDenyCheck)],
     );
 
     assertions::assert_all_inventory(&results);
@@ -109,8 +109,8 @@ fn path_qualified_tool_satisfies_contract() {
 fn path_qualified_universal_g3rs_satisfies_contract() {
     let results = run_case(
         "#!/bin/sh\n/usr/local/bin/g3rs validate --path .\ngitleaks detect\ncargo test\n",
-        vec!["gitleaks".to_owned()],
-        vec![requirement(G3HookCommandRequirement::CargoTest)],
+        &["gitleaks".to_owned()],
+        &[requirement(G3HookCommandRequirement::CargoTest)],
     );
 
     assertions::assert_all_inventory(&results);
@@ -120,8 +120,8 @@ fn path_qualified_universal_g3rs_satisfies_contract() {
 fn path_qualified_gitleaks_satisfies_contract() {
     let results = run_case(
         "#!/bin/sh\ng3rs validate --path .\n/usr/local/bin/gitleaks detect\ncargo test\n",
-        vec!["g3rs".to_owned()],
-        vec![requirement(G3HookCommandRequirement::CargoTest)],
+        &["g3rs".to_owned()],
+        &[requirement(G3HookCommandRequirement::CargoTest)],
     );
 
     assertions::assert_all_inventory(&results);
@@ -131,8 +131,8 @@ fn path_qualified_gitleaks_satisfies_contract() {
 fn path_qualified_machete_and_dupes_satisfy_contract() {
     let results = run_case(
         "#!/bin/sh\n/usr/local/bin/cargo-machete\n/usr/local/bin/cargo-dupes check --exclude-tests\n",
-        vec!["g3rs".to_owned(), "gitleaks".to_owned()],
-        vec![
+        &["g3rs".to_owned(), "gitleaks".to_owned()],
+        &[
             requirement(G3HookCommandRequirement::CargoMachete),
             requirement(G3HookCommandRequirement::CargoDupes),
             requirement(G3HookCommandRequirement::CargoDupesExcludeTests),
@@ -146,8 +146,8 @@ fn path_qualified_machete_and_dupes_satisfy_contract() {
 fn g3rs_empty_path_does_not_satisfy_installed_tool_contract() {
     let results = run_case(
         "#!/bin/sh\n/usr/local/bin/g3rs validate --path \"\"\ngitleaks detect\ncargo test\n",
-        vec!["gitleaks".to_owned()],
-        vec![requirement(G3HookCommandRequirement::CargoTest)],
+        &["gitleaks".to_owned()],
+        &[requirement(G3HookCommandRequirement::CargoTest)],
     );
 
     assertions::assert_contains(
@@ -164,8 +164,8 @@ fn g3rs_empty_path_does_not_satisfy_installed_tool_contract() {
 fn critical_commands_add_required_tools() {
     let results = run_case(
         "#!/bin/sh\ntrue\n",
-        vec!["g3rs".to_owned(), "gitleaks".to_owned()],
-        vec![critical_requirement(
+        &["g3rs".to_owned(), "gitleaks".to_owned()],
+        &[critical_requirement(
             G3HookCriticalCommand::CargoSubcommand("machete".to_owned()),
         )],
     );

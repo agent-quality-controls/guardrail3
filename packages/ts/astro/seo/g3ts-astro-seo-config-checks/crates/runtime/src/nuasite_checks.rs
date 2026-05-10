@@ -1,9 +1,13 @@
 use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/nuasite-checks";
+/// Static rule data.
 const DEPENDENCY_NAME: &str = "@nuasite/checks";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -21,15 +25,31 @@ pub(crate) fn check(
         | G3TsAstroConfigSurfaceState::ParseError { .. } => false,
     };
 
-    if has_package && has_build_script && has_static_output && has_checks {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                    ID,
-                    "Nuasite rendered-output checks are installed and wired",
-                    format!("`{rel_path}` wires `checks()` from `@nuasite/checks` with fail-closed options and the package scripts safely run `astro build`."),
-                    rel_path,
-                ));
-        }
+    let presence = NuasitePartsPresence::from_parts([
+        NuasitePart {
+            label: "package dependency",
+            present: has_package,
+        },
+        NuasitePart {
+            label: "safe `astro build` script",
+            present: has_build_script,
+        },
+        NuasitePart {
+            label: "explicit static output",
+            present: has_static_output,
+        },
+        NuasitePart {
+            label: "fail-closed `checks()` integration",
+            present: has_checks,
+        },
+    ]);
+    if presence.all_present() {
+        results.push(crate::support::info(
+                ID,
+                "Nuasite rendered-output checks are installed and wired",
+                format!("`{rel_path}` wires `checks()` from `@nuasite/checks` with fail-closed options and the package scripts safely run `astro build`."),
+                rel_path,
+            ));
         return;
     }
 
@@ -38,30 +58,45 @@ pub(crate) fn check(
             "Nuasite rendered-output checks are not installed and wired",
             format!(
                 "This Astro app must list `{DEPENDENCY_NAME}`, safely run `astro build`, set `output: \"static\"`, and wire `checks()` from `{DEPENDENCY_NAME}` with `failOnError: true`, `failOnWarning: true`, `reportJson: true`, no disabled `seo`, `performance`, `accessibility`, or `geo` lanes, and `customChecks: [structuredDataPresentCheck]`. Missing pieces: {}.",
-                missing_parts(has_package, has_build_script, has_static_output, has_checks).join(", ")
+                presence.missing_parts().join(", ")
             ),
-            rel_path,
+            Some(rel_path),
         ));
 }
 
-fn missing_parts(
-    has_package: bool,
-    has_build_script: bool,
-    has_static_output: bool,
-    has_checks: bool,
-) -> Vec<&'static str> {
-    let mut parts = Vec::new();
-    if !has_package {
-        parts.push("package dependency");
+/// One Nuasite contract piece tracked alongside its label.
+#[derive(Debug, Clone, Copy)]
+struct NuasitePart {
+    /// Display label for the missing-parts message.
+    label: &'static str,
+    /// True when the piece is wired.
+    present: bool,
+}
+
+/// Tracks which Nuasite contract pieces are wired in the workspace.
+#[derive(Debug, Clone, Copy)]
+struct NuasitePartsPresence {
+    /// Required pieces in stable presentation order.
+    parts: [NuasitePart; 4],
+}
+
+impl NuasitePartsPresence {
+    /// Build a presence record from a list of parts.
+    const fn from_parts(parts: [NuasitePart; 4]) -> Self {
+        Self { parts }
     }
-    if !has_build_script {
-        parts.push("safe `astro build` script");
+
+    /// True when every contract piece is wired.
+    fn all_present(self) -> bool {
+        self.parts.iter().all(|part| part.present)
     }
-    if !has_static_output {
-        parts.push("explicit static output");
+
+    /// Returns labels for missing contract pieces.
+    fn missing_parts(self) -> Vec<&'static str> {
+        self.parts
+            .iter()
+            .filter(|part| !part.present)
+            .map(|part| part.label)
+            .collect()
     }
-    if !has_checks {
-        parts.push("fail-closed `checks()` integration");
-    }
-    parts
 }

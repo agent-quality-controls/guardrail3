@@ -3,6 +3,7 @@ use g3ts_fmt_types::{
     G3TsFmtSyncpackSnapshot, G3TsFmtSyncpackSurfaceState, G3TsFmtSyncpackVersionGroupSnapshot,
 };
 
+/// Ingests the Syncpack config under `app_root_rel_path` into a surface state.
 pub(crate) fn ingest_syncpack_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -36,8 +37,12 @@ pub(crate) fn ingest_syncpack_config(
             reason: reason.to_owned(),
         };
     }
-    let typed = syncpack_config_parser::typed(&document)
-        .expect("parsed Syncpack config document should stay typed");
+    let Some(typed) = syncpack_config_parser::typed(&document) else {
+        return G3TsFmtSyncpackSurfaceState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "Syncpack config parsed without typed data".to_owned(),
+        };
+    };
     G3TsFmtSyncpackSurfaceState::Parsed {
         snapshot: G3TsFmtSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
@@ -52,6 +57,7 @@ pub(crate) fn ingest_syncpack_config(
     }
 }
 
+/// Maps a parser version group into the contract snapshot shape.
 fn syncpack_version_group(
     group: syncpack_config_parser::types::SyncpackVersionGroup,
 ) -> G3TsFmtSyncpackVersionGroupSnapshot {

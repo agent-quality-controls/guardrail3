@@ -1,6 +1,7 @@
 use g3ts_hooks_types::G3TsHooksFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Runs the g3ts hooks file-tree checks against `input`.
 #[must_use]
 pub fn check(input: &G3TsHooksFileTreeChecksInput) -> Vec<G3CheckResult> {
     if !input.active() {
@@ -20,6 +21,7 @@ pub fn check(input: &G3TsHooksFileTreeChecksInput) -> Vec<G3CheckResult> {
     results
 }
 
+/// Errors when no pre-commit hook is configured.
 fn pre_commit_exists(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.pre_commit().is_none() {
         results.push(error(
@@ -32,6 +34,7 @@ fn pre_commit_exists(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3C
     }
 }
 
+/// Errors when `core.hooksPath` is not the repo-owned `.githooks` directory.
 fn hooks_path_configured(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.hooks_path() != Some(".githooks") {
         results.push(error(
@@ -44,6 +47,7 @@ fn hooks_path_configured(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec
     }
 }
 
+/// Errors when the pre-commit hook script is not executable.
 fn pre_commit_executable(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(script) = input.pre_commit() else {
         return;
@@ -59,6 +63,7 @@ fn pre_commit_executable(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec
     }
 }
 
+/// Reports inventory for the optional `.githooks/pre-commit.d` modular directory.
 fn modular_directory_inventory(
     input: &G3TsHooksFileTreeChecksInput,
     results: &mut Vec<G3CheckResult>,
@@ -78,6 +83,7 @@ fn modular_directory_inventory(
     ));
 }
 
+/// Reports inventory for each modular hook script discovered in the modular dir.
 fn modular_scripts_inventory(
     input: &G3TsHooksFileTreeChecksInput,
     results: &mut Vec<G3CheckResult>,
@@ -98,6 +104,7 @@ fn modular_scripts_inventory(
     }
 }
 
+/// Reports inventory for any local hook override scripts.
 fn local_override_inventory(
     input: &G3TsHooksFileTreeChecksInput,
     results: &mut Vec<G3CheckResult>,
@@ -113,6 +120,7 @@ fn local_override_inventory(
     }
 }
 
+/// Reports inventory for the pre-commit script's line and byte counts.
 fn script_stats_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if let Some(script) = input.pre_commit() {
         results.push(info(
@@ -130,6 +138,7 @@ fn script_stats_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Ve
     }
 }
 
+/// Reports inventory for the pre-commit script's file size.
 fn file_size_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if let Some(script) = input.pre_commit() {
         results.push(info(
@@ -142,6 +151,7 @@ fn file_size_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G
     }
 }
 
+/// Reports inventory for any alternate hook surfaces that bypass the contract.
 fn trust_risk_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     for path in input.trust_risks() {
         results.push(info(
@@ -156,6 +166,7 @@ fn trust_risk_inventory(input: &G3TsHooksFileTreeChecksInput, results: &mut Vec<
     }
 }
 
+/// Builds an error-severity check result.
 fn error(
     id: &str,
     title: &str,
@@ -173,6 +184,7 @@ fn error(
     )
 }
 
+/// Builds an info-severity inventory check result.
 fn info(
     id: &str,
     title: &str,

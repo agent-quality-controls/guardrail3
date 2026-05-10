@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info, parsed_root, weakened_required_settings};
 
+/// Stable rule identifier reported on each emitted result.
 const ID: &str = "g3ts-npmrc/required-settings-strong-enough";
 
+/// Run the rule and append any results to `results`.
 pub(crate) fn check(input: &G3TsNpmrcChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(snapshot) = parsed_root(input) else {
         return;

@@ -4,6 +4,7 @@ use g3ts_astro_i18n_types::{
     G3TsAstroI18nIntegrationContractInput,
 };
 
+/// Ingests workspace inputs required by Astro i18n config checks.
 #[must_use]
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroI18nConfigChecksInput {
     let app_roots = crate::roots::astro_app_roots(crawl);

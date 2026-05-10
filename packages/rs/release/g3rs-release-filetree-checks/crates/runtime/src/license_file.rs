@@ -1,9 +1,12 @@
 use g3rs_release_types::G3RsReleaseFileTreeRepo;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3rs-release/license-file";
+/// Recognized license file rel-paths.
 const ALLOWED_LICENSE_PATHS: &[&str] = &["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "LICENSE.md"];
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckResult>) {
     if repo.publishable_count == 0 {
         return;

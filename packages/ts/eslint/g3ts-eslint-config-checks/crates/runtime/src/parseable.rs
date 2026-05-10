@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::info;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/parseable";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     match &input.config {
         G3TsEslintConfigState::Missing => {}

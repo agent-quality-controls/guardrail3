@@ -1347,6 +1347,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3rs-rust-family-contracts"
+version = "0.1.0"
+dependencies = [
+ "g3rs-rust-family-contracts-runtime",
+]
+
+[[package]]
+name = "g3rs-rust-family-contracts-architecture"
+version = "0.1.0"
+dependencies = [
+ "g3rs-apparch-hook-contract",
+ "g3rs-arch-hook-contract",
+ "g3rs-hooks-contract-types",
+ "g3rs-topology-hook-contract",
+]
+
+[[package]]
+name = "g3rs-rust-family-contracts-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-hooks-contract-types",
+ "g3rs-rust-family-contracts-architecture",
+ "g3rs-rust-family-contracts-tooling",
+]
+
+[[package]]
+name = "g3rs-rust-family-contracts-tooling"
+version = "0.1.0"
+dependencies = [
+ "g3rs-cargo-hook-contract",
+ "g3rs-clippy-hook-contract",
+ "g3rs-code-hook-contract",
+ "g3rs-deny-hook-contract",
+ "g3rs-deps-hook-contract",
+ "g3rs-fmt-hook-contract",
+ "g3rs-garde-hook-contract",
+ "g3rs-hooks-contract-types",
+ "g3rs-release-hook-contract",
+ "g3rs-test-hook-contract",
+ "g3rs-toolchain-hook-contract",
+]
+
+[[package]]
 name = "g3rs-test-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -1888,9 +1931,13 @@ dependencies = [
 name = "guardrail3-rs-validate-command"
 version = "0.1.0"
 dependencies = [
+ "g3rs-hooks-contract-types",
+ "g3rs-rust-family-contracts",
  "g3rs-workspace-crawl",
  "guardrail3-check-types",
  "guardrail3-rs-app-types",
+ "guardrail3-rs-toml-parser-runtime",
+ "guardrail3-rs-toml-parser-types",
  "guardrail3-rs-validate-command-assertions",
  "tempfile",
 ]

@@ -1,5 +1,6 @@
-use g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState;
+use g3ts_astro_media_types::{G3TsAstroMediaPolicySnapshot, G3TsAstroMediaPolicySurfaceState};
 
+/// `POLICY_RULES` constant.
 const POLICY_RULES: [&str; 4] = [
     "astro-media-policy/no-raw-public-image-paths",
     "astro-media-policy/no-inline-image-alt",
@@ -7,15 +8,20 @@ const POLICY_RULES: [&str; 4] = [
     "astro-media-policy/require-approved-media-helper",
 ];
 
+/// `common_plugins`: common plugins.
 pub(crate) fn common_plugins(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, |probe| probe.plugins.clone())
 }
 
+/// Alias for the eslint plugin-to-packages mapping.
+type PluginPackageNames = std::collections::BTreeMap<String, Vec<String>>;
+
+/// `common_plugin_package_names`: common plugin package names.
 pub(crate) fn common_plugin_package_names(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
-) -> std::collections::BTreeMap<String, Vec<String>> {
+) -> PluginPackageNames {
     let Some(first) = probes.first() else {
         return std::collections::BTreeMap::new();
     };
@@ -48,12 +54,14 @@ pub(crate) fn common_plugin_package_names(
         .collect()
 }
 
+/// `common_error_rules`: common error rules.
 pub(crate) fn common_error_rules(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, active_error_rules)
 }
 
+/// `common_effective_media_policy_rules`: common effective media policy rules.
 pub(crate) fn common_effective_media_policy_rules(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
     astro_policy: &G3TsAstroMediaPolicySurfaceState,
@@ -66,25 +74,37 @@ pub(crate) fn common_effective_media_policy_rules(
         .into_iter()
         .filter(|rule| {
             !probes.is_empty()
-                && probes.iter().all(|probe| {
-                    probe.rules.get(*rule).is_some_and(|setting| {
-                        setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error
-                            && setting.options.first().is_some_and(|options| {
-                                rule_options_match_policy(rule, options, snapshot)
-                            })
-                    })
-                })
+                && probes
+                    .iter()
+                    .all(|probe| probe_enforces_rule(probe, rule, snapshot))
         })
         .map(str::to_owned)
         .collect()
 }
 
+/// Returns `true` when the probe enforces `rule` at error severity with options that match `snapshot`.
+fn probe_enforces_rule(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+    rule: &str,
+    snapshot: &G3TsAstroMediaPolicySnapshot,
+) -> bool {
+    probe.rules.get(rule).is_some_and(|setting| {
+        setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error
+            && setting
+                .options
+                .first()
+                .is_some_and(|options| rule_options_match_policy(rule, options, snapshot))
+    })
+}
+
+/// `common_restricted_disable_patterns`: common restricted disable patterns.
 pub(crate) fn common_restricted_disable_patterns(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, restricted_disable_patterns)
 }
 
+/// `active_error_rules`: active error rules.
 fn active_error_rules(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -98,6 +118,7 @@ fn active_error_rules(
         .collect()
 }
 
+/// `common_values`: common values.
 fn common_values(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
     extract: impl Fn(&eslint_config_parser::types::EslintEffectiveConfigProbe) -> Vec<String>,
@@ -117,6 +138,7 @@ fn common_values(
     common.into_iter().collect()
 }
 
+/// `rule_options_match_policy`: rule options match policy.
 fn rule_options_match_policy(
     rule: &str,
     options: &serde_json::Value,
@@ -185,6 +207,7 @@ fn rule_options_match_policy(
     }
 }
 
+/// `all_policy_options_match`: all policy options match.
 fn all_policy_options_match(
     options: &serde_json::Value,
     policy: &g3ts_astro_media_types::G3TsAstroMediaPolicySnapshot,
@@ -252,6 +275,7 @@ fn all_policy_options_match(
         )
 }
 
+/// `string_array_option_matches`: string array option matches.
 fn string_array_option_matches(
     options: &serde_json::Value,
     key: &str,
@@ -273,6 +297,7 @@ fn string_array_option_matches(
     actual == expected
 }
 
+/// `normalized_string_set`: normalized string set.
 fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collections::BTreeSet<&str>> {
     values
         .iter()
@@ -285,6 +310,7 @@ fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collection
         .collect::<Option<std::collections::BTreeSet<_>>>()
 }
 
+/// `restricted_disable_patterns`: restricted disable patterns.
 fn restricted_disable_patterns(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -305,6 +331,7 @@ fn restricted_disable_patterns(
         .collect()
 }
 
+/// `disable_patterns_from_option`: disable patterns from option.
 fn disable_patterns_from_option(option: &serde_json::Value) -> Vec<String> {
     if let Some(items) = option.as_array() {
         return items.iter().filter_map(disable_pattern).collect();
@@ -313,6 +340,7 @@ fn disable_patterns_from_option(option: &serde_json::Value) -> Vec<String> {
     disable_pattern(option).into_iter().collect()
 }
 
+/// `disable_pattern`: disable pattern.
 fn disable_pattern(value: &serde_json::Value) -> Option<String> {
     if let Some(pattern) = value.as_str() {
         return Some(pattern.to_owned());

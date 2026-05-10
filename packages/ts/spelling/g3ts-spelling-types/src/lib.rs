@@ -1,3 +1,4 @@
+/// Public type definitions exported by the spelling-types crate.
 #[cfg(feature = "api")]
 mod types;
 

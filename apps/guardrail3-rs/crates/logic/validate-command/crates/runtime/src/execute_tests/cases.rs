@@ -10,7 +10,13 @@ use guardrail3_rs_validate_command_assertions::execute as assertions;
 
 use crate::execute;
 
-use super::fs;
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test fixture creation is isolated here so production code keeps centralized filesystem access"
+)]
+fn write_fixture(path: &Path, content: &str) {
+    std::fs::write(path, content).expect("write temporary workspace fixture file");
+}
 
 #[derive(Debug)]
 struct StubCrawler;
@@ -18,6 +24,12 @@ struct StubCrawler;
 impl WorkspaceCrawler for StubCrawler {
     fn crawl(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
         g3rs_workspace_crawl::crawl(root).map_err(|error| WorkspaceCrawlError {
+            message: error.to_string(),
+        })
+    }
+
+    fn crawl_any(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
+        g3rs_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
             message: error.to_string(),
         })
     }
@@ -88,7 +100,7 @@ impl ReportRenderer for StubRenderer {
 #[test]
 fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    fs::write(
+    write_fixture(
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
@@ -97,6 +109,8 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Fmt],
         include_inventory: false,
+        staged: false,
+        rules_only: true,
     };
 
     let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
@@ -115,7 +129,7 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
 #[test]
 fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    fs::write(
+    write_fixture(
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
@@ -124,16 +138,20 @@ fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
         workspace_root: tempdir.path().to_path_buf(),
         families: Vec::new(),
         include_inventory: false,
+        staged: false,
+        rules_only: true,
     };
 
     let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
         .expect("execute should succeed for all-family run");
 
+    // Per-workspace default excludes Hooks family (moved to validate-repo).
+    let expected_runs = SUPPORTED_FAMILIES.len() - 1;
     assertions::assert_execution_outcome(
         outcome.stdout(),
         outcome.stderr(),
         outcome.exit_code(),
-        &format!("runs={} inventory=false", SUPPORTED_FAMILIES.len()),
+        &format!("runs={expected_runs} inventory=false"),
         "",
         1,
     );
@@ -179,7 +197,7 @@ impl FamilyRunner for ErroringFamilyRunner {
 #[test]
 fn execute_keeps_successful_family_results_when_one_family_errors() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
-    fs::write(
+    write_fixture(
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
@@ -188,6 +206,8 @@ fn execute_keeps_successful_family_results_when_one_family_errors() {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Deny, SupportedFamily::Fmt],
         include_inventory: false,
+        staged: false,
+        rules_only: true,
     };
 
     let outcome = execute(&request, &StubCrawler, &ErroringFamilyRunner, &StubRenderer)

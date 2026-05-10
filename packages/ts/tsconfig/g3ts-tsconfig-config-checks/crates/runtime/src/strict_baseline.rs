@@ -5,8 +5,11 @@ use crate::support::{
     effective_check_actionable, effective_flag_mismatches, has_external_extends, info,
 };
 
+/// Check ID emitted by this rule.
 const ID: &str = "g3ts-tsconfig/strict-baseline";
 
+/// Emit findings describing whether the tsconfig satisfies the strict
+/// compiler-option baseline.
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let G3TsTsconfigState::Parsed { rel_path, .. } = &input.config else {
         return;

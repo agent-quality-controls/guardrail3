@@ -6,6 +6,7 @@ use release_plz_toml_parser::types::ReleasePlzToml;
 
 use crate::run::IngestionError;
 
+/// `read_to_string` function.
 pub(crate) fn read_to_string(abs_path: &Path) -> Result<String, IngestionError> {
     crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
         path: abs_path.to_path_buf(),
@@ -13,6 +14,7 @@ pub(crate) fn read_to_string(abs_path: &Path) -> Result<String, IngestionError> 
     })
 }
 
+/// `parse_cargo_toml` function.
 pub(crate) fn parse_cargo_toml(
     content: &str,
     abs_path: &Path,
@@ -23,6 +25,7 @@ pub(crate) fn parse_cargo_toml(
     })
 }
 
+/// `parse_release_plz_toml` function.
 pub(crate) fn parse_release_plz_toml(
     content: &str,
     abs_path: &Path,
@@ -33,6 +36,7 @@ pub(crate) fn parse_release_plz_toml(
     })
 }
 
+/// `parse_cliff_toml` function.
 pub(crate) fn parse_cliff_toml(
     content: &str,
     abs_path: &Path,
@@ -43,6 +47,11 @@ pub(crate) fn parse_cliff_toml(
     })
 }
 
+/// `parse_workflow_yaml` function.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "parse.rs is the centralized YAML parsing boundary for release workflows"
+)]
 pub(crate) fn parse_workflow_yaml(
     content: &str,
     abs_path: &Path,

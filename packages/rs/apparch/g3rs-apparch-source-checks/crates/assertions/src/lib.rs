@@ -1,3 +1,5 @@
+//! Assertion helpers for the `g3rs-apparch` family source-level checks.
+
 #[cfg(feature = "checks")]
 use g3rs_apparch_source_checks_runtime as _;
 use guardrail3_check_types as _;

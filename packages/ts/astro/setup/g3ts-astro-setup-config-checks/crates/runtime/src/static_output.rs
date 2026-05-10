@@ -1,8 +1,10 @@
 use g3ts_astro_setup_types::{G3TsAstroConfigSurfaceState, G3TsAstroSetupIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/static-output";
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -39,6 +41,7 @@ pub(crate) fn check(
     }
 }
 
+/// Internal helper used by the rule.
 fn push_unavailable(rel_path: &str, reason: &str, results: &mut Vec<G3CheckResult>) {
     results.push(crate::support::error(
         ID,

@@ -7,7 +7,8 @@ use g3ts_astro_media_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-pub(crate) fn parsed_package(
+/// Internal function `fn`.
+pub(crate) const fn parsed_package(
     package: &G3TsAstroPackageSurfaceState,
 ) -> Option<&G3TsAstroPackageSurfaceSnapshot> {
     match package {
@@ -18,15 +19,17 @@ pub(crate) fn parsed_package(
     }
 }
 
-pub(crate) fn package_rel_path(package: &G3TsAstroPackageSurfaceState) -> Option<&str> {
+/// Returns the relative path of the package surface across all parse states.
+pub(crate) fn package_rel_path(package: &G3TsAstroPackageSurfaceState) -> &str {
     match package {
         G3TsAstroPackageSurfaceState::Missing { rel_path }
         | G3TsAstroPackageSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroPackageSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroPackageSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroPackageSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroPackageSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
+/// Internal function `package_has_dependency`.
 pub(crate) fn package_has_dependency(
     package: &G3TsAstroPackageSurfaceState,
     dependency_name: &str,
@@ -40,6 +43,7 @@ pub(crate) fn package_has_dependency(
     })
 }
 
+/// Internal function `package_safely_runs_astro_build`.
 pub(crate) fn package_safely_runs_astro_build(package: &G3TsAstroPackageSurfaceState) -> bool {
     parsed_package(package).is_some_and(|snapshot| {
         snapshot.script_tool_invocations.iter().any(|invocation| {
@@ -53,6 +57,7 @@ pub(crate) fn package_safely_runs_astro_build(package: &G3TsAstroPackageSurfaceS
     })
 }
 
+/// Internal function `script_has_no_parse_blocker`.
 fn script_has_no_parse_blocker(
     snapshot: &G3TsAstroPackageSurfaceSnapshot,
     script_name: &str,
@@ -63,6 +68,7 @@ fn script_has_no_parse_blocker(
         .all(|blocker| blocker.script_name != script_name)
 }
 
+/// Internal function `script_commands_are_fail_closed`.
 fn script_commands_are_fail_closed(
     snapshot: &G3TsAstroPackageSurfaceSnapshot,
     script_name: &str,
@@ -73,6 +79,7 @@ fn script_commands_are_fail_closed(
     })
 }
 
+/// Internal function `invocation_targets_tool`.
 fn invocation_targets_tool(
     invocation: &G3TsAstroPackageScriptToolInvocation,
     executable: &str,
@@ -82,16 +89,18 @@ fn invocation_targets_tool(
         && invocation.args.first().is_some_and(|arg| arg == first_arg)
 }
 
-pub(crate) fn astro_config_rel_path(config: &G3TsAstroConfigSurfaceState) -> Option<&str> {
+/// Returns the relative path of the astro config across all parse states.
+pub(crate) fn astro_config_rel_path(config: &G3TsAstroConfigSurfaceState) -> &str {
     match config {
         G3TsAstroConfigSurfaceState::Missing { rel_path }
         | G3TsAstroConfigSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroConfigSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroConfigSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroConfigSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroConfigSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
-pub(crate) fn parsed_astro_config(
+/// Internal function `fn`.
+pub(crate) const fn parsed_astro_config(
     config: &G3TsAstroConfigSurfaceState,
 ) -> Option<&G3TsAstroConfigSurfaceSnapshot> {
     match config {
@@ -102,6 +111,7 @@ pub(crate) fn parsed_astro_config(
     }
 }
 
+/// Internal function `astro_config_integration_first_arg`.
 pub(crate) fn astro_config_integration_first_arg<'a>(
     snapshot: &'a G3TsAstroConfigSurfaceSnapshot,
     module: &str,
@@ -114,6 +124,7 @@ pub(crate) fn astro_config_integration_first_arg<'a>(
         .and_then(|call| call.first_arg.as_ref())
 }
 
+/// Internal function `object_properties`.
 pub(crate) fn object_properties(
     value: &G3TsAstroStaticValue,
 ) -> Option<&[G3TsAstroStaticObjectProperty]> {
@@ -129,6 +140,7 @@ pub(crate) fn object_properties(
     }
 }
 
+/// Internal function `object_has_only_allowed_keys`.
 pub(crate) fn object_has_only_allowed_keys(
     properties: &[G3TsAstroStaticObjectProperty],
     allowed: &[&str],
@@ -138,6 +150,7 @@ pub(crate) fn object_has_only_allowed_keys(
         .all(|property| allowed.contains(&property.key.as_str()))
 }
 
+/// Internal function `property_value`.
 pub(crate) fn property_value<'a>(
     properties: &'a [G3TsAstroStaticObjectProperty],
     key: &str,
@@ -148,6 +161,7 @@ pub(crate) fn property_value<'a>(
         .map(|property| &property.value)
 }
 
+/// Internal function `property_string`.
 pub(crate) fn property_string<'a>(
     properties: &'a [G3TsAstroStaticObjectProperty],
     key: &str,
@@ -158,6 +172,7 @@ pub(crate) fn property_string<'a>(
     }
 }
 
+/// Internal function `property_bool`.
 pub(crate) fn property_bool(
     properties: &[G3TsAstroStaticObjectProperty],
     key: &str,
@@ -168,6 +183,7 @@ pub(crate) fn property_bool(
     }
 }
 
+/// Internal function `property_string_array`.
 pub(crate) fn property_string_array(
     properties: &[G3TsAstroStaticObjectProperty],
     key: &str,
@@ -190,7 +206,8 @@ pub(crate) fn property_string_array(
         .collect()
 }
 
-pub(crate) fn parsed_media_policy(
+/// Internal function `fn`.
+pub(crate) const fn parsed_media_policy(
     policy: &G3TsAstroMediaPolicySurfaceState,
 ) -> Option<&G3TsAstroMediaPolicySnapshot> {
     match policy {
@@ -203,26 +220,29 @@ pub(crate) fn parsed_media_policy(
     }
 }
 
-pub(crate) fn media_policy_rel_path(policy: &G3TsAstroMediaPolicySurfaceState) -> Option<&str> {
+/// Returns the relative path of the media policy across all parse states.
+pub(crate) fn media_policy_rel_path(policy: &G3TsAstroMediaPolicySurfaceState) -> &str {
     match policy {
         G3TsAstroMediaPolicySurfaceState::Missing { rel_path }
         | G3TsAstroMediaPolicySurfaceState::Unreadable { rel_path, .. }
         | G3TsAstroMediaPolicySurfaceState::ParseError { rel_path, .. }
         | G3TsAstroMediaPolicySurfaceState::MissingAstroPolicy { rel_path }
-        | G3TsAstroMediaPolicySurfaceState::MissingMediaPolicy { rel_path } => Some(rel_path),
-        G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroMediaPolicySurfaceState::MissingMediaPolicy { rel_path } => rel_path,
+        G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
-pub(crate) fn eslint_rel_path(config: &G3TsAstroMediaEslintSurfaceState) -> Option<&str> {
+/// Returns the relative path of the media eslint config across all parse states.
+pub(crate) fn eslint_rel_path(config: &G3TsAstroMediaEslintSurfaceState) -> &str {
     match config {
         G3TsAstroMediaEslintSurfaceState::Missing { rel_path }
         | G3TsAstroMediaEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroMediaEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroMediaEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroMediaEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroMediaEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
+/// Internal function `info`.
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -235,6 +255,7 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3Chec
     .into_inventory()
 }
 
+/// Internal function `error`.
 pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

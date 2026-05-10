@@ -1,8 +1,10 @@
 use g3ts_apparch_types::{G3TsApparchConfigChecksInput, G3TsApparchLayer};
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-apparch/io-outbound-dependency-direction";
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(input: &G3TsApparchConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let violating = crate::support::violating_edges(
         input,

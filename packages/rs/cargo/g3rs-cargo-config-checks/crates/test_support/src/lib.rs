@@ -1,3 +1,4 @@
+/// input module.
 mod input;
 
 #[cfg(feature = "support")]

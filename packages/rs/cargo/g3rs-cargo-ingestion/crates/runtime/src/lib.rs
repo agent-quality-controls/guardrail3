@@ -1,7 +1,12 @@
+/// fs module.
 mod fs;
+/// ingest module.
 mod ingest;
+/// parse module.
 mod parse;
+/// run module.
 mod run;
+/// select module.
 mod select;
 
 #[cfg(feature = "ingest")]

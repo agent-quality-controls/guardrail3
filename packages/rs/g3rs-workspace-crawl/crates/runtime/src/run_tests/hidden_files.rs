@@ -1,17 +1,9 @@
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed");
-}
+use super::fixtures::git_init;
 
 #[test]
 fn includes_hidden_config_files() {

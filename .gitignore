@@ -11,3 +11,4 @@ node_modules/
 fuzz/corpus/
 fuzz/artifacts/
 .env.local
+.baselines/structural-split-baseline-verify.out

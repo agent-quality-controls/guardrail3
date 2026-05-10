@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/local-override-inventory";
 
+/// `check` function.
 pub(crate) fn check(local_override_scripts: &[String], results: &mut Vec<G3CheckResult>) {
     if local_override_scripts.is_empty() {
         results.push(

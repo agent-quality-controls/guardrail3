@@ -1,7 +1,14 @@
+//! Runtime rules for the `g3rs-deny-ingestion` family.
+
+/// Filesystem helpers used by ingestion and rule code.
 mod fs;
+/// Ingestion code that constructs the family's input bundle.
 mod ingest;
+/// Parser helpers for the family's structured inputs.
 mod parse;
+/// Family entry point that runs all rules.
 mod run;
+/// Crate selection helpers used by the family's ingestion stage.
 mod select;
 
 #[cfg(feature = "ingest")]

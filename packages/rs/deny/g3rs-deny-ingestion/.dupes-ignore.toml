@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "bd22b4eb8aa6a945"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"
+
+[[ignore]]
+fingerprint = "fd2808b3f9265731"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"
+
+[[ignore]]
+fingerprint = "29933a9efcd222cd"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"
+
+[[ignore]]
+fingerprint = "307512a6a1a30638"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"
+
+[[ignore]]
+fingerprint = "5a259a2ee9265773"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"
+
+[[ignore]]
+fingerprint = "86eb67221d8f06e7"
+reason = "test fixtures setting up temp workspaces share shape across deny.toml variants and rule scenarios"

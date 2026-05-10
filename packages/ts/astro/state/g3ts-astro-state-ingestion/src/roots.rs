@@ -6,6 +6,7 @@ use g3_workspace_crawl::{
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// Allowed Astro root config filenames.
 const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.js",
     "astro.config.mjs",
@@ -14,6 +15,8 @@ const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.mts",
     "astro.config.cts",
 ];
+
+/// Returns the sorted set of Astro app roots discovered in `crawl`.
 #[must_use]
 pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
@@ -34,11 +37,13 @@ pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// Returns true when `entry` is an included file (not directory, not ignored).
 fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
+/// Returns true when `rel_path`'s file name matches a known Astro root config.
 fn root_astro_config_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -46,6 +51,7 @@ fn root_astro_config_file(rel_path: &str) -> bool {
         .is_some_and(|file_name| ROOT_ASTRO_CONFIGS.contains(&file_name))
 }
 
+/// Returns true when `rel_path`'s file name is `package.json`.
 fn package_json_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -53,6 +59,7 @@ fn package_json_file(rel_path: &str) -> bool {
         == Some("package.json")
 }
 
+/// Returns the parent directory of `rel_path` as a relative path, or `.` for top-level files.
 fn parent_rel_path(rel_path: &str) -> String {
     Path::new(rel_path)
         .parent()
@@ -62,6 +69,7 @@ fn parent_rel_path(rel_path: &str) -> String {
         .to_owned()
 }
 
+/// Returns true when `entry`'s `package.json` declares a dependency on `astro`.
 fn package_has_astro_dependency(entry: &G3WorkspaceEntry) -> bool {
     if !entry.readable {
         return false;

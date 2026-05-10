@@ -1,3 +1,19 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::match_same_arms,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::shadow_unrelated,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use syn::parse::{Parse, Parser};
@@ -7,6 +23,7 @@ use syn::visit::Visit;
 use super::body::TestBodyVisitor;
 use g3rs_test_types::ast::UseBinding;
 
+/// `is_test_attr` function.
 pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
     let predicate = cfg_predicate(attr);
     path_is_test_attr(attr.path())
@@ -21,6 +38,7 @@ pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
             })
 }
 
+/// `is_tokio_test_attr` function.
 pub(super) fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
     let predicate = cfg_predicate(attr);
     path_is_tokio_test_attr(attr.path())
@@ -35,6 +53,7 @@ pub(super) fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
             })
 }
 
+/// `is_cfg_test_attr` function.
 pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     if !attr.path().is_ident("cfg") {
         return false;
@@ -42,6 +61,7 @@ pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     cfg_predicate(attr).is_some_and(|meta| cfg_meta_requires_test(&meta))
 }
 
+/// `is_should_panic_attr` function.
 pub(super) fn is_should_panic_attr(attr: &syn::Attribute) -> bool {
     let predicate = cfg_predicate(attr);
     attr.path().is_ident("should_panic")
@@ -56,6 +76,7 @@ pub(super) fn is_should_panic_attr(attr: &syn::Attribute) -> bool {
             })
 }
 
+/// `is_assertion_macro_name` function.
 pub(super) fn is_assertion_macro_name(name: &str) -> bool {
     matches!(
         name,
@@ -69,6 +90,7 @@ pub(super) fn is_assertion_macro_name(name: &str) -> bool {
     )
 }
 
+/// `call_path` function.
 pub(super) fn call_path(expr: &syn::Expr) -> Option<Vec<String>> {
     match expr {
         syn::Expr::Path(path) => path
@@ -82,6 +104,7 @@ pub(super) fn call_path(expr: &syn::Expr) -> Option<Vec<String>> {
     }
 }
 
+/// `macro_has_literal_comparison` function.
 pub(super) fn macro_has_literal_comparison(mac: &syn::Macro) -> bool {
     let parser = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
     let Ok(args) = parser.parse2(mac.tokens.clone()) else {
@@ -93,6 +116,7 @@ pub(super) fn macro_has_literal_comparison(mac: &syn::Macro) -> bool {
     args.iter().take(2).all(expr_is_literal_like)
 }
 
+/// `macro_has_weak_matches` function.
 pub(super) fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
     let Ok(expr) = syn::parse2::<syn::Expr>(mac.tokens.clone()) else {
         return false;
@@ -113,12 +137,13 @@ pub(super) fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
     if name != "matches" {
         return false;
     }
-    let Ok(args) = syn::parse2::<MatchesArgs>(expr_macro.mac.tokens.clone()) else {
+    let Ok(args) = syn::parse2::<MatchesArgs>(expr_macro.mac.tokens) else {
         return false;
     };
     pattern_contains_wild(&args.pattern)
 }
 
+/// `macro_has_weak_assert_matches` function.
 pub(super) fn macro_has_weak_assert_matches(mac: &syn::Macro) -> bool {
     let Ok(args) = syn::parse2::<MatchesArgs>(mac.tokens.clone()) else {
         return false;
@@ -126,6 +151,7 @@ pub(super) fn macro_has_weak_assert_matches(mac: &syn::Macro) -> bool {
     pattern_contains_wild(&args.pattern)
 }
 
+/// `visit_macro_expr_args` function.
 pub(super) fn visit_macro_expr_args(visitor: &mut TestBodyVisitor, mac: &syn::Macro) {
     let parser = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
     let Ok(args) = parser.parse2(mac.tokens.clone()) else {
@@ -136,6 +162,7 @@ pub(super) fn visit_macro_expr_args(visitor: &mut TestBodyVisitor, mac: &syn::Ma
     }
 }
 
+/// `pattern_contains_wild` function.
 fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
     match pattern {
         syn::Pat::Wild(_) => true,
@@ -158,6 +185,7 @@ fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
     }
 }
 
+/// `should_panic_has_expected` function.
 pub(super) fn should_panic_has_expected(attr: &syn::Attribute) -> bool {
     if attr.path().is_ident("should_panic") {
         return meta_has_should_panic_expected(&attr.meta);
@@ -175,6 +203,7 @@ pub(super) fn should_panic_has_expected(attr: &syn::Attribute) -> bool {
         })
 }
 
+/// `meta_has_should_panic_expected` function.
 fn meta_has_should_panic_expected(meta: &syn::Meta) -> bool {
     let mut has_expected = false;
     let _ = parse_meta_nested(meta, |meta| {
@@ -187,10 +216,12 @@ fn meta_has_should_panic_expected(meta: &syn::Meta) -> bool {
     has_expected
 }
 
+/// `span_line` function.
 pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }
 
+/// `path_attr_value` function.
 pub(super) fn path_attr_value(attr: &syn::Attribute) -> Option<String> {
     if !attr.path().is_ident("path") {
         return None;
@@ -207,6 +238,7 @@ pub(super) fn path_attr_value(attr: &syn::Attribute) -> Option<String> {
     }
 }
 
+/// `collect_use_bindings` function.
 pub(super) fn collect_use_bindings(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
@@ -256,6 +288,7 @@ pub(super) fn collect_use_bindings(
     }
 }
 
+/// `expr_is_literal_like` function.
 fn expr_is_literal_like(expr: &syn::Expr) -> bool {
     match expr {
         syn::Expr::Lit(_) => true,
@@ -265,6 +298,7 @@ fn expr_is_literal_like(expr: &syn::Expr) -> bool {
     }
 }
 
+/// `path_is_test_attr` function.
 fn path_is_test_attr(path: &syn::Path) -> bool {
     path.is_ident("test")
         || path
@@ -273,20 +307,24 @@ fn path_is_test_attr(path: &syn::Path) -> bool {
             .is_some_and(|segment| segment.ident == "test")
 }
 
+/// `meta_path_is_test` function.
 fn meta_path_is_test(meta: &syn::Meta) -> bool {
     path_is_test_attr(meta.path())
 }
 
+/// `path_is_tokio_test_attr` function.
 fn path_is_tokio_test_attr(path: &syn::Path) -> bool {
     path.segments.len() == 2
         && path.segments[0].ident == "tokio"
         && path.segments[1].ident == "test"
 }
 
+/// `meta_path_is_tokio_test` function.
 fn meta_path_is_tokio_test(meta: &syn::Meta) -> bool {
     path_is_tokio_test_attr(meta.path())
 }
 
+/// `cfg_attr_nested_metas` function.
 fn cfg_attr_nested_metas(attr: &syn::Attribute) -> Option<Vec<syn::Meta>> {
     if !attr.path().is_ident("cfg_attr") {
         return None;
@@ -303,6 +341,7 @@ fn cfg_attr_nested_metas(attr: &syn::Attribute) -> Option<Vec<syn::Meta>> {
     Some(iter.collect())
 }
 
+/// `cfg_predicate` function.
 fn cfg_predicate(attr: &syn::Attribute) -> Option<syn::Meta> {
     let syn::Meta::List(list) = &attr.meta else {
         return None;
@@ -319,10 +358,12 @@ fn cfg_predicate(attr: &syn::Attribute) -> Option<syn::Meta> {
         .next()
 }
 
+/// `cfg_meta_requires_test` function.
 fn cfg_meta_requires_test(meta: &syn::Meta) -> bool {
     cfg_meta_can_be_true(meta, true) && !cfg_meta_can_be_true(meta, false)
 }
 
+/// `cfg_meta_contains_positive_test` function.
 fn cfg_meta_contains_positive_test(meta: &syn::Meta) -> bool {
     match meta {
         syn::Meta::Path(path) => path.is_ident("test"),
@@ -334,6 +375,7 @@ fn cfg_meta_contains_positive_test(meta: &syn::Meta) -> bool {
     }
 }
 
+/// `cfg_meta_can_be_true` function.
 fn cfg_meta_can_be_true(meta: &syn::Meta, test_enabled: bool) -> bool {
     match meta {
         syn::Meta::Path(path) => !path.is_ident("test") || test_enabled,
@@ -351,6 +393,7 @@ fn cfg_meta_can_be_true(meta: &syn::Meta, test_enabled: bool) -> bool {
     }
 }
 
+/// `cfg_meta_can_be_false` function.
 fn cfg_meta_can_be_false(meta: &syn::Meta, test_enabled: bool) -> bool {
     match meta {
         syn::Meta::Path(path) => !path.is_ident("test") || !test_enabled,
@@ -368,12 +411,14 @@ fn cfg_meta_can_be_false(meta: &syn::Meta, test_enabled: bool) -> bool {
     }
 }
 
+/// `nested_cfg_meta_items` function.
 fn nested_cfg_meta_items(list: &syn::MetaList) -> Vec<syn::Meta> {
     list.parse_args_with(Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
         .map(|items| items.into_iter().collect())
         .unwrap_or_default()
 }
 
+/// `parse_meta_nested` function.
 fn parse_meta_nested(
     meta: &syn::Meta,
     logic: impl FnMut(syn::meta::ParseNestedMeta<'_>) -> syn::Result<()>,
@@ -384,6 +429,7 @@ fn parse_meta_nested(
     }
 }
 
+/// `peel_parens` function.
 fn peel_parens(expr: syn::Expr) -> syn::Expr {
     match expr {
         syn::Expr::Paren(paren) => peel_parens(*paren.expr),
@@ -392,6 +438,7 @@ fn peel_parens(expr: syn::Expr) -> syn::Expr {
     }
 }
 
+/// `collect_pat_idents` function.
 pub(super) fn collect_pat_idents(pat: &syn::Pat, out: &mut BTreeSet<String>) {
     match pat {
         syn::Pat::Ident(ident) => {
@@ -429,6 +476,7 @@ pub(super) fn collect_pat_idents(pat: &syn::Pat, out: &mut BTreeSet<String>) {
     }
 }
 
+/// `single_pat_ident` function.
 pub(super) fn single_pat_ident(pat: &syn::Pat) -> Option<String> {
     match pat {
         syn::Pat::Ident(ident) => Some(ident.ident.to_string()),
@@ -439,7 +487,9 @@ pub(super) fn single_pat_ident(pat: &syn::Pat) -> Option<String> {
     }
 }
 
+/// `Pipe` trait.
 trait Pipe: Sized {
+    /// `pipe` method.
     fn pipe<T>(self, f: impl FnOnce(Self) -> T) -> T {
         f(self)
     }
@@ -447,9 +497,13 @@ trait Pipe: Sized {
 
 impl<T> Pipe for T {}
 
+/// `MatchesArgs` struct.
 struct MatchesArgs {
+    /// `_expr` item.
     _expr: syn::Expr,
+    /// `_guard` item.
     _guard: Option<syn::Expr>,
+    /// `pattern` item.
     pattern: syn::Pat,
 }
 

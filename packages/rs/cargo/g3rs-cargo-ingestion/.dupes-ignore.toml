@@ -1,0 +1,47 @@
+[[ignore]]
+fingerprint = "640dc7c8b7da5c02"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "8eeea99925658d3f"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "0228170fb250bbb6"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "655a7ee76e9079af"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "1e8a840c142582e5"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "291a5337e0c65dae"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "2f13555f3fdb870e"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "38f9bf01cbe88a79"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "6a40b69ee6fd8c52"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "942d3b95b0c17011"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "fad0522fa9fe7858"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"
+
+[[ignore]]
+fingerprint = "fb0acc3d501420c3"
+reason = "real-proof-site duplication across distinct cargo-ingestion test bodies asserting distinct rule outputs; g3rs-test/real-proof-site forbids extracting these tests into helpers since each must independently invoke the ingestion API with its own fixture"

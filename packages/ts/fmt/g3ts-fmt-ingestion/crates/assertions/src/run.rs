@@ -1,3 +1,8 @@
+/// Asserts that ingesting `crawl` produces `expected` fmt contracts.
+///
+/// # Panics
+///
+/// Panics when the produced contract count does not match `expected`.
 pub fn assert_ingests_contract_count(
     crawl: &g3_workspace_crawl::G3RsWorkspaceCrawl,
     expected: usize,

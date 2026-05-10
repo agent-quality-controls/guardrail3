@@ -6,8 +6,10 @@ use g3rs_hooks_contract_types::{
 use g3rs_hooks_types::G3RsHooksSelectedHookConfigFact;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-hooks/contract-required-tools-installed";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(
     selected_hook: &G3RsHooksSelectedHookConfigFact,
     installed_tools: &[String],
@@ -44,6 +46,7 @@ pub(crate) fn check(
     }
 }
 
+/// Implements `required tools`.
 fn required_tools(requirements: &[G3HookRequirement]) -> Vec<String> {
     let mut tools = BTreeSet::from(["g3rs".to_owned(), "gitleaks".to_owned()]);
     for requirement in requirements {
@@ -57,6 +60,7 @@ fn required_tools(requirements: &[G3HookRequirement]) -> Vec<String> {
     tools.into_iter().collect()
 }
 
+/// Implements `add required command tools`.
 fn add_required_command_tools(tools: &mut BTreeSet<String>, command: G3HookCommandRequirement) {
     match command {
         G3HookCommandRequirement::CargoDenyCheck => {
@@ -81,6 +85,7 @@ fn add_required_command_tools(tools: &mut BTreeSet<String>, command: G3HookComma
     }
 }
 
+/// Implements `add critical command tools`.
 fn add_critical_command_tools(tools: &mut BTreeSet<String>, command: &G3HookCriticalCommand) {
     match command {
         G3HookCriticalCommand::Binary(binary) => {
@@ -106,8 +111,8 @@ fn add_critical_command_tools(tools: &mut BTreeSet<String>, command: &G3HookCrit
 #[cfg(test)]
 fn run_case(
     content: &str,
-    installed_tools: Vec<String>,
-    requirements: Vec<G3HookRequirement>,
+    installed_tools: &[String],
+    requirements: &[G3HookRequirement],
 ) -> Vec<G3CheckResult> {
     let parsed = hook_shell_parser::parse_script(content);
     let selected_hook = G3RsHooksSelectedHookConfigFact {
@@ -115,12 +120,7 @@ fn run_case(
         parsed,
     };
     let mut results = Vec::new();
-    check(
-        &selected_hook,
-        &installed_tools,
-        &requirements,
-        &mut results,
-    );
+    check(&selected_hook, installed_tools, requirements, &mut results);
     results
 }
 

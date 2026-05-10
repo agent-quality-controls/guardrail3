@@ -1,0 +1,55 @@
+[[ignore]]
+fingerprint = "e53d9a3783129852"
+reason = "shared tree-traversal closure shape: every workspace traversal closure (workspace/run.rs, file_tree.rs, source_path_attr.rs) filters directory entries by a uniform `.iter().filter(...)` pattern that mirrors the dir-listing contract from g3rs-workspace-crawl; the closures are intentionally identical because they apply the same predicate to the same shape of input."
+
+[[ignore]]
+fingerprint = "35879f4243593957"
+reason = "tier-specific test fixture helpers (config_tests, source_tests, file_tree_tests) follow the uniform `ingest -> input` layout required by g3rs-test/runtime-assertions-split: each tier wires its own `ingest_for_*` entry point but the harness boilerplate is identical because the contract is uniform."
+
+[[ignore]]
+fingerprint = "7a3255cdc3f41187"
+reason = "tier-specific test fixture helpers (config_tests, source_tests, file_tree_tests) share the `write_file` helper because every tier writes the same synthetic workspace shape; per g3rs-test/real-proof-site each tier must own its own fixture file."
+
+[[ignore]]
+fingerprint = "9a972dfa12d39d19"
+reason = "per-tier assertion helpers (assertions/src/{config,source,file_tree}.rs) follow the uniform `assert_has_result` shape because every architecture tier exposes the same ingestion-result contract; the helper bodies are identical because the contract is uniform."
+
+[[ignore]]
+fingerprint = "9bc37e7a04ebac92"
+reason = "shared tree-traversal closure shape (see e53d9a3783129852); multiple per-pass closures in workspace/run.rs perform the same dir-entry filtering operation because they apply the same predicate to the same input shape."
+
+[[ignore]]
+fingerprint = "b0c0bf4c344242dd"
+reason = "tier-specific test fixture helpers (config_tests, source_tests, file_tree_tests) share `crawl_workspace` because every tier crawls the same synthetic workspace using the same g3rs-workspace-crawl entry point."
+
+[[ignore]]
+fingerprint = "b8d82d079d7113b7"
+reason = "tier-specific test fixture helpers (config_tests, source_tests, file_tree_tests) share `make_dir` because every tier writes the same synthetic directory layout; per g3rs-test/real-proof-site each tier owns its own fixture."
+
+[[ignore]]
+fingerprint = "f31943a1473c8687"
+reason = "per-tier assertion helpers (assertions/src/{config,source,file_tree}.rs) follow the uniform `assert_missing_result` shape; the bodies are identical because the ingestion-result contract is uniform across tiers."
+
+[[ignore]]
+fingerprint = "fd741c8dfac5f427"
+reason = "the public `ingest_for_*` entry points in crates/runtime/src/run.rs are intentionally uniform one-line wrappers because each tier delegates to its own implementation module; the wrapper shape is part of the family-runner contract."
+
+[[ignore]]
+fingerprint = "29c6bbb40196ca9b"
+reason = "`DirContents::files` and `DirContents::dirs` are symmetric getters returning the two halves of the same struct; the bodies are identical because both expose the same slice-accessor shape."
+
+[[ignore]]
+fingerprint = "2b228e1f7b822326"
+reason = "tier-specific test fixture helpers share the `*_results` shape because each tier returns its own ingestion-result vector via the same retrieval pattern."
+
+[[ignore]]
+fingerprint = "dbadd444c7085eb0"
+reason = "`is_rs_file` is shared between workspace traversal (workspace/run.rs) and the file-tree ingester (file_tree.rs) because both apply the same `.rs` filename predicate; extracting a single helper would couple the two modules across tier boundaries."
+
+[[ignore]]
+fingerprint = "e8e9d16079c761f5"
+reason = "shared tree-traversal closure shape (see e53d9a3783129852); two adjacent passes in workspace/run.rs filter the same dir-entry shape with the same predicate."
+
+[[ignore]]
+fingerprint = "fb831b2b73565109"
+reason = "shared tree-traversal closure shape (see e53d9a3783129852); workspace/run.rs and file_tree.rs share a closure body because both filter directory entries with the same predicate."

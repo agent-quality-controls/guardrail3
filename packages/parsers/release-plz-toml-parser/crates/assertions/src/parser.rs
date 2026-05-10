@@ -5,19 +5,11 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use std::io::Write;
-
 use release_plz_toml_parser_runtime::types::ReleasePlzToml;
 
+#[must_use]
 pub fn parse_fixture(input: &str) -> ReleasePlzToml {
     release_plz_toml_parser_runtime::parse(input).expect("should parse valid release-plz.toml")
-}
-
-pub fn parse_from_tempfile(input: &str) -> ReleasePlzToml {
-    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
-    file.write_all(input.as_bytes())
-        .expect("release-plz config should be written");
-    release_plz_toml_parser_runtime::from_path(file.path()).expect("file should parse")
 }
 
 /// Assert a boolean `Option` field matches an expected value.

@@ -3,8 +3,10 @@ use g3rs_apparch_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-apparch/types-public-surface";
 
+/// Pushes a violation when a `*-types` package's public surface drifts from the manifest declaration.
 pub(crate) fn check(
     input: &G3RsApparchTypesPublicSurfaceChecksInput,
     results: &mut Vec<G3CheckResult>,

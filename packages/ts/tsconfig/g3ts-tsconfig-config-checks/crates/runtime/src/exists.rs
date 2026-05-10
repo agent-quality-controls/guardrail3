@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{info, root_rel_path};
 
+/// Check ID emitted by this rule.
 const ID: &str = "g3ts-tsconfig/exists";
 
+/// Emit a finding describing whether a root tsconfig file exists.
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(rel_path) = root_rel_path(input) else {
         results.push(G3CheckResult::new(
