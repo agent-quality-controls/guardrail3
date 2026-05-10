@@ -1,9 +1,13 @@
 use g3rs_fmt_types::{G3RsFmtConfigFileKind, G3RsFmtFileTreeChecksInput, G3RsFmtNestedConfigFile};
 
+/// Tuple specifying a nested rustfmt-style config file at `rel_path`.
+type NestedConfig<'a> = (&'a str, G3RsFmtConfigFileKind);
+
+/// Builds a fixture `G3RsFmtFileTreeChecksInput` from the test-friendly inputs.
 pub fn input(
     root_rustfmt_toml_rel_path: Option<&str>,
     root_dot_rustfmt_toml_rel_path: Option<&str>,
-    nested_config_files: Vec<(&str, G3RsFmtConfigFileKind)>,
+    nested_config_files: Vec<NestedConfig<'_>>,
     dual_conflict_dirs: Vec<&str>,
 ) -> G3RsFmtFileTreeChecksInput {
     G3RsFmtFileTreeChecksInput {

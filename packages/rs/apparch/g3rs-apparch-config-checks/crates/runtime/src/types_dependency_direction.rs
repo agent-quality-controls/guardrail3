@@ -20,10 +20,12 @@ pub(crate) fn check(
         .filter(|target| {
             matches!(
                 target.layer,
-                Some(G3RsApparchLayer::Types)
-                    | Some(G3RsApparchLayer::Logic)
-                    | Some(G3RsApparchLayer::IoInbound)
-                    | Some(G3RsApparchLayer::IoOutbound)
+                Some(
+                    G3RsApparchLayer::Types
+                        | G3RsApparchLayer::Logic
+                        | G3RsApparchLayer::IoInbound
+                        | G3RsApparchLayer::IoOutbound
+                )
             )
         })
         .collect::<Vec<_>>();

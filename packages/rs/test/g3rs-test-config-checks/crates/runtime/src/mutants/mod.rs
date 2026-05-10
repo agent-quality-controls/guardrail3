@@ -1,5 +1,10 @@
+/// `cargo_mutants_installed` module.
 pub(crate) mod cargo_mutants_installed;
+/// `mutants_config_sane` module.
 pub(crate) mod mutants_config_sane;
+/// `mutants_profile_present` module.
 pub(crate) mod mutants_profile_present;
+/// `mutants_toml_exists` module.
 pub(crate) mod mutants_toml_exists;
+/// `mutation_hook_present` module.
 pub(crate) mod mutation_hook_present;

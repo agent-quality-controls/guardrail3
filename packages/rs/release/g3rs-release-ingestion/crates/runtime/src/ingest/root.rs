@@ -3,6 +3,7 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::collect::{ParsedCrate, RootCargo, push_all_failures};
 
+/// `parse_root_cargo` function.
 pub(super) fn parse_root_cargo(
     crawl: &G3RsWorkspaceCrawl,
     config_failures: &mut Vec<G3RsReleaseInputFailure>,
@@ -64,6 +65,7 @@ pub(super) fn parse_root_cargo(
     })
 }
 
+/// `collect_parsed_crates` function.
 pub(super) fn collect_parsed_crates(
     crawl: &G3RsWorkspaceCrawl,
     root: Option<&RootCargo>,
@@ -85,7 +87,39 @@ pub(super) fn collect_parsed_crates(
         });
     }
 
-    let member_rels = match root.cargo.workspace.as_ref() {
+    let member_rels = resolve_member_rels(
+        crawl,
+        root,
+        config_failures,
+        filetree_failures,
+        source_failures,
+    );
+
+    for member_rel in member_rels {
+        if let Some(parsed) = parse_member_crate(
+            crawl,
+            member_rel,
+            config_failures,
+            filetree_failures,
+            source_failures,
+        ) {
+            crates.push(parsed);
+        }
+    }
+
+    crates.sort_by(|left, right| left.cargo_rel_path.cmp(&right.cargo_rel_path));
+    crates
+}
+
+/// Resolve workspace member rel paths, pushing failures if normalization fails.
+fn resolve_member_rels(
+    crawl: &G3RsWorkspaceCrawl,
+    root: &RootCargo,
+    config_failures: &mut Vec<G3RsReleaseInputFailure>,
+    filetree_failures: &mut Vec<G3RsReleaseInputFailure>,
+    source_failures: &mut Vec<G3RsReleaseInputFailure>,
+) -> Vec<String> {
+    match root.cargo.workspace.as_ref() {
         Some(_) => match crate::select::collect_member_rels(crawl, &root.cargo) {
             Ok(member_rels) => member_rels,
             Err(reason) => {
@@ -100,69 +134,73 @@ pub(super) fn collect_parsed_crates(
             }
         },
         None => Vec::new(),
-    };
+    }
+}
 
-    for member_rel in member_rels {
-        if member_rel.is_empty() {
-            continue;
-        }
-        let Some(entry) = crate::select::select_member_manifest(crawl, &member_rel) else {
-            push_all_failures(
-                config_failures,
-                filetree_failures,
-                source_failures,
-                crate::select::member_manifest_rel_path(&member_rel),
-                format!("Declared workspace member `{member_rel}` is missing Cargo.toml."),
-            );
-            continue;
-        };
-        if !entry.readable {
+/// Parse a single member manifest into a `ParsedCrate`, recording failures on the way.
+fn parse_member_crate(
+    crawl: &G3RsWorkspaceCrawl,
+    member_rel: String,
+    config_failures: &mut Vec<G3RsReleaseInputFailure>,
+    filetree_failures: &mut Vec<G3RsReleaseInputFailure>,
+    source_failures: &mut Vec<G3RsReleaseInputFailure>,
+) -> Option<ParsedCrate> {
+    if member_rel.is_empty() {
+        return None;
+    }
+    let Some(entry) = crate::select::select_member_manifest(crawl, &member_rel) else {
+        push_all_failures(
+            config_failures,
+            filetree_failures,
+            source_failures,
+            crate::select::member_manifest_rel_path(&member_rel),
+            format!("Declared workspace member `{member_rel}` is missing Cargo.toml."),
+        );
+        return None;
+    };
+    if !entry.readable {
+        push_all_failures(
+            config_failures,
+            filetree_failures,
+            source_failures,
+            &entry.path.rel_path,
+            "Failed to read member Cargo.toml for release checks: file is not readable.",
+        );
+        return None;
+    }
+
+    let content = match crate::parse::read_to_string(&entry.path.abs_path) {
+        Ok(content) => content,
+        Err(error) => {
             push_all_failures(
                 config_failures,
                 filetree_failures,
                 source_failures,
                 &entry.path.rel_path,
-                "Failed to read member Cargo.toml for release checks: file is not readable.",
+                format!("Failed to read member Cargo.toml for release checks: {error}"),
             );
-            continue;
+            return None;
         }
+    };
 
-        let content = match crate::parse::read_to_string(&entry.path.abs_path) {
-            Ok(content) => content,
-            Err(error) => {
-                push_all_failures(
-                    config_failures,
-                    filetree_failures,
-                    source_failures,
-                    &entry.path.rel_path,
-                    format!("Failed to read member Cargo.toml for release checks: {error}"),
-                );
-                continue;
-            }
-        };
+    let cargo = match crate::parse::parse_cargo_toml(&content, &entry.path.abs_path) {
+        Ok(cargo) => cargo,
+        Err(error) => {
+            push_all_failures(
+                config_failures,
+                filetree_failures,
+                source_failures,
+                &entry.path.rel_path,
+                format!("Failed to parse member Cargo.toml for release checks: {error}"),
+            );
+            return None;
+        }
+    };
 
-        let cargo = match crate::parse::parse_cargo_toml(&content, &entry.path.abs_path) {
-            Ok(cargo) => cargo,
-            Err(error) => {
-                push_all_failures(
-                    config_failures,
-                    filetree_failures,
-                    source_failures,
-                    &entry.path.rel_path,
-                    format!("Failed to parse member Cargo.toml for release checks: {error}"),
-                );
-                continue;
-            }
-        };
-
-        crates.push(ParsedCrate {
-            rel_dir: member_rel,
-            cargo_rel_path: entry.path.rel_path.clone(),
-            cargo_abs_path: entry.path.abs_path.clone(),
-            cargo,
-        });
-    }
-
-    crates.sort_by(|left, right| left.cargo_rel_path.cmp(&right.cargo_rel_path));
-    crates
+    Some(ParsedCrate {
+        rel_dir: member_rel,
+        cargo_rel_path: entry.path.rel_path.clone(),
+        cargo_abs_path: entry.path.abs_path.clone(),
+        cargo,
+    })
 }

@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "ae65f97ad37cd833"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "e0b7d60870df7467"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "eb3b6f65c8908835"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "7e1693acd773dd8f"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "a643a68fd425bee7"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "b694b0bab2032a15"
+reason = "per-rule helper / per-rule test: each check rule/test exercises a distinct hook source pattern; deduping would couple unrelated rule checks, conflicts with real-proof-site contract"

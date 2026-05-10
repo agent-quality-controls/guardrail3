@@ -1,12 +1,29 @@
 use super::super::*;
 
+/// Returns the first target of `targets` or fails the calling test.
+///
+/// # Panics
+/// Panics when `targets` is empty, which the surrounding test treats as a setup failure.
+#[expect(
+    clippy::panic,
+    reason = "test-helper: panic on empty `targets` is the test failure signal"
+)]
+fn first_target(
+    targets: &[eslint_config_parser::types::EslintProbeTarget],
+) -> &eslint_config_parser::types::EslintProbeTarget {
+    let Some(target) = targets.first() else {
+        panic!("expected at least one target");
+    };
+    target
+}
+
 #[test]
 fn literal_file_path_probes_exact_file() {
     let targets = probe_targets_from_glob("app", "src/mdx-components.tsx");
 
-    assert_eq!(targets.len(), 1);
+    assert_eq!(targets.len(), 1, "expected exactly one target");
     g3ts_astro_media_ingestion_assertions::eslint::targets::assert_target(
-        &targets[0],
+        first_target(&targets),
         "app/src/mdx-components.tsx",
         eslint_config_parser::types::EslintProbeKind::TsxSource,
     );
@@ -53,9 +70,9 @@ fn astro_ts_tsx_glob_probes_glob_directory() {
 fn mdx_glob_probes_content_directory() {
     let targets = probe_targets_from_glob("app", "content/**/*.mdx");
 
-    assert_eq!(targets.len(), 1);
+    assert_eq!(targets.len(), 1, "expected exactly one target");
     g3ts_astro_media_ingestion_assertions::eslint::targets::assert_target(
-        &targets[0],
+        first_target(&targets),
         "app/content/__g3ts_media_probe__.mdx",
         eslint_config_parser::types::EslintProbeKind::MdxContent,
     );

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::panic,
+    reason = "rule check fns intentionally call std::panic::panic_any to surface unparseable input bubbled up by the upstream parser; this is the documented fail-fast contract for the source-checks family"
+)]
+
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::reason_text_is_useful;
 
@@ -6,8 +11,10 @@ use crate::parse::comments::same_line_reason;
 use crate::parse::types::CfgPredicateTruth;
 use crate::support::CodeSourceRuleInput;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-code/path-attr-with-reason";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_path_attrs(input.source) {
         if info.cfg_truth == CfgPredicateTruth::KnownFalse
@@ -75,6 +82,7 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
+/// Implements `is exact owned test sidecar`.
 fn is_exact_owned_test_sidecar(rel_path: &str, module_name: &str, path_value: &str) -> bool {
     let file_name = rel_path.rsplit('/').next();
     let Some(file_name) = file_name else {

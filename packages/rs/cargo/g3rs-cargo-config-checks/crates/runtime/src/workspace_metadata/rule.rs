@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{CargoRole, cargo_role, error, info, policy_root_edition, role_label};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/workspace-metadata";
 
+/// check fn.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     let role = cargo_role(cargo);
     if matches!(role, CargoRole::Other) {
@@ -22,14 +24,11 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
                 cargo_rel_path,
             ));
         }
-        Some(Ok("2024" | "2021")) => {
+        Some(Ok(edition @ ("2024" | "2021"))) => {
             results.push(info(
                 ID,
                 "edition policy satisfied",
-                format!(
-                    "`{cargo_rel_path}` declares edition `{}`.",
-                    policy_root_edition(cargo).expect("edition just matched").expect("string edition")
-                ),
+                format!("`{cargo_rel_path}` declares edition `{edition}`."),
                 cargo_rel_path,
             ));
         }
@@ -65,6 +64,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
     }
 }
 
+/// edition rank fn.
 fn edition_rank(edition: &str) -> Option<usize> {
     match edition {
         "2015" => Some(0),

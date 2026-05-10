@@ -32,7 +32,9 @@ pub(crate) fn check(
 
     for dependency in violating {
         let target = &dependency.target;
-        let target_layer = target.layer.expect("filtered to layered target");
+        let Some(target_layer) = target.layer else {
+            continue;
+        };
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Warn,

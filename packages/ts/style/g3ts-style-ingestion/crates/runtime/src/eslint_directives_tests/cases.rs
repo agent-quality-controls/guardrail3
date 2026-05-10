@@ -10,7 +10,7 @@ fn style_source_globs_are_scoped_to_app_root() {
     };
 
     g3ts_style_ingestion_assertions::eslint_directives::assert_scoped_style_globs(
-        super::super::style_source_globs("apps/landing", &policy),
+        super::super::style_source_globs("apps/landing", &policy).as_deref(),
         &["apps/landing/src/**/*.{astro,ts,tsx}"],
     );
 }
@@ -18,8 +18,7 @@ fn style_source_globs_are_scoped_to_app_root() {
 #[test]
 fn compiled_style_source_globs_match_configured_files() {
     let globs = vec!["apps/landing/src/**/*.{astro,ts,tsx}".to_owned()];
-    let compiled = super::super::compile_globs(&globs)
-        .expect("test glob should compile");
+    let compiled = super::super::compile_globs(&globs).expect("test glob should compile");
 
     g3ts_style_ingestion_assertions::eslint_directives::assert_glob_matches(
         &compiled,

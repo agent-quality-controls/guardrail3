@@ -1,0 +1,27 @@
+[package]
+name = "g3rs-rust-family-contracts-architecture"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "Hook contracts for architecture-shape Rust families (topology, arch, apparch)"
+publish = false
+readme = "README.md"
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true
+
+[dependencies]
+g3rs-hooks-contract-types = { path = "../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }
+g3rs-apparch-hook-contract = { path = "../../../apparch/g3rs-apparch-hook-contract", version = "0.1.0" }
+g3rs-arch-hook-contract = { path = "../../../arch/g3rs-arch-hook-contract", version = "0.1.0" }
+g3rs-topology-hook-contract = { path = "../../../topology/g3rs-topology-hook-contract", version = "0.1.0" }

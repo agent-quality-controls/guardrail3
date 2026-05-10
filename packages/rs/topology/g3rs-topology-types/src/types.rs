@@ -76,6 +76,13 @@ pub struct G3RsTopologyNestedWorkspaceInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3RsTopologyNestedGuardrail3RsTomlInput {
+    pub rel_dir: String,
+    pub guardrail3_rs_toml_rel_path: String,
+    pub outer_adopted_unit_rel: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3RsTopologyWorkspaceMemberIssueKind {
     Undeclared {
         workspace_root_rel: String,
@@ -116,6 +123,7 @@ pub struct G3RsTopologyFileTreeChecksInput {
     pub family_files: Vec<G3RsTopologyWorkspaceFamilyFile>,
     pub input_failures: Vec<G3RsTopologyFileTreeInputFailure>,
     pub nested_workspaces: Vec<G3RsTopologyNestedWorkspaceInput>,
+    pub nested_guardrail3_rs_tomls: Vec<G3RsTopologyNestedGuardrail3RsTomlInput>,
     pub membership_issues: Vec<G3RsTopologyWorkspaceMemberIssueInput>,
     pub escaping_member_paths: Vec<G3RsTopologyEscapingWorkspaceMemberPathInput>,
     pub illegal_family_files: Vec<G3RsTopologyIllegalFamilyFilePlacementInput>,

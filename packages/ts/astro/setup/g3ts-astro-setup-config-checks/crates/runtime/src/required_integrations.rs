@@ -1,7 +1,9 @@
 use g3ts_astro_setup_types::{G3TsAstroConfigSurfaceState, G3TsAstroSetupIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/required-integrations";
+/// Static rule data.
 const REQUIRED_PACKAGES: [&str; 9] = [
     "@astrojs/react",
     "@astrojs/mdx",
@@ -14,6 +16,7 @@ const REQUIRED_PACKAGES: [&str; 9] = [
     "g3ts-astro-llms-auditor",
 ];
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -53,14 +56,12 @@ pub(crate) fn check(
     };
 
     if missing_packages.is_empty() && missing_integrations.is_empty() {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Required Astro integrations are present",
-                format!("`{rel_path}` wires React, MDX, sitemap generator/auditor, robots generator/auditor, Nuasite checks, and llms generator/auditor integrations from the approved packages."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Required Astro integrations are present",
+            format!("`{rel_path}` wires React, MDX, sitemap generator/auditor, robots generator/auditor, Nuasite checks, and llms generator/auditor integrations from the approved packages."),
+            rel_path,
+        ));
         return;
     }
 
@@ -72,21 +73,29 @@ pub(crate) fn check(
                 format_missing(&missing_packages),
                 format_missing(&missing_integrations)
             ),
-            rel_path,
+            Some(rel_path),
         ));
 }
 
+/// Specification of a required Astro integration.
 struct RequiredIntegration {
+    /// npm module name to look for in the integration call.
     module: &'static str,
+    /// Acceptable import-name spellings, including `None` for default imports.
     accepted_imports: &'static [Option<&'static str>],
+    /// Required argument shape for the integration call.
     argument: RequiredIntegrationArgument,
 }
 
+/// Required argument shape for an Astro integration call.
 enum RequiredIntegrationArgument {
+    /// The integration must be called without arguments.
     None,
+    /// The integration must be called with at least one argument.
     Some,
 }
 
+/// Internal helper used by the rule.
 fn required_integrations() -> Vec<RequiredIntegration> {
     vec![
         RequiredIntegration {
@@ -137,6 +146,7 @@ fn required_integrations() -> Vec<RequiredIntegration> {
     ]
 }
 
+/// Internal helper used by the rule.
 fn format_missing(values: &[&str]) -> String {
     if values.is_empty() {
         return "none".to_owned();

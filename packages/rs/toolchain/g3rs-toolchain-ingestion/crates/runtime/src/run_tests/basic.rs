@@ -1,3 +1,8 @@
+#![allow(
+    clippy::disallowed_methods,
+    reason = "fixture-driven filesystem tests need direct std::fs calls in test bodies"
+)]
+
 use std::fs;
 
 use tempfile::tempdir;
@@ -167,15 +172,16 @@ fn fails_on_malformed_toolchain_toml() {
     let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should return Err when rust-toolchain.toml contains invalid TOML");
 
-    match &err {
-        super::IngestionError::ParseFailed { path, reason } => {
-            assert!(
-                path.ends_with("rust-toolchain.toml"),
-                "ParseFailed path should reference rust-toolchain.toml, got: {path:?}"
-            );
-            assert!(!reason.is_empty(), "ParseFailed reason should not be empty");
-        }
-        other => panic!("expected ParseFailed, got: {other:?}"),
+    assert!(
+        matches!(&err, super::IngestionError::ParseFailed { .. }),
+        "expected ParseFailed variant from ingestion, got: {err:?}",
+    );
+    if let super::IngestionError::ParseFailed { path, reason } = &err {
+        assert!(
+            path.ends_with("rust-toolchain.toml"),
+            "ParseFailed path should reference rust-toolchain.toml, got: {path:?}",
+        );
+        assert!(!reason.is_empty(), "ParseFailed reason should not be empty");
     }
 }
 
@@ -388,12 +394,13 @@ fn unreadable_toolchain_toml_returns_error() {
     let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should return Err when rust-toolchain.toml has readable=false");
 
-    match &err {
-        super::IngestionError::Unreadable { path, reason } => {
-            assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
-            assert!(!reason.is_empty());
-        }
-        other => panic!("expected Unreadable, got: {other:?}"),
+    assert!(
+        matches!(&err, super::IngestionError::Unreadable { .. }),
+        "expected Unreadable variant, got: {err:?}",
+    );
+    if let super::IngestionError::Unreadable { path, reason } = &err {
+        assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
+        assert!(!reason.is_empty(), "Unreadable reason should not be empty");
     }
 }
 
@@ -443,12 +450,13 @@ fn unreadable_cargo_toml_returns_error() {
     let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should fail closed when Cargo.toml is unreadable");
 
-    match &err {
-        super::IngestionError::Unreadable { path, reason } => {
-            assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
-            assert!(!reason.is_empty(), "got: {reason}");
-        }
-        other => panic!("expected Unreadable, got: {other:?}"),
+    assert!(
+        matches!(&err, super::IngestionError::Unreadable { .. }),
+        "expected Unreadable variant, got: {err:?}",
+    );
+    if let super::IngestionError::Unreadable { path, reason } = &err {
+        assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
+        assert!(!reason.is_empty(), "got: {reason}");
     }
 }
 
@@ -475,12 +483,13 @@ fn toolchain_deleted_after_crawl_returns_unreadable() {
         "ingestion should return Err when rust-toolchain.toml is deleted between crawl and read",
     );
 
-    match &err {
-        super::IngestionError::Unreadable { path, reason } => {
-            assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
-            assert!(!reason.is_empty(), "got: {reason}");
-        }
-        other => panic!("expected Unreadable from TOCTOU, got: {other:?}"),
+    assert!(
+        matches!(&err, super::IngestionError::Unreadable { .. }),
+        "expected Unreadable variant from TOCTOU, got: {err:?}",
+    );
+    if let super::IngestionError::Unreadable { path, reason } = &err {
+        assert!(path.ends_with("rust-toolchain.toml"), "got: {path:?}");
+        assert!(!reason.is_empty(), "got: {reason}");
     }
 }
 
@@ -506,12 +515,13 @@ fn cargo_deleted_after_crawl_returns_unreadable() {
     let err = super::ingest_for_config_checks(&crawl)
         .expect_err("ingestion should fail closed when Cargo.toml vanishes after crawl");
 
-    match &err {
-        super::IngestionError::Unreadable { path, reason } => {
-            assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
-            assert!(!reason.is_empty(), "got: {reason}");
-        }
-        other => panic!("expected Unreadable, got: {other:?}"),
+    assert!(
+        matches!(&err, super::IngestionError::Unreadable { .. }),
+        "expected Unreadable variant, got: {err:?}",
+    );
+    if let super::IngestionError::Unreadable { path, reason } = &err {
+        assert!(path.ends_with("Cargo.toml"), "got: {path:?}");
+        assert!(!reason.is_empty(), "got: {reason}");
     }
 }
 

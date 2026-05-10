@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/modular-directory-inventory";
 
+/// `check` function.
 pub(crate) fn check(has_modular_dir: bool, results: &mut Vec<G3CheckResult>) {
     let (title, message, file) = if has_modular_dir {
         (

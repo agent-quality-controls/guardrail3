@@ -1,3 +1,8 @@
+/// Asserts that running the runtime check on `input` produces exactly `expected` ids.
+///
+/// # Panics
+///
+/// Panics when the runtime check produces ids different from `expected`.
 pub fn assert_runtime_check_exact_ids(
     input: &g3ts_astro_state_types::G3TsAstroStateFileTreeChecksInput,
     expected: &[&str],
@@ -6,6 +11,11 @@ pub fn assert_runtime_check_exact_ids(
     assert_exact_ids(&results, expected);
 }
 
+/// Asserts that `results` ids match `expected` exactly, in order.
+///
+/// # Panics
+///
+/// Panics when the rule ids in `results` do not match `expected`.
 pub fn assert_exact_ids(results: &[guardrail3_check_types::G3CheckResult], expected: &[&str]) {
     let actual = results
         .iter()

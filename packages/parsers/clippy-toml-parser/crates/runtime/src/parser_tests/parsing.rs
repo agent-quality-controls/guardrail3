@@ -135,6 +135,10 @@ allow-unwrap-in-tests = false
 }
 
 #[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "single end-to-end fixture asserting every structured clippy.toml field; splitting would obscure coverage parity"
+)]
 fn exact_structured_fields_parse() {
     let cfg = parse_fixture(
         r#"

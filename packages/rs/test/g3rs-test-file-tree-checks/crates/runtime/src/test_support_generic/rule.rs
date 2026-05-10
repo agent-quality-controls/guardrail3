@@ -1,3 +1,7 @@
+#![expect(
+    clippy::too_many_lines,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use super::support::{
@@ -9,7 +13,9 @@ use crate::support::TestSupportFileInput;
 use g3rs_test_types::ast::{PublicValueKind, ReturnKind};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/test-support-generic";
+/// `REPORT_FIELDS` constant.
 const REPORT_FIELDS: &[&str] = &[
     "file",
     "id",
@@ -19,6 +25,7 @@ const REPORT_FIELDS: &[&str] = &[
     "severity",
     "title",
 ];
+/// `REPORT_METHODS` constant.
 const REPORT_METHODS: &[&str] = &[
     "file",
     "id",
@@ -33,6 +40,7 @@ const REPORT_METHODS: &[&str] = &[
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
+/// `check` function.
 pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut reported = false;
     let local_import_aliases = local_import_aliases(&input.file.parsed.imports);

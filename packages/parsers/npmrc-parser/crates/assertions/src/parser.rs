@@ -1,3 +1,9 @@
+#![allow(
+    clippy::missing_panics_doc,
+    clippy::assertions_on_constants,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses; explicit assert!(false, ...) is intentional unreachable-branch failure"
+)]
+
 use npmrc_parser_runtime::types::NpmrcDocument;
 
 pub fn assert_parsed_document(document: &NpmrcDocument) {

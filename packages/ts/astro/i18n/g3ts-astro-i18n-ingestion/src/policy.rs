@@ -1,8 +1,10 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_astro_i18n_types::{G3TsAstroI18nPolicySnapshot, G3TsAstroI18nPolicySurfaceState};
 
+/// Relative path of the guardrail TS config within an Astro app root.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 
+/// Ingests the i18n policy surface from an Astro app's `guardrail3-ts.toml`.
 pub(crate) fn ingest_i18n_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,

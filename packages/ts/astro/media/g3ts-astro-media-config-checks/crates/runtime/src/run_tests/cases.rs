@@ -25,10 +25,12 @@ fn golden_reports_media_inventory_ids() {
 #[test]
 fn missing_media_policy_fails() {
     let mut input = super::helpers::golden();
-    input.integration_contracts[0].astro_policy =
+    super::helpers::set_first_integration_policy(
+        &mut input,
         g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::MissingMediaPolicy {
             rel_path: "apps/landing/guardrail3-ts.toml".to_owned(),
-        };
+        },
+    );
 
     assertions::assert_runtime_check_id_severity(
         &input,
@@ -40,11 +42,7 @@ fn missing_media_policy_fails() {
 #[test]
 fn missing_assets_integration_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroConfigSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_config
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::astro_config_snapshot_mut(&mut input);
     snapshot.integrations.clear();
 
     assertions::assert_runtime_check_id_severity(
@@ -57,11 +55,7 @@ fn missing_assets_integration_fails() {
 #[test]
 fn invalid_output_asset_path_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.favicon = "favicon.svg".to_owned();
 
     assertions::assert_runtime_check_id_severity(
@@ -74,11 +68,7 @@ fn invalid_output_asset_path_fails() {
 #[test]
 fn invalid_app_relative_source_glob_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.public_source_globs = vec!["/src/**/*.astro".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
@@ -91,11 +81,7 @@ fn invalid_app_relative_source_glob_fails() {
 #[test]
 fn external_media_helper_module_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.media_helper_modules = vec!["https://example.com/media.ts".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
@@ -108,11 +94,7 @@ fn external_media_helper_module_fails() {
 #[test]
 fn whitespace_only_policy_arrays_fail() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.approved_media_helpers = vec![" ".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
@@ -125,11 +107,7 @@ fn whitespace_only_policy_arrays_fail() {
 #[test]
 fn missing_allow_svg_icons_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.allow_svg_icons = None;
 
     assertions::assert_runtime_check_id_severity(
@@ -142,11 +120,7 @@ fn missing_allow_svg_icons_fails() {
 #[test]
 fn missing_allowed_public_image_paths_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.allowed_public_image_paths = Vec::new();
 
     assertions::assert_runtime_check_id_severity(
@@ -159,11 +133,7 @@ fn missing_allowed_public_image_paths_fails() {
 #[test]
 fn unknown_media_policy_fields_fail() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].astro_policy
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::policy_snapshot_mut(&mut input);
     snapshot.extra_fields = vec!["allow_raw_public_images".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
@@ -176,11 +146,7 @@ fn unknown_media_policy_fields_fail() {
 #[test]
 fn missing_policy_rule_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroMediaEslintSurfaceState::Parsed { snapshot } =
-        &mut input.eslint_contracts[0].config
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::eslint_snapshot_mut(&mut input);
     snapshot
         .public_media_policy_rules
         .retain(|rule| rule != "astro-media-policy/no-inline-image-alt");
@@ -195,11 +161,7 @@ fn missing_policy_rule_fails() {
 #[test]
 fn missing_delegated_package_fails() {
     let mut input = super::helpers::golden();
-    let g3ts_astro_media_types::G3TsAstroPackageSurfaceState::Parsed { snapshot } =
-        &mut input.integration_contracts[0].package
-    else {
-        unreachable!("test fixture must be parsed")
-    };
+    let snapshot = super::helpers::package_snapshot_mut(&mut input);
     snapshot
         .dev_dependencies
         .retain(|package| package != "g3ts-eslint-plugin-astro-media-policy");

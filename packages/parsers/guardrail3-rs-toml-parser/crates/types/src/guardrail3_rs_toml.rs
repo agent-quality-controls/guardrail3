@@ -8,6 +8,9 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use toml::Value;
 
+/// Maps each collection name to the list of field names declared for it in `guardrail3-rs.toml`.
+pub type CollectionFieldsMap = BTreeMap<String, Vec<String>>;
+
 /// Typed representation of a `guardrail3-rs.toml` file.
 ///
 /// Known workspace-level Rust policy fields are mapped to typed fields.
@@ -121,7 +124,7 @@ pub struct TsAstroContentPolicyConfig {
     #[serde(default)]
     pub required_collections: Vec<String>,
     #[serde(default)]
-    pub collection_fields: BTreeMap<String, Vec<String>>,
+    pub collection_fields: CollectionFieldsMap,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

@@ -1,6 +1,7 @@
 use g3ts_typecov_types::G3TsTypecovConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs all typecov config checks and returns aggregated results.
 #[must_use]
 pub fn check(input: &G3TsTypecovConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();

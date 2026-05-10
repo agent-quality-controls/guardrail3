@@ -9,6 +9,7 @@ use package_script_command_parser::types::{
     PackageScriptParseState, PackageScriptToolInvocation,
 };
 
+/// Helper `ingest_package_surface`.
 pub(crate) fn ingest_package_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -84,6 +85,7 @@ pub(crate) fn ingest_package_surface(
     }
 }
 
+/// Helper `parse_package_script`.
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     match package_script_command_parser::parse(name, body) {
         Ok(fact) => fact,
@@ -99,6 +101,7 @@ fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     }
 }
 
+/// Helper `script_commands`.
 fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsAstroPackageScriptCommand> {
     fact.commands
         .iter()
@@ -106,6 +109,7 @@ fn script_commands(fact: &PackageScriptParseFact) -> Vec<G3TsAstroPackageScriptC
         .collect()
 }
 
+/// Helper `script_command`.
 fn script_command(
     script_name: &str,
     command: &PackageScriptCommand,
@@ -119,7 +123,8 @@ fn script_command(
     }
 }
 
-fn script_command_separator(
+/// Helper `script_command_separator`.
+const fn script_command_separator(
     separator: PackageScriptCommandSeparator,
 ) -> G3TsAstroPackageScriptCommandSeparator {
     match separator {
@@ -128,6 +133,7 @@ fn script_command_separator(
     }
 }
 
+/// Helper `script_tool_invocations`.
 fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsAstroPackageScriptToolInvocation> {
@@ -137,6 +143,7 @@ fn script_tool_invocations(
         .collect()
 }
 
+/// Helper `script_tool_invocation`.
 fn script_tool_invocation(
     invocation: &PackageScriptToolInvocation,
 ) -> G3TsAstroPackageScriptToolInvocation {
@@ -151,6 +158,7 @@ fn script_tool_invocation(
     }
 }
 
+/// Helper `script_parse_blocker`.
 fn script_parse_blocker(
     fact: &PackageScriptParseFact,
 ) -> Option<G3TsAstroPackageScriptParseBlocker> {

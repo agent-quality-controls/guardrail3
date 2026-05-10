@@ -1,6 +1,7 @@
 use g3ts_spelling_types::{G3TsSpellingConfigSurfaceState, G3TsSpellingContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// `check`: check.
 pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
     match &contract.cspell_config {
         G3TsSpellingConfigSurfaceState::Parsed { rel_path } => crate::common::info(

@@ -241,5 +241,5 @@ fn contains_segment_pair(path: &str, first: &str, second: &str) -> bool {
     let parts = path.split('/').collect::<Vec<_>>();
     parts
         .windows(2)
-        .any(|window| window[0] == first && window[1] == second)
+        .any(|window| matches!(window, [a, b] if *a == first && *b == second))
 }

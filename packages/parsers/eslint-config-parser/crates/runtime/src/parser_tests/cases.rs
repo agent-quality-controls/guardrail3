@@ -1,3 +1,9 @@
+#![allow(
+    clippy::disallowed_methods,
+    clippy::too_many_lines,
+    reason = "tempdir-based parser tests scaffold real ESLint config trees on disk; std::fs is the test-only filesystem boundary and the realistic-fixture cases enumerate every probe inline"
+)]
+
 use std::fs;
 
 use eslint_config_parser_runtime_assertions::parser as assertions;

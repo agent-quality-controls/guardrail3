@@ -1,3 +1,7 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures must call std::fs and std::process::Command directly to seed and tear down filesystem state"
+)]
 use std::path::Path;
 use std::process::Command;
 

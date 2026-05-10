@@ -1,3 +1,11 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::arithmetic_side_effects,
+    clippy::indexing_slicing,
+    clippy::string_slice,
+    reason = "state.rs IS the token-cursor + shell env state machine; indices and arithmetic mirror the cursor's strict monotonic invariants"
+)]
+
 #[derive(Debug, Clone)]
 pub(super) struct TokenCursor<'a> {
     tokens: &'a [String],
@@ -5,7 +13,7 @@ pub(super) struct TokenCursor<'a> {
 }
 
 impl<'a> TokenCursor<'a> {
-    pub(super) fn new(tokens: &'a [String]) -> Self {
+    pub(super) const fn new(tokens: &'a [String]) -> Self {
         Self { tokens, index: 0 }
     }
 

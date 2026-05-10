@@ -21,11 +21,7 @@ fn package_manager_script_shorthand_is_normalized_as_script_executable() {
     let invocation = invocations
         .first()
         .expect("pnpm lint:css should create one tool invocation");
-    g3ts_style_ingestion_assertions::package::assert_tool_invocation(
-        invocation,
-        "lint:css",
-        &[],
-    );
+    g3ts_style_ingestion_assertions::package::assert_tool_invocation(invocation, "lint:css", &[]);
 }
 
 #[test]

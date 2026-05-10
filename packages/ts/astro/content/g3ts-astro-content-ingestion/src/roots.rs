@@ -7,6 +7,7 @@ use g3ts_astro_content_types::G3TsAstroPackageSurfaceState;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// Constant `ROOT_ASTRO_CONFIGS`.
 const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.js",
     "astro.config.mjs",
@@ -15,6 +16,7 @@ const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.mts",
     "astro.config.cts",
 ];
+/// Constant `LIVE_CONFIGS`.
 const LIVE_CONFIGS: [&str; 6] = [
     "src/live.config.js",
     "src/live.config.mjs",
@@ -24,6 +26,8 @@ const LIVE_CONFIGS: [&str; 6] = [
     "src/live.config.cts",
 ];
 
+/// Discover the set of Astro app roots present in `crawl`, deduplicating by
+/// path and returning them in stable order.
 #[must_use]
 pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
@@ -45,19 +49,17 @@ pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// Select the live config file for the app rooted at `app_root_rel_path`.
 pub(crate) fn select_live_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a G3WorkspaceEntry> {
-    LIVE_CONFIGS.iter().find_map(|rel_path| {
-        exact_included_file(
-            crawl,
-            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
-        )
-    })
+    find_first_scoped_included_file(crawl, app_root_rel_path, &LIVE_CONFIGS)
 }
 
-fn exact_included_file<'crawl>(
+/// Look up the workspace entry that exactly matches `rel_path` and whose
+/// crawl ignore state is `Included`.
+pub(crate) fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Option<&'crawl G3WorkspaceEntry> {
@@ -68,11 +70,28 @@ fn exact_included_file<'crawl>(
     })
 }
 
+/// Find the first entry whose path equals `app_root_rel_path` joined to one
+/// of the candidate `rel_paths`, returning the matching workspace entry.
+pub(crate) fn find_first_scoped_included_file<'a>(
+    crawl: &'a G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    rel_paths: &[&str],
+) -> Option<&'a G3WorkspaceEntry> {
+    rel_paths.iter().find_map(|rel_path| {
+        exact_included_file(
+            crawl,
+            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
+        )
+    })
+}
+
+/// Helper `is_included_file`.
 fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
+/// Helper `root_astro_config_file`.
 fn root_astro_config_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -80,6 +99,7 @@ fn root_astro_config_file(rel_path: &str) -> bool {
         .is_some_and(|file_name| ROOT_ASTRO_CONFIGS.contains(&file_name))
 }
 
+/// Helper `package_json_file`.
 fn package_json_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -87,6 +107,7 @@ fn package_json_file(rel_path: &str) -> bool {
         == Some("package.json")
 }
 
+/// Helper `parent_rel_path`.
 fn parent_rel_path(rel_path: &str) -> String {
     Path::new(rel_path)
         .parent()
@@ -96,6 +117,7 @@ fn parent_rel_path(rel_path: &str) -> String {
         .to_owned()
 }
 
+/// Helper `package_has_astro_dependency`.
 fn package_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {
     match package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => snapshot

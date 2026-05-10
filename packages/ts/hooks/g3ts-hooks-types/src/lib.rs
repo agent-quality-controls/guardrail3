@@ -1,3 +1,4 @@
+/// Public type definitions for the G3TS hooks family.
 #[cfg(feature = "api")]
 mod types;
 

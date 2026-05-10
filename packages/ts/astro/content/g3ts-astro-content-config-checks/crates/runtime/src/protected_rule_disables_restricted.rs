@@ -3,8 +3,11 @@ use g3ts_astro_content_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-content/protected-content-rule-disables-restricted";
+/// Internal constant `RESTRICT_RULE`.
 const RESTRICT_RULE: &str = "@eslint-community/eslint-comments/no-restricted-disable";
+/// Internal constant `PROTECTED_RULES`.
 const PROTECTED_RULES: [&str; 9] = [
     "astro-pipeline/no-authored-content-fs-read",
     "astro-pipeline/no-authored-content-glob",
@@ -17,6 +20,7 @@ const PROTECTED_RULES: [&str; 9] = [
     "i18next/no-literal-string",
 ];
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroContentEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -26,7 +30,7 @@ pub(crate) fn check(
             ID,
             "Content protected-disable policy cannot be checked",
             "G3TS could not parse the Astro content ESLint effective config. Configure `@eslint-community/eslint-comments/no-restricted-disable` on Astro, TS, and TSX source lanes for all protected content rules.".to_owned(),
-            config_rel_path(&contract.config),
+            Some(config_rel_path(&contract.config)),
         ));
         return;
     };
@@ -65,6 +69,7 @@ pub(crate) fn check(
     ));
 }
 
+/// Internal function `lane_is_restricted`.
 fn lane_is_restricted(warn_or_error_rules: &[String], patterns: &[String]) -> bool {
     warn_or_error_rules.iter().any(|rule| rule == RESTRICT_RULE)
         && PROTECTED_RULES.iter().all(|rule| {
@@ -74,6 +79,7 @@ fn lane_is_restricted(warn_or_error_rules: &[String], patterns: &[String]) -> bo
         })
 }
 
+/// Internal function `pattern_covers_rule`.
 fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
     pattern == rule
         || pattern == "*"
@@ -82,11 +88,12 @@ fn pattern_covers_rule(pattern: &str, rule: &str) -> bool {
             .is_some_and(|prefix| rule.starts_with(prefix))
 }
 
-fn config_rel_path(config: &G3TsAstroContentEslintSurfaceState) -> Option<&str> {
+/// Returns the relative path of the eslint config across all parse states.
+fn config_rel_path(config: &G3TsAstroContentEslintSurfaceState) -> &str {
     match config {
         G3TsAstroContentEslintSurfaceState::Missing { rel_path }
         | G3TsAstroContentEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroContentEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroContentEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroContentEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroContentEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }

@@ -1,8 +1,10 @@
 use g3rs_clippy_types::{G3RsClippyCargoConfigState, G3RsClippyConfigChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/forbid-clippy-conf-dir-override";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.cargo_configs.is_empty() {
         results.push(
@@ -35,7 +37,11 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     }
 }
 
-fn finding(cargo_config: &G3RsClippyCargoConfigState) -> Option<(String, String, String)> {
+/// `(title, message, rel_path)` triple emitted by `finding`.
+type FindingTriple = (String, String, String);
+
+/// finding fn.
+fn finding(cargo_config: &G3RsClippyCargoConfigState) -> Option<FindingTriple> {
     match cargo_config {
         G3RsClippyCargoConfigState::Unreadable { rel_path, reason }
         | G3RsClippyCargoConfigState::ParseError { rel_path, reason } => Some((

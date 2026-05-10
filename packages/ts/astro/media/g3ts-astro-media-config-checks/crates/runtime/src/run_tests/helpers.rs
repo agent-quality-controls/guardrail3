@@ -10,6 +10,96 @@ use g3ts_astro_media_types::{
     G3TsAstroPackageSurfaceState, G3TsAstroStaticObjectProperty, G3TsAstroStaticValue,
 };
 
+/// Returns a mutable reference to the parsed media policy snapshot of the first integration contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first integration contract astro_policy must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn policy_snapshot_mut(
+    input: &mut G3TsAstroMediaConfigChecksInput,
+) -> &mut G3TsAstroMediaPolicySnapshot {
+    let policy = &mut input.integration_contracts[0].astro_policy;
+    let G3TsAstroMediaPolicySurfaceState::Parsed { snapshot } = policy else {
+        panic!("golden media policy should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed astro config snapshot of the first integration contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first integration contract astro_config must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn astro_config_snapshot_mut(
+    input: &mut G3TsAstroMediaConfigChecksInput,
+) -> &mut G3TsAstroConfigSurfaceSnapshot {
+    let config = &mut input.integration_contracts[0].astro_config;
+    let G3TsAstroConfigSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden astro config should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed eslint snapshot of the first eslint contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first eslint contract config must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn eslint_snapshot_mut(
+    input: &mut G3TsAstroMediaConfigChecksInput,
+) -> &mut G3TsAstroMediaEslintSurfaceSnapshot {
+    let config = &mut input.eslint_contracts[0].config;
+    let G3TsAstroMediaEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden media eslint config should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed package snapshot of the first integration contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first integration contract package must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn package_snapshot_mut(
+    input: &mut G3TsAstroMediaConfigChecksInput,
+) -> &mut G3TsAstroPackageSurfaceSnapshot {
+    let package = &mut input.integration_contracts[0].package;
+    let G3TsAstroPackageSurfaceState::Parsed { snapshot } = package else {
+        panic!("golden media package should be parsed");
+    };
+    snapshot
+}
+
+/// Sets the `astro_policy` of the first integration contract.
+///
+/// Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    reason = "golden fixture invariant: first integration contract must exist; mismatch is a test setup failure"
+)]
+pub(super) fn set_first_integration_policy(
+    input: &mut G3TsAstroMediaConfigChecksInput,
+    policy: G3TsAstroMediaPolicySurfaceState,
+) {
+    input.integration_contracts[0].astro_policy = policy;
+}
+
 pub(super) fn golden() -> G3TsAstroMediaConfigChecksInput {
     G3TsAstroMediaConfigChecksInput {
         integration_contracts: vec![G3TsAstroMediaIntegrationContractInput {

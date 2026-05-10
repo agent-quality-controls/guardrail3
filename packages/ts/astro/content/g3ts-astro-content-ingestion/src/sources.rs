@@ -6,8 +6,14 @@ use g3ts_astro_content_types::{
     G3TsAstroContentAdapterSourcePaths, G3TsAstroContentPolicySurfaceState,
 };
 
+/// Pair of `(scoped_adapter_path, raw_adapter_path)` describing a content
+/// adapter declaration after scoping it to an app root.
+type ScopedAdapter = (String, String);
+
+/// Constant `SOURCE_MODULE_EXTENSIONS`.
 const SOURCE_MODULE_EXTENSIONS: [&str; 6] = [".ts", ".tsx", ".js", ".jsx", ".mts", ".mjs"];
 
+/// Helper `content_adapter_sources`.
 pub(crate) fn content_adapter_sources(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -23,6 +29,7 @@ pub(crate) fn content_adapter_sources(
     }
 }
 
+/// Helper `content_adapter_source_paths`.
 fn content_adapter_source_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -31,7 +38,7 @@ fn content_adapter_source_paths(
     let G3TsAstroContentPolicySurfaceState::Parsed { snapshot } = astro_policy else {
         return Vec::new();
     };
-    let scoped_adapters: Vec<(String, String)> = snapshot
+    let scoped_adapters: Vec<ScopedAdapter> = snapshot
         .content_adapters
         .iter()
         .map(|adapter| {
@@ -71,6 +78,7 @@ fn content_adapter_source_paths(
         .collect()
 }
 
+/// Helper `content_adapter_astro_content_source_paths`.
 fn content_adapter_astro_content_source_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -104,6 +112,7 @@ fn content_adapter_astro_content_source_paths(
         .collect()
 }
 
+/// Helper `is_source_module_file`.
 fn is_source_module_file(rel_path: &str) -> bool {
     SOURCE_MODULE_EXTENSIONS
         .iter()

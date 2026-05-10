@@ -13,15 +13,3 @@ rule = "multiple_crate_versions"
 file = "Cargo.toml"
 selector = "lint:clippy::multiple_crate_versions"
 reason = "This internal workspace package intentionally depends on parser crates and shared internal crates with overlapping transitive versions."
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "Runtime intentionally groups source parsing and per-rule checks into dedicated submodules."
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/assertions/Cargo.toml"
-selector = "structural-split"
-reason = "Assertions intentionally keep one shared proof module per source rule."

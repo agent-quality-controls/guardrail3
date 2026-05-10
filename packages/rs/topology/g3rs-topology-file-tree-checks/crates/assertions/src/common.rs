@@ -1,14 +1,21 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// One expected check finding used for assertion-driven snapshot comparison.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// Severity expected for the finding.
     severity: G3Severity,
+    /// Expected human-readable title of the finding.
     title: &'a str,
+    /// Expected human-readable message body of the finding.
     message: &'a str,
+    /// Optional workspace-relative file path expected on the finding.
     file: Option<&'a str>,
+    /// Whether the finding is expected to be filtered as inventory.
     inventory: bool,
 }
 
+/// Returns the findings emitted under `id`, sorted into a stable comparison order.
 #[must_use]
 pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
@@ -41,12 +48,18 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
-pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: Finding<'_>) {
-    assert!(findings(results, id).contains(&expected));
+/// Asserts that `results` under `id` contains the expected finding.
+pub(crate) fn assert_contains(results: &[G3CheckResult], id: &str, expected: &Finding<'_>) {
+    let actual = findings(results, id);
+    assert!(
+        actual.contains(expected),
+        "expected finding for `{id}` not present in {actual:#?}",
+    );
 }
 
+/// Constructs one expected [`Finding`] from its primitive fields.
 #[must_use]
-pub(crate) fn finding<'a>(
+pub(crate) const fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
@@ -62,6 +75,7 @@ pub(crate) fn finding<'a>(
     }
 }
 
+/// Asserts that no findings were emitted under `rule_id`.
 pub(crate) fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
     let actual = findings(results, rule_id);
     assert!(
@@ -73,38 +87,38 @@ pub(crate) fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
 #[macro_export]
 macro_rules! define_result_assertions {
     ($rule_id:literal) => {
-        pub use crate::common::Finding;
         pub use guardrail3_check_types::G3Severity as Severity;
+        pub use $crate::common::Finding;
 
         #[must_use]
         pub fn findings(results: &[guardrail3_check_types::G3CheckResult]) -> Vec<Finding<'_>> {
-            crate::common::findings(results, $rule_id)
+            $crate::common::findings(results, $rule_id)
         }
 
         pub fn assert_contains(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: Finding<'_>,
         ) {
-            crate::common::assert_contains(results, $rule_id, expected);
+            $crate::common::assert_contains(results, $rule_id, &expected);
         }
 
         pub fn assert_rule_quiet(results: &[guardrail3_check_types::G3CheckResult]) {
-            crate::common::assert_rule_quiet(results, $rule_id);
+            $crate::common::assert_rule_quiet(results, $rule_id);
         }
 
         pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
-            crate::common::assert_rule_quiet(results, $rule_id);
+            $crate::common::assert_rule_quiet(results, $rule_id);
         }
 
         #[must_use]
-        pub fn finding<'a>(
+        pub const fn finding<'a>(
             severity: Severity,
             title: &'a str,
             message: &'a str,
             file: Option<&'a str>,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(severity, title, message, file, inventory)
+            $crate::common::finding(severity, title, message, file, inventory)
         }
     };
 }

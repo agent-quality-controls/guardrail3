@@ -1,5 +1,10 @@
 crate::define_result_assertions!("g3rs-clippy/forbid-clippy-conf-dir-override");
 
+/// Asserts the inventory finding "no clippy config dir overrides found" is present.
+///
+/// # Panics
+///
+/// Panics if the inventory finding is absent.
 pub fn assert_no_overrides_inventory(results: &[guardrail3_check_types::G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

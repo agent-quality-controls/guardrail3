@@ -1,3 +1,5 @@
+//! Assertions for clippy hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

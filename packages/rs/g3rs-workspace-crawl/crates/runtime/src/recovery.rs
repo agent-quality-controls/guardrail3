@@ -1,3 +1,5 @@
+//! Recovery list and banned-tree predicates used during crawl phase 2.
+
 use std::path::Path;
 
 /// Directory names that are never walked during recovery.
@@ -71,7 +73,12 @@ pub(crate) fn should_recover(name: &str, rel_path: &str) -> bool {
     if RECOVER_PREFIX.iter().any(|p| name.starts_with(p)) {
         return true;
     }
-    if name.starts_with("tsconfig") && name.ends_with(".json") {
+    if name.starts_with("tsconfig")
+        && Path::new(name)
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("json"))
+    {
         return true;
     }
     if rel_path.ends_with(".cargo/config.toml") || rel_path.ends_with(".cargo/config") {

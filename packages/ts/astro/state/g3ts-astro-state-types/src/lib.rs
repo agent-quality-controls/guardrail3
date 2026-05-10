@@ -1,3 +1,4 @@
+/// Public type definitions for the Astro state surface contract.
 #[cfg(feature = "api")]
 mod types;
 

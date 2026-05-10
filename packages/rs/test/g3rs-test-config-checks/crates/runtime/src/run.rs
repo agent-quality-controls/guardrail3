@@ -1,6 +1,7 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsTestConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let mutation_active = input.mutants_exists

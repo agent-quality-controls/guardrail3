@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{error, info};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/description-present";
 
+/// `check` function.
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
     if !crate::support::crate_publishable(krate) {
         return;
@@ -44,7 +46,13 @@ pub(crate) fn run_check_with_workspace(
     let input =
         crate::test_support::config_input_for_publishable_crate(cargo_toml, workspace_cargo_toml);
     let mut results = Vec::new();
-    crate::description_present::check(&input.crate_checks[0], &mut results);
+    crate::description_present::check(
+        input
+            .crates
+            .first()
+            .expect("test fixture must include a crate"),
+        &mut results,
+    );
     results
 }
 

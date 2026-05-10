@@ -1,17 +1,24 @@
 use g3ts_astro_i18n_types::G3TsAstroI18nPolicySurfaceState;
 
+/// i18n policy `ESLint` rule names recognised by this aggregator.
 const POLICY_RULES: [&str; 1] = ["astro-i18n-policy/no-unlocalized-internal-hrefs"];
+/// Name of the `no-restricted-syntax` `ESLint` rule.
 const NO_RESTRICTED_SYNTAX: &str = "no-restricted-syntax";
 
+/// Map of plugin name to its derived package names, expressed as a `BTreeMap`.
+type PluginPackageMap = std::collections::BTreeMap<String, Vec<String>>;
+
+/// Returns plugins that are present in every probe's effective config.
 pub(crate) fn common_plugins(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, |probe| probe.plugins.clone())
 }
 
+/// Returns the per-plugin package names common to every probe.
 pub(crate) fn common_plugin_package_names(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
-) -> std::collections::BTreeMap<String, Vec<String>> {
+) -> PluginPackageMap {
     let Some(first) = probes.first() else {
         return std::collections::BTreeMap::new();
     };
@@ -44,12 +51,14 @@ pub(crate) fn common_plugin_package_names(
         .collect()
 }
 
+/// Returns rules that are configured as errors in every probe.
 pub(crate) fn common_error_rules(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, active_error_rules)
 }
 
+/// Returns i18n policy rules that all probes enforce with options matching the policy snapshot.
 pub(crate) fn common_effective_i18n_policy_rules(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
     astro_policy: &G3TsAstroI18nPolicySurfaceState,
@@ -62,25 +71,40 @@ pub(crate) fn common_effective_i18n_policy_rules(
         .into_iter()
         .filter(|rule| {
             !probes.is_empty()
-                && probes.iter().all(|probe| {
-                    probe.rules.get(*rule).is_some_and(|setting| {
-                        setting.severity == eslint_config_parser::types::EslintRuleSeverity::Error
-                            && setting.options.first().is_some_and(|options| {
-                                rule_options_match_policy(rule, options, snapshot)
-                            })
-                    })
-                })
+                && probes
+                    .iter()
+                    .all(|probe| probe_enforces_policy_rule(probe, rule, snapshot))
         })
         .map(str::to_owned)
         .collect()
 }
 
+/// Returns true when the probe enforces `rule` with options matching the policy snapshot.
+fn probe_enforces_policy_rule(
+    probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
+    rule: &str,
+    snapshot: &g3ts_astro_i18n_types::G3TsAstroI18nPolicySnapshot,
+) -> bool {
+    let Some(setting) = probe.rules.get(rule) else {
+        return false;
+    };
+    if setting.severity != eslint_config_parser::types::EslintRuleSeverity::Error {
+        return false;
+    }
+    setting
+        .options
+        .first()
+        .is_some_and(|options| rule_options_match_policy(rule, options, snapshot))
+}
+
+/// Returns selectors common to every probe's `no-restricted-syntax` rule.
 pub(crate) fn common_no_restricted_syntax_selectors(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, no_restricted_syntax_selectors)
 }
 
+/// Returns the union of selectors across all probes' `no-restricted-syntax` rule.
 pub(crate) fn union_no_restricted_syntax_selectors(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
@@ -92,12 +116,14 @@ pub(crate) fn union_no_restricted_syntax_selectors(
         .collect()
 }
 
+/// Returns disable patterns common to every probe's restricted disable rule.
 pub(crate) fn common_restricted_disable_patterns(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
 ) -> Vec<String> {
     common_values(probes, restricted_disable_patterns)
 }
 
+/// Returns the names of rules configured as errors in `probe`.
 fn active_error_rules(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -111,6 +137,7 @@ fn active_error_rules(
         .collect()
 }
 
+/// Returns the values present in every probe's projection produced by `extract`.
 fn common_values(
     probes: &[&eslint_config_parser::types::EslintEffectiveConfigProbe],
     extract: impl Fn(&eslint_config_parser::types::EslintEffectiveConfigProbe) -> Vec<String>,
@@ -130,6 +157,7 @@ fn common_values(
     common.into_iter().collect()
 }
 
+/// Returns true when the rule options match the i18n policy snapshot exactly.
 fn rule_options_match_policy(
     rule: &str,
     options: &serde_json::Value,
@@ -152,7 +180,11 @@ fn rule_options_match_policy(
 
             exact_option_keys_match(options, &expected_keys)
                 && string_array_option_matches(options, "locales", &policy.locales)
-                && optional_string_option_matches(options, "defaultLocale", &policy.default_locale)
+                && optional_string_option_matches(
+                    options,
+                    "defaultLocale",
+                    policy.default_locale.as_deref(),
+                )
                 && bool_option_matches(
                     options,
                     "requireLocalePrefixForContentRoutes",
@@ -188,6 +220,7 @@ fn rule_options_match_policy(
     }
 }
 
+/// Returns true when `options` is an object with exactly the expected key set.
 fn exact_option_keys_match(options: &serde_json::Value, expected: &[&str]) -> bool {
     let Some(object) = options.as_object() else {
         return false;
@@ -205,6 +238,7 @@ fn exact_option_keys_match(options: &serde_json::Value, expected: &[&str]) -> bo
     actual == expected
 }
 
+/// Returns true when `options.key` is a string array equal (as a set) to `expected`.
 fn string_array_option_matches(
     options: &serde_json::Value,
     key: &str,
@@ -226,6 +260,7 @@ fn string_array_option_matches(
     actual == expected
 }
 
+/// Returns the trimmed, deduplicated string set if all values are strings, else None.
 fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collections::BTreeSet<&str>> {
     values
         .iter()
@@ -238,23 +273,24 @@ fn normalized_string_set(values: &[serde_json::Value]) -> Option<std::collection
         .collect::<Option<std::collections::BTreeSet<_>>>()
 }
 
+/// Returns true when `options.key` matches `expected` (Some -> equal string, None -> missing/null).
 fn optional_string_option_matches(
     options: &serde_json::Value,
     key: &str,
-    expected: &Option<String>,
+    expected: Option<&str>,
 ) -> bool {
-    match expected {
-        Some(expected) => {
-            options.get(key).and_then(serde_json::Value::as_str) == Some(expected.as_str())
-        }
-        None => !options.get(key).is_some_and(|value| !value.is_null()),
-    }
+    expected.map_or_else(
+        || options.get(key).is_none_or(serde_json::Value::is_null),
+        |expected| options.get(key).and_then(serde_json::Value::as_str) == Some(expected),
+    )
 }
 
+/// Returns true when `options.key` is the boolean `expected`.
 fn bool_option_matches(options: &serde_json::Value, key: &str, expected: bool) -> bool {
     options.get(key).and_then(serde_json::Value::as_bool) == Some(expected)
 }
 
+/// Returns selectors from the `no-restricted-syntax` rule when configured as an error.
 fn no_restricted_syntax_selectors(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -274,6 +310,7 @@ fn no_restricted_syntax_selectors(
         .collect()
 }
 
+/// Returns disable patterns from the eslint-comments restricted-disable rule.
 fn restricted_disable_patterns(
     probe: &eslint_config_parser::types::EslintEffectiveConfigProbe,
 ) -> Vec<String> {
@@ -294,6 +331,7 @@ fn restricted_disable_patterns(
         .collect()
 }
 
+/// Returns disable patterns extracted from a single rule option (array or scalar).
 fn disable_patterns_from_option(option: &serde_json::Value) -> Vec<String> {
     if let Some(items) = option.as_array() {
         return items.iter().filter_map(disable_pattern).collect();
@@ -302,6 +340,7 @@ fn disable_patterns_from_option(option: &serde_json::Value) -> Vec<String> {
     disable_pattern(option).into_iter().collect()
 }
 
+/// Returns the disable pattern from a string value or recognised object shape.
 fn disable_pattern(value: &serde_json::Value) -> Option<String> {
     if let Some(pattern) = value.as_str() {
         return Some(pattern.to_owned());

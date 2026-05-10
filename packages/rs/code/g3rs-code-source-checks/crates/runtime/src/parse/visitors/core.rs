@@ -1,3 +1,12 @@
+#![allow(
+    clippy::wildcard_enum_match_arm,
+    clippy::match_wildcard_for_single_variants,
+    clippy::missing_docs_in_private_items,
+    clippy::arithmetic_side_effects,
+    clippy::type_complexity,
+    reason = "code-source-checks parse visitors walk every variant of upstream syntax-tree enums (syn::*); module-level allow lets the visitor stay aligned with upstream syn versions without churning the lint floor each upgrade"
+)]
+
 use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -8,6 +17,7 @@ use crate::parse::types::{
     StringDispatchInfo, TestExpectCallInfo, TraitMethodCountInfo,
 };
 
+/// Implements `find forbidden macros`.
 pub(crate) fn find_forbidden_macros(
     source: &syn::File,
     file_is_test_root: bool,
@@ -20,6 +30,7 @@ pub(crate) fn find_forbidden_macros(
     visitor.out
 }
 
+/// Implements `find test expect calls`.
 pub(crate) fn find_test_expect_calls(
     source: &syn::File,
     file_is_test_root: bool,
@@ -32,12 +43,14 @@ pub(crate) fn find_test_expect_calls(
     visitor.out
 }
 
+/// Implements `find generic parameter caps`.
 pub(crate) fn find_generic_parameter_caps(source: &syn::File) -> Vec<GenericParameterCapInfo> {
     let mut visitor = GenericParameterCapVisitor { out: Vec::new() };
     visitor.visit_file(source);
     visitor.out
 }
 
+/// Implements `find string dispatch sites`.
 pub(crate) fn find_string_dispatch_sites(
     source: &syn::File,
     file_is_test_root: bool,
@@ -45,49 +58,66 @@ pub(crate) fn find_string_dispatch_sites(
     super::string_dispatch::find_string_dispatch_sites(source, file_is_test_root)
 }
 
+/// Implements `find large type items`.
 pub(crate) fn find_large_type_items(source: &syn::File) -> Vec<LargeTypeFact> {
     let mut visitor = LargeTypeVisitor { out: Vec::new() };
     visitor.visit_file(source);
     visitor.out
 }
 
+/// Implements `find large traits`.
 pub(crate) fn find_large_traits(source: &syn::File) -> Vec<TraitMethodCountInfo> {
     let mut visitor = LargeTraitVisitor { out: Vec::new() };
     visitor.visit_file(source);
     visitor.out
 }
 
+/// Struct `ForbiddenMacroVisitor` used by this module.
 struct ForbiddenMacroVisitor {
+    /// Field `out`.
     out: Vec<ForbiddenMacroInfo>,
+    /// Field `in_test_context`.
     in_test_context: bool,
 }
 
+/// Struct `TestExpectVisitor` used by this module.
 struct TestExpectVisitor {
+    /// Field `out`.
     out: Vec<TestExpectCallInfo>,
+    /// Field `in_test_context`.
     in_test_context: bool,
 }
 
+/// Struct `GenericParameterCapVisitor` used by this module.
 struct GenericParameterCapVisitor {
+    /// Field `out`.
     out: Vec<GenericParameterCapInfo>,
 }
 
+/// Struct `LargeTypeVisitor` used by this module.
 struct LargeTypeVisitor {
+    /// Field `out`.
     out: Vec<LargeTypeFact>,
 }
 
+/// Struct `LargeTraitVisitor` used by this module.
 struct LargeTraitVisitor {
+    /// Field `out`.
     out: Vec<TraitMethodCountInfo>,
 }
 
 pub(super) trait TestContextAware {
+    /// Implements `in test context mut`.
     fn in_test_context_mut(&mut self) -> &mut bool;
 
+    /// Implements `save and apply test context`.
     fn save_and_apply_test_context(&mut self, attrs: &[syn::Attribute]) -> bool {
         let was = *self.in_test_context_mut();
         *self.in_test_context_mut() |= attrs_enter_test_context(attrs);
         was
     }
 
+    /// Implements `restore test context`.
     fn restore_test_context(&mut self, was: bool) {
         *self.in_test_context_mut() = was;
     }
@@ -151,6 +181,7 @@ impl<'source> Visit<'source> for ForbiddenMacroVisitor {
 }
 
 impl TestExpectVisitor {
+    /// Implements `push expect call`.
     fn push_expect_call(
         &mut self,
         line: usize,
@@ -164,6 +195,7 @@ impl TestExpectVisitor {
     }
 }
 
+/// Implements `extract expect message`.
 fn extract_expect_message(expr: &syn::Expr) -> Option<String> {
     match expr {
         syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
@@ -229,6 +261,7 @@ impl<'source> Visit<'source> for TestExpectVisitor {
 }
 
 impl GenericParameterCapVisitor {
+    /// Implements `push if over cap`.
     fn push_if_over_cap(
         &mut self,
         line: usize,

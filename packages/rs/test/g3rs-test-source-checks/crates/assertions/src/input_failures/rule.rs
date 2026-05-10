@@ -1,3 +1,11 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "structural assertion helper code where lint conflicts with verification surface"
+)]
+#![expect(
+    clippy::must_use_candidate,
+    reason = "structural assertion helper code where lint conflicts with verification surface"
+)]
 use g3rs_test_types::G3RsTestSourceChecksInput;
 use g3rs_test_types::G3RsTestSourceInputFailure;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -20,6 +28,11 @@ pub fn check(rel_path: &str, message: &str) -> Vec<G3CheckResult> {
     })
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_result(
     results: &[G3CheckResult],
     rule_id: &str,
@@ -38,6 +51,11 @@ pub fn assert_has_result(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_message_contains(results: &[G3CheckResult], needle: &str) {
     assert_eq!(results.len(), 1, "{results:#?}");
     assert!(

@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{info, root_rel_path};
 
+/// `ID` constant.
 const ID: &str = "g3ts-package/root-exists";
 
+/// `check`: check.
 pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckResult>) {
     if matches!(
         input.root,

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    reason = "fail_open.rs holds shell-script suffix detectors that share one centralized contract documented at the module level"
+)]
+
 use crate::shell_ast;
 use crate::types::FailOpenWrapper;
 

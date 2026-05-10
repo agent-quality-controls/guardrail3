@@ -16,9 +16,9 @@ pub struct Cli {
 /// Supported CLI subcommands.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Command {
-    /// Validates one workspace root against the selected families.
+    /// Validates one TypeScript package root against the selected families.
     Validate {
-        /// Workspace root to validate.
+        /// Package root to validate.
         #[arg(long = "path")]
         path: PathBuf,
         /// Optional family filter.
@@ -27,6 +27,19 @@ pub enum Command {
         /// Includes inventory findings in the rendered output.
         #[arg(long = "inventory", default_value_t = false)]
         inventory: bool,
+        /// Filters toolchain gates by staged files.
+        #[arg(long = "staged", default_value_t = false)]
+        staged: bool,
+        /// Skips toolchain gates and runs only the static rule families.
+        #[arg(long = "rules-only", default_value_t = false)]
+        rules_only: bool,
+    },
+    /// Validates repository-level invariants (hooks, tools, topology, marker pairs).
+    #[command(name = "validate-repo")]
+    ValidateRepo {
+        /// Optional repo root override; defaults to git rev-parse --show-toplevel.
+        #[arg(long = "path")]
+        path: Option<PathBuf>,
     },
 }
 
@@ -53,14 +66,15 @@ pub enum FamilyArg {
     Spelling,
     Typecov,
     Hooks,
+    Topology,
 }
 
 impl FamilyArg {
     #[must_use]
     pub fn expand(self) -> Vec<SupportedFamily> {
         match self {
-            FamilyArg::Eslint => vec![SupportedFamily::Eslint],
-            FamilyArg::Astro => vec![
+            Self::Eslint => vec![SupportedFamily::Eslint],
+            Self::Astro => vec![
                 SupportedFamily::AstroSetup,
                 SupportedFamily::AstroContent,
                 SupportedFamily::AstroMdx,
@@ -69,24 +83,25 @@ impl FamilyArg {
                 SupportedFamily::AstroSeo,
                 SupportedFamily::AstroState,
             ],
-            FamilyArg::AstroSetup => vec![SupportedFamily::AstroSetup],
-            FamilyArg::AstroContent => vec![SupportedFamily::AstroContent],
-            FamilyArg::AstroMdx => vec![SupportedFamily::AstroMdx],
-            FamilyArg::AstroI18n => vec![SupportedFamily::AstroI18n],
-            FamilyArg::AstroMedia => vec![SupportedFamily::AstroMedia],
-            FamilyArg::AstroSeo => vec![SupportedFamily::AstroSeo],
-            FamilyArg::AstroState => vec![SupportedFamily::AstroState],
-            FamilyArg::Arch => vec![SupportedFamily::Arch],
-            FamilyArg::Apparch => vec![SupportedFamily::Apparch],
-            FamilyArg::Tsconfig => vec![SupportedFamily::Tsconfig],
-            FamilyArg::Package => vec![SupportedFamily::Package],
-            FamilyArg::Npmrc => vec![SupportedFamily::Npmrc],
-            FamilyArg::Jscpd => vec![SupportedFamily::Jscpd],
-            FamilyArg::Style => vec![SupportedFamily::Style],
-            FamilyArg::Fmt => vec![SupportedFamily::Fmt],
-            FamilyArg::Spelling => vec![SupportedFamily::Spelling],
-            FamilyArg::Typecov => vec![SupportedFamily::Typecov],
-            FamilyArg::Hooks => vec![SupportedFamily::Hooks],
+            Self::AstroSetup => vec![SupportedFamily::AstroSetup],
+            Self::AstroContent => vec![SupportedFamily::AstroContent],
+            Self::AstroMdx => vec![SupportedFamily::AstroMdx],
+            Self::AstroI18n => vec![SupportedFamily::AstroI18n],
+            Self::AstroMedia => vec![SupportedFamily::AstroMedia],
+            Self::AstroSeo => vec![SupportedFamily::AstroSeo],
+            Self::AstroState => vec![SupportedFamily::AstroState],
+            Self::Arch => vec![SupportedFamily::Arch],
+            Self::Apparch => vec![SupportedFamily::Apparch],
+            Self::Tsconfig => vec![SupportedFamily::Tsconfig],
+            Self::Package => vec![SupportedFamily::Package],
+            Self::Npmrc => vec![SupportedFamily::Npmrc],
+            Self::Jscpd => vec![SupportedFamily::Jscpd],
+            Self::Style => vec![SupportedFamily::Style],
+            Self::Fmt => vec![SupportedFamily::Fmt],
+            Self::Spelling => vec![SupportedFamily::Spelling],
+            Self::Typecov => vec![SupportedFamily::Typecov],
+            Self::Hooks => vec![SupportedFamily::Hooks],
+            Self::Topology => vec![SupportedFamily::Topology],
         }
     }
 }

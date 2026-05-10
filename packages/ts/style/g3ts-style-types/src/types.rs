@@ -98,11 +98,22 @@ pub enum G3TsStylelintConfigSurfaceState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Snapshot mirrors the discrete ESLint-config surface flags consumed by style \
+              checks; each boolean models a separately observable rule state that must remain \
+              independently inspectable"
+)]
 pub struct G3TsStyleEslintSurfaceSnapshot {
     pub rel_path: String,
     pub source_probe_present: bool,
     pub source_probe_ignored: bool,
     pub source_plugins: Vec<String>,
+    #[expect(
+        clippy::type_complexity,
+        reason = "BTreeMap<String, Vec<String>> models package-name -> rule-list lookups; \
+                  introducing a named alias here would not add clarity beyond the field name"
+    )]
     pub source_plugin_package_names: BTreeMap<String, Vec<String>>,
     pub style_policy_plugin_effective: bool,
     pub style_policy_rule_effective: bool,

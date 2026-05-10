@@ -1,0 +1,47 @@
+[[ignore]]
+fingerprint = "1f0e2f71170b1d71"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "4bc3bf479f61dc5d"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "66b9619e61bf2691"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "7cb0be80f1c3016f"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "a880ff694dfc5624"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "65fa64d23760079e"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "064ece7647f70582"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "099d15d86d555c81"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "24fe382387e8b371"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "87bde2301741c457"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "c5f431f842bf919e"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"
+
+[[ignore]]
+fingerprint = "fb598818799dc6cc"
+reason = "test fixtures and per-rule assertion helpers share the same input-construction and predicate shape; each variant proves a different rule path"

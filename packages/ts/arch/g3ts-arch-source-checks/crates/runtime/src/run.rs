@@ -1,6 +1,7 @@
 use g3ts_arch_types::G3TsArchSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3TsArchSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::facade_parseable::check(input, &mut results);

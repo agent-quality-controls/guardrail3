@@ -20,9 +20,11 @@ pub(crate) fn check(
         .filter(|target| {
             matches!(
                 target.layer,
-                Some(G3RsApparchLayer::Logic)
-                    | Some(G3RsApparchLayer::IoInbound)
-                    | Some(G3RsApparchLayer::IoOutbound)
+                Some(
+                    G3RsApparchLayer::Logic
+                        | G3RsApparchLayer::IoInbound
+                        | G3RsApparchLayer::IoOutbound
+                )
             ) && !crate::run::is_package_internal_assertions_to_runtime_edge(krate, target)
         })
         .collect::<Vec<_>>();

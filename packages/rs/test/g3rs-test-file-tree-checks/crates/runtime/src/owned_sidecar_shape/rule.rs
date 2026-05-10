@@ -1,3 +1,11 @@
+#![expect(
+    clippy::excessive_nesting,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use g3rs_test_types::G3RsTestComponentFileTreeFacts;
@@ -6,20 +14,27 @@ use g3rs_test_types::G3RsTestFileTreeChecksInput;
 use g3rs_test_types::ast::CfgTestModuleInfo;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/owned-sidecar-shape";
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
+/// `SidecarViolation` struct.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct SidecarViolation {
+    /// `rel_path` item.
     rel_path: String,
+    /// `line` item.
     line: Option<usize>,
+    /// `title` item.
     title: String,
+    /// `message` item.
     message: String,
 }
 
+/// `collect` function.
 pub(crate) fn collect(input: &G3RsTestFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     let violations = collect_violations(input);
     if violations.is_empty() {
@@ -52,6 +67,7 @@ pub(crate) fn collect(input: &G3RsTestFileTreeChecksInput, results: &mut Vec<G3C
     }
 }
 
+/// `collect_violations` function.
 fn collect_violations(input: &G3RsTestFileTreeChecksInput) -> Vec<SidecarViolation> {
     let prebound_sidecar_mod_paths = input
         .components
@@ -125,6 +141,7 @@ fn collect_violations(input: &G3RsTestFileTreeChecksInput) -> Vec<SidecarViolati
     violations
 }
 
+/// `collect_ad_hoc_src_tests_tree_violations` function.
 fn collect_ad_hoc_src_tests_tree_violations(
     input: &G3RsTestFileTreeChecksInput,
     violations: &mut Vec<SidecarViolation>,
@@ -177,6 +194,7 @@ fn collect_ad_hoc_src_tests_tree_violations(
     }
 }
 
+/// `collect_component_sidecar_violations` function.
 fn collect_component_sidecar_violations(
     component: &G3RsTestComponentFileTreeFacts,
     violations: &mut Vec<SidecarViolation>,
@@ -249,6 +267,7 @@ fn collect_component_sidecar_violations(
     }
 }
 
+/// `owned_sidecar_owner_rel_path` function.
 fn owned_sidecar_owner_rel_path(src_root: &str, rel_after_src: &str) -> Option<String> {
     let dir_name = rel_after_src.rsplit('/').next()?;
     let owner_module_name = dir_name.strip_suffix("_tests")?;
@@ -265,12 +284,14 @@ fn owned_sidecar_owner_rel_path(src_root: &str, rel_after_src: &str) -> Option<S
     }
 }
 
+/// `is_flat_test_sidecar` function.
 fn is_flat_test_sidecar(rel_path: &str) -> bool {
     rel_path.ends_with("_tests.rs")
         || rel_path.ends_with("_test.rs")
         || rel_path.ends_with("/tests.rs")
 }
 
+/// `cfg_test_decl_is_owned_sidecar` function.
 fn cfg_test_decl_is_owned_sidecar(
     file_rel_path: &str,
     module: &CfgTestModuleInfo,
@@ -296,6 +317,7 @@ fn cfg_test_decl_is_owned_sidecar(
     module.path_attr.as_deref() == Some(expected_path_attr.as_str())
 }
 
+/// `owned_sidecar_contract` function.
 fn owned_sidecar_contract(file_rel_path: &str) -> Option<(String, String)> {
     let file_name = file_rel_path.rsplit('/').next()?;
     let stem = file_name.strip_suffix(".rs")?;
@@ -306,6 +328,7 @@ fn owned_sidecar_contract(file_rel_path: &str) -> Option<(String, String)> {
     Some((module_name.clone(), format!("{module_name}/mod.rs")))
 }
 
+/// `join_under_root` function.
 fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
     if root_rel_dir.is_empty() {
         child_rel.to_owned()
@@ -314,10 +337,12 @@ fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
     }
 }
 
+/// `parent_dir` function.
 fn parent_dir(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
 }
 
+/// `path_is_under` function.
 fn path_is_under(rel_path: &str, prefix: &str) -> bool {
     rel_path == prefix
         || rel_path

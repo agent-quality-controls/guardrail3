@@ -1,8 +1,10 @@
 use g3rs_clippy_types::G3RsClippyFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/coverage-exists";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     match input.preferred_root_config_rel_path.as_deref() {
         Some(rel_path) => results.push(

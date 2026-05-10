@@ -1,0 +1,43 @@
+[[ignore]]
+fingerprint = "10b9540ab5cb6434"
+reason = "Parallel rel-path getters per surface kind; intentional to keep getter shape identical across the file family"
+
+[[ignore]]
+fingerprint = "46eb5d360a0120c2"
+reason = "Parallel parsed_*_mut fixture-builder accessors for distinct surface kinds"
+
+[[ignore]]
+fingerprint = "5a442887ad6a9152"
+reason = "Parallel parsed_* match-extractors for distinct surface kinds"
+
+[[ignore]]
+fingerprint = "9cdc5e6ab9988046"
+reason = "Parallel test cases for distinct invalid-policy-path scenarios"
+
+[[ignore]]
+fingerprint = "67494cb2c360a615"
+reason = "Parallel error() helpers per check file; each is local to its module"
+
+[[ignore]]
+fingerprint = "7f31bbb88d232510"
+reason = "Parallel test cases for distinct invalid-policy-path scenarios"
+
+[[ignore]]
+fingerprint = "c58d630441e4a4ed"
+reason = "Parallel info() helpers per check file; each is local to its module"
+
+[[ignore]]
+fingerprint = "3fa61a03a3f19c02"
+reason = "Parallel test cases for distinct rule scenarios sharing fixture/assert structure"
+
+[[ignore]]
+fingerprint = "a94637b881ac5476"
+reason = "Parallel test cases for distinct empty-glob scenarios"
+
+[[ignore]]
+fingerprint = "b9bcfb2321aa9ba9"
+reason = "Parallel closures over distinct rule-name strings"
+
+[[ignore]]
+fingerprint = "e05fe7beb31feb2a"
+reason = "Parallel test cases for distinct missing-plugin/missing-pin scenarios"

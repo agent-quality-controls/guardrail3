@@ -5,8 +5,10 @@ use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{QueryAsMacroSite, error, warn};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-garde/query-as-inventory";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResult>) {
     if !macro_use.policy_resolved {
         return;
@@ -48,13 +50,15 @@ pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResul
     }
 }
 
+/// Implements `check count`.
 pub(crate) fn check_count(macro_uses: &[QueryAsMacroSite], results: &mut Vec<G3CheckResult>) {
     let mut counts = BTreeMap::<String, usize>::new();
     for macro_use in macro_uses {
         if !macro_use.policy_resolved {
             continue;
         }
-        *counts.entry(macro_use.rel_path.clone()).or_default() += 1;
+        let entry = counts.entry(macro_use.rel_path.clone()).or_default();
+        *entry = entry.saturating_add(1);
     }
 
     for (rel_path, count) in counts {

@@ -1,5 +1,11 @@
+#![allow(
+    clippy::missing_panics_doc,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
+)]
+
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier emitted by `io-traits-in-types`.
 const ID: &str = "g3rs-apparch/io-traits-in-types";
 
 pub fn assert_trait_violation(results: &[G3CheckResult], source_file: &str) {

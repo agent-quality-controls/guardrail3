@@ -5,13 +5,15 @@ use cargo_toml_parser_types::document::{
 };
 use toml::Value;
 
+#[must_use]
 pub fn typed(document: &CargoTomlDocument) -> Option<&CargoToml> {
     match &document.typed {
-        CargoTomlParseState::Parsed(cargo) => Some(cargo),
+        CargoTomlParseState::Parsed(cargo) => Some(cargo.as_ref()),
         CargoTomlParseState::Invalid(_) => None,
     }
 }
 
+#[must_use]
 pub fn parse_error_reason(document: &CargoTomlDocument) -> Option<&str> {
     match &document.typed {
         CargoTomlParseState::Parsed(_) => None,
@@ -19,6 +21,7 @@ pub fn parse_error_reason(document: &CargoTomlDocument) -> Option<&str> {
     }
 }
 
+#[must_use]
 pub fn kind(document: &CargoTomlDocument) -> CargoTomlDocumentKind {
     if document.raw.get("workspace").is_some() {
         CargoTomlDocumentKind::WorkspaceRoot
@@ -37,6 +40,7 @@ pub fn package_name(document: &CargoTomlDocument) -> Option<&str> {
         .and_then(Value::as_str)
 }
 
+#[must_use]
 pub fn root_package_string_field<'a>(
     document: &'a CargoTomlDocument,
     field: &str,
@@ -49,16 +53,17 @@ pub fn root_package_string_field<'a>(
                 .and_then(|value| value.get("package")),
             field,
         );
-        if !matches!(workspace_package, CargoStringFieldState::Missing) {
-            workspace_package
-        } else {
+        if matches!(workspace_package, CargoStringFieldState::Missing) {
             package_string_field(document, field)
+        } else {
+            workspace_package
         }
     } else {
         package_string_field(document, field)
     }
 }
 
+#[must_use]
 pub fn package_string_field<'a>(
     document: &'a CargoTomlDocument,
     field: &str,
@@ -66,20 +71,21 @@ pub fn package_string_field<'a>(
     string_field(document.raw.get("package"), field)
 }
 
+#[must_use]
 pub fn lints_workspace_state(document: &CargoTomlDocument) -> CargoBoolFieldState<'_> {
-    match document
+    document
         .raw
         .get("lints")
         .and_then(|value| value.get("workspace"))
-    {
-        None => CargoBoolFieldState::Missing,
-        Some(value) => match value.as_bool() {
-            Some(flag) => CargoBoolFieldState::Value(flag),
-            None => CargoBoolFieldState::WrongType(value),
-        },
-    }
+        .map_or(CargoBoolFieldState::Missing, |value| {
+            value.as_bool().map_or(
+                CargoBoolFieldState::WrongType(value),
+                CargoBoolFieldState::Value,
+            )
+        })
 }
 
+#[must_use]
 pub fn policy_lints<'a>(document: &'a CargoTomlDocument, family: &str) -> Option<&'a ToolLints> {
     let cargo = typed(document)?;
     match kind(document) {
@@ -102,6 +108,7 @@ pub fn policy_lints<'a>(document: &'a CargoTomlDocument, family: &str) -> Option
     }
 }
 
+#[must_use]
 pub fn policy_lints_state<'a>(
     document: &'a CargoTomlDocument,
     family: &str,
@@ -118,6 +125,7 @@ pub fn policy_lints_state<'a>(
     lint_table_state(raw_lints, family, policy_lints(document, family))
 }
 
+#[must_use]
 pub fn member_lints<'a>(document: &'a CargoTomlDocument, family: &str) -> Option<&'a ToolLints> {
     typed(document)?
         .lints
@@ -125,6 +133,7 @@ pub fn member_lints<'a>(document: &'a CargoTomlDocument, family: &str) -> Option
         .and_then(|lints| lints.tools.get(family))
 }
 
+#[must_use]
 pub fn member_lints_state<'a>(
     document: &'a CargoTomlDocument,
     family: &str,
@@ -136,14 +145,17 @@ pub fn member_lints_state<'a>(
     )
 }
 
+#[must_use]
 pub fn policy_allow_entries(document: &CargoTomlDocument, family: &str) -> Vec<String> {
     explicit_allow_entries(policy_lints(document, family))
 }
 
+#[must_use]
 pub fn member_allow_entries(document: &CargoTomlDocument, family: &str) -> Vec<String> {
     explicit_allow_entries(member_lints(document, family))
 }
 
+#[must_use]
 pub fn policy_lint_level<'a>(
     document: &'a CargoTomlDocument,
     family: &str,
@@ -152,6 +164,7 @@ pub fn policy_lint_level<'a>(
     lint_level(policy_lints(document, family)?.get(name))
 }
 
+#[must_use]
 pub fn member_lint_level<'a>(
     document: &'a CargoTomlDocument,
     family: &str,
@@ -160,6 +173,7 @@ pub fn member_lint_level<'a>(
     lint_level(member_lints(document, family)?.get(name))
 }
 
+/// Resolves a single `[package].field` (or workspace inherit form) into the typed `CargoStringFieldState`.
 fn string_field<'a>(table: Option<&'a Value>, field: &str) -> CargoStringFieldState<'a> {
     let Some(value) = table.and_then(|table| table.get(field)) else {
         return CargoStringFieldState::Missing;
@@ -173,24 +187,30 @@ fn string_field<'a>(table: Option<&'a Value>, field: &str) -> CargoStringFieldSt
         {
             CargoStringFieldState::Inherit
         }
-        _ => CargoStringFieldState::WrongType(value),
+        Value::Integer(_)
+        | Value::Float(_)
+        | Value::Boolean(_)
+        | Value::Datetime(_)
+        | Value::Array(_)
+        | Value::Table(_) => CargoStringFieldState::WrongType(value),
     }
 }
 
+/// Returns sorted lint names whose level resolves to `"allow"` in the given `ToolLints` block.
 fn explicit_allow_entries(lints: Option<&ToolLints>) -> Vec<String> {
     let Some(lints) = lints else {
         return Vec::new();
     };
     let mut entries = lints
         .iter()
-        .filter_map(|(name, value)| {
-            (lint_level(Some(value)) == Some("allow")).then(|| name.clone())
-        })
+        .filter(|&(_name, value)| lint_level(Some(value)) == Some("allow"))
+        .map(|(name, _value)| name.clone())
         .collect::<Vec<_>>();
     entries.sort();
     entries
 }
 
+/// Combines raw and typed lint-table views into a single `CargoLintTableState`.
 fn lint_table_state<'a>(
     raw_lints: Option<&'a Value>,
     family: &str,
@@ -211,7 +231,8 @@ fn lint_table_state<'a>(
     CargoLintTableState::WrongType(raw_family_value)
 }
 
-fn lint_level<'a>(value: Option<&'a LintValue>) -> Option<&'a str> {
+/// Extracts the lint level string from a `LintValue` regardless of compact or detailed form.
+fn lint_level(value: Option<&LintValue>) -> Option<&str> {
     match value? {
         LintValue::Level(level) => Some(level.as_str()),
         LintValue::Detailed(detail) => Some(detail.level.as_str()),

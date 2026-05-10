@@ -15,7 +15,7 @@ pub use crate::run_config::{
     assert_workspace_unsafe_code_detailed_level, assert_workspace_unsafe_code_level,
     require_config_file,
 };
-pub use crate::run_file_tree::{assert_root_cargo_paths, assert_single_zero_structural_root};
+pub use crate::run_file_tree::assert_root_cargo_paths;
 pub use crate::run_pipeline::{
     assert_pipeline_classifies_custom_target_paths_before_checks_run,
     assert_pipeline_emits_explicit_input_failure_for_parse_error,

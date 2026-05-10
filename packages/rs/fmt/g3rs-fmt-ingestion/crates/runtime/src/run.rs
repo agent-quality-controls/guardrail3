@@ -9,12 +9,16 @@ use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 /// Re-export of `G3RsFmtIngestionError` so the facade can reach it.
 pub use g3rs_fmt_ingestion_types::G3RsFmtIngestionError as IngestionError;
 
+/// Implements this item.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
 pub fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsFmtConfigChecksInput, IngestionError> {
     let rustfmt_entry = crate::select::select_active_rustfmt_config(crawl)
         .ok_or(IngestionError::RustfmtTomlNotFound)?;
-    let (rustfmt_state, rustfmt_explicit_keys) = ingest_rustfmt_state(rustfmt_entry)?;
+    let (rustfmt_state, rustfmt_explicit_keys) = ingest_rustfmt_state(rustfmt_entry);
 
     Ok(G3RsFmtConfigChecksInput {
         rustfmt_rel_path: rustfmt_entry.path.rel_path.clone(),
@@ -28,42 +32,57 @@ pub fn ingest_for_config_checks(
     })
 }
 
-pub fn ingest_for_source_checks(
+/// Implements this item.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
+pub const fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsFmtSourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
-pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Result<G3RsFmtFileTreeChecksInput, IngestionError> {
-    Ok(G3RsFmtFileTreeChecksInput {
+/// Implements this item.
+#[must_use]
+pub fn ingest_for_file_tree_checks(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtFileTreeChecksInput {
+    G3RsFmtFileTreeChecksInput {
         root_rustfmt_toml_rel_path: crate::select::select_root_rustfmt_toml(crawl)
             .map(|entry| entry.path.rel_path.clone()),
         root_dot_rustfmt_toml_rel_path: crate::select::select_root_dot_rustfmt_toml(crawl)
             .map(|entry| entry.path.rel_path.clone()),
         nested_config_files: crate::select::collect_nested_config_files(crawl),
         dual_conflict_dirs: crate::select::collect_dual_conflict_dirs(crawl),
-    })
+    }
 }
 
-fn ingest_rustfmt_state(
-    entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
-) -> Result<(G3RsFmtRustfmtConfigState, Vec<String>), IngestionError> {
+/// Typed view of a parsed `rustfmt.toml` paired with the names of explicit top-level keys.
+type RustfmtIngestion = (G3RsFmtRustfmtConfigState, Vec<String>);
+
+/// Implements `ingest rustfmt state`.
+fn ingest_rustfmt_state(entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry) -> RustfmtIngestion {
     if !entry.readable {
-        return Ok((G3RsFmtRustfmtConfigState::Unreadable, Vec::new()));
+        return (G3RsFmtRustfmtConfigState::Unreadable, Vec::new());
     }
     match crate::parse::parse_rustfmt_toml(&entry.path.abs_path) {
-        Ok((rustfmt, explicit_keys)) => {
-            Ok((G3RsFmtRustfmtConfigState::Parsed(rustfmt), explicit_keys))
-        }
+        Ok((rustfmt, explicit_keys)) => (
+            G3RsFmtRustfmtConfigState::Parsed(Box::new(rustfmt)),
+            explicit_keys,
+        ),
         Err(IngestionError::Unreadable { .. }) => {
-            Ok((G3RsFmtRustfmtConfigState::Unreadable, Vec::new()))
+            (G3RsFmtRustfmtConfigState::Unreadable, Vec::new())
         }
-        Err(_) => Ok((G3RsFmtRustfmtConfigState::ParseError, Vec::new())),
+        Err(
+            IngestionError::ParseFailed { .. }
+            | IngestionError::RustfmtTomlNotFound
+            | IngestionError::CargoTomlNotFound
+            | IngestionError::ToolchainTomlNotFound
+            | IngestionError::SourceIngestionNotImplemented
+            | IngestionError::FileTreeIngestionNotImplemented,
+        ) => (G3RsFmtRustfmtConfigState::ParseError, Vec::new()),
     }
 }
 
+/// Implements `ingest cargo state`.
 fn ingest_cargo_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtCargoState {
     let Some(entry) = crate::select::select_cargo_toml(crawl) else {
         return G3RsFmtCargoState::Missing;
@@ -72,13 +91,20 @@ fn ingest_cargo_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtCargoState {
         return G3RsFmtCargoState::Unreadable;
     }
     match crate::parse::parse_cargo_toml(&entry.path.abs_path) {
-        Ok(cargo) => G3RsFmtCargoState::Parsed(cargo),
-        Err(IngestionError::ParseFailed { .. }) => G3RsFmtCargoState::ParseError,
+        Ok(cargo) => G3RsFmtCargoState::Parsed(Box::new(cargo)),
         Err(IngestionError::Unreadable { .. }) => G3RsFmtCargoState::Unreadable,
-        Err(_) => G3RsFmtCargoState::ParseError,
+        Err(
+            IngestionError::ParseFailed { .. }
+            | IngestionError::RustfmtTomlNotFound
+            | IngestionError::CargoTomlNotFound
+            | IngestionError::ToolchainTomlNotFound
+            | IngestionError::SourceIngestionNotImplemented
+            | IngestionError::FileTreeIngestionNotImplemented,
+        ) => G3RsFmtCargoState::ParseError,
     }
 }
 
+/// Implements `ingest toolchain state`.
 fn ingest_toolchain_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtToolchainState {
     let Some(entry) = crate::select::select_toolchain_toml(crawl) else {
         return G3RsFmtToolchainState::Missing;
@@ -87,13 +113,20 @@ fn ingest_toolchain_state(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtToolchainState {
         return G3RsFmtToolchainState::Unreadable;
     }
     match crate::parse::parse_toolchain_toml(&entry.path.abs_path) {
-        Ok(toolchain) => G3RsFmtToolchainState::Parsed(toolchain),
-        Err(IngestionError::ParseFailed { .. }) => G3RsFmtToolchainState::ParseError,
+        Ok(toolchain) => G3RsFmtToolchainState::Parsed(Box::new(toolchain)),
         Err(IngestionError::Unreadable { .. }) => G3RsFmtToolchainState::Unreadable,
-        Err(_) => G3RsFmtToolchainState::ParseError,
+        Err(
+            IngestionError::ParseFailed { .. }
+            | IngestionError::RustfmtTomlNotFound
+            | IngestionError::CargoTomlNotFound
+            | IngestionError::ToolchainTomlNotFound
+            | IngestionError::SourceIngestionNotImplemented
+            | IngestionError::FileTreeIngestionNotImplemented,
+        ) => G3RsFmtToolchainState::ParseError,
     }
 }
 
+/// Implements `ingest rust policy`.
 fn ingest_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsFmtRustPolicyState {
     let Some(entry) = crate::select::select_rust_policy_toml(crawl) else {
         return G3RsFmtRustPolicyState::Missing;

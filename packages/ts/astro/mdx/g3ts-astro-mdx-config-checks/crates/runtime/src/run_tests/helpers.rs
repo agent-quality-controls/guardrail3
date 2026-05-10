@@ -7,6 +7,44 @@ use g3ts_astro_mdx_types::{
 };
 use std::collections::BTreeMap;
 
+/// Returns a mutable reference to the parsed eslint snapshot of the first eslint contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first eslint contract must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn eslint_snapshot_mut(
+    input: &mut G3TsAstroMdxConfigChecksInput,
+) -> &mut G3TsAstroMdxEslintSurfaceSnapshot {
+    let config = &mut input.eslint_contracts[0].config;
+    let G3TsAstroMdxEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden mdx eslint config should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed package snapshot of the first integration contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first integration contract package must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn package_snapshot_mut(
+    input: &mut G3TsAstroMdxConfigChecksInput,
+) -> &mut G3TsAstroPackageSurfaceSnapshot {
+    let package = &mut input.integration_contracts[0].package;
+    let G3TsAstroPackageSurfaceState::Parsed { snapshot } = package else {
+        panic!("golden mdx package should be parsed");
+    };
+    snapshot
+}
+
 pub(super) fn golden() -> G3TsAstroMdxConfigChecksInput {
     G3TsAstroMdxConfigChecksInput {
         integration_contracts: vec![G3TsAstroMdxIntegrationContractInput {
@@ -55,91 +93,121 @@ fn astro_policy() -> G3TsAstroMdxPolicySurfaceState {
 
 fn eslint_config() -> G3TsAstroMdxEslintSurfaceState {
     G3TsAstroMdxEslintSurfaceState::Parsed {
-        snapshot: G3TsAstroMdxEslintSurfaceSnapshot {
-            rel_path: "eslint.config.mjs".to_owned(),
-            mdx_content_probe_present: true,
-            mdx_content_plugins: vec![
-                "mdx".to_owned(),
-                "@eslint-community/eslint-comments".to_owned(),
-            ],
-            mdx_content_plugin_package_names: BTreeMap::from([
-                ("mdx".to_owned(), vec!["eslint-plugin-mdx".to_owned()]),
-                (
-                    "@eslint-community/eslint-comments".to_owned(),
-                    vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
-                ),
-            ]),
-            mdx_content_error_rules: vec![
-                "mdx/remark".to_owned(),
-                "@eslint-community/eslint-comments/require-description".to_owned(),
-                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
-            ],
-            mdx_content_warn_or_error_rules: vec![
-                "mdx/remark".to_owned(),
-                "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
-                "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
-                "astro-pipeline/no-raw-mdx-images".to_owned(),
-                "@eslint-community/eslint-comments/require-description".to_owned(),
-                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
-                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
-            ],
-            mdx_content_restricted_disable_patterns: vec![
-                "mdx/remark".to_owned(),
-                "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
-                "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
-                "astro-pipeline/no-raw-mdx-images".to_owned(),
-            ],
-            mdx_content_unused_disable_fail_closed: true,
-            mdx_content_effective_mdx_component_map_rules: vec![
-                "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
-            ],
-            mdx_content_effective_named_component_import_rules: vec![
-                "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
-            ],
-            mdx_content_effective_no_raw_image_rules: vec![
-                "astro-pipeline/no-raw-mdx-images".to_owned(),
-            ],
-            component_map_probe_present: true,
-            component_map_plugins: vec![
-                "astro-pipeline".to_owned(),
-                "@eslint-community/eslint-comments".to_owned(),
-            ],
-            component_map_plugin_package_names: BTreeMap::from([
-                (
-                    "astro-pipeline".to_owned(),
-                    vec!["g3ts-eslint-plugin-astro-pipeline".to_owned()],
-                ),
-                (
-                    "@eslint-community/eslint-comments".to_owned(),
-                    vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
-                ),
-            ]),
-            component_map_error_rules: vec![
-                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
-                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
-                "@eslint-community/eslint-comments/require-description".to_owned(),
-                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
-            ],
-            component_map_warn_or_error_rules: vec![
-                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
-                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
-                "@eslint-community/eslint-comments/require-description".to_owned(),
-                "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
-                "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
-            ],
-            component_map_restricted_disable_patterns: vec![
-                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
-                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
-            ],
-            component_map_unused_disable_fail_closed: true,
-            component_map_effective_no_raw_ui_export_rules: vec![
-                "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
-            ],
-            component_map_effective_wrapper_zod_parse_rules: vec![
-                "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
-            ],
-            component_map_probe_ignored: false,
-            mdx_content_probe_ignored: false,
-        },
+        snapshot: eslint_snapshot(),
     }
+}
+
+fn eslint_snapshot() -> G3TsAstroMdxEslintSurfaceSnapshot {
+    G3TsAstroMdxEslintSurfaceSnapshot {
+        rel_path: "eslint.config.mjs".to_owned(),
+        mdx_content_probe_present: true,
+        mdx_content_plugins: vec![
+            "mdx".to_owned(),
+            "@eslint-community/eslint-comments".to_owned(),
+        ],
+        mdx_content_plugin_package_names: mdx_content_plugin_package_names(),
+        mdx_content_error_rules: vec![
+            "mdx/remark".to_owned(),
+            "@eslint-community/eslint-comments/require-description".to_owned(),
+            "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+        ],
+        mdx_content_warn_or_error_rules: mdx_content_warn_or_error_rules(),
+        mdx_content_restricted_disable_patterns: mdx_content_restricted_disable_patterns(),
+        mdx_content_unused_disable_fail_closed: true,
+        mdx_content_effective_mdx_component_map_rules: vec![
+            "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
+        ],
+        mdx_content_effective_named_component_import_rules: vec![
+            "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
+        ],
+        mdx_content_effective_no_raw_image_rules: vec![
+            "astro-pipeline/no-raw-mdx-images".to_owned(),
+        ],
+        component_map_probe_present: true,
+        component_map_plugins: vec![
+            "astro-pipeline".to_owned(),
+            "@eslint-community/eslint-comments".to_owned(),
+        ],
+        component_map_plugin_package_names: component_map_plugin_package_names(),
+        component_map_error_rules: component_map_error_rules(),
+        component_map_warn_or_error_rules: component_map_warn_or_error_rules(),
+        component_map_restricted_disable_patterns: vec![
+            "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+            "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+        ],
+        component_map_unused_disable_fail_closed: true,
+        component_map_effective_no_raw_ui_export_rules: vec![
+            "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+        ],
+        component_map_effective_wrapper_zod_parse_rules: vec![
+            "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+        ],
+        component_map_probe_ignored: false,
+        mdx_content_probe_ignored: false,
+    }
+}
+
+type PluginPackageNames = BTreeMap<String, Vec<String>>;
+
+fn mdx_content_plugin_package_names() -> PluginPackageNames {
+    BTreeMap::from([
+        ("mdx".to_owned(), vec!["eslint-plugin-mdx".to_owned()]),
+        (
+            "@eslint-community/eslint-comments".to_owned(),
+            vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
+        ),
+    ])
+}
+
+fn mdx_content_warn_or_error_rules() -> Vec<String> {
+    vec![
+        "mdx/remark".to_owned(),
+        "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
+        "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
+        "astro-pipeline/no-raw-mdx-images".to_owned(),
+        "@eslint-community/eslint-comments/require-description".to_owned(),
+        "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+        "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+    ]
+}
+
+fn mdx_content_restricted_disable_patterns() -> Vec<String> {
+    vec![
+        "mdx/remark".to_owned(),
+        "astro-pipeline/mdx-component-imports-from-approved-map".to_owned(),
+        "astro-pipeline/mdx-imports-only-approved-components".to_owned(),
+        "astro-pipeline/no-raw-mdx-images".to_owned(),
+    ]
+}
+
+fn component_map_plugin_package_names() -> PluginPackageNames {
+    BTreeMap::from([
+        (
+            "astro-pipeline".to_owned(),
+            vec!["g3ts-eslint-plugin-astro-pipeline".to_owned()],
+        ),
+        (
+            "@eslint-community/eslint-comments".to_owned(),
+            vec!["@eslint-community/eslint-plugin-eslint-comments".to_owned()],
+        ),
+    ])
+}
+
+fn component_map_error_rules() -> Vec<String> {
+    vec![
+        "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+        "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+        "@eslint-community/eslint-comments/require-description".to_owned(),
+        "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+    ]
+}
+
+fn component_map_warn_or_error_rules() -> Vec<String> {
+    vec![
+        "astro-pipeline/mdx-component-map-no-raw-ui-exports".to_owned(),
+        "astro-pipeline/mdx-component-wrapper-requires-zod-parse".to_owned(),
+        "@eslint-community/eslint-comments/require-description".to_owned(),
+        "@eslint-community/eslint-comments/no-unused-disable".to_owned(),
+        "@eslint-community/eslint-comments/no-restricted-disable".to_owned(),
+    ]
 }

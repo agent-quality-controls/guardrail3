@@ -26,6 +26,8 @@ pub fn assert_validate_command_from<I, T>(
             path,
             family,
             inventory,
+            staged: _,
+            rules_only: _,
         } => {
             let actual_family = family
                 .iter()
@@ -56,6 +58,9 @@ pub fn assert_validate_command_from<I, T>(
                 inventory, expected_inventory,
                 "parsed inventory flag should match the expected CLI value"
             );
+        }
+        g3ts::Command::ValidateRepo { .. } => {
+            unreachable!("expected validate command but parsed validate-repo");
         }
     }
 }

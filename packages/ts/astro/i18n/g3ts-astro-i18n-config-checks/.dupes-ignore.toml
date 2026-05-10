@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "a130420960f89a32"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "4fc10be4b2aa0e17"
+reason = "package-name-filter: closures matching distinct plugin package names per rule; deduping would couple unrelated rule wirings, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "69fa8f448e1b421e"
+reason = "lane-restricted-pattern: closures matching distinct rule-name patterns per lane; deduping would couple unrelated lane checks, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "73b5ebe0f5dbfcc2"
+reason = "fixture-snapshot-helper: per-fixture mut-snapshot accessor; deduping would couple unrelated fixture mutations, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "d6f433849219da7a"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "ebca207f47110b29"
+reason = "rel-path-helper: each surface state has its own rel_path projection; deduping would couple unrelated rule modules to support, conflicts with real-proof-site contract"

@@ -1,3 +1,4 @@
+/// Entry point that ingests the workspace crawl into a package checks input.
 mod run;
 
 #[cfg(feature = "ingest")]

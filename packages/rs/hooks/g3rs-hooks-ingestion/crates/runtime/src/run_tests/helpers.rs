@@ -24,7 +24,7 @@ pub(super) fn repo_root(temp_dir: &tempfile::TempDir) -> &Path {
     root
 }
 
-#[allow(dead_code)]
+#[allow(dead_code)] // reason: shared sidecar helper for selection-only fixtures; sibling test modules that do not exercise core.hooksPath leave it unused.
 pub(super) fn git_config_hooks_path(path: &Path, hooks_path: &str) {
     let status = Command::new("git")
         .args(["config", "core.hooksPath", hooks_path])
@@ -37,7 +37,7 @@ pub(super) fn git_config_hooks_path(path: &Path, hooks_path: &str) {
     );
 }
 
-#[allow(dead_code)]
+#[allow(dead_code)] // reason: shared sidecar helper that simulates a broken gitdir pointer for upward-walk failure tests; other sibling test modules do not reference it.
 pub(super) fn break_git_dir(path: &Path) {
     fs::rename(path.join(".git"), path.join(".git-real"))
         .expect("rename .git directory to break gitdir resolution");
@@ -46,7 +46,7 @@ pub(super) fn break_git_dir(path: &Path) {
 }
 
 #[cfg(unix)]
-#[allow(dead_code)]
+#[allow(dead_code)] // reason: shared sidecar helper for synthesizing executable hook fixtures on unix; sibling tests that only read hook content do not call it.
 pub(super) fn make_executable(path: &Path) {
     use std::os::unix::fs::PermissionsExt as _;
 

@@ -1,0 +1,38 @@
+[package]
+name = "guardrail3-ts-family-runner-hooks"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+g3-workspace-crawl.workspace = true
+g3ts-astro-content-hook-contract.workspace = true
+g3ts-astro-i18n-hook-contract.workspace = true
+g3ts-astro-media-hook-contract.workspace = true
+g3ts-astro-mdx-hook-contract.workspace = true
+g3ts-astro-seo-hook-contract.workspace = true
+g3ts-astro-setup-hook-contract.workspace = true
+g3ts-hooks-config-checks.workspace = true
+g3ts-hooks-contract-types.workspace = true
+g3ts-hooks-file-tree-checks.workspace = true
+g3ts-hooks-ingestion.workspace = true
+g3ts-hooks-source-checks.workspace = true
+g3ts-fmt-hook-contract.workspace = true
+g3ts-spelling-hook-contract.workspace = true
+g3ts-typecov-hook-contract.workspace = true
+g3ts-style-hook-contract.workspace = true
+guardrail3-ts-app-types = { path = "../../../../types/app-types" }
+
+[dev-dependencies]
+tempfile.workspace = true
+guardrail3-ts-family-runner-hooks-assertions = { path = "../assertions" }
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

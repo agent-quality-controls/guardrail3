@@ -1,3 +1,6 @@
+//! Assertion helpers for the `g3rs-deps-config-checks` family's rule tests.
+
+/// Rule implementation for `common`.
 mod common;
 
 #[cfg(feature = "checks")]

@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "6deb0973e8ac08df"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "ebca207f47110b29"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "5a442887ad6a9152"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "73b5ebe0f5dbfcc2"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "a130420960f89a32"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "be17f42f40289db1"
+reason = "per-rule helper: per-fixture mut-snapshot accessor / per-surface-state rel-path projection / per-rule single-violation test; deduping would couple unrelated rules or surfaces, conflicts with real-proof-site contract"

@@ -6,6 +6,7 @@ use g3ts_astro_mdx_types::{
 };
 
 #[must_use]
+/// `ingest_for_config_checks` helper.
 pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroMdxConfigChecksInput {
     let app_roots = crate::roots::astro_app_roots(crawl);
     let policies = app_roots
@@ -62,6 +63,7 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsAstroMdxConfigC
     }
 }
 
+/// `missing_component_map_sources` helper.
 fn missing_component_map_sources(
     contract: &G3TsAstroMdxIntegrationContractInput,
 ) -> Vec<G3TsAstroMdxMissingComponentMapInput> {

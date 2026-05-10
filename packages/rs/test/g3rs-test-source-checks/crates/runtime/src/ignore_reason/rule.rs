@@ -1,10 +1,16 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::TestFileInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/ignore-reason";
 
+/// `check` function.
 pub(crate) fn check(input: &TestFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut documented = 0usize;
     let mut missing = 0usize;

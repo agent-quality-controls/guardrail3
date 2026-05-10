@@ -1,0 +1,232 @@
+# Manifest extracted from .plans/2026-05-10-212749-remove-structural-split.md
+#
+# Verifier: scripts/verify-remove-structural-split.py reads this and emits PASS/FAIL.
+# Plan prose is reference; verification runs against this manifest.
+
+[meta]
+plan = ".plans/2026-05-10-212749-remove-structural-split.md"
+baseline_waivers_file = ".baselines/structural-split-waivers.txt"
+
+# =============================================================================
+# Layer 1: tree shape — files and dirs that must (not) exist
+# =============================================================================
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/structural_split.rs"
+must_exist = false
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/workspace/structure.rs"
+must_exist = false
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/structural_split_tests"
+must_exist = false
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/assertions/src/structural_split.rs"
+must_exist = false
+
+# Surviving rule files in the same package must remain.
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/crate_has_facade.rs"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/mod_rs_required.rs"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/assertions/src/crate_has_facade.rs"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/assertions/src/mod_rs_required.rs"
+must_exist = true
+
+# =============================================================================
+# Layer 2: rule registration — Rust source must not declare or call the rule
+# =============================================================================
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/lib.rs"
+needle = "structural_split"
+reason = "rule module declaration must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/runtime/src/run.rs"
+needle = "structural_split"
+reason = "rule call site must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-file-tree-checks/crates/assertions/src/lib.rs"
+needle = "structural_split"
+reason = "assertions module declaration must be removed"
+
+# =============================================================================
+# Layer 3: type fields — arch types must not declare the three caps
+# =============================================================================
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-types/src/types.rs"
+needle = "max_sibling_rs_file_count"
+reason = "arch type field tied to deleted rule must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-types/src/types.rs"
+needle = "max_sibling_dir_count"
+reason = "arch type field tied to deleted rule must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-types/src/types.rs"
+needle = "max_module_depth"
+reason = "arch type field tied to deleted rule must be removed"
+
+# =============================================================================
+# Layer 4: arch ingestion — must no longer compute the three metrics
+# =============================================================================
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/file_tree.rs"
+needle = "max_sibling_rs_file_count"
+reason = "ingestion populator for deleted field"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/file_tree.rs"
+needle = "max_sibling_dir_count"
+reason = "ingestion populator for deleted field"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/file_tree.rs"
+needle = "max_module_depth"
+reason = "ingestion populator for deleted field"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/workspace/run.rs"
+needle = "measure_max_sibling_counts"
+reason = "compute helper for deleted rule must be unreferenced"
+
+[[forbidden_text]]
+file = "packages/rs/arch/g3rs-arch-ingestion/crates/runtime/src/workspace/run.rs"
+needle = "measure_module_depth"
+reason = "compute helper for deleted rule must be unreferenced"
+
+# =============================================================================
+# Layer 5: code-ingestion shadow — must no longer compute or assert
+# =============================================================================
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-types/src/types.rs"
+needle = "max_module_depth"
+reason = "dead shadow field must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-types/src/types.rs"
+needle = "max_sibling_dirs"
+reason = "dead shadow field must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-types/src/types.rs"
+needle = "max_sibling_rs_files"
+reason = "dead shadow field must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run.rs"
+needle = "max_module_depth"
+reason = "dead shadow populator must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run.rs"
+needle = "max_sibling_dirs"
+reason = "dead shadow populator must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run.rs"
+needle = "max_sibling_rs_files"
+reason = "dead shadow populator must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/assertions/src/run_file_tree.rs"
+needle = "max_module_depth"
+reason = "dead shadow assertion must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/assertions/src/run_file_tree.rs"
+needle = "max_sibling_dirs"
+reason = "dead shadow assertion must be removed"
+
+[[forbidden_text]]
+file = "packages/rs/code/g3rs-code-ingestion/crates/assertions/src/run_file_tree.rs"
+needle = "max_sibling_rs_files"
+reason = "dead shadow assertion must be removed"
+
+# =============================================================================
+# Layer 6: waivers — every guardrail3-rs.toml waiver entry referencing the rule must be gone
+# =============================================================================
+
+[waivers]
+forbidden_id = "g3rs-arch/structural-split"
+file_pattern = "guardrail3-rs.toml"
+search_root = "packages"
+expected_count_after = 0
+
+# =============================================================================
+# Layer 7: repo-wide grep — no remaining identifier references anywhere
+# =============================================================================
+
+[[repo_grep]]
+pattern = "structural[_-]split"
+exclude_globs = [
+  ".plans/**",
+  ".worklogs/**",
+  ".baselines/**",
+  "scripts/verify-remove-structural-split.py",
+  "target/**",
+  "**/target/**",
+  ".git/**",
+]
+expected_count = 0
+
+[[repo_grep]]
+pattern = "max_module_depth"
+exclude_globs = ["target/**", "**/target/**", ".git/**", ".plans/**", ".worklogs/**", ".baselines/**"]
+expected_count = 0
+
+[[repo_grep]]
+pattern = "max_sibling_rs_file_count"
+exclude_globs = ["target/**", "**/target/**", ".git/**", ".plans/**", ".worklogs/**", ".baselines/**"]
+expected_count = 0
+
+[[repo_grep]]
+pattern = "max_sibling_dir_count"
+exclude_globs = ["target/**", "**/target/**", ".git/**", ".plans/**", ".worklogs/**", ".baselines/**"]
+expected_count = 0
+
+[[repo_grep]]
+pattern = "max_sibling_dirs"
+exclude_globs = ["target/**", "**/target/**", ".git/**", ".plans/**", ".worklogs/**", ".baselines/**"]
+expected_count = 0
+
+[[repo_grep]]
+pattern = "max_sibling_rs_files"
+exclude_globs = ["target/**", "**/target/**", ".git/**", ".plans/**", ".worklogs/**", ".baselines/**"]
+expected_count = 0
+
+# =============================================================================
+# Layer 8: build / validate health — workspaces that touched files must build
+# =============================================================================
+
+[[validate_workspace]]
+path = "packages/rs/arch/g3rs-arch-file-tree-checks"
+
+[[validate_workspace]]
+path = "packages/rs/arch/g3rs-arch-types"
+
+[[validate_workspace]]
+path = "packages/rs/arch/g3rs-arch-ingestion"
+
+[[validate_workspace]]
+path = "packages/rs/code/g3rs-code-types"
+
+[[validate_workspace]]
+path = "packages/rs/code/g3rs-code-ingestion"

@@ -1,5 +1,11 @@
 use std::collections::BTreeMap;
 
+/// Pair of `(script_name, raw_script_body)` extracted from `package.json` scripts.
+pub type G3TsAstroPackageScriptBody = (String, String);
+
+/// Mapping of collection name to the field names defined for that collection.
+pub type G3TsAstroContentCollectionFields = BTreeMap<String, Vec<String>>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroPackageSurfaceSnapshot {
     pub rel_path: String,
@@ -7,7 +13,7 @@ pub struct G3TsAstroPackageSurfaceSnapshot {
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
     pub script_names: Vec<String>,
-    pub script_bodies: Vec<(String, String)>,
+    pub script_bodies: Vec<G3TsAstroPackageScriptBody>,
     pub script_commands: Vec<G3TsAstroPackageScriptCommand>,
     pub script_tool_invocations: Vec<G3TsAstroPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsAstroPackageScriptParseBlocker>,
@@ -71,6 +77,11 @@ pub enum G3TsAstroContentMode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_field_names,
+    reason = "Each `*_rel_path` field names a distinct config artifact relative to the app \
+              root; renaming would obscure the artifact each path refers to"
+)]
 pub struct G3TsAstroContentAppRootInput {
     pub app_root_rel_path: String,
     pub content_config_rel_path: Option<String>,
@@ -99,7 +110,7 @@ pub struct G3TsAstroContentPolicySnapshot {
     pub content_root: Option<String>,
     pub content_adapters: Vec<String>,
     pub required_collections: Vec<String>,
-    pub collection_fields: BTreeMap<String, Vec<String>>,
+    pub collection_fields: G3TsAstroContentCollectionFields,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -151,6 +162,12 @@ pub struct G3TsAstroContentAdapterSourceInput {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Each bool corresponds to a distinct named ESLint probe (astro/ts/tsx \
+              source presence and ignored state); merging into bitflags would obscure \
+              the field-level surface consumed by checks across multiple crates"
+)]
 pub struct G3TsAstroContentEslintSurfaceSnapshot {
     pub rel_path: String,
     pub astro_source_probe_present: bool,
@@ -183,6 +200,11 @@ pub struct G3TsAstroContentEslintSurfaceSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Parsed snapshot is the dominant runtime variant; boxing would force \
+              construction-site changes across consumer crates outside this workspace"
+)]
 pub enum G3TsAstroContentEslintSurfaceState {
     Missing {
         rel_path: String,
@@ -208,18 +230,27 @@ pub struct G3TsAstroContentEslintPluginContractInput {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroContentEslintDirectiveInput {
+    /// Relative path of the source file containing the directive.
     rel_path: String,
+    /// Disable directive kind, for example `disable`, `disable-next-line`, or
+    /// `disable-line`.
     directive_kind: String,
+    /// Names of the rules disabled by this directive; empty when `all_rules`
+    /// is true.
     disabled_rules: Vec<String>,
+    /// True when the directive disables all rules (no rule list specified).
     all_rules: bool,
+    /// 1-based line number where the directive comment appears.
     line: u32,
+    /// 1-based line number the directive targets, when applicable.
     target_line: Option<u32>,
+    /// Parse error encountered while scanning the directive, if any.
     parse_error: Option<String>,
 }
 
 impl G3TsAstroContentEslintDirectiveInput {
     #[must_use]
-    pub fn new(
+    pub const fn new(
         rel_path: String,
         directive_kind: String,
         disabled_rules: Vec<String>,
@@ -246,7 +277,7 @@ impl G3TsAstroContentEslintDirectiveInput {
 
     #[must_use]
     pub fn directive_kind(&self) -> &str {
-        &self.directive_kind
+        self.directive_kind.as_str()
     }
 
     #[must_use]
@@ -255,17 +286,17 @@ impl G3TsAstroContentEslintDirectiveInput {
     }
 
     #[must_use]
-    pub fn all_rules(&self) -> bool {
+    pub const fn all_rules(&self) -> bool {
         self.all_rules
     }
 
     #[must_use]
-    pub fn line(&self) -> u32 {
+    pub const fn line(&self) -> u32 {
         self.line
     }
 
     #[must_use]
-    pub fn target_line(&self) -> Option<u32> {
+    pub const fn target_line(&self) -> Option<u32> {
         self.target_line
     }
 
@@ -275,7 +306,7 @@ impl G3TsAstroContentEslintDirectiveInput {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroContentPolicyEslintContractInput {
     pub app_root_rel_path: String,
     pub route_page_paths: Vec<String>,
@@ -284,7 +315,7 @@ pub struct G3TsAstroContentPolicyEslintContractInput {
     pub eslint_config: G3TsAstroContentEslintSurfaceState,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroContentIntegrationContractInput {
     pub app_root_rel_path: String,
     pub route_page_paths: Vec<String>,
@@ -294,7 +325,7 @@ pub struct G3TsAstroContentIntegrationContractInput {
     pub astro_policy: G3TsAstroContentPolicySurfaceState,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroContentConfigChecksInput {
     pub integration_contracts: Vec<G3TsAstroContentIntegrationContractInput>,
     pub eslint_contracts: Vec<G3TsAstroContentEslintPluginContractInput>,

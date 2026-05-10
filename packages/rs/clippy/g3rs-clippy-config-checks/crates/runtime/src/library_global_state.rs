@@ -9,8 +9,10 @@ use crate::support::{
     rust_profile,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/library-global-state";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) || rust_profile(input) != Some(RustProfile::Library) {
         return;
@@ -22,7 +24,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     let section = parse_ban_section(document, "disallowed-types");
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
-        malformed_count += 1;
+        malformed_count = malformed_count.saturating_add(1);
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -41,7 +43,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     let mut missing_count = 0usize;
     for expected in EXPECTED_LIBRARY_GLOBAL_STATE_TYPES {
         if !found.contains(*expected) {
-            missing_count += 1;
+            missing_count = missing_count.saturating_add(1);
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Error,

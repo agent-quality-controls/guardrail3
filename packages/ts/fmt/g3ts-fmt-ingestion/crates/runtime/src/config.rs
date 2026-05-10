@@ -1,6 +1,7 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_fmt_types::G3TsFmtConfigSurfaceState;
 
+/// Ingests the Prettier config under `app_root_rel_path` into a surface state.
 pub(crate) fn ingest_prettier_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -28,6 +29,7 @@ pub(crate) fn ingest_prettier_config(
     }
 }
 
+/// Returns the parent directory of `rel_path` as a relative path, or `.` for top-level files.
 fn parent_rel_path(rel_path: &str) -> String {
     std::path::Path::new(rel_path)
         .parent()

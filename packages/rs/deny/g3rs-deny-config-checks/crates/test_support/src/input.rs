@@ -1,9 +1,20 @@
+#![expect(
+    clippy::expect_used,
+    clippy::type_complexity,
+    reason = "test-only fixture helpers fail-fast on bad fixtures and accept a rule fn pointer with the same explicit signature the production check::* functions use; introducing a type alias for a one-line fn pointer would obscure rather than clarify the test entry-point shape"
+)]
+
 use deny_toml_parser::parse as parse_deny_toml;
 use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use g3rs_deny_types::G3RsDenyRustPolicyState;
 use guardrail3_check_types::G3CheckResult;
 use guardrail3_rs_toml_parser::types::RustProfile;
 
+#[must_use]
+/// Implements this item.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub fn input(
     deny_toml: &str,
     profile: Option<RustProfile>,
@@ -28,6 +39,10 @@ pub fn run(
     results
 }
 
+/// Implements this item.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub fn run_with_rust_policy(
     deny_toml: &str,
     rust_policy: G3RsDenyRustPolicyState,
@@ -43,6 +58,7 @@ pub fn run_with_rust_policy(
     results
 }
 
+/// Implements `rust policy`.
 fn rust_policy(
     profile: Option<RustProfile>,
     policy_context_valid: bool,

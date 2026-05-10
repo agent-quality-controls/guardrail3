@@ -2,8 +2,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::CfgTestModuleInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/inline-test-bodies";
 
+/// `check` function.
 pub(crate) fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     if !input.module.has_body {
         results.push(

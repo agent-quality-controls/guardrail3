@@ -4,8 +4,10 @@ use g3_workspace_crawl::{
 };
 use g3ts_astro_seo_types::G3TsAstroSeoEslintDirectiveInput;
 
+/// `SOURCE_EXTENSIONS` constant.
 const SOURCE_EXTENSIONS: [&str; 3] = [".astro", ".ts", ".tsx"];
 
+/// `eslint_directives`: eslint directives.
 pub(crate) fn eslint_directives(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -16,6 +18,7 @@ pub(crate) fn eslint_directives(
         .collect()
 }
 
+/// `source_paths`: source paths.
 fn source_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String> {
     let src_root = g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src");
     let src_prefix = format!("{src_root}/");
@@ -35,6 +38,7 @@ fn source_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<String
         .collect()
 }
 
+/// `file_directives`: file directives.
 fn file_directives(
     crawl: &G3WorkspaceCrawl,
     rel_path: &str,
@@ -73,6 +77,7 @@ fn file_directives(
         .collect()
 }
 
+/// `parse_error`: parse error.
 fn parse_error(rel_path: &str, reason: String) -> G3TsAstroSeoEslintDirectiveInput {
     G3TsAstroSeoEslintDirectiveInput::new(
         rel_path.to_owned(),
@@ -85,6 +90,7 @@ fn parse_error(rel_path: &str, reason: String) -> G3TsAstroSeoEslintDirectiveInp
     )
 }
 
+/// `disabled_rules`: disabled rules.
 fn disabled_rules(rules: eslint_directive_parser::types::EslintDisabledRuleSet) -> Vec<String> {
     match rules {
         eslint_directive_parser::types::EslintDisabledRuleSet::AllRules => Vec::new(),

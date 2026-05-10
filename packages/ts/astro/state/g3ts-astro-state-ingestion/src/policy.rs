@@ -5,7 +5,9 @@ use g3_workspace_crawl::{
 use g3ts_astro_state_types::{G3TsAstroStatePolicySnapshot, G3TsAstroStatePolicySurfaceState};
 use std::path::Path;
 
+/// Per-package guardrail3-ts config file path within an app root.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
+/// Allowed Astro content collection config filenames.
 const CONTENT_CONFIGS: [&str; 6] = [
     "src/content.config.js",
     "src/content.config.mjs",
@@ -14,6 +16,7 @@ const CONTENT_CONFIGS: [&str; 6] = [
     "src/content.config.mts",
     "src/content.config.cts",
 ];
+/// Allowed Astro live (database) collection config filenames.
 const LIVE_CONFIGS: [&str; 6] = [
     "src/live.config.js",
     "src/live.config.mjs",
@@ -22,6 +25,7 @@ const LIVE_CONFIGS: [&str; 6] = [
     "src/live.config.mts",
     "src/live.config.cts",
 ];
+/// Allowed contentlayer config filenames.
 const CONTENTLAYER_CONFIGS: [&str; 6] = [
     "contentlayer.config.js",
     "contentlayer.config.mjs",
@@ -31,6 +35,7 @@ const CONTENTLAYER_CONFIGS: [&str; 6] = [
     "contentlayer.config.cts",
 ];
 
+/// Ingests the per-app `guardrail3-ts.toml` Astro state policy surface.
 pub(crate) fn ingest_state_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -79,6 +84,7 @@ pub(crate) fn ingest_state_policy_surface(
     }
 }
 
+/// Returns true when the Astro app declares any state-bearing config or content files.
 pub(crate) fn has_strict_astro_state_boundary(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -88,6 +94,7 @@ pub(crate) fn has_strict_astro_state_boundary(
         || has_content_files(crawl, app_root_rel_path)
 }
 
+/// Returns rel paths under `app_root_rel_path` that look like legacy generated state.
 pub(crate) fn legacy_generated_state_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -113,30 +120,37 @@ pub(crate) fn legacy_generated_state_paths(
         .collect()
 }
 
+/// Finds the first existing config from `candidates` under `app_root_rel_path`.
+fn select_first_existing<'a>(
+    crawl: &'a G3WorkspaceCrawl,
+    app_root_rel_path: &str,
+    candidates: &[&str],
+) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
+    candidates.iter().find_map(|rel_path| {
+        exact_included_file(
+            crawl,
+            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
+        )
+    })
+}
+
+/// Finds an existing Astro content config under `app_root_rel_path`.
 fn select_content_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
-    CONTENT_CONFIGS.iter().find_map(|rel_path| {
-        exact_included_file(
-            crawl,
-            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
-        )
-    })
+    select_first_existing(crawl, app_root_rel_path, &CONTENT_CONFIGS)
 }
 
+/// Finds an existing Astro live config under `app_root_rel_path`.
 fn select_live_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
 ) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
-    LIVE_CONFIGS.iter().find_map(|rel_path| {
-        exact_included_file(
-            crawl,
-            &g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, rel_path),
-        )
-    })
+    select_first_existing(crawl, app_root_rel_path, &LIVE_CONFIGS)
 }
 
+/// Returns true when the app has any included file under `src/content/`.
 fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool {
     let prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/content/");
@@ -148,6 +162,7 @@ fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool 
     })
 }
 
+/// Returns the included file entry whose rel path matches `rel_path` exactly.
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,
@@ -159,12 +174,14 @@ fn exact_included_file<'crawl>(
     })
 }
 
+/// Returns true when `entry` is an included file (not directory, not ignored).
 fn is_included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
-fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
+/// Returns true when `entry` is a readable file or directory.
+const fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.readable
         && matches!(
             entry.kind,
@@ -172,12 +189,14 @@ fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
         )
 }
 
+/// Returns true when `rel_path` lies under the app's `src/pages/` route tree.
 fn is_route_tree_path(rel_path: &str, app_root_rel_path: &str) -> bool {
     let pages_prefix =
         g3ts_astro_check_support::surfaces::scoped_rel_path(app_root_rel_path, "src/pages/");
     rel_path.starts_with(&pages_prefix)
 }
 
+/// Returns true when `rel_path` matches a known legacy generated state location.
 fn is_legacy_generated_state_path(rel_path: &str, app_root_rel_path: &str) -> bool {
     path_has_segment(rel_path, ".next")
         || path_has_segment(rel_path, ".contentlayer")
@@ -188,6 +207,7 @@ fn is_legacy_generated_state_path(rel_path: &str, app_root_rel_path: &str) -> bo
                 .is_some_and(|file_name| CONTENTLAYER_CONFIGS.contains(&file_name)))
 }
 
+/// Returns true when any path component of `rel_path` equals `segment`.
 fn path_has_segment(rel_path: &str, segment: &str) -> bool {
     Path::new(rel_path)
         .components()

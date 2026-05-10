@@ -1,3 +1,10 @@
+#![expect(
+    clippy::disallowed_methods,
+    clippy::indexing_slicing,
+    clippy::shadow_unrelated,
+    reason = "test fixtures need direct filesystem and process access to build temp workspaces; deterministic indexing is intentional in fixtures with known shape; per-fixture re-bindings (workspace_crawl, inputs, crate_inputs) reuse names across reset-and-resnapshot patterns"
+)]
+
 use g3rs_deps_ingestion_assertions::run as assertions;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
 use g3rs_workspace_crawl::crawl;
@@ -92,6 +99,11 @@ fn malformed_root_guardrail_rs_file_fails_ingestion() {
 #[test]
 fn source_entrypoint_stays_stubbed() {
     let workspace = temp_workspace();
+    write_file(
+        workspace.path(),
+        "Cargo.toml",
+        "[workspace]\nmembers = []\n",
+    );
     let crawl = crawl(workspace.path()).expect("workspace crawl should succeed");
 
     let err = ingest_for_source_checks(&crawl).expect_err("source ingestion should stay stubbed");

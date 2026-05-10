@@ -7,7 +7,7 @@ use guardrail3_rs_toml_parser::types::RustProfile;
 pub enum G3RsClippyConfigState {
     Unreadable { reason: String },
     ParseError { reason: String },
-    Parsed(ClippyTomlDocument),
+    Parsed(Box<ClippyTomlDocument>),
 }
 
 #[derive(Debug, Clone)]
@@ -40,7 +40,7 @@ pub enum G3RsClippyCargoConfigState {
     },
     Parsed {
         rel_path: String,
-        cargo_config: CargoConfigToml,
+        cargo_config: Box<CargoConfigToml>,
     },
 }
 
@@ -57,7 +57,7 @@ pub enum G3RsClippyCargoRootState {
     },
     Parsed {
         rel_path: String,
-        cargo: CargoTomlDocument,
+        cargo: Box<CargoTomlDocument>,
     },
 }
 
@@ -76,7 +76,7 @@ pub enum G3RsClippyCargoMemberState {
     Parsed {
         member_rel: String,
         rel_path: String,
-        cargo: CargoTomlDocument,
+        cargo: Box<CargoTomlDocument>,
     },
 }
 

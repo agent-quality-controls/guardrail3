@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{raw_parse_error, typed_clippy, typed_parse_error};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/config-parseable";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if typed_clippy(input).is_some() {
         results.push(

@@ -5,6 +5,7 @@ use g3_workspace_crawl::{
 };
 use std::path::Path;
 
+/// File names recognized as a root `ESLint` config (flat-config formats).
 const ROOT_ESLINT_CONFIGS: [&str; 6] = [
     "eslint.config.js",
     "eslint.config.mjs",
@@ -14,6 +15,7 @@ const ROOT_ESLINT_CONFIGS: [&str; 6] = [
     "eslint.config.cts",
 ];
 
+/// Walk from `app_root_rel_path` up to the repo root, returning the nearest active `ESLint` config entry.
 pub(crate) fn select_active_eslint_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -28,6 +30,7 @@ pub(crate) fn select_active_eslint_config<'a>(
         })
 }
 
+/// Look up a file entry by exact `rel_path`.
 fn exact_file<'a>(crawl: &'a G3WorkspaceCrawl, rel_path: &str) -> Option<&'a G3WorkspaceEntry> {
     crawl
         .entries
@@ -35,6 +38,7 @@ fn exact_file<'a>(crawl: &'a G3WorkspaceCrawl, rel_path: &str) -> Option<&'a G3W
         .find(|entry| entry.path.rel_path == rel_path && entry.kind == G3WorkspaceEntryKind::File)
 }
 
+/// Return `app_root_rel_path` and each ancestor directory up to the repo root (".").
 fn ancestor_rel_paths(app_root_rel_path: &str) -> Vec<String> {
     let mut ancestors = Vec::new();
     let mut current = app_root_rel_path.to_owned();
@@ -52,6 +56,7 @@ fn ancestor_rel_paths(app_root_rel_path: &str) -> Vec<String> {
     ancestors
 }
 
+/// Return the parent directory of `rel_path`, mapping the root parent to ".".
 fn parent_rel_path(rel_path: &str) -> String {
     let Some(parent) = Path::new(rel_path)
         .parent()
@@ -67,6 +72,7 @@ fn parent_rel_path(rel_path: &str) -> String {
     }
 }
 
+/// Join `app_root_rel_path` with `rel_path`, treating "." as the repo root.
 fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     if app_root_rel_path == "." {
         rel_path.to_owned()
@@ -75,6 +81,7 @@ fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     }
 }
 
+/// Whether `entry` is a file that has not been ignored by the workspace crawl.
 fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included

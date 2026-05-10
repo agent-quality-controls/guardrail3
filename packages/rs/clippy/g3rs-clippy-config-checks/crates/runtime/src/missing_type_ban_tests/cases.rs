@@ -10,7 +10,7 @@ fn reports_missing_baseline_type_ban() {
     check(&input, &mut results);
 
     assertions::assert_missing_type_ban_count(&results, 21);
-    assertions::assert_contains_missing_type_ban(&results, "std::collections::HashMap");
+    assertions::assert_contains_for_path(&results, "std::collections::HashMap");
 }
 
 #[test]
@@ -26,7 +26,7 @@ fn reports_library_profile_specific_missing_type_ban() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assertions::assert_contains_missing_type_ban(&results, "std::sync::Mutex");
+    assertions::assert_contains_for_path(&results, "std::sync::Mutex");
 }
 
 #[test]

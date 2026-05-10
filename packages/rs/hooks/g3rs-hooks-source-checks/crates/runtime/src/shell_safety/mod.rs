@@ -1,8 +1,16 @@
+/// `concrete_lockfile_command` module.
 pub(crate) mod concrete_lockfile_command;
+/// `executable_command_context_only` module.
 pub(crate) mod executable_command_context_only;
+/// `no_bypass_instructions` module.
 pub(crate) mod no_bypass_instructions;
+/// `no_fail_open_wrappers` module.
 pub(crate) mod no_fail_open_wrappers;
+/// `no_unconditional_exit_zero` module.
 pub(crate) mod no_unconditional_exit_zero;
+/// `real_dispatcher_syntax_only` module.
 pub(crate) mod real_dispatcher_syntax_only;
+/// `shell_error_handling` module.
 pub(crate) mod shell_error_handling;
+/// `valid_shebang` module.
 pub(crate) mod valid_shebang;

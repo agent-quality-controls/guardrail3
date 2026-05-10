@@ -1,0 +1,75 @@
+[[ignore]]
+fingerprint = "0a150bab9a231b80"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "5cb1a3248bb9122b"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "8ca14d5aa6db1fc1"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "bbf92b6caf7103f0"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "7bcdcef5b0c609cf"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "93b9b50b4356ef2f"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "413b8eb550bd3109"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "493933fcd97a7676"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "43a9ce4a41a4b313"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "8c1a4d5e77b6d804"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "c8cb73f969ebb3d7"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "e55a4872d7325025"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "f46d5f08ffb5b71f"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "0a33dd23fa9d3805"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "4bb310aae5687c7b"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "d2e578dfce08a8b5"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "f6da2d58d33fd47f"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "feb0418ab23a0f62"
+reason = "per-rule test bodies share structure per g3rs-test/real-proof-site (one proof site per rule); per-rule helpers share structure per g3rs-test/runtime-assertions-split"

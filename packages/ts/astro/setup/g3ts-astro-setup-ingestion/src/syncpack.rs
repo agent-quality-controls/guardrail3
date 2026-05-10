@@ -5,9 +5,16 @@ use g3ts_astro_setup_types::{
 };
 use std::collections::BTreeSet;
 
+/// `PACKAGE_JSON_REL_PATH` constant.
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
+/// `SYNCPACK_CONFIG_REL_PATH` constant.
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
-const REQUIRED_SYNCPACK_PINS: [(&str, &str); 26] = [
+
+/// Required syncpack package-version pin: (`package_name`, `expected_version`).
+type SyncpackPin = (&'static str, &'static str);
+
+/// `REQUIRED_SYNCPACK_PINS` constant.
+const REQUIRED_SYNCPACK_PINS: [SyncpackPin; 26] = [
     ("astro", "6.1.9"),
     ("@astrojs/react", "5.0.4"),
     ("@astrojs/mdx", "5.0.4"),
@@ -35,6 +42,7 @@ const REQUIRED_SYNCPACK_PINS: [(&str, &str); 26] = [
     ("eslint-plugin-mdx", "3.7.0"),
     ("@eslint-community/eslint-plugin-eslint-comments", "4.7.1"),
 ];
+/// `FORBIDDEN_SYNCPACK_DEPS` constant.
 const FORBIDDEN_SYNCPACK_DEPS: [&str; 16] = [
     "next",
     "velite",
@@ -53,9 +61,12 @@ const FORBIDDEN_SYNCPACK_DEPS: [&str; 16] = [
     "g3ts-astro-llms-checks",
     "g3ts-astro-llms",
 ];
+/// `PIN_DEPENDENCY_TYPES` constant.
 const PIN_DEPENDENCY_TYPES: [&str; 2] = ["prod", "dev"];
+/// `BAN_DEPENDENCY_TYPES` constant.
 const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
 
+/// `ingest_syncpack_config_surface`: ingest syncpack config surface.
 pub(crate) fn ingest_syncpack_config_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -91,8 +102,12 @@ pub(crate) fn ingest_syncpack_config_surface(
         };
     }
 
-    let typed = syncpack_config_parser::typed(&document)
-        .expect("parsed Syncpack config document should stay typed");
+    let Some(typed) = syncpack_config_parser::typed(&document) else {
+        return G3TsAstroSyncpackConfigState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "syncpack config typed view unavailable after successful parse".to_owned(),
+        };
+    };
     let package_rel_path = package_rel_path_for_app(app_root_rel_path, package);
     let source_covers_package_manifest =
         syncpack_source_covers_package(&typed.source, &entry.path.rel_path, &package_rel_path);
@@ -129,6 +144,7 @@ pub(crate) fn ingest_syncpack_config_surface(
     }
 }
 
+/// `required_syncpack_pins`: required syncpack pins.
 pub(crate) fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
     REQUIRED_SYNCPACK_PINS
         .into_iter()
@@ -139,6 +155,7 @@ pub(crate) fn required_syncpack_pins() -> Vec<G3TsAstroSyncpackRequiredPin> {
         .collect()
 }
 
+/// `forbidden_syncpack_deps`: forbidden syncpack deps.
 pub(crate) fn forbidden_syncpack_deps() -> Vec<String> {
     FORBIDDEN_SYNCPACK_DEPS
         .into_iter()
@@ -146,6 +163,7 @@ pub(crate) fn forbidden_syncpack_deps() -> Vec<String> {
         .collect()
 }
 
+/// `package_rel_path_for_app`: package rel path for app.
 fn package_rel_path_for_app(
     app_root_rel_path: &str,
     package: &G3TsAstroPackageSurfaceState,
@@ -164,6 +182,7 @@ fn package_rel_path_for_app(
     }
 }
 
+/// `syncpack_source_covers_package`: syncpack source covers package.
 fn syncpack_source_covers_package(
     source: &[String],
     syncpack_rel_path: &str,
@@ -174,6 +193,7 @@ fn syncpack_source_covers_package(
         && syncpack_config_is_app_local(syncpack_rel_path, package_rel_path)
 }
 
+/// `has_one_canonical_pin_group`: has one canonical pin group.
 fn has_one_canonical_pin_group(
     version_groups: &[syncpack_config_parser::types::SyncpackVersionGroup],
     dependency: &str,
@@ -191,6 +211,7 @@ fn has_one_canonical_pin_group(
     matching_groups.next().is_none() && canonical_pin_group(group, version, dependency_types)
 }
 
+/// `has_one_canonical_ban_group`: has one canonical ban group.
 fn has_one_canonical_ban_group(
     version_groups: &[syncpack_config_parser::types::SyncpackVersionGroup],
     dependency: &str,
@@ -207,6 +228,7 @@ fn has_one_canonical_ban_group(
     matching_groups.next().is_none() && canonical_ban_group(group, dependency_types)
 }
 
+/// `group_targets_dependency`: group targets dependency.
 fn group_targets_dependency(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     dependency: &str,
@@ -214,6 +236,7 @@ fn group_targets_dependency(
     string_sets_match_exactly(&group.dependencies, &[dependency])
 }
 
+/// `canonical_pin_group`: canonical pin group.
 fn canonical_pin_group(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     version: &str,
@@ -227,6 +250,7 @@ fn canonical_pin_group(
         && group.pin_version.as_deref() == Some(version)
 }
 
+/// `canonical_ban_group`: canonical ban group.
 fn canonical_ban_group(
     group: &syncpack_config_parser::types::SyncpackVersionGroup,
     dependency_types: &[&str],
@@ -239,12 +263,17 @@ fn canonical_ban_group(
         && group.pin_version.is_none()
 }
 
+/// `string_sets_match_exactly`: string sets match exactly.
 fn string_sets_match_exactly(left: &[String], right: &[&str]) -> bool {
-    left.len() == right.len()
-        && BTreeSet::from_iter(left.iter().map(String::as_str))
-            == BTreeSet::from_iter(right.iter().copied())
+    if left.len() != right.len() {
+        return false;
+    }
+    let left_set: BTreeSet<&str> = left.iter().map(String::as_str).collect();
+    let right_set: BTreeSet<&str> = right.iter().copied().collect();
+    left_set == right_set
 }
 
+/// `syncpack_config_is_app_local`: syncpack config is app local.
 fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str) -> bool {
     let expected_rel_path = package_rel_path.strip_suffix("/package.json").map_or_else(
         || ".syncpackrc".to_owned(),
@@ -254,6 +283,7 @@ fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str)
     syncpack_rel_path == expected_rel_path
 }
 
+/// `select_syncpack_config`: select syncpack config.
 fn select_syncpack_config<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -266,6 +296,7 @@ fn select_syncpack_config<'crawl>(
     })
 }
 
+/// `missing_syncpack_config_rel_path`: missing syncpack config rel path.
 fn missing_syncpack_config_rel_path(app_root_rel_path: &str) -> String {
     if app_root_rel_path == "." {
         SYNCPACK_CONFIG_REL_PATH.to_owned()
@@ -274,6 +305,7 @@ fn missing_syncpack_config_rel_path(app_root_rel_path: &str) -> String {
     }
 }
 
+/// `scoped_rel_path`: scoped rel path.
 fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     if app_root_rel_path == "." {
         rel_path.to_owned()

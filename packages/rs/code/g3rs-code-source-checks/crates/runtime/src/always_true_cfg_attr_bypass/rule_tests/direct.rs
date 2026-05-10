@@ -4,10 +4,10 @@ use g3rs_code_source_checks_assertions::always_true_cfg_attr_bypass::rule::{
 
 #[test]
 fn errors_on_unconditional_cfg_attr_bypass() {
-    let content = r#"
+    let content = r"
 #[cfg_attr(not(any()), allow(clippy::unwrap_used))]
 fn foo() {}
-"#;
+";
     let results = super::super::check_source("src/foo.rs", content, false);
 
     assert_rule_results(

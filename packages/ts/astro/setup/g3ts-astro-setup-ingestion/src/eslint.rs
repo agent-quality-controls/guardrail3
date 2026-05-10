@@ -8,6 +8,7 @@ use g3ts_astro_setup_types::{
 use std::collections::BTreeMap;
 
 #[must_use]
+/// `ingest_setup_eslint_surface`: ingest setup eslint surface.
 pub(crate) fn ingest_setup_eslint_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -77,6 +78,7 @@ pub(crate) fn ingest_setup_eslint_surface(
     }
 }
 
+/// `probe_targets`: probe targets.
 fn probe_targets(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -85,7 +87,7 @@ fn probe_targets(
         probe(
             eslint_config_parser::types::EslintProbeKind::AstroSource,
             first_matching_app_rel_path(crawl, app_root_rel_path, |rel_path| {
-                rel_path.starts_with("src/") && rel_path.ends_with(".astro")
+                rel_path.starts_with("src/") && has_extension(rel_path, "astro")
             })
             .unwrap_or_else(|| {
                 g3ts_astro_check_support::surfaces::scoped_rel_path(
@@ -97,7 +99,7 @@ fn probe_targets(
         probe(
             eslint_config_parser::types::EslintProbeKind::TsSource,
             first_matching_app_rel_path(crawl, app_root_rel_path, |rel_path| {
-                rel_path.starts_with("src/") && rel_path.ends_with(".ts")
+                rel_path.starts_with("src/") && has_extension(rel_path, "ts")
             })
             .unwrap_or_else(|| {
                 g3ts_astro_check_support::surfaces::scoped_rel_path(
@@ -109,7 +111,7 @@ fn probe_targets(
         probe(
             eslint_config_parser::types::EslintProbeKind::TsxSource,
             first_matching_app_rel_path(crawl, app_root_rel_path, |rel_path| {
-                rel_path.starts_with("src/") && rel_path.ends_with(".tsx")
+                rel_path.starts_with("src/") && has_extension(rel_path, "tsx")
             })
             .unwrap_or_else(|| {
                 g3ts_astro_check_support::surfaces::scoped_rel_path(
@@ -121,6 +123,14 @@ fn probe_targets(
     ]
 }
 
+/// Returns `true` when `rel_path` ends with the given extension (case-insensitive).
+fn has_extension(rel_path: &str, extension: &str) -> bool {
+    std::path::Path::new(rel_path)
+        .extension()
+        .is_some_and(|value| value.eq_ignore_ascii_case(extension))
+}
+
+/// `first_matching_app_rel_path`: first matching app rel path.
 fn first_matching_app_rel_path(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -144,13 +154,15 @@ fn first_matching_app_rel_path(
         .map(|entry| entry.path.rel_path.clone())
 }
 
-fn probe(
+/// `probe`: probe.
+const fn probe(
     probe: eslint_config_parser::types::EslintProbeKind,
     rel_path: String,
 ) -> eslint_config_parser::types::EslintProbeTarget {
     eslint_config_parser::types::EslintProbeTarget { probe, rel_path }
 }
 
+/// `map_raw_state`: map raw state.
 fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroSetupEslintSurfaceState {
     match raw {
         G3TsAstroRawEslintConfigState::Missing { rel_path } => {
@@ -171,6 +183,7 @@ fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroSetupEslintSurf
     }
 }
 
+/// `active_probe`: active probe.
 fn active_probe(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -178,6 +191,7 @@ fn active_probe(
     probe_by_kind(typed, kind).filter(|probe| !probe.ignored)
 }
 
+/// `probe_by_kind`: probe by kind.
 fn probe_by_kind(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -185,6 +199,7 @@ fn probe_by_kind(
     typed.probes.iter().find(|probe| probe.probe == kind)
 }
 
+/// `probe_ignored`: probe ignored.
 fn probe_ignored(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     kind: eslint_config_parser::types::EslintProbeKind,
@@ -192,22 +207,29 @@ fn probe_ignored(
     probe_by_kind(typed, kind).is_none_or(|probe| probe.ignored)
 }
 
+/// `plugins`: plugins.
 fn plugins(probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>) -> Vec<String> {
     probe.map_or_else(Vec::new, |probe| probe.plugins.clone())
 }
 
+/// `plugin_meta_names`: plugin meta names.
 fn plugin_meta_names(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> BTreeMap<String, String> {
     probe.map_or_else(BTreeMap::new, |probe| probe.plugin_meta_names.clone())
 }
 
+/// Alias for the eslint plugin-to-packages mapping.
+type PluginPackageNames = BTreeMap<String, Vec<String>>;
+
+/// `plugin_package_names`: plugin package names.
 fn plugin_package_names(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
-) -> BTreeMap<String, Vec<String>> {
+) -> PluginPackageNames {
     probe.map_or_else(BTreeMap::new, |probe| probe.plugin_package_names.clone())
 }
 
+/// `active_error_rules`: active error rules.
 fn active_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -223,6 +245,7 @@ fn active_error_rules(
     })
 }
 
+/// `active_warn_or_error_rules`: active warn or error rules.
 fn active_warn_or_error_rules(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -238,6 +261,7 @@ fn active_warn_or_error_rules(
     })
 }
 
+/// `restricted_disable_patterns`: restricted disable patterns.
 fn restricted_disable_patterns(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> Vec<String> {
@@ -263,6 +287,7 @@ fn restricted_disable_patterns(
         .collect()
 }
 
+/// `unused_disable_fail_closed`: unused disable fail closed.
 fn unused_disable_fail_closed(
     probe: Option<&eslint_config_parser::types::EslintEffectiveConfigProbe>,
 ) -> bool {

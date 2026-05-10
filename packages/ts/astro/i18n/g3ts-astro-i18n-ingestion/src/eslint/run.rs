@@ -10,6 +10,7 @@ use g3ts_astro_i18n_types::{
     G3TsAstroI18nPolicySurfaceState,
 };
 
+/// Reads the `ESLint` config surface for an Astro app and projects it into the i18n surface state.
 pub(crate) fn ingest_i18n_eslint_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -55,6 +56,7 @@ pub(crate) fn ingest_i18n_eslint_surface(
     }
 }
 
+/// Maps the raw `ESLint` config surface into the i18n-specific surface state.
 fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroI18nEslintSurfaceState {
     match raw {
         G3TsAstroRawEslintConfigState::Missing { rel_path } => {
@@ -75,6 +77,7 @@ fn map_raw_state(raw: G3TsAstroRawEslintConfigState) -> G3TsAstroI18nEslintSurfa
     }
 }
 
+/// Returns probes from the snapshot that match the requested targets and are not ignored.
 fn active_probes<'a>(
     typed: &'a eslint_config_parser::types::EslintConfigSnapshot,
     targets: &[eslint_config_parser::types::EslintProbeTarget],
@@ -91,6 +94,7 @@ fn active_probes<'a>(
         .collect()
 }
 
+/// Returns true when any requested target is missing or ignored in the snapshot.
 fn probes_missing_or_ignored(
     typed: &eslint_config_parser::types::EslintConfigSnapshot,
     targets: &[eslint_config_parser::types::EslintProbeTarget],

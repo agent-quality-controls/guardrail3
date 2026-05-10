@@ -1,0 +1,7 @@
+[[ignore]]
+fingerprint = "3ede6cbbcc1c9785"
+reason = "per-rule test cases share the same single-helper-call shape; each test proves a different rule path"
+
+[[ignore]]
+fingerprint = "52fa9db7faaebc16"
+reason = "per-rule assertion helpers share the same predicate shape over G3CheckResult; each helper proves a different rule emission"

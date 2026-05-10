@@ -6,9 +6,9 @@ use super::helpers::run_check;
 #[test]
 fn stays_quiet_when_rustfmt_edition_is_absent() {
     let results = run_check(
-        r#"
+        r"
 max_width = 100
-"#,
+",
         parsed_cargo(
             r#"
 [workspace.package]

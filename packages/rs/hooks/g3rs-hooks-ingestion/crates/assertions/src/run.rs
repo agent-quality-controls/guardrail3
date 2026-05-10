@@ -1,12 +1,19 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Decoded finding shape used by assertion helpers.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// Severity reported by the rule.
     severity: G3Severity,
+    /// Short title.
     title: &'a str,
+    /// Full message body.
     message: &'a str,
+    /// Workspace-relative file path if present.
     file: Option<&'a str>,
+    /// 1-based line number if present.
     line: Option<usize>,
+    /// Whether the finding is inventory-only.
     inventory: bool,
 }
 
@@ -71,6 +78,10 @@ pub fn count(results: &[G3CheckResult], id: &str) -> usize {
     findings(results, id).len()
 }
 
+/// Assert at least one finding for `id` matches title/file/inventory.
+///
+/// # Panics
+/// Panics when no matching finding exists.
 pub fn assert_present(
     results: &[G3CheckResult],
     id: &str,
@@ -87,6 +98,10 @@ pub fn assert_present(
     );
 }
 
+/// Assert at least one finding matches and its message contains `needle`.
+///
+/// # Panics
+/// Panics when no matching finding exists.
 pub fn assert_message_contains(
     results: &[G3CheckResult],
     id: &str,
@@ -107,6 +122,10 @@ pub fn assert_message_contains(
     );
 }
 
+/// Assert at least one finding matches and its message equals `message`.
+///
+/// # Panics
+/// Panics when no matching finding exists.
 pub fn assert_message_equals(
     results: &[G3CheckResult],
     id: &str,
@@ -127,6 +146,10 @@ pub fn assert_message_equals(
     );
 }
 
+/// Assert at least one finding matches at the given 1-based `line`.
+///
+/// # Panics
+/// Panics when no matching finding exists.
 pub fn assert_present_on_line(
     results: &[G3CheckResult],
     id: &str,
@@ -147,15 +170,21 @@ pub fn assert_present_on_line(
     );
 }
 
+/// Assert no findings exist for the given `file`.
+///
+/// # Panics
+/// Panics when any finding references `file`.
 pub fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     let findings = results
         .iter()
-        .filter_map(|result| (result.file() == Some(file)).then(|| Finding::from_result(result)))
+        .filter(|result| result.file() == Some(file))
+        .map(Finding::from_result)
         .collect::<Vec<_>>();
     assert!(findings.is_empty(), "{findings:#?}");
 }
 
 impl<'a> Finding<'a> {
+    /// Build a Finding view from a `G3CheckResult`.
     fn from_result(result: &'a G3CheckResult) -> Self {
         Self {
             severity: result.severity(),

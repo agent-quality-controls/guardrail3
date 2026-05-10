@@ -1,3 +1,14 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "Test cases index fixture vectors by known constant positions; out-of-bounds \
+              indexing should panic to surface a fixture-construction bug"
+)]
+#![expect(
+    clippy::panic,
+    reason = "Test cases panic to surface unexpected variant states; this is the standard \
+              pattern for variant assertions inside #[test] functions"
+)]
+
 use g3ts_style_config_checks_assertions as assertions;
 use guardrail3_check_types::G3Severity;
 
@@ -500,10 +511,7 @@ fn validate_script_accepts_direct_package_manager_stylelint() {
         .push(g3ts_style_types::G3TsStylePackageScriptToolInvocation {
             script_name: "validate".to_owned(),
             executable: "stylelint".to_owned(),
-            args: vec![
-                "--max-warnings".to_owned(),
-                "0".to_owned(),
-            ],
+            args: vec!["--max-warnings".to_owned(), "0".to_owned()],
             preceded_by: None,
             followed_by: None,
         });
@@ -547,8 +555,7 @@ fn style_policy_rule_must_use_owned_plugin_package_on_every_probe() {
 #[test]
 fn protected_style_rule_disables_must_restrict_style_rules() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_eslint_mut(&mut input)
-        .source_probe_disable_policies[0]
+    super::helpers::parsed_eslint_mut(&mut input).source_probe_disable_policies[0]
         .restricted_disable_patterns
         .retain(|pattern| pattern != "style-policy/*");
 
@@ -575,10 +582,9 @@ fn protected_style_rule_disables_accept_wildcard() {
 #[test]
 fn protected_style_rule_disables_must_be_per_probe() {
     let mut input = super::helpers::golden();
-    let protected_probe = super::helpers::parsed_eslint_mut(&mut input)
-        .source_probe_disable_policies[0]
-        .clone();
-    let mut unprotected_probe = protected_probe.clone();
+    let protected_probe =
+        super::helpers::parsed_eslint_mut(&mut input).source_probe_disable_policies[0].clone();
+    let mut unprotected_probe = protected_probe;
     unprotected_probe.rel_path = "src/__g3ts_style_probe__.astro".to_owned();
     unprotected_probe.restricted_disable_patterns = vec!["style-policy/*".to_owned()];
     super::helpers::parsed_eslint_mut(&mut input)
@@ -711,7 +717,8 @@ fn syncpack_must_reject_ignored_pin_groups() {
 #[test]
 fn syncpack_must_cover_package_manifest() {
     let mut input = super::helpers::golden();
-    super::helpers::parsed_syncpack_mut(&mut input).source = vec!["packages/*/package.json".to_owned()];
+    super::helpers::parsed_syncpack_mut(&mut input).source =
+        vec!["packages/*/package.json".to_owned()];
 
     assertions::assert_runtime_check_id_severity(
         &input,

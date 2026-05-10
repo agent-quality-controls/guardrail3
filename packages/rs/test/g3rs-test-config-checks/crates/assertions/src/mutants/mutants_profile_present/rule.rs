@@ -1,5 +1,10 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_missing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -12,6 +17,11 @@ pub fn assert_missing(results: &[G3CheckResult]) {
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_present(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

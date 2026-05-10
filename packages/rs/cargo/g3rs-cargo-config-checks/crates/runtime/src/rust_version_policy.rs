@@ -5,8 +5,10 @@ use guardrail3_rs_toml_parser::types::RustProfile;
 
 use crate::support::{rust_policy_valid, rust_profile};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/rust-version-policy";
 
+/// check fn.
 pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(root) {
         return;

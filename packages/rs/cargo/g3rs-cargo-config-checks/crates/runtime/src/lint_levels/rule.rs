@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{self, CargoRole, LintExpectation};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/lint-levels";
 
+/// check fn.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     if matches!(support::cargo_role(cargo), CargoRole::Other) {
         return;
@@ -16,19 +18,34 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
 
     if let Some(rust_lints) = rust_lints {
         for expected in support::EXPECTED_RUST_LINTS {
-            violations += check_expected(cargo_rel_path, rust_lints, expected, results);
+            violations = violations.saturating_add(check_expected(
+                cargo_rel_path,
+                rust_lints,
+                expected,
+                results,
+            ));
         }
         for expected in support::EXPECTED_LIBRARY_RUST_LINTS {
-            violations += check_expected(cargo_rel_path, rust_lints, expected, results);
+            violations = violations.saturating_add(check_expected(
+                cargo_rel_path,
+                rust_lints,
+                expected,
+                results,
+            ));
         }
     }
 
     if let Some(clippy_lints) = clippy_lints {
         for expected in support::EXPECTED_CLIPPY_GROUPS {
-            violations += check_expected(cargo_rel_path, clippy_lints, expected, results);
+            violations = violations.saturating_add(check_expected(
+                cargo_rel_path,
+                clippy_lints,
+                expected,
+                results,
+            ));
         }
         for lint_name in support::EXPECTED_CLIPPY_DENY {
-            violations += check_expected(
+            violations = violations.saturating_add(check_expected(
                 cargo_rel_path,
                 clippy_lints,
                 &LintExpectation {
@@ -37,23 +54,15 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
                     priority: None,
                 },
                 results,
-            );
+            ));
         }
         for required in support::EXPECTED_CLIPPY_REQUIRED_ALLOW {
-            if let Some(actual_level) = support::lint_level(clippy_lints, required.name) {
-                if actual_level != "allow" {
-                    violations += 1;
-                    results.push(support::error(
-                        ID,
-                        format!("lint `{}` must be allow", required.name),
-                        format!(
-                            "`{}` must be `\"allow\"` (got `\"{actual_level}\"`). Reason: {}",
-                            required.name, required.reason
-                        ),
-                        cargo_rel_path,
-                    ));
-                }
-            }
+            violations = violations.saturating_add(check_required_allow(
+                cargo_rel_path,
+                clippy_lints,
+                required,
+                results,
+            ));
         }
     }
 
@@ -67,6 +76,7 @@ pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G
     }
 }
 
+/// check expected fn.
 fn check_expected(
     cargo_rel_path: &str,
     lints: &ToolLints,
@@ -79,7 +89,7 @@ fn check_expected(
         if actual_level != expected.expected_level
             && support::is_weaker(expected.expected_level, actual_level)
         {
-            violations += 1;
+            violations = violations.saturating_add(1);
             results.push(support::error(
                 ID,
                 format!("lint `{}` weakens policy", expected.name),
@@ -100,15 +110,13 @@ fn check_expected(
         if support::lint_level(lints, expected.name).is_some() {
             let actual_priority = support::lint_priority(lints, expected.name);
             if actual_priority != Some(expected_priority) {
-                violations += 1;
+                violations = violations.saturating_add(1);
                 results.push(support::error(
                     ID,
                     format!("lint `{}` has wrong priority", expected.name),
                     format!(
                         "Expected priority `{expected_priority}`, got `{}`. Set the priority to `{expected_priority}`.",
-                        actual_priority
-                            .map(|priority| priority.to_string())
-                            .unwrap_or_else(|| "none".to_owned())
+                        actual_priority.map_or_else(|| "none".to_owned(), |priority| priority.to_string())
                     ),
                     cargo_rel_path,
                 ));
@@ -117,6 +125,31 @@ fn check_expected(
     }
 
     violations
+}
+
+/// Check that a `required-allow` clippy lint is actually set to `"allow"`; returns 1 on violation.
+fn check_required_allow(
+    cargo_rel_path: &str,
+    clippy_lints: &ToolLints,
+    required: &support::RequiredAllowLint,
+    results: &mut Vec<G3CheckResult>,
+) -> usize {
+    let Some(actual_level) = support::lint_level(clippy_lints, required.name) else {
+        return 0;
+    };
+    if actual_level == "allow" {
+        return 0;
+    }
+    results.push(support::error(
+        ID,
+        format!("lint `{}` must be allow", required.name),
+        format!(
+            "`{}` must be `\"allow\"` (got `\"{actual_level}\"`). Reason: {}",
+            required.name, required.reason
+        ),
+        cargo_rel_path,
+    ));
+    1
 }
 
 #[cfg(test)]

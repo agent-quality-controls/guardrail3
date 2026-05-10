@@ -40,7 +40,7 @@ pub fn parse_document(
     let program = parse_program(&abs_path, &source, selected_config.kind)?;
     let raw = serde_json::json!({
         "selected_config": {
-            "rel_path": selected_config.rel_path.clone(),
+            "rel_path": selected_config.rel_path,
             "kind": selected_config.kind,
         }
     });
@@ -120,7 +120,7 @@ fn parse_program(
     source: &str,
     kind: AstroConfigFileKind,
 ) -> Result<swc_ecma_ast::Program, crate::error::Error> {
-    let cm: Lrc<SourceMap> = Default::default();
+    let cm: Lrc<SourceMap> = Lrc::default();
     let fm = cm.new_source_file(
         FileName::Real(PathBuf::from(abs_path)).into(),
         source.to_owned(),
@@ -329,11 +329,10 @@ fn collect_module_state(module: &Module, state: &mut AnalysisState) {
                             );
                         }
                         swc_ecma_ast::ImportSpecifier::Named(named_specifier) => {
-                            let imported_name = named_specifier
-                                .imported
-                                .as_ref()
-                                .map(module_export_name)
-                                .unwrap_or_else(|| named_specifier.local.sym.to_string());
+                            let imported_name = named_specifier.imported.as_ref().map_or_else(
+                                || named_specifier.local.sym.to_string(),
+                                module_export_name,
+                            );
                             let _ = state.import_bindings.insert(
                                 named_specifier.local.sym.to_string(),
                                 ImportBinding {
@@ -376,7 +375,7 @@ fn collect_module_state(module: &Module, state: &mut AnalysisState) {
                 collect_named_exports(export_decl, state);
             }
             ModuleItem::Stmt(stmt) => collect_statement_state(stmt, state),
-            _ => {}
+            ModuleItem::ModuleDecl(_) => {}
         }
     }
 }
@@ -489,8 +488,7 @@ fn collect_named_exports(export_decl: &swc_ecma_ast::NamedExport, state: &mut An
         let export_name = named
             .exported
             .as_ref()
-            .map(module_export_name)
-            .unwrap_or_else(|| module_export_name(&named.orig));
+            .map_or_else(|| module_export_name(&named.orig), module_export_name);
         let local_name = module_export_name(&named.orig);
         if const_binding(state, &local_name).is_some() {
             let _ = state.exported_const_names.insert(export_name, local_name);
@@ -725,10 +723,11 @@ fn simple_assignment_root_ident(target: &swc_ecma_ast::SimpleAssignTarget) -> Op
     }
 }
 
-fn pat_assignment_root_ident(target: &swc_ecma_ast::AssignTargetPat) -> Option<&str> {
+const fn pat_assignment_root_ident(target: &swc_ecma_ast::AssignTargetPat) -> Option<&str> {
     match target {
-        swc_ecma_ast::AssignTargetPat::Array(_) | swc_ecma_ast::AssignTargetPat::Object(_) => None,
-        swc_ecma_ast::AssignTargetPat::Invalid(_) => None,
+        swc_ecma_ast::AssignTargetPat::Array(_)
+        | swc_ecma_ast::AssignTargetPat::Object(_)
+        | swc_ecma_ast::AssignTargetPat::Invalid(_) => None,
     }
 }
 
@@ -781,9 +780,8 @@ fn assignment_exports_target(assign_expr: &AssignExpr) -> bool {
         swc_ecma_ast::AssignTarget::Simple(simple) => simple,
         swc_ecma_ast::AssignTarget::Pat(_) => return false,
     };
-    let member = match left {
-        swc_ecma_ast::SimpleAssignTarget::Member(member) => member,
-        _ => return false,
+    let swc_ecma_ast::SimpleAssignTarget::Member(member) = left else {
+        return false;
     };
 
     let object_ident = match &*member.obj {
@@ -1481,7 +1479,7 @@ fn strip_wrappers(mut expr: &Expr) -> &Expr {
     }
 }
 
-fn expr_kind_name(expr: &Expr) -> &'static str {
+const fn expr_kind_name(expr: &Expr) -> &'static str {
     match expr {
         Expr::Arrow(_) => "arrow",
         Expr::Fn(_) => "function",

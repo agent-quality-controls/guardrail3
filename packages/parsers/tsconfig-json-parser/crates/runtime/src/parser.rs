@@ -1,24 +1,36 @@
+use jsonc_parser::ParseOptions;
 use serde_json::Value;
 use tsconfig_json_parser_types::document::{
     TsconfigCompilerOptions, TsconfigDocument, TsconfigParseState, TsconfigSnapshot,
 };
 
+/// Internal `Result` alias used by the typed-snapshot normalizers.
+type NormalizeResult<T> = Result<T, String>;
+
+/// Parses `tsconfig.json` content into a typed snapshot.
+///
+/// # Errors
+/// Returns `Error::Jsonc` when the input is not valid JSONC or its shape is not a `tsconfig.json` object.
 #[allow(
     clippy::disallowed_methods,
     reason = "parser.rs IS the centralized tsconfig JSONC parser"
 )]
 pub fn parse(input: &str) -> Result<TsconfigSnapshot, crate::error::Error> {
-    let raw: Value = jsonc_parser::parse_to_serde_value(input, &Default::default())
+    let raw: Value = jsonc_parser::parse_to_serde_value(input, &ParseOptions::default())
         .map_err(|err| crate::error::Error::Jsonc(err.to_string()))?;
     normalize_snapshot(&raw).map_err(crate::error::Error::Jsonc)
 }
 
+/// Parses `tsconfig.json` content into a typed document, capturing schema mismatches as `Invalid`.
+///
+/// # Errors
+/// Returns `Error::Jsonc` when the input is not valid JSONC.
 #[allow(
     clippy::disallowed_methods,
     reason = "parser.rs IS the centralized tsconfig JSONC parser"
 )]
 pub fn parse_document(input: &str) -> Result<TsconfigDocument, crate::error::Error> {
-    let raw: Value = jsonc_parser::parse_to_serde_value(input, &Default::default())
+    let raw: Value = jsonc_parser::parse_to_serde_value(input, &ParseOptions::default())
         .map_err(|err| crate::error::Error::Jsonc(err.to_string()))?;
     let typed = match normalize_snapshot(&raw) {
         Ok(snapshot) => TsconfigParseState::Parsed(snapshot),
@@ -27,6 +39,10 @@ pub fn parse_document(input: &str) -> Result<TsconfigDocument, crate::error::Err
     Ok(TsconfigDocument { raw, typed })
 }
 
+/// Reads `tsconfig.json` from `path` and parses it into a typed snapshot.
+///
+/// # Errors
+/// Returns `Error::Io` if the file cannot be read, or `Error::Jsonc` if it is not valid JSONC.
 pub fn from_path(
     path: impl AsRef<std::path::Path>,
 ) -> Result<TsconfigSnapshot, crate::error::Error> {
@@ -34,6 +50,10 @@ pub fn from_path(
     parse(&content)
 }
 
+/// Reads `tsconfig.json` from `path` and parses it into a typed document.
+///
+/// # Errors
+/// Returns `Error::Io` if the file cannot be read, or `Error::Jsonc` if it is not valid JSONC.
 pub fn from_path_document(
     path: impl AsRef<std::path::Path>,
 ) -> Result<TsconfigDocument, crate::error::Error> {
@@ -41,7 +61,8 @@ pub fn from_path_document(
     parse_document(&content)
 }
 
-fn normalize_snapshot(raw: &Value) -> Result<TsconfigSnapshot, String> {
+/// Asserts the JSONC root is an object and produces a typed `TsconfigSnapshot` from its known fields.
+fn normalize_snapshot(raw: &Value) -> NormalizeResult<TsconfigSnapshot> {
     let root = raw
         .as_object()
         .ok_or_else(|| "tsconfig root must be a JSON object".to_owned())?;
@@ -53,7 +74,8 @@ fn normalize_snapshot(raw: &Value) -> Result<TsconfigSnapshot, String> {
     })
 }
 
-fn normalize_extends(value: Option<&Value>) -> Result<Vec<String>, String> {
+/// Normalizes the `extends` field, which can be missing, a single string, or an array of strings.
+fn normalize_extends(value: Option<&Value>) -> NormalizeResult<Vec<String>> {
     let Some(value) = value else {
         return Ok(Vec::new());
     };
@@ -63,14 +85,23 @@ fn normalize_extends(value: Option<&Value>) -> Result<Vec<String>, String> {
             .iter()
             .map(|item| match item {
                 Value::String(entry) => Ok(entry.clone()),
-                _ => Err("tsconfig extends array must contain only strings".to_owned()),
+                Value::Null
+                | Value::Bool(_)
+                | Value::Number(_)
+                | Value::Array(_)
+                | Value::Object(_) => {
+                    Err("tsconfig extends array must contain only strings".to_owned())
+                }
             })
             .collect(),
-        _ => Err("tsconfig extends must be a string or string array".to_owned()),
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::Object(_) => {
+            Err("tsconfig extends must be a string or string array".to_owned())
+        }
     }
 }
 
-fn normalize_compiler_options(value: Option<&Value>) -> Result<TsconfigCompilerOptions, String> {
+/// Extracts the strict-mode `compilerOptions` flags this parser cares about into a typed snapshot.
+fn normalize_compiler_options(value: Option<&Value>) -> NormalizeResult<TsconfigCompilerOptions> {
     let Some(value) = value else {
         return Ok(TsconfigCompilerOptions::default());
     };
@@ -99,6 +130,7 @@ fn normalize_compiler_options(value: Option<&Value>) -> Result<TsconfigCompilerO
     })
 }
 
+/// Returns `Some(bool)` when `value` is a JSON boolean, otherwise `None`.
 fn bool_value(value: Option<&Value>) -> Option<bool> {
     value.and_then(Value::as_bool)
 }

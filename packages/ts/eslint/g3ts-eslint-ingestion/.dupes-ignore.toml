@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "f39c9a9e154c67a3"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "0cd76c80e7eff19c"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "3e57974a7aa8b241"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "830b49ddc089c1da"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "b672bb2f6a9c6d1f"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "ba54881d57080b71"
+reason = "per-rule extension predicate / per-test setup: each predicate handles a distinct file kind / each test exercises a distinct ingestion path; deduping would couple unrelated check paths, conflicts with real-proof-site contract"

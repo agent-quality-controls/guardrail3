@@ -4,6 +4,7 @@ use g3ts_style_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `REQUIRED_PACKAGES` constant.
 const REQUIRED_PACKAGES: [&str; 5] = [
     "stylelint",
     "stylelint-config-standard",
@@ -11,9 +12,13 @@ const REQUIRED_PACKAGES: [&str; 5] = [
     "@double-great/stylelint-a11y",
     "g3ts-eslint-plugin-style-policy",
 ];
+/// `FORBIDDEN_PACKAGES` constant.
 const FORBIDDEN_PACKAGES: [&str; 1] = ["eslint-plugin-tailwind-ban"];
+/// `REQUIRED_EXTENDS` constant.
 const REQUIRED_EXTENDS: [&str; 2] = ["stylelint-config-standard", "stylelint-config-tailwindcss"];
+/// `REQUIRED_PLUGINS` constant.
 const REQUIRED_PLUGINS: [&str; 1] = ["@double-great/stylelint-a11y"];
+/// `REQUIRED_A11Y_RULES` constant.
 const REQUIRED_A11Y_RULES: [&str; 11] = [
     "a11y/content-property-no-static-value",
     "a11y/font-size-is-readable",
@@ -49,6 +54,13 @@ pub fn check(input: &G3TsStyleConfigChecksInput) -> Vec<G3CheckResult> {
     results
 }
 
+/// `check_policy`: check policy.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Match has a guarded Parsed arm and treats every other case (including future \
+              variants) as policy-not-configured; explicit per-variant arms would duplicate \
+              the same failure body"
+)]
 fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let rel_path = policy_rel_path(&contract.policy);
     match &contract.policy {
@@ -74,6 +86,7 @@ fn check_policy(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResu
     }
 }
 
+/// `check_policy_paths`: check policy paths.
 fn check_policy_paths(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let rel_path = policy_rel_path(&contract.policy);
     let Some(snapshot) = parsed_policy(&contract.policy) else {
@@ -104,6 +117,7 @@ fn check_policy_paths(contract: &G3TsStyleContractInput, results: &mut Vec<G3Che
     }
 }
 
+/// `check_packages`: check packages.
 fn check_packages(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let missing = REQUIRED_PACKAGES
         .iter()
@@ -159,6 +173,13 @@ fn check_packages(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckRe
     }
 }
 
+/// `check_stylelint`: check stylelint.
+#[expect(
+    clippy::too_many_lines,
+    reason = "Linear single-function check expressing distinct Stylelint config-surface \
+              variants with their result emissions; splitting would require shared mutable \
+              state plumbing that would obscure the linear control flow"
+)]
 fn check_stylelint(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let rel_path = stylelint_rel_path(&contract.stylelint_config);
     let Some(snapshot) = parsed_stylelint(&contract.stylelint_config) else {
@@ -240,6 +261,7 @@ fn check_stylelint(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckR
     }
 }
 
+/// `check_css_lint_script`: check css lint script.
 fn check_css_lint_script(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let rel_path = package_rel_path(&contract.package);
     let Some(package) = parsed_package(&contract.package) else {
@@ -283,6 +305,7 @@ fn check_css_lint_script(contract: &G3TsStyleContractInput, results: &mut Vec<G3
     }
 }
 
+/// `check_tailwind_eslint`: check tailwind eslint.
 fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3CheckResult>) {
     let rel_path = eslint_rel_path(&contract.eslint_config);
     let Some(snapshot) = parsed_eslint(&contract.eslint_config) else {
@@ -318,11 +341,13 @@ fn check_tailwind_eslint(contract: &G3TsStyleContractInput, results: &mut Vec<G3
     }
 }
 
+/// `valid_rel_path`: valid rel path.
 fn valid_rel_path(path: &str) -> bool {
     let trimmed = path.trim();
     !invalid_common_path(trimmed) && !trimmed.starts_with('/') && !external_url(trimmed)
 }
 
+/// `invalid_common_path`: invalid common path.
 fn invalid_common_path(path: &str) -> bool {
     path.is_empty()
         || path.contains('\\')
@@ -332,6 +357,7 @@ fn invalid_common_path(path: &str) -> bool {
         || path.split('/').any(|segment| segment == "..")
 }
 
+/// `has_encoded_parent_segment`: has encoded parent segment.
 fn has_encoded_parent_segment(path: &str) -> bool {
     path.split('/').any(|segment| {
         let lower = segment.to_ascii_lowercase();
@@ -339,6 +365,7 @@ fn has_encoded_parent_segment(path: &str) -> bool {
     })
 }
 
+/// `external_url`: external url.
 fn external_url(path: &str) -> bool {
     path.contains("://")
         || path.split_once(':').is_some_and(|(scheme, _)| {
@@ -349,6 +376,7 @@ fn external_url(path: &str) -> bool {
         })
 }
 
+/// `invalid_policy_paths`: invalid policy paths.
 fn invalid_policy_paths(snapshot: &g3ts_style_types::G3TsStylePolicySnapshot) -> Vec<String> {
     snapshot
         .source_globs
@@ -365,7 +393,8 @@ fn invalid_policy_paths(snapshot: &g3ts_style_types::G3TsStylePolicySnapshot) ->
         .collect()
 }
 
-fn parsed_package(
+/// `parsed_package`: parsed package.
+const fn parsed_package(
     package: &G3TsStylePackageSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStylePackageSurfaceSnapshot> {
     match package {
@@ -376,6 +405,7 @@ fn parsed_package(
     }
 }
 
+/// `package_present`: package present.
 fn package_present(package: &G3TsStylePackageSurfaceState, dependency_name: &str) -> bool {
     parsed_package(package).is_some_and(|snapshot| {
         snapshot
@@ -386,6 +416,13 @@ fn package_present(package: &G3TsStylePackageSurfaceState, dependency_name: &str
     })
 }
 
+/// `policy_rel_path`: policy rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn policy_rel_path(policy: &G3TsStylePolicySurfaceState) -> Option<&str> {
     match policy {
         G3TsStylePolicySurfaceState::Missing { rel_path }
@@ -397,7 +434,8 @@ fn policy_rel_path(policy: &G3TsStylePolicySurfaceState) -> Option<&str> {
     }
 }
 
-fn parsed_policy(
+/// `parsed_policy`: parsed policy.
+const fn parsed_policy(
     policy: &G3TsStylePolicySurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStylePolicySnapshot> {
     match policy {
@@ -410,6 +448,13 @@ fn parsed_policy(
     }
 }
 
+/// `package_rel_path`: package rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn package_rel_path(package: &G3TsStylePackageSurfaceState) -> Option<&str> {
     match package {
         G3TsStylePackageSurfaceState::Missing { rel_path }
@@ -419,7 +464,8 @@ fn package_rel_path(package: &G3TsStylePackageSurfaceState) -> Option<&str> {
     }
 }
 
-fn parsed_stylelint(
+/// `parsed_stylelint`: parsed stylelint.
+const fn parsed_stylelint(
     config: &G3TsStylelintConfigSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStylelintConfigSnapshot> {
     match config {
@@ -430,6 +476,13 @@ fn parsed_stylelint(
     }
 }
 
+/// `stylelint_rel_path`: stylelint rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn stylelint_rel_path(config: &G3TsStylelintConfigSurfaceState) -> Option<&str> {
     match config {
         G3TsStylelintConfigSurfaceState::Missing { rel_path }
@@ -439,7 +492,8 @@ fn stylelint_rel_path(config: &G3TsStylelintConfigSurfaceState) -> Option<&str> 
     }
 }
 
-fn parsed_eslint(
+/// `parsed_eslint`: parsed eslint.
+const fn parsed_eslint(
     config: &G3TsStyleEslintSurfaceState,
 ) -> Option<&g3ts_style_types::G3TsStyleEslintSurfaceSnapshot> {
     match config {
@@ -450,6 +504,13 @@ fn parsed_eslint(
     }
 }
 
+/// `eslint_rel_path`: eslint rel path.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Returns Option<&str> to match the rel-path getter shape shared across surface \
+              kinds; callers thread the Option through G3CheckResult::file which is also \
+              Option<&str>"
+)]
 fn eslint_rel_path(config: &G3TsStyleEslintSurfaceState) -> Option<&str> {
     match config {
         G3TsStyleEslintSurfaceState::Missing { rel_path }
@@ -459,6 +520,7 @@ fn eslint_rel_path(config: &G3TsStyleEslintSurfaceState) -> Option<&str> {
     }
 }
 
+/// `info`: info.
 fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -471,6 +533,7 @@ fn info(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckRe
     .into_inventory()
 }
 
+/// `error`: error.
 fn error(id: &str, title: &str, message: String, file: Option<&str>) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),

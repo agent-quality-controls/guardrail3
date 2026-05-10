@@ -1,6 +1,7 @@
 use g3ts_fmt_types::G3TsFmtConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs all fmt config checks and returns aggregated results.
 #[must_use]
 pub fn check(input: &G3TsFmtConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();

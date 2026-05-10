@@ -1,6 +1,7 @@
 use g3ts_fmt_types::{G3TsFmtConfigSurfaceState, G3TsFmtContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs the corresponding fmt config check.
 pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
     match &contract.prettier_config {
         G3TsFmtConfigSurfaceState::Parsed { rel_path } => crate::common::info(

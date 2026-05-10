@@ -8,6 +8,11 @@ pub fn find_root<'a>(
         .find(|candidate| candidate.root_rel_dir == root_rel_dir)
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_result(
     results: &[guardrail3_check_types::G3CheckResult],
     id: &str,
@@ -22,6 +27,11 @@ pub fn assert_result(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_file_has_result(
     results: &[guardrail3_check_types::G3CheckResult],
     file: &str,

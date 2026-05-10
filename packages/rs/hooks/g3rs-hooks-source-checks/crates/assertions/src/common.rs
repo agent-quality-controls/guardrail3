@@ -11,6 +11,7 @@ pub struct ExpectedRuleResult<'a> {
     pub message_contains: Option<&'a str>,
 }
 
+/// `rule_results` function.
 pub(crate) fn rule_results<'a>(
     results: &'a [G3CheckResult],
     rule_id: &str,
@@ -21,6 +22,7 @@ pub(crate) fn rule_results<'a>(
         .collect()
 }
 
+/// `assert_rule_results` function.
 pub(crate) fn assert_rule_results(
     results: &[G3CheckResult],
     rule_id: &str,
@@ -64,6 +66,7 @@ pub(crate) fn assert_rule_results(
     }
 }
 
+/// `assert_rule_quiet` function.
 pub(crate) fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
     let actual = rule_results(results, rule_id);
     assert!(
@@ -75,25 +78,25 @@ pub(crate) fn assert_rule_quiet(results: &[G3CheckResult], rule_id: &str) {
 #[macro_export]
 macro_rules! define_rule_assertions {
     ($rule_id:literal) => {
-        pub use crate::common::ExpectedRuleResult;
         use guardrail3_check_types::G3CheckResult;
         #[allow(unused_imports)]
         pub use guardrail3_check_types::G3Severity as Severity;
         #[allow(unused_imports)]
         pub use guardrail3_check_types::G3Severity;
+        pub use $crate::common::ExpectedRuleResult;
 
         const RULE_ID: &str = $rule_id;
 
         pub fn findings(results: &[G3CheckResult]) -> Vec<&G3CheckResult> {
-            crate::common::rule_results(results, RULE_ID)
+            $crate::common::rule_results(results, RULE_ID)
         }
 
         pub fn assert_rule_results(results: &[G3CheckResult], expected: &[ExpectedRuleResult<'_>]) {
-            crate::common::assert_rule_results(results, RULE_ID, expected);
+            $crate::common::assert_rule_results(results, RULE_ID, expected);
         }
 
         pub fn assert_rule_quiet(results: &[G3CheckResult]) {
-            crate::common::assert_rule_quiet(results, RULE_ID);
+            $crate::common::assert_rule_quiet(results, RULE_ID);
         }
     };
 }

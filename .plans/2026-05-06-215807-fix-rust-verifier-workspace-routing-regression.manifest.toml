@@ -1,0 +1,883 @@
+# Manifest extracted from .plans/2026-05-06-215807-fix-rust-verifier-workspace-routing-regression.md
+#
+# This file encodes every claim from the plan that can be mechanically
+# verified. Verifier scripts read this manifest and produce PASS/FAIL.
+# The plan prose is reference material only; verification is done against
+# this manifest.
+#
+# Schema: see .plans/manifest-schema.md (or the protocol spec at
+# /Users/tartakovsky/Projects/websmasher/websmasher/.plans/2026-05-08-132242-manifest-driven-verification-protocol.md).
+# This manifest extends the standard schema with two additional layers
+# (hook_pattern and regression_scenario) because the slice's "DB CHECK"
+# equivalent is shell-text presence/absence and runtime injection tests.
+
+# =============================================================================
+# Layer 1: tree shape — files and directories that must (not) exist
+# =============================================================================
+
+# The hook is the only shell artifact the slice owns.
+[[tree]]
+path = ".githooks/pre-commit"
+must_exist = true
+
+# Bash verifier scripts are deleted; replaced by binary subcommands.
+[[tree]]
+path = "scripts/g3rs/verify"
+must_exist = false
+
+[[tree]]
+path = "scripts/g3ts/verify"
+must_exist = false
+
+# scripts/repo-verify is NOT introduced; shared inline checks live in the hook.
+[[tree]]
+path = "scripts/repo-verify"
+must_exist = false
+
+# RS topology is unchanged; just confirm it's still there.
+[[tree]]
+path = "packages/rs/topology/g3rs-topology-types"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/topology/g3rs-topology-ingestion"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/topology/g3rs-topology-file-tree-checks"
+must_exist = true
+
+[[tree]]
+path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_guardrail3_rs_toml"
+must_exist = true
+
+# New TS topology family. Each workspace must have full adoption pack.
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types/guardrail3-rs.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types/clippy.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types/deny.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types/rust-toolchain.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-types/rustfmt.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion/guardrail3-rs.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion/clippy.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion/deny.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion/rust-toolchain.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-ingestion/rustfmt.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/guardrail3-rs.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/clippy.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/deny.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/rust-toolchain.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/rustfmt.toml"
+must_exist = true
+
+[[tree]]
+path = "packages/ts/topology/g3ts-topology-file-tree-checks/crates/runtime/src/no_nested_guardrail3_ts_toml"
+must_exist = true
+
+# =============================================================================
+# Layer 2: CLI surface — subcommands and accepted flags
+# =============================================================================
+
+[[cli_subcommand]]
+binary = "g3rs"
+subcommand = "validate"
+must_exist = true
+
+[[cli_subcommand]]
+binary = "g3rs"
+subcommand = "validate-repo"
+must_exist = true
+
+[[cli_subcommand]]
+binary = "g3ts"
+subcommand = "validate"
+must_exist = true
+
+[[cli_subcommand]]
+binary = "g3ts"
+subcommand = "validate-repo"
+must_exist = true
+
+[[cli_flag]]
+binary = "g3rs"
+subcommand = "validate"
+flag = "--path"
+must_accept = true
+
+[[cli_flag]]
+binary = "g3rs"
+subcommand = "validate"
+flag = "--staged"
+must_accept = true
+
+[[cli_flag]]
+binary = "g3rs"
+subcommand = "validate"
+flag = "--rules-only"
+must_accept = true
+
+[[cli_flag]]
+binary = "g3ts"
+subcommand = "validate"
+flag = "--path"
+must_accept = true
+
+[[cli_flag]]
+binary = "g3ts"
+subcommand = "validate"
+flag = "--staged"
+must_accept = true
+
+[[cli_flag]]
+binary = "g3ts"
+subcommand = "validate"
+flag = "--rules-only"
+must_accept = true
+
+# g3ts validate must accept --family topology
+[[cli_family_value]]
+binary = "g3ts"
+family = "topology"
+must_accept = true
+
+# =============================================================================
+# Layer 3: rule IDs (must exist with named severity on violation)
+# =============================================================================
+
+# Topology rules (run from validate-repo)
+[[rule]]
+id = "g3rs-topology/no-nested-workspaces"
+package = "g3rs-topology-file-tree-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-topology/no-nested-guardrail3-rs-toml"
+package = "g3rs-topology-file-tree-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-topology/no-nested-guardrail3-ts-toml"
+package = "g3ts-topology-file-tree-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# RS hook routing rules
+[[rule]]
+id = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/routing-no-env-override"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/routing-no-upward-walk-from-units"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/routing-discovers-marker-pair"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/routing-staged-files-diff-filter-acm"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/dedups-owning-units"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/skips-when-no-owning-unit"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# RS shared inline check rules
+[[rule]]
+id = "g3rs-hooks/merge-conflict-step-present"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/gitleaks-step-present"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/file-size-step-present"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# RS hook orchestration rules (calls validate-repo and validate per-unit)
+[[rule]]
+id = "g3rs-hooks/calls-validate-repo"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3rs-hooks/dispatches-per-unit-validate-staged"
+package = "g3rs-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# TS hook routing rules (parity with RS)
+[[rule]]
+id = "g3ts-hooks/routing-scope-not-hardcoded-literal"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/routing-no-env-override"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/routing-no-upward-walk-from-units"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/routing-discovers-marker-pair"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/routing-staged-files-diff-filter-acm"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/dedups-owning-units"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/skips-when-no-owning-unit"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/merge-conflict-scan"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/gitleaks-scan"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/file-size-cap"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/migration-consistency"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/lockfile-integrity"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/calls-validate-repo"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+[[rule]]
+id = "g3ts-hooks/dispatches-per-unit-validate-staged"
+package = "g3ts-hooks-source-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# Tool-presence rules (live in validate-repo only)
+[[rule]]
+id = "g3rs-hooks/required-tools-installed"
+package = "g3rs-hooks-config-checks"
+severity_on_violation = "Error"
+must_exist = true
+
+# =============================================================================
+# Rules that MUST be REMOVED (not just renamed; gone entirely)
+# These existed before the slice and contradict the new architecture.
+# =============================================================================
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-g3rs-validate"
+reason = "Verifier is in-binary; no script-content rule applies."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-metadata-locked"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-fmt-all-check"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-clippy-deny-warnings"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-deny-check"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-machete"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-test-workspace"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-mutants-check-in-place"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-dupes-thresholds"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-precommit-reads-staged-files"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-resolves-git-root"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-required-command-not-fail-open"
+reason = "Verifier is in-binary."
+
+[[rule_removed]]
+id = "g3rs-hooks/g3rs-verifier-exists"
+reason = "Bash verifier deleted."
+
+[[rule_removed]]
+id = "g3rs-hooks/precommit-calls-g3rs-verifier"
+reason = "Hook calls validate, not a separate verifier."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-does-not-call-g3ts"
+reason = "Verifier is in-binary; sovereignty enforced by Cargo deps (Layer 4)."
+
+[[rule_removed]]
+id = "g3rs-hooks/verifier-does-not-call-ts-package-manager"
+reason = "Verifier is in-binary."
+
+# =============================================================================
+# Layer 3b removed: family contracts use typed `G3HookCommandRequirement`
+# enum variants, not literal command strings, so a substring grep does not
+# work. The contract -> command mapping is enforced by:
+#   - Layer 3 (rule presence): each command has a corresponding source-check
+#     rule, and removing the rule fails Layer 3.
+#   - Layer 5 (regression scenarios): injecting a bad hook fires the rule
+#     end-to-end, which depends on the contract producing the correct
+#     command.
+# A future Layer 3b reimplementation could invoke each family's
+# `hook_contract()` via a test binary and diff against an expected list,
+# but that is not necessary for this slice's gating.
+# =============================================================================
+
+# =============================================================================
+# Layer 3c: hook required and forbidden patterns
+# =============================================================================
+
+[[hook_required]]
+pattern = "git diff --cached --name-only --diff-filter=ACM"
+description = "Staged-file collection with ACM filter."
+
+[[hook_required]]
+pattern = "g3rs validate-repo"
+description = "Hook calls RS repo-level validate."
+
+[[hook_required]]
+pattern = "g3ts validate-repo"
+description = "Hook calls TS repo-level validate."
+
+[[hook_required]]
+pattern = "g3rs validate"
+in_loop = true
+with_flag = "--staged"
+description = "Hook calls per-workspace validate with --staged inside discovery loop."
+
+[[hook_required]]
+pattern = "g3ts validate"
+in_loop = true
+with_flag = "--staged"
+description = "Hook calls per-package validate with --staged inside discovery loop."
+
+[[hook_required]]
+pattern = "Cargo.toml"
+description = "Hook tests for Cargo.toml marker (RS adopted unit)."
+
+[[hook_required]]
+pattern = "guardrail3-rs.toml"
+description = "Hook tests for guardrail3-rs.toml marker (RS adopted unit)."
+
+[[hook_required]]
+pattern = "package.json"
+description = "Hook tests for package.json marker (TS adopted unit)."
+
+[[hook_required]]
+pattern = "guardrail3-ts.toml"
+description = "Hook tests for guardrail3-ts.toml marker (TS adopted unit)."
+
+[[hook_required]]
+pattern = "gitleaks protect --staged"
+description = "Shared inline gitleaks scan."
+
+# Forbidden literal patterns in the hook
+[[hook_forbidden]]
+pattern = "GUARDRAIL3_RUST_WORKSPACE"
+description = "Env-override routing var (RS-named)."
+
+[[hook_forbidden]]
+pattern = "GUARDRAIL3_TS_SCOPE"
+description = "Env-override routing var (TS-named)."
+
+[[hook_forbidden]]
+pattern = "GUARDRAIL3_RS_SCOPE"
+description = "Env-override routing var."
+
+[[hook_forbidden]]
+pattern = "scripts/g3rs/verify"
+description = "Bash verifier script reference (deleted)."
+
+[[hook_forbidden]]
+pattern = "scripts/g3ts/verify"
+description = "Bash verifier script reference (deleted)."
+
+[[hook_forbidden]]
+pattern = "scripts/repo-verify"
+description = "Repo-verify script not introduced."
+
+# Hook must not invoke language toolchains directly. These are word-boundary
+# patterns; the verifier must distinguish "cargo " from "cargo_" etc.
+[[hook_forbidden_invocation]]
+command = "cargo"
+description = "Toolchain invocation forbidden in hook."
+
+[[hook_forbidden_invocation]]
+command = "pnpm"
+description = "Toolchain invocation forbidden in hook except inside the lockfile-integrity inline check or inside an echo error-message string telling the user how to regenerate."
+allowed_contexts = [
+  "pnpm install --frozen-lockfile",
+  "pnpm exec drizzle-kit generate",
+  "pnpm install'",
+]
+
+[[hook_forbidden_invocation]]
+command = "tsc"
+description = "Toolchain invocation forbidden in hook."
+
+[[hook_forbidden_invocation]]
+command = "eslint"
+description = "Toolchain invocation forbidden in hook."
+
+[[hook_forbidden_invocation]]
+command = "prettier"
+description = "Toolchain invocation forbidden in hook."
+
+[[hook_forbidden_invocation]]
+command = "cspell"
+description = "Toolchain invocation forbidden in hook."
+
+[[hook_forbidden_invocation]]
+command = "stylelint"
+description = "Toolchain invocation forbidden in hook."
+
+# =============================================================================
+# Layer 4: forbidden Cargo deps (sovereignty)
+# =============================================================================
+
+[[forbidden_dep]]
+from = "packages/rs/hooks/g3rs-hooks-source-checks/**"
+to_glob = "g3ts-*"
+description = "RS hooks source-checks must not depend on any TS package."
+
+[[forbidden_dep]]
+from = "packages/ts/hooks/g3ts-hooks-source-checks/**"
+to_glob = "g3rs-*"
+description = "TS hooks source-checks must not depend on any RS package."
+
+[[forbidden_dep]]
+from = "packages/rs/topology/g3rs-topology-*/**"
+to_glob = "g3ts-*"
+description = "RS topology must not depend on any TS package."
+
+[[forbidden_dep]]
+from = "packages/ts/topology/g3ts-topology-*/**"
+to_glob = "g3rs-*"
+description = "TS topology must not depend on any RS package."
+
+# =============================================================================
+# Layer 5: empirical regression scenarios
+# Each scenario injects a regression into a target file, runs validate-repo,
+# asserts exit code and a specific rule fires at Severity::Error, then
+# restores the file (md5 round-trip).
+# =============================================================================
+
+# RS hook regressions (10 scenarios)
+
+[[regression_scenario]]
+id = "rs-01-hardcoded-literal-scope"
+target = ".githooks/pre-commit"
+inject = "replace_token"
+inject_from = "--path \"$unit\" --staged"
+inject_to = "--path \"apps/guardrail3-rs\" --staged"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-02-repo-root-prefixed-literal-scope"
+target = ".githooks/pre-commit"
+inject = "replace_token"
+inject_from = "--path \"$unit\" --staged"
+inject_to = "--path \"$REPO_ROOT/apps/guardrail3-rs\" --staged"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-03-ambient-repo-root-after-loop"
+target = ".githooks/pre-commit"
+inject = "append_before_final_echo"
+inject_text = "g3rs validate --path \"$REPO_ROOT\" --staged"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-04-env-override-default-substitution"
+target = ".githooks/pre-commit"
+inject = "prepend_before_rust_loop"
+inject_text = "RUST_WORKSPACE=\"${GUARDRAIL3_RUST_WORKSPACE:-apps/guardrail3-rs}\""
+inject_replace_loop_scope = true
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-05-command-substitution-default"
+target = ".githooks/pre-commit"
+inject = "prepend_before_rust_loop"
+inject_text = "RUST_WORKSPACE=\"$(cat /etc/foo 2>/dev/null || echo apps/guardrail3-rs)\""
+inject_replace_loop_scope = true
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-06-default-fallback-literal"
+target = ".githooks/pre-commit"
+inject = "prepend_before_rust_loop_invocation"
+inject_text = "if [ -z \"$RUST_UNIQUE_UNITS\" ]; then RUST_UNIQUE_UNITS=\"apps/guardrail3-rs\"; fi"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-07-default-fallback-variable-prefixed-literal"
+target = ".githooks/pre-commit"
+inject = "prepend_before_rust_loop_invocation"
+inject_text = "if [ -z \"$RUST_UNIQUE_UNITS\" ]; then RUST_UNIQUE_UNITS=\"$REPO_ROOT/apps/guardrail3-rs\"; fi"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-08-direct-cargo-in-hook"
+target = ".githooks/pre-commit"
+inject = "append_before_final_echo"
+inject_text = "cargo deny check"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/no-toolchain-invocation"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-09-missing-gitleaks"
+target = ".githooks/pre-commit"
+inject = "delete_line_matching"
+inject_pattern = "gitleaks protect --staged"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/gitleaks-step-present"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "rs-10-half-adopted-marker-only-cargo-toml"
+target = ".githooks/pre-commit"
+inject = "delete_line_matching"
+inject_pattern = "guardrail3-rs.toml"
+command = "g3rs validate-repo"
+expected_exit = 1
+expected_rule = "g3rs-hooks/routing-discovers-marker-pair"
+expected_severity = "Error"
+
+# TS hook regressions (10 scenarios; mirror RS)
+
+[[regression_scenario]]
+id = "ts-01-hardcoded-literal-scope"
+target = ".githooks/pre-commit"
+inject = "replace_token_in_ts_loop"
+inject_from = "--path \"$unit\" --staged"
+inject_to = "--path \"apps/landing\" --staged"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-02-repo-root-prefixed-literal-scope"
+target = ".githooks/pre-commit"
+inject = "replace_token_in_ts_loop"
+inject_from = "--path \"$unit\" --staged"
+inject_to = "--path \"$REPO_ROOT/apps/landing\" --staged"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-03-ambient-repo-root-after-loop"
+target = ".githooks/pre-commit"
+inject = "append_before_final_echo"
+inject_text = "g3ts validate --path \"$REPO_ROOT\" --staged"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-scope-not-hardcoded-literal"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-04-env-override-default-substitution"
+target = ".githooks/pre-commit"
+inject = "prepend_before_ts_loop"
+inject_text = "TS_PKG=\"${GUARDRAIL3_TS_SCOPE:-apps/landing}\""
+inject_replace_loop_scope_ts = true
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-05-command-substitution-default"
+target = ".githooks/pre-commit"
+inject = "prepend_before_ts_loop"
+inject_text = "TS_PKG=\"$(cat /etc/foo 2>/dev/null || echo apps/landing)\""
+inject_replace_loop_scope_ts = true
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-06-default-fallback-literal"
+target = ".githooks/pre-commit"
+inject = "prepend_before_ts_loop_invocation"
+inject_text = "if [ -z \"$TS_UNIQUE_UNITS\" ]; then TS_UNIQUE_UNITS=\"apps/landing\"; fi"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-07-default-fallback-variable-prefixed-literal"
+target = ".githooks/pre-commit"
+inject = "prepend_before_ts_loop_invocation"
+inject_text = "if [ -z \"$TS_UNIQUE_UNITS\" ]; then TS_UNIQUE_UNITS=\"$REPO_ROOT/apps/landing\"; fi"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-no-env-override"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-08-direct-pnpm-in-hook"
+target = ".githooks/pre-commit"
+inject = "append_before_final_echo"
+inject_text = "pnpm exec eslint --max-warnings 0 ."
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/no-toolchain-invocation"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-09-missing-merge-conflict-scan"
+target = ".githooks/pre-commit"
+inject = "delete_block_matching"
+inject_pattern_start = "Checking for merge conflict markers"
+inject_pattern_end = "fi"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/merge-conflict-scan"
+expected_severity = "Error"
+
+[[regression_scenario]]
+id = "ts-10-half-adopted-marker-only-package-json"
+target = ".githooks/pre-commit"
+inject = "delete_line_matching"
+inject_pattern = "guardrail3-ts.toml"
+command = "g3ts validate-repo"
+expected_exit = 1
+expected_rule = "g3ts-hooks/routing-discovers-marker-pair"
+expected_severity = "Error"
+
+# Real-commit gating scenario: stage a file, inject, run hook directly,
+# assert exit non-zero, restore.
+
+[[commit_gate_scenario]]
+id = "rs-commit-blocked-on-hardcoded-scope"
+inject_target = ".githooks/pre-commit"
+inject = "replace_token"
+inject_from = "--path \"$unit\" --staged"
+inject_to = "--path \"apps/guardrail3-rs\" --staged"
+stage_path = "apps/guardrail3-rs/Cargo.lock"
+expected_hook_exit = 1
+description = "bash .githooks/pre-commit must exit non-zero with the regression."
+
+# =============================================================================
+# Layer 6: severity invariants — all listed rules emit Severity::Error on
+# their failure case.
+# =============================================================================
+# (Encoded via severity_on_violation in [[rule]] above. No separate section.)
+
+# =============================================================================
+# Layer 7: test pinning — every failure-mode test for the listed rules must
+# call `assert_error_finding` (not `assert_finding`) so a future severity
+# regression is caught at compile/test time.
+# =============================================================================
+
+[[test_pinning]]
+package = "g3rs-hooks-source-checks"
+test_helpers_accepted = [
+  "assert_error_finding",
+  "assert_finding",
+  "assert_missing_pattern_error",
+  "assert_missing_coverage_error",
+]
+applies_to_tests_matching = "fires_"
+description = "Every failure-mode test must use a helper that internally asserts Severity::Error: assert_error_finding directly, assert_finding (which delegates), or a rule-specific helper whose body asserts Error (e.g. assert_missing_pattern_error in contract_trigger_coverage)."
+
+[[test_pinning]]
+package = "g3ts-hooks-source-checks"
+test_helpers_accepted = ["assert_error_finding", "assert_finding"]
+applies_to_tests_matching = "fires_"
+description = "Every failure-mode test must use either assert_error_finding directly or assert_finding (which delegates to assert_error_finding)."
+
+# =============================================================================
+# Layer 8: real-artifact tests — each language must have at least one
+# include_str! test against each real artifact.
+# =============================================================================
+
+[[real_artifact_test]]
+package = "g3rs-hooks-source-checks"
+artifact = ".githooks/pre-commit"
+test_pattern = "real_repo.*hook.*passes"
+description = "Real-hook-passes-all-rules test must exist."
+
+[[real_artifact_test]]
+package = "g3ts-hooks-source-checks"
+artifact = ".githooks/pre-commit"
+test_pattern = "real_repo.*hook.*passes"
+description = "Real-hook-passes-all-rules test must exist (TS family)."

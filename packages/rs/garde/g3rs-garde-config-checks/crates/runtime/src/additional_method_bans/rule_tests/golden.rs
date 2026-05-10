@@ -11,7 +11,7 @@ fn inventories_when_additional_bans_present() {
 
     assertions::assert_contains(
         &results,
-        assertions::info(
+        &assertions::info(
             "additional garde method bans present",
             "All additional garde deserialization entry-point bans are present in the covering clippy configuration.",
             "clippy.toml",

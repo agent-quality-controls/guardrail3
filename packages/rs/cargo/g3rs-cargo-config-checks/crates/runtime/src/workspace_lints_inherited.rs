@@ -2,8 +2,10 @@ use cargo_toml_parser::types::CargoBoolFieldState;
 use g3rs_cargo_types::G3RsCargoWorkspaceMember;
 use guardrail3_check_types::G3CheckResult;
 
+/// I D const.
 const ID: &str = "g3rs-cargo/workspace-lints-inherited";
 
+/// check fn.
 pub(crate) fn check(member: &G3RsCargoWorkspaceMember, results: &mut Vec<G3CheckResult>) {
     match crate::support::member_lints_workspace_state(member) {
         CargoBoolFieldState::WrongType(_) => results.push(crate::support::error(

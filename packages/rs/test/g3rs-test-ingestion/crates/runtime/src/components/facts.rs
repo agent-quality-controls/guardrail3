@@ -1,3 +1,11 @@
+#![expect(
+    clippy::default_trait_access,
+    reason = "Default::default() chosen for explicit type-inferred init of facts struct fields"
+)]
+#![expect(
+    clippy::needless_pass_by_value,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestComponentSourceFacts};
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
@@ -8,6 +16,7 @@ use crate::components::support::{
 };
 use crate::roots::OwnedTestRoot;
 
+/// `build_owned_component` function.
 pub(crate) fn build_owned_component(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
@@ -45,6 +54,7 @@ pub(crate) fn build_owned_component(
     }
 }
 
+/// `public_component_facts` function.
 pub(crate) fn public_component_facts(
     components: &[OwnedTestComponent],
 ) -> Vec<G3RsTestComponentSourceFacts> {
@@ -61,6 +71,7 @@ pub(crate) fn public_component_facts(
         .collect()
 }
 
+/// `public_file_tree_component_facts` function.
 pub(crate) fn public_file_tree_component_facts(
     components: &[OwnedTestComponent],
 ) -> Vec<G3RsTestComponentFileTreeFacts> {

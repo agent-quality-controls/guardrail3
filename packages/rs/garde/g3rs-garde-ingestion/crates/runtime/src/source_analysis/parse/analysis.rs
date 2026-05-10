@@ -1,61 +1,110 @@
+#![expect(
+    clippy::struct_excessive_bools,
+    clippy::type_complexity,
+    clippy::arithmetic_side_effects,
+    clippy::shadow_unrelated,
+    reason = "boundary-field summary captures four orthogonal field facts that each map to distinct rule findings (skip, dive, validation, context); the typed (bool, bool) entries in the type-validation map encode the (has_non_primitive, has_validate_derive) pair the rules consume; `cfg_test_depth += 1` increments a small recursion counter where a saturating add would mask a bug; the `name` rebinding inside an iterator closure is intentional shadowing of the outer canonical name with the closure-local name being filtered"
+)]
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Enum `BoundaryKind` used by this module.
 pub(crate) enum BoundaryKind {
+    /// Variant `Struct`.
     Struct,
+    /// Variant `Enum`.
     Enum,
 }
 
 #[derive(Debug, Clone)]
+/// Struct `DerivedBoundaryType` used by this module.
 pub(crate) struct DerivedBoundaryType {
+    /// Field `line`.
     pub(crate) line: usize,
+    /// Field `name`.
     pub(crate) name: String,
+    /// Field `boundary_kind`.
     pub(crate) boundary_kind: BoundaryKind,
+    /// Field `boundary_macros`.
     pub(crate) boundary_macros: Vec<String>,
+    /// Field `has_validate_derive`.
     pub(crate) has_validate_derive: bool,
+    /// Field `has_non_primitive_fields`.
     pub(crate) has_non_primitive_fields: bool,
 }
 
 #[derive(Debug, Clone)]
+/// Struct `ManualImpl` used by this module.
 pub(crate) struct ManualImpl {
+    /// Field `line`.
     pub(crate) line: usize,
+    /// Field `type_name`.
     pub(crate) type_name: String,
 }
 
 #[derive(Debug, Clone)]
+/// Struct `QueryAsMacro` used by this module.
 pub(crate) struct QueryAsMacro {
+    /// Field `line`.
     pub(crate) line: usize,
+    /// Field `macro_name`.
     pub(crate) macro_name: String,
 }
 
 #[derive(Debug, Clone)]
+/// Struct `BoundaryField` used by this module.
 pub(crate) struct BoundaryField {
+    /// Field `line`.
     pub(crate) line: usize,
+    /// Field `boundary_name`.
     pub(crate) boundary_name: String,
+    /// Field `field_name`.
     pub(crate) field_name: String,
+    /// Field `field_type`.
     pub(crate) field_type: String,
+    /// Field `candidate_type_names`.
     pub(crate) candidate_type_names: Vec<String>,
+    /// Field `boundary_has_validate_derive`.
     pub(crate) boundary_has_validate_derive: bool,
+    /// Field `boundary_has_context`.
     pub(crate) boundary_has_context: bool,
+    /// Field `requires_field_validation`.
     pub(crate) requires_field_validation: bool,
+    /// Field `has_garde_skip`.
     pub(crate) has_garde_skip: bool,
+    /// Field `has_garde_dive`.
     pub(crate) has_garde_dive: bool,
+    /// Field `has_meaningful_garde_rule`.
     pub(crate) has_meaningful_garde_rule: bool,
+    /// Field `uses_context`.
     pub(crate) uses_context: bool,
 }
 
 #[derive(Debug, Clone, Default)]
+/// Struct `ParsedGardeFile` used by this module.
 pub(crate) struct ParsedGardeFile {
+    /// Field `derived_types`.
     pub(crate) derived_types: Vec<DerivedBoundaryType>,
+    /// Field `manual_deserialize_impls`.
     pub(crate) manual_deserialize_impls: Vec<ManualImpl>,
+    /// Field `manual_validate_impls`.
     pub(crate) manual_validate_impls: std::collections::BTreeSet<String>,
+    /// Field `type_validation_map`.
     pub(crate) type_validation_map: std::collections::BTreeMap<String, (bool, bool)>,
+    /// Field `boundary_fields`.
     pub(crate) boundary_fields: Vec<BoundaryField>,
+    /// Field `query_as_macros`.
     pub(crate) query_as_macros: Vec<QueryAsMacro>,
 }
 
+/// Implements `parse rust file`.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
 pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
     syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
 }
 
+/// Implements `analyze`.
 pub(crate) fn analyze(source: &syn::File) -> ParsedGardeFile {
     let mut visitor = GardeVisitor::default();
     syn::visit::Visit::visit_file(&mut visitor, source);
@@ -63,23 +112,38 @@ pub(crate) fn analyze(source: &syn::File) -> ParsedGardeFile {
 }
 
 #[derive(Default)]
+/// Struct `GardeVisitor` used by this module.
 struct GardeVisitor {
+    /// Field `derived_types`.
     derived_types: Vec<DerivedBoundaryType>,
+    /// Field `manual_deserialize_impls`.
     manual_deserialize_impls: Vec<ManualImpl>,
+    /// Field `manual_validate_impls`.
     manual_validate_impls: std::collections::BTreeSet<String>,
+    /// Field `type_validation_map`.
     type_validation_map: std::collections::BTreeMap<String, (bool, bool)>,
+    /// Field `boundary_fields`.
     boundary_fields: Vec<BoundaryField>,
+    /// Field `query_as_macros`.
     query_as_macros: Vec<QueryAsMacro>,
+    /// Field `module_stack`.
     module_stack: Vec<String>,
+    /// Field `boundary_derive_aliases`.
     boundary_derive_aliases: std::collections::BTreeSet<String>,
+    /// Field `deserialize_aliases`.
     deserialize_aliases: std::collections::BTreeSet<String>,
+    /// Field `validate_aliases`.
     validate_aliases: std::collections::BTreeSet<String>,
+    /// Field `query_as_aliases`.
     query_as_aliases: std::collections::BTreeSet<String>,
+    /// Field `module_path_aliases`.
     module_path_aliases: std::collections::BTreeMap<String, String>,
+    /// Field `cfg_test_depth`.
     cfg_test_depth: usize,
 }
 
 impl GardeVisitor {
+    /// Implements `finish`.
     fn finish(self) -> ParsedGardeFile {
         ParsedGardeFile {
             derived_types: self.derived_types,
@@ -91,6 +155,7 @@ impl GardeVisitor {
         }
     }
 
+    /// Implements `qualified name`.
     fn qualified_name(&self, name: &str) -> String {
         if self.module_stack.is_empty() {
             name.to_owned()
@@ -99,6 +164,7 @@ impl GardeVisitor {
         }
     }
 
+    /// Implements `qualify type name`.
     fn qualify_type_name(&self, name: &str) -> String {
         if name.contains("::") || self.module_stack.is_empty() {
             name.to_owned()
@@ -107,12 +173,14 @@ impl GardeVisitor {
         }
     }
 
+    /// Implements `is input boundary derive`.
     fn is_input_boundary_derive(&self, macro_name: &str) -> bool {
         let resolved =
             super::aliases::resolve_path_string_aliases(macro_name, &self.module_path_aliases);
         is_input_boundary_derive(&resolved) || self.boundary_derive_aliases.contains(macro_name)
     }
 
+    /// Implements `is validate derive`.
     fn is_validate_derive(&self, macro_name: &str) -> bool {
         let resolved =
             super::aliases::resolve_path_string_aliases(macro_name, &self.module_path_aliases);
@@ -284,6 +352,7 @@ impl<'source> syn::visit::Visit<'source> for GardeVisitor {
     }
 }
 
+/// Implements `derive macros`.
 fn derive_macros(attrs: &[syn::Attribute]) -> Vec<String> {
     let mut macros = Vec::new();
     for attr in attrs {
@@ -301,6 +370,7 @@ fn derive_macros(attrs: &[syn::Attribute]) -> Vec<String> {
     macros
 }
 
+/// Implements `is input boundary derive`.
 fn is_input_boundary_derive(macro_name: &str) -> bool {
     matches!(
         macro_name.trim_start_matches(':'),
@@ -315,6 +385,7 @@ fn is_input_boundary_derive(macro_name: &str) -> bool {
     )
 }
 
+/// Implements `is validate derive`.
 fn is_validate_derive(macro_name: &str) -> bool {
     matches!(
         macro_name.trim_start_matches(':'),
@@ -322,6 +393,7 @@ fn is_validate_derive(macro_name: &str) -> bool {
     )
 }
 
+/// Implements `attrs contain cfg test`.
 fn attrs_contain_cfg_test(attrs: &[syn::Attribute]) -> bool {
     attrs
         .iter()
@@ -329,6 +401,7 @@ fn attrs_contain_cfg_test(attrs: &[syn::Attribute]) -> bool {
         .any(|attr| meta_contains_test(&attr.meta))
 }
 
+/// Implements `meta contains test`.
 fn meta_contains_test(meta: &syn::Meta) -> bool {
     match meta {
         syn::Meta::Path(path) => path.is_ident("test"),

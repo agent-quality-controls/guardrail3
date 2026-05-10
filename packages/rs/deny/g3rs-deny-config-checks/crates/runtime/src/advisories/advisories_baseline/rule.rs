@@ -4,8 +4,10 @@ use guardrail3_check_types::G3CheckResult;
 use crate::support::expectations::expected_advisory_baseline;
 use crate::support::findings::error;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/advisories-baseline";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(advisories) = deny.advisories.as_ref() else {
         results.push(error(
@@ -20,7 +22,7 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     let (expected_unmaintained, expected_yanked) = expected_advisory_baseline();
     check_value(
         deny_rel_path,
-        advisories.unmaintained.as_ref().map(advisory_scope_str),
+        advisories.unmaintained.map(advisory_scope_str),
         "unmaintained",
         &expected_unmaintained,
         results,
@@ -34,7 +36,8 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
     );
 }
 
-const fn advisory_scope_str(scope: &AdvisoryScope) -> &'static str {
+/// Implements `advisory scope str`.
+const fn advisory_scope_str(scope: AdvisoryScope) -> &'static str {
     match scope {
         AdvisoryScope::All => "all",
         AdvisoryScope::Workspace => "workspace",
@@ -43,6 +46,7 @@ const fn advisory_scope_str(scope: &AdvisoryScope) -> &'static str {
     }
 }
 
+/// Implements `check value`.
 fn check_value(
     deny_rel_path: &str,
     actual: Option<&str>,

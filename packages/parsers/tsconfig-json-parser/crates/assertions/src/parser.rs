@@ -1,3 +1,9 @@
+#![allow(
+    clippy::missing_panics_doc,
+    clippy::assertions_on_constants,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses; explicit assert!(false, ...) is intentional unreachable-branch failure"
+)]
+
 use tsconfig_json_parser_runtime::types::TsconfigBoolFieldState;
 
 pub fn assert_parsed_document(document: &tsconfig_json_parser_runtime::types::TsconfigDocument) {

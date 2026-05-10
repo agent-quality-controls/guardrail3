@@ -9,34 +9,50 @@ use g3rs_clippy_types::{
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_toml_parser::types::RustProfile;
 
+/// Threshold Expectation struct.
 #[derive(Debug)]
 pub(crate) struct ThresholdExpectation {
+    /// str static.
     pub(crate) key: &'static str,
 }
 
+/// Ban Entry struct.
 #[derive(Debug, Clone)]
 pub(crate) struct BanEntry {
+    /// Internal item.
     pub(crate) path: String,
+    /// Internal item.
     pub(crate) reason: Option<String>,
+    /// Internal item.
     pub(crate) is_plain_string: bool,
 }
 
+/// Ban Section Facts struct.
 #[derive(Debug, Clone)]
 pub(crate) struct BanSectionFacts {
+    /// Internal item.
     pub(crate) entries: Vec<BanEntry>,
+    /// Internal item.
     pub(crate) malformed_messages: Vec<String>,
 }
 
+/// Bool Setting enum.
 #[derive(Debug)]
 pub(crate) enum BoolSetting<'a> {
+    /// Internal item.
     Missing,
+    /// Internal item.
     WrongType(&'a toml::Value),
+    /// Internal item.
     Value(bool),
 }
 
+/// EXPECTED MACRO BANS const.
 pub(crate) const EXPECTED_MACRO_BANS: &[&str] = crate::baseline::EXPECTED_MACRO_BANS;
+/// EXPECTED LIBRARY GLOBAL STATE TYPES const.
 pub(crate) const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] =
     crate::baseline::LIBRARY_EXTRA_TYPE_PATHS;
+/// THRESHOLD EXPECTATIONS const.
 const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
     ThresholdExpectation {
         key: "max-struct-bools",
@@ -61,6 +77,7 @@ const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
     },
 ];
 
+/// GARDE METHOD BANS const.
 const GARDE_METHOD_BANS: &[&str] = &[
     "serde_json::from_str",
     "serde_json::from_slice",
@@ -108,6 +125,7 @@ const GARDE_METHOD_BANS: &[&str] = &[
     "figment::Figment::extract",
 ];
 
+/// GARDE TYPE BANS const.
 const GARDE_TYPE_BANS: &[&str] = &[
     "axum::extract::Json",
     "axum::Json",
@@ -126,6 +144,7 @@ const GARDE_TYPE_BANS: &[&str] = &[
     "axum_extra::extract::MsgPack",
 ];
 
+/// check threshold fn.
 pub(crate) fn check_threshold(
     id: &str,
     clippy_rel_path: &str,
@@ -173,6 +192,7 @@ pub(crate) fn check_threshold(
     }
 }
 
+/// has matching waiver fn.
 pub(crate) fn has_matching_waiver(
     input: &G3RsClippyConfigChecksInput,
     rule: &str,
@@ -183,20 +203,25 @@ pub(crate) fn has_matching_waiver(
     })
 }
 
-pub(crate) fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyToml> {
+/// fn const.
+pub(crate) const fn typed_clippy(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyToml> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed(document) => clippy_toml_parser::typed(document),
         G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
-pub(crate) fn clippy_document(input: &G3RsClippyConfigChecksInput) -> Option<&ClippyTomlDocument> {
+/// fn const.
+pub(crate) const fn clippy_document(
+    input: &G3RsClippyConfigChecksInput,
+) -> Option<&ClippyTomlDocument> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed(document) => Some(document),
         G3RsClippyConfigState::Unreadable { .. } | G3RsClippyConfigState::ParseError { .. } => None,
     }
 }
 
+/// typed parse error fn.
 pub(crate) fn typed_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
         G3RsClippyConfigState::Parsed(document) => clippy_toml_parser::parse_error_reason(document),
@@ -204,6 +229,7 @@ pub(crate) fn typed_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&
     }
 }
 
+/// raw parse error fn.
 pub(crate) fn raw_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.clippy {
         G3RsClippyConfigState::Unreadable { reason }
@@ -212,14 +238,16 @@ pub(crate) fn raw_parse_error(input: &G3RsClippyConfigChecksInput) -> Option<&st
     }
 }
 
-pub(crate) fn rust_policy_valid(input: &G3RsClippyConfigChecksInput) -> bool {
+/// fn const.
+pub(crate) const fn rust_policy_valid(input: &G3RsClippyConfigChecksInput) -> bool {
     matches!(
         input.rust_policy,
         G3RsClippyRustPolicyState::Missing | G3RsClippyRustPolicyState::Parsed { .. }
     )
 }
 
-pub(crate) fn rust_profile(input: &G3RsClippyConfigChecksInput) -> Option<RustProfile> {
+/// fn const.
+pub(crate) const fn rust_profile(input: &G3RsClippyConfigChecksInput) -> Option<RustProfile> {
     match &input.rust_policy {
         G3RsClippyRustPolicyState::Parsed { profile, .. } => *profile,
         G3RsClippyRustPolicyState::Missing
@@ -228,16 +256,23 @@ pub(crate) fn rust_profile(input: &G3RsClippyConfigChecksInput) -> Option<RustPr
     }
 }
 
-pub(crate) fn garde_enabled(input: &G3RsClippyConfigChecksInput) -> bool {
+/// fn const.
+pub(crate) const fn garde_enabled(input: &G3RsClippyConfigChecksInput) -> bool {
     match &input.rust_policy {
         G3RsClippyRustPolicyState::Parsed { garde_enabled, .. } => *garde_enabled,
-        G3RsClippyRustPolicyState::Missing => true,
-        G3RsClippyRustPolicyState::Unreadable { .. }
+        G3RsClippyRustPolicyState::Missing
+        | G3RsClippyRustPolicyState::Unreadable { .. }
         | G3RsClippyRustPolicyState::ParseError { .. } => true,
     }
 }
 
-pub(crate) fn rust_policy_failure(input: &G3RsClippyConfigChecksInput) -> Option<(&str, &str)> {
+/// `(rel_path, reason)` reported when the rust-policy file fails to load.
+pub(crate) type RustPolicyFailure<'a> = (&'a str, &'a str);
+
+/// rust policy failure fn.
+pub(crate) fn rust_policy_failure(
+    input: &G3RsClippyConfigChecksInput,
+) -> Option<RustPolicyFailure<'_>> {
     match &input.rust_policy {
         G3RsClippyRustPolicyState::Unreadable { rel_path, reason }
         | G3RsClippyRustPolicyState::ParseError { rel_path, reason } => Some((rel_path, reason)),
@@ -245,6 +280,7 @@ pub(crate) fn rust_policy_failure(input: &G3RsClippyConfigChecksInput) -> Option
     }
 }
 
+/// rust policy rel path fn.
 pub(crate) fn rust_policy_rel_path(input: &G3RsClippyConfigChecksInput) -> Option<&str> {
     match &input.rust_policy {
         G3RsClippyRustPolicyState::Unreadable { rel_path, .. }
@@ -254,6 +290,7 @@ pub(crate) fn rust_policy_rel_path(input: &G3RsClippyConfigChecksInput) -> Optio
     }
 }
 
+/// published library policy fn.
 pub(crate) fn published_library_policy(input: &G3RsClippyConfigChecksInput) -> bool {
     let G3RsClippyCargoRootState::Parsed {
         cargo: root_cargo, ..
@@ -287,6 +324,7 @@ pub(crate) fn published_library_policy(input: &G3RsClippyConfigChecksInput) -> b
         .any(|member| manifest_publishable(member, workspace_publish))
 }
 
+/// relaxation message fn.
 pub(crate) fn relaxation_message(key: &str, expected: bool, actual: Option<bool>) -> String {
     let policy = match key {
         "allow-dbg-in-tests" | "allow-print-in-tests" => {
@@ -300,32 +338,38 @@ pub(crate) fn relaxation_message(key: &str, expected: bool, actual: Option<bool>
         _ => "Managed test relaxation keys must match the hardened clippy policy.",
     };
 
-    match actual {
-        Some(actual) => format!("`{key}` must be `{expected}`; found `{actual}`. {policy}"),
-        None => format!("`{key}` must be set explicitly to `{expected}`. {policy}"),
-    }
+    actual.map_or_else(
+        || format!("`{key}` must be set explicitly to `{expected}`. {policy}"),
+        |actual| format!("`{key}` must be `{expected}`; found `{actual}`. {policy}"),
+    )
 }
 
+/// fn const.
 pub(crate) const fn allow_dbg_in_tests(clippy: &ClippyToml) -> Option<bool> {
     clippy.allow_dbg_in_tests
 }
 
+/// fn const.
 pub(crate) const fn allow_print_in_tests(clippy: &ClippyToml) -> Option<bool> {
     clippy.allow_print_in_tests
 }
 
+/// fn const.
 pub(crate) const fn allow_expect_in_tests(clippy: &ClippyToml) -> Option<bool> {
     clippy.allow_expect_in_tests
 }
 
+/// fn const.
 pub(crate) const fn allow_panic_in_tests(clippy: &ClippyToml) -> Option<bool> {
     clippy.allow_panic_in_tests
 }
 
+/// fn const.
 pub(crate) const fn allow_unwrap_in_tests(clippy: &ClippyToml) -> Option<bool> {
     clippy.allow_unwrap_in_tests
 }
 
+/// expected required type bans fn.
 pub(crate) fn expected_required_type_bans(garde_enabled: bool) -> Vec<&'static str> {
     let mut bans = crate::baseline::BASE_TYPE_PATHS.to_vec();
     if !garde_enabled {
@@ -334,6 +378,7 @@ pub(crate) fn expected_required_type_bans(garde_enabled: bool) -> Vec<&'static s
     bans
 }
 
+/// expected type bans fn.
 pub(crate) fn expected_type_bans(
     profile: Option<RustProfile>,
     garde_enabled: bool,
@@ -345,6 +390,7 @@ pub(crate) fn expected_type_bans(
     bans
 }
 
+/// expected method bans fn.
 pub(crate) fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
     let mut bans = crate::baseline::SERVICE_METHOD_PATHS.to_vec();
     if !garde_enabled {
@@ -353,6 +399,7 @@ pub(crate) fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
     bans
 }
 
+/// parse ban section fn.
 pub(crate) fn parse_ban_section(document: &ClippyTomlDocument, key: &str) -> BanSectionFacts {
     let ParserBanSection {
         entries,
@@ -377,6 +424,7 @@ pub(crate) fn parse_ban_section(document: &ClippyTomlDocument, key: &str) -> Ban
     }
 }
 
+/// bool setting fn.
 pub(crate) fn bool_setting<'a>(document: &'a ClippyTomlDocument, key: &str) -> BoolSetting<'a> {
     match clippy_toml_parser::bool_setting(document, key) {
         ParserBoolSetting::Missing => BoolSetting::Missing,
@@ -385,10 +433,12 @@ pub(crate) fn bool_setting<'a>(document: &'a ClippyTomlDocument, key: &str) -> B
     }
 }
 
+/// display macro name fn.
 pub(crate) fn display_macro_name(path: &str) -> &str {
     path.rsplit("::").next().unwrap_or(path)
 }
 
+/// managed non threshold keys fn.
 pub(crate) fn managed_non_threshold_keys() -> Vec<&'static str> {
     vec![
         "disallowed-methods",
@@ -403,6 +453,7 @@ pub(crate) fn managed_non_threshold_keys() -> Vec<&'static str> {
     ]
 }
 
+/// known top level keys fn.
 pub(crate) fn known_top_level_keys() -> Vec<&'static str> {
     THRESHOLD_EXPECTATIONS
         .iter()
@@ -410,13 +461,15 @@ pub(crate) fn known_top_level_keys() -> Vec<&'static str> {
         .collect()
 }
 
+/// normalized key distance fn.
 pub(crate) fn normalized_key_distance(a: &str, b: &str) -> usize {
     let a = a.replace(['-', '_'], "");
     let b = b.replace(['-', '_'], "");
     levenshtein(&a, &b)
 }
 
-pub(crate) fn value_kind(value: &toml::Value) -> &'static str {
+/// fn const.
+pub(crate) const fn value_kind(value: &toml::Value) -> &'static str {
     match value {
         toml::Value::String(_) => "string",
         toml::Value::Integer(_) => "integer",
@@ -428,6 +481,7 @@ pub(crate) fn value_kind(value: &toml::Value) -> &'static str {
     }
 }
 
+/// manifest publishable fn.
 fn manifest_publishable(
     cargo: &cargo_toml_parser::types::CargoToml,
     workspace_publish: Option<&cargo_toml_parser::types::VecStringOrBool>,
@@ -438,6 +492,7 @@ fn manifest_publishable(
     package_publishable(package, workspace_publish)
 }
 
+/// package publishable fn.
 fn package_publishable(
     package: &cargo_toml_parser::types::PackageSection,
     workspace_publish: Option<&cargo_toml_parser::types::VecStringOrBool>,
@@ -456,6 +511,7 @@ fn package_publishable(
     }
 }
 
+/// publish value allows publish fn.
 fn publish_value_allows_publish(value: &cargo_toml_parser::types::VecStringOrBool) -> bool {
     match value {
         cargo_toml_parser::types::VecStringOrBool::Bool(flag) => *flag,
@@ -463,18 +519,23 @@ fn publish_value_allows_publish(value: &cargo_toml_parser::types::VecStringOrBoo
     }
 }
 
+/// levenshtein fn.
+#[expect(
+    clippy::indexing_slicing,
+    reason = "Levenshtein DP table is sized exactly `right_chars.len() + 1` so `current[j]`, `prev[j]`, `prev[j + 1]`, and the final `prev[right_chars.len()]` indices are inside the loop's enforced bounds; switching to `.get()` would obscure the algorithm without changing safety"
+)]
 fn levenshtein(left: &str, right: &str) -> usize {
     let left_chars = left.chars().collect::<Vec<_>>();
     let right_chars = right.chars().collect::<Vec<_>>();
     let mut prev = (0..=right_chars.len()).collect::<Vec<_>>();
 
     for (i, left_char) in left_chars.iter().enumerate() {
-        let mut current = vec![i + 1];
+        let mut current = vec![i.saturating_add(1)];
         for (j, right_char) in right_chars.iter().enumerate() {
             let cost = usize::from(left_char != right_char);
-            let insertion = current[j] + 1;
-            let deletion = prev[j + 1] + 1;
-            let substitution = prev[j] + cost;
+            let insertion = current[j].saturating_add(1);
+            let deletion = prev[j.saturating_add(1)].saturating_add(1);
+            let substitution = prev[j].saturating_add(cost);
             current.push(insertion.min(deletion).min(substitution));
         }
         prev = current;

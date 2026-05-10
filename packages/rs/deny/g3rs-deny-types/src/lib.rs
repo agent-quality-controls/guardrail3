@@ -1,3 +1,6 @@
+//! Shared types for the g3rs deny family.
+
+/// Internal type definitions exposed via the facade re-exports.
 #[cfg(feature = "api")]
 mod types;
 

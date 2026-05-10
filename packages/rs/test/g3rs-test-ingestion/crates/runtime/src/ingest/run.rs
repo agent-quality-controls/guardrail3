@@ -1,3 +1,11 @@
+#![expect(
+    clippy::missing_errors_doc,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use g3rs_test_ingestion_types::{
     G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput, G3RsTestSourceChecksInput,
 };
@@ -15,6 +23,7 @@ pub fn ingest_for_config_checks(
     ingest_for_config_checks_with_tool_state(crawl, cargo_mutants_installed())
 }
 
+/// `ingest_for_config_checks_with_tool_state` function.
 pub(crate) fn ingest_for_config_checks_with_tool_state(
     crawl: &G3RsWorkspaceCrawl,
     cargo_mutants_installed: bool,
@@ -120,6 +129,7 @@ pub fn ingest_for_file_tree_checks(
         .collect()
 }
 
+/// `parse_optional_nextest` function.
 fn parse_optional_nextest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -147,6 +157,7 @@ fn parse_optional_nextest(
         })
 }
 
+/// `parse_optional_mutants` function.
 fn parse_optional_mutants(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -174,6 +185,11 @@ fn parse_optional_mutants(
     Ok((true, Some(parsed)))
 }
 
+/// `cargo_mutants_installed` function.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "this is the single sanctioned site that probes whether the cargo-mutants subcommand is available; callers depend on this."
+)]
 fn cargo_mutants_installed() -> bool {
     std::process::Command::new("cargo-mutants")
         .arg("--version")

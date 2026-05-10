@@ -19,6 +19,8 @@ allow-wildcard-paths = true
 highlight = "all"
 
 skip = [
+    { name = "hashbrown", reason = "Transitive duplicate from upstream parser stacks (swc_common pulls 0.14.5, newer tree-sitter pulls 0.17.0); pinning here would break cross-workspace parser contracts." },
+    { name = "siphasher", reason = "Transitive duplicate from upstream parser stacks (swc_common pulls 0.3.11, newer tree-sitter pulls 1.0.2); pinning here would break cross-workspace parser contracts." },
 ]
 
 deny = [
@@ -45,7 +47,7 @@ deny = [
     # --- Global state: use std lazy primitives instead of lazy_static ---
     { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
     # --- Error handling: standardize on thiserror ---
-    { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
+    { name = "anyhow", wrappers = ["swc_common"], reason = "Ban anyhow (standardize on thiserror); swc_common wrapper allowed because the upstream swc parser stack uses anyhow internally and the astro-config-parser depends on swc" },
     # --- Web framework: standardize on axum ---
     { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
     { name = "axum", wrappers = [], reason = "Ban framework dependencies in library profile (standardize on typed boundaries)" },
@@ -66,7 +68,7 @@ deny = [
     { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
     { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
     # --- Parsing: use structured parsers, never regex ---
-    { name = "regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, serde_json, toml)" },
+    { name = "regex", wrappers = ["tree-sitter"], reason = "Ban regex crates - use structured parsers (syn, serde_json, toml); tree-sitter wrapper allowed" },
     { name = "fancy-regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "onig", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
     { name = "pcre2", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
@@ -103,6 +105,14 @@ allow = [
     "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.8
+
+# Per-crate license clarification for ar_archive_writer (transitive build dep of psm pulled by
+# the swc parser stack used by astro-config-parser). The crate is dual-licensed; we elect
+# Apache-2.0 to keep our baseline allow-list intact.
+[[licenses.clarify]]
+crate = "ar_archive_writer"
+expression = "Apache-2.0"
+license-files = []
 
 # Workspace crates with `publish = false` don't need a license field
 [licenses.private]

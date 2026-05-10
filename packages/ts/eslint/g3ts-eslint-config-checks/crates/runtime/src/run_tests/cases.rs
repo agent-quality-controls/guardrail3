@@ -51,6 +51,10 @@ fn parse_error_reports_exists_inventory_and_parse_error() {
 }
 
 #[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "test enumerates every per-rule inventory finding the golden config produces; splitting would obscure cross-rule coverage"
+)]
 fn golden_config_reports_inventory_across_full_baseline() {
     let input = golden();
     let results = super::super::check(&input);
@@ -221,6 +225,10 @@ fn wrong_thresholds_report_threshold_error() {
 }
 
 #[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "test enumerates every per-rule-group error the missing-groups fixture produces; splitting would obscure cross-group coverage"
+)]
 fn missing_rule_groups_report_group_errors() {
     let input = missing_rule_groups();
     let results = super::super::check(&input);

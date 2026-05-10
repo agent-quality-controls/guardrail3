@@ -3,18 +3,24 @@ use std::path::{Component, Path};
 
 use g3_workspace_crawl as workspace_crawl;
 use g3ts_apparch_types as apparch_types;
-use tree_sitter::Parser;
+use tree_sitter::{Node, Parser};
 
 use crate::run::G3TsApparchIngestionError;
 
+/// Aggregated facts about the app's source tree.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct AppFacts {
+    /// All discovered TS/TSX source files with layer assignments.
     pub files: Vec<apparch_types::G3TsApparchSourceFile>,
+    /// Internal-to-internal import edges between layers.
     pub internal_edges: Vec<apparch_types::G3TsApparchInternalEdge>,
+    /// External (npm) imports keyed by module name.
     pub external_imports: Vec<apparch_types::G3TsApparchExternalImport>,
+    /// Public top-level exported items keyed by file/line.
     pub public_items: Vec<apparch_types::G3TsApparchPublicItem>,
 }
 
+/// Walk the workspace crawl and produce `AppFacts`.
 pub(crate) fn collect_app_facts(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
 ) -> Result<AppFacts, G3TsApparchIngestionError> {
@@ -72,6 +78,7 @@ pub(crate) fn collect_app_facts(
     })
 }
 
+/// Collect the readable, classified source files from `crawl`, sorted by rel-path.
 fn source_files(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
 ) -> Vec<apparch_types::G3TsApparchSourceFile> {
@@ -92,32 +99,51 @@ fn source_files(
     files
 }
 
+/// Map a rel-path under `src/...` to a layer, or `None` if it does not belong to any known layer.
 fn classify_layer(rel_path: &str) -> Option<apparch_types::G3TsApparchLayer> {
-    if is_source_extension(rel_path) {
-        if rel_path.starts_with("src/app/") {
-            return Some(apparch_types::G3TsApparchLayer::App);
-        }
-        if rel_path.starts_with("src/types/") {
-            return Some(apparch_types::G3TsApparchLayer::Types);
-        }
-        if rel_path.starts_with("src/logic/") {
-            return Some(apparch_types::G3TsApparchLayer::Logic);
-        }
-        if rel_path.starts_with("src/io/inbound/") {
-            return Some(apparch_types::G3TsApparchLayer::IoInbound);
-        }
-        if rel_path.starts_with("src/io/outbound/") {
-            return Some(apparch_types::G3TsApparchLayer::IoOutbound);
-        }
+    if !is_source_extension(rel_path) {
+        return None;
     }
-
+    if rel_path.starts_with("src/app/") {
+        return Some(apparch_types::G3TsApparchLayer::App);
+    }
+    if rel_path.starts_with("src/types/") {
+        return Some(apparch_types::G3TsApparchLayer::Types);
+    }
+    if rel_path.starts_with("src/logic/") {
+        return Some(apparch_types::G3TsApparchLayer::Logic);
+    }
+    if rel_path.starts_with("src/io/inbound/") {
+        return Some(apparch_types::G3TsApparchLayer::IoInbound);
+    }
+    if rel_path.starts_with("src/io/outbound/") {
+        return Some(apparch_types::G3TsApparchLayer::IoOutbound);
+    }
     None
 }
 
+/// Whether `rel_path` has a TypeScript source extension (`.ts`/`.tsx`, excluding `.d.ts`).
 fn is_source_extension(rel_path: &str) -> bool {
-    (rel_path.ends_with(".ts") || rel_path.ends_with(".tsx")) && !rel_path.ends_with(".d.ts")
+    let path = Path::new(rel_path);
+    let ext_matches = path
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("ts") || ext.eq_ignore_ascii_case("tsx"));
+    if !ext_matches {
+        return false;
+    }
+    !rel_path.rsplit_once('.').is_some_and(|(stem, _)| {
+        Path::new(stem)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("d"))
+    })
 }
 
+/// One-based line number for `node`'s starting row.
+fn line_one_based(node: Node<'_>) -> usize {
+    node.start_position().row.saturating_add(1)
+}
+
+/// Read the source bytes of `rel_path` from the crawl, returning a structured ingestion error on failure.
 fn read_source_file(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -135,31 +161,42 @@ fn read_source_file(
     })
 }
 
+/// One module-specifier import discovered in a source file.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 struct ParsedImport {
+    /// Kind of import (static, reexport, dynamic).
     kind: apparch_types::G3TsApparchImportKind,
+    /// Raw module specifier text (without quotes).
     specifier: String,
 }
 
+/// One top-level public item discovered by the parser.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ParsedPublicItem {
+    /// Exported name.
     item_name: String,
+    /// Kind of public item (function/class/interface/etc.).
     kind: apparch_types::G3TsApparchPublicItemKind,
+    /// One-based line number of the declaration.
     line: usize,
 }
 
+/// Parsed surface of one source file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct ParsedSourceFile {
+    /// Imports discovered in the file.
     imports: Vec<ParsedImport>,
+    /// Public top-level items discovered in the file.
     public_items: Vec<ParsedPublicItem>,
 }
 
+/// Parse a source file's text into imports and public items.
 fn parse_source_file(
     rel_path: &str,
     source: &str,
 ) -> Result<ParsedSourceFile, G3TsApparchIngestionError> {
     let mut parser = Parser::new();
-    let language = if rel_path.ends_with(".tsx") {
+    let language = if has_tsx_extension(rel_path) {
         tree_sitter_typescript::LANGUAGE_TSX
     } else {
         tree_sitter_typescript::LANGUAGE_TYPESCRIPT
@@ -177,7 +214,7 @@ fn parse_source_file(
     };
 
     let root = tree.root_node();
-    if let Some(reason) = first_intolerable_parse_error(root, source, rel_path.ends_with(".tsx")) {
+    if let Some(reason) = first_intolerable_parse_error(root, source, has_tsx_extension(rel_path)) {
         return Err(G3TsApparchIngestionError {
             message: format!("TypeScript parser reported syntax errors in `{rel_path}`: {reason}"),
         });
@@ -215,16 +252,20 @@ fn parse_source_file(
     })
 }
 
-fn first_intolerable_parse_error(
-    node: tree_sitter::Node<'_>,
-    source: &str,
-    is_tsx: bool,
-) -> Option<String> {
+/// Whether `rel_path` ends in `.tsx` (case-insensitive).
+fn has_tsx_extension(rel_path: &str) -> bool {
+    Path::new(rel_path)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("tsx"))
+}
+
+/// Find the first parser error worth reporting, recursing into children.
+fn first_intolerable_parse_error(node: Node<'_>, source: &str, is_tsx: bool) -> Option<String> {
     if node.is_missing() {
         return Some(format!(
             "missing `{}` token at line {}",
             node.kind(),
-            node.start_position().row + 1
+            line_one_based(node)
         ));
     }
 
@@ -233,7 +274,7 @@ fn first_intolerable_parse_error(
             "unexpected token {:?} at line {}",
             node.utf8_text(source.as_bytes())
                 .unwrap_or("<invalid utf8>"),
-            node.start_position().row + 1
+            line_one_based(node)
         ));
     }
 
@@ -251,11 +292,8 @@ fn first_intolerable_parse_error(
     None
 }
 
-fn is_tolerable_jsx_text_ampersand_error(
-    node: tree_sitter::Node<'_>,
-    source: &str,
-    is_tsx: bool,
-) -> bool {
+/// Whether `node` is a tolerable bare-`&` JSX text error (tree-sitter quirk).
+fn is_tolerable_jsx_text_ampersand_error(node: Node<'_>, source: &str, is_tsx: bool) -> bool {
     if !is_tsx || !node.is_error() || node.kind() != "ERROR" {
         return false;
     }
@@ -283,7 +321,8 @@ fn is_tolerable_jsx_text_ampersand_error(
     false
 }
 
-fn module_specifier_text(node: tree_sitter::Node<'_>, source: &str) -> Option<String> {
+/// Extract the module-specifier string under an import/export statement.
+fn module_specifier_text(node: Node<'_>, source: &str) -> Option<String> {
     let mut cursor = node.walk();
     node.children(&mut cursor)
         .find(|child| child.kind() == "string")
@@ -292,6 +331,7 @@ fn module_specifier_text(node: tree_sitter::Node<'_>, source: &str) -> Option<St
         .map(str::to_owned)
 }
 
+/// Strip surrounding `"`/`'` quotes from a string literal token.
 fn trim_string_literal(raw: &str) -> Option<&str> {
     raw.strip_prefix('"')
         .and_then(|value| value.strip_suffix('"'))
@@ -301,11 +341,8 @@ fn trim_string_literal(raw: &str) -> Option<&str> {
         })
 }
 
-fn collect_exported_items(
-    node: tree_sitter::Node<'_>,
-    source: &str,
-    public_items: &mut Vec<ParsedPublicItem>,
-) {
+/// Walk an `export_statement` and append top-level exported items to `public_items`.
+fn collect_exported_items(node: Node<'_>, source: &str, public_items: &mut Vec<ParsedPublicItem>) {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = match child.kind() {
@@ -323,13 +360,14 @@ fn collect_exported_items(
         public_items.push(ParsedPublicItem {
             item_name: exported_item_name(child, source),
             kind,
-            line: child.start_position().row + 1,
+            line: line_one_based(child),
         });
     }
 }
 
+/// Walk an exported `lexical_declaration` and append per-declarator public items.
 fn collect_exported_lexical_items(
-    node: tree_sitter::Node<'_>,
+    node: Node<'_>,
     source: &str,
     public_items: &mut Vec<ParsedPublicItem>,
 ) {
@@ -345,14 +383,13 @@ fn collect_exported_lexical_items(
         public_items.push(ParsedPublicItem {
             item_name: exported_item_name(child, source),
             kind,
-            line: child.start_position().row + 1,
+            line: line_one_based(child),
         });
     }
 }
 
-fn declarator_public_item_kind(
-    node: tree_sitter::Node<'_>,
-) -> Option<apparch_types::G3TsApparchPublicItemKind> {
+/// Map a `variable_declarator` initializer kind to a public-item kind.
+fn declarator_public_item_kind(node: Node<'_>) -> Option<apparch_types::G3TsApparchPublicItemKind> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         match child.kind() {
@@ -368,20 +405,17 @@ fn declarator_public_item_kind(
     None
 }
 
-fn exported_item_name(node: tree_sitter::Node<'_>, source: &str) -> String {
+/// Extract the exported item's identifier name, falling back to the node kind.
+fn exported_item_name(node: Node<'_>, source: &str) -> String {
     let mut cursor = node.walk();
     node.children(&mut cursor)
         .find(|child| child.kind() == "identifier" || child.kind() == "type_identifier")
         .and_then(|child| child.utf8_text(source.as_bytes()).ok())
-        .map(str::to_owned)
-        .unwrap_or_else(|| node.kind().to_owned())
+        .map_or_else(|| node.kind().to_owned(), str::to_owned)
 }
 
-fn collect_dynamic_imports(
-    node: tree_sitter::Node<'_>,
-    source: &str,
-    imports: &mut BTreeSet<ParsedImport>,
-) {
+/// Recursively look for `import("...")` calls and add them to `imports`.
+fn collect_dynamic_imports(node: Node<'_>, source: &str, imports: &mut BTreeSet<ParsedImport>) {
     if is_dynamic_import_call(node) {
         if let Some(specifier) = first_string_descendant_text(node, source) {
             let _ = imports.insert(ParsedImport {
@@ -397,7 +431,8 @@ fn collect_dynamic_imports(
     }
 }
 
-fn is_dynamic_import_call(node: tree_sitter::Node<'_>) -> bool {
+/// Whether `node` is a `call_expression` of `import(...)`.
+fn is_dynamic_import_call(node: Node<'_>) -> bool {
     if node.kind() != "call_expression" {
         return false;
     }
@@ -407,7 +442,8 @@ fn is_dynamic_import_call(node: tree_sitter::Node<'_>) -> bool {
         .any(|child| child.kind() == "import")
 }
 
-fn first_string_descendant_text(node: tree_sitter::Node<'_>, source: &str) -> Option<String> {
+/// First descendant string-literal text under `node`, if any.
+fn first_string_descendant_text(node: Node<'_>, source: &str) -> Option<String> {
     if node.kind() == "string" {
         return node
             .utf8_text(source.as_bytes())
@@ -426,14 +462,20 @@ fn first_string_descendant_text(node: tree_sitter::Node<'_>, source: &str) -> Op
     None
 }
 
+/// Resolution outcome for one import specifier.
 enum ResolvedImport {
+    /// Resolves to a known internal source file with a layer assignment.
     Internal {
+        /// Internal target rel-path.
         rel_path: String,
+        /// Target layer.
         layer: apparch_types::G3TsApparchLayer,
     },
+    /// External (npm) module specifier.
     External(String),
 }
 
+/// Resolve `specifier` from `from_rel_path` to either an internal or external import.
 fn resolve_import(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     from_rel_path: &str,
@@ -451,6 +493,7 @@ fn resolve_import(
     Some(ResolvedImport::External(specifier.to_owned()))
 }
 
+/// Resolve `base_rel_path` to an existing readable internal source file.
 fn resolve_internal_target(
     crawl: &workspace_crawl::G3RsWorkspaceCrawl,
     base_rel_path: &str,
@@ -473,6 +516,7 @@ fn resolve_internal_target(
     None
 }
 
+/// Build candidate rel-paths to try when resolving an internal import target.
 fn candidate_source_paths(base_rel_path: &str) -> Vec<String> {
     let mut candidates = Vec::new();
     if is_source_extension(base_rel_path) {
@@ -485,6 +529,7 @@ fn candidate_source_paths(base_rel_path: &str) -> Vec<String> {
     candidates
 }
 
+/// Normalize a relative path with `.`/`..` components into a `/`-joined string.
 fn normalize_relative_path(path: &Path) -> Option<String> {
     let mut segments = Vec::new();
     for component in path.components() {

@@ -8,7 +8,7 @@ fn warns_when_file_size_only_appears_in_comment() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("file-size check step missing"),
             inventory: Some(false),
             ..Default::default()
@@ -57,7 +57,7 @@ fi
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("file-size check step missing"),
             inventory: Some(false),
             ..Default::default()
@@ -71,7 +71,7 @@ fn warns_when_git_cat_file_size_is_only_echoed() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("file-size check step missing"),
             inventory: Some(false),
             ..Default::default()

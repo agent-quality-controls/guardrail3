@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::findings::warn;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/deprecated-advisories";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(advisories) = deny.advisories.as_ref() else {
         return;

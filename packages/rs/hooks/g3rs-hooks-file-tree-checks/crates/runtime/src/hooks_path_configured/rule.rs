@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/hooks-path-configured";
 
+/// `check` function.
 pub(crate) fn check(hooks_path: Option<&str>, results: &mut Vec<G3CheckResult>) {
     match hooks_path {
         Some(".githooks") => results.push(

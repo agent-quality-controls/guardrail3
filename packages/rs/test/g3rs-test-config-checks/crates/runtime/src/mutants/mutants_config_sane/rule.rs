@@ -1,8 +1,10 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/mutants-config-sane";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(mutants) = input.mutants.as_ref() else {
         return;
@@ -64,6 +66,7 @@ pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3Check
     }
 }
 
+/// `is_exclude_all_pattern` function.
 fn is_exclude_all_pattern(pattern: &str) -> bool {
     matches!(pattern.trim(), ".*" | "^.*$" | ".+" | "^.+$")
 }

@@ -102,6 +102,8 @@ g3rs-topology-file-tree-checks = { path = "../../packages/rs/topology/g3rs-topol
 g3rs-topology-hook-contract = { path = "../../packages/rs/topology/g3rs-topology-hook-contract" }
 g3rs-topology-ingestion = { path = "../../packages/rs/topology/g3rs-topology-ingestion", features = ["api"] }
 
+g3rs-rust-family-contracts = { path = "../../packages/rs/g3rs-rust-family-contracts", features = ["api"] }
+
 [workspace.lints.rust]
 warnings = "deny"
 unsafe_code = "forbid"

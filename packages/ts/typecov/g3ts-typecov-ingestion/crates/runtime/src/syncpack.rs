@@ -4,6 +4,7 @@ use g3ts_typecov_types::{
     G3TsTypecovSyncpackVersionGroupSnapshot,
 };
 
+/// `ingest_syncpack_config`: ingest syncpack config.
 pub(crate) fn ingest_syncpack_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -37,8 +38,12 @@ pub(crate) fn ingest_syncpack_config(
             reason: reason.to_owned(),
         };
     }
-    let typed = syncpack_config_parser::typed(&document)
-        .expect("parsed Syncpack config document should stay typed");
+    let Some(typed) = syncpack_config_parser::typed(&document) else {
+        return G3TsTypecovSyncpackSurfaceState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "parsed Syncpack config document was not typed".to_owned(),
+        };
+    };
     G3TsTypecovSyncpackSurfaceState::Parsed {
         snapshot: G3TsTypecovSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
@@ -53,11 +58,13 @@ pub(crate) fn ingest_syncpack_config(
     }
 }
 
+/// `included_file`: included file.
 fn included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
         && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
 }
 
+/// `syncpack_version_group`: syncpack version group.
 fn syncpack_version_group(
     group: syncpack_config_parser::types::SyncpackVersionGroup,
 ) -> G3TsTypecovSyncpackVersionGroupSnapshot {

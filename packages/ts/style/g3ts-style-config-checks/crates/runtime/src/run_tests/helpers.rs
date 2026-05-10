@@ -1,8 +1,19 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "Test helpers index fixture vectors at known constant positions; out-of-bounds \
+              indexing should panic to surface a fixture-construction bug"
+)]
+#![expect(
+    clippy::panic,
+    reason = "Test helpers panic to surface unexpected fixture states; this is the standard \
+              pattern for variant assertions inside fixture builders"
+)]
+
 use std::collections::BTreeMap;
 
 use g3ts_style_types::{
-    G3TsStyleConfigChecksInput, G3TsStyleContractInput, G3TsStyleEslintSurfaceSnapshot,
-    G3TsStyleEslintSurfaceState, G3TsStyleEslintProbeDisablePolicySnapshot,
+    G3TsStyleConfigChecksInput, G3TsStyleContractInput, G3TsStyleEslintProbeDisablePolicySnapshot,
+    G3TsStyleEslintSurfaceSnapshot, G3TsStyleEslintSurfaceState,
     G3TsStylePackageScriptCommandSeparator, G3TsStylePackageScriptToolInvocation,
     G3TsStylePackageSurfaceSnapshot, G3TsStylePackageSurfaceState, G3TsStylePolicySnapshot,
     G3TsStylePolicySurfaceState, G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,

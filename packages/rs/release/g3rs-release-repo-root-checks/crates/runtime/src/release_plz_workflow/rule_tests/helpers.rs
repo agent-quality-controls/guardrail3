@@ -1,9 +1,9 @@
-use g3rs_release_types::G3RsReleaseConfigRepo;
+use g3rs_release_types::{G3RsReleaseConfigRepo, G3RsReleaseConfigRepoWorkflowFlags};
 use guardrail3_check_types::G3CheckResult;
 
 pub(super) fn run(has_workflow: bool) -> Vec<G3CheckResult> {
     let mut input = input();
-    input.has_release_plz_workflow = has_workflow;
+    input.workflow_flags.has_release_plz_workflow = has_workflow;
     input.release_plz_workflow_rel_path =
         has_workflow.then(|| ".github/workflows/release.yml".to_owned());
     let mut results = Vec::new();
@@ -29,11 +29,13 @@ resolver = "2"
         cliff_exists: false,
         cliff: None,
         workflows: Vec::new(),
-        has_release_plz_workflow: false,
+        workflow_flags: G3RsReleaseConfigRepoWorkflowFlags {
+            has_release_plz_workflow: false,
+            has_publish_dry_run_workflow: false,
+            has_registry_token_workflow: false,
+        },
         release_plz_workflow_rel_path: None,
-        has_publish_dry_run_workflow: false,
         publish_dry_run_workflow_rel_path: None,
-        has_registry_token_workflow: false,
         registry_token_workflow_rel_path: None,
         semver_checks_installed: false,
     }

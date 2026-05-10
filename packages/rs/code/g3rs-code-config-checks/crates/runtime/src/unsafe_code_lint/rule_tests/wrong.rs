@@ -4,7 +4,7 @@ use super::helpers::{cargo_file, run_check};
 
 #[test]
 fn emits_error_for_deny() {
-    let results = run_check(vec![cargo_file(
+    let results = run_check(&[cargo_file(
         "Cargo.toml",
         "[workspace]\n[workspace.lints.rust]\nunsafe_code = \"deny\"\n",
     )]);

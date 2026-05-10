@@ -1,6 +1,8 @@
+/// Helpers for inlining tsconfig strict flags into a contract surface.
 #[cfg(feature = "api")]
 mod flags;
 
+/// Public type definitions for the tsconfig contract surface.
 #[cfg(feature = "api")]
 mod types;
 

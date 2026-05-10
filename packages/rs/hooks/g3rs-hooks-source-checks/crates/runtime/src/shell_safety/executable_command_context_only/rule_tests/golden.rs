@@ -75,9 +75,9 @@ g3rs rs validate --staged .
 #[test]
 fn ignores_inert_guardrail_text_when_env_wrapper_executes_real_command() {
     let results = run_case(
-        r#"# g3rs rs validate --staged .
+        r"# g3rs rs validate --staged .
 env -i g3rs rs validate --staged .
-"#,
+",
     );
     assertions::assert_rule_quiet(&results);
 }
@@ -85,9 +85,9 @@ env -i g3rs rs validate --staged .
 #[test]
 fn ignores_inert_guardrail_text_when_path_qualified_command_executes() {
     let results = run_case(
-        r#"# g3rs rs validate --staged .
+        r"# g3rs rs validate --staged .
 /usr/local/bin/g3rs rs validate --staged .
-"#,
+",
     );
     assertions::assert_rule_quiet(&results);
 }
@@ -95,12 +95,12 @@ fn ignores_inert_guardrail_text_when_path_qualified_command_executes() {
 #[test]
 fn ignores_inert_guardrail_text_when_called_function_executes_real_command() {
     let results = run_case(
-        r#"# g3rs rs validate --staged .
+        r"# g3rs rs validate --staged .
 run_guardrail() {
     g3rs rs validate --staged .
 }
 run_guardrail
-"#,
+",
     );
     assertions::assert_rule_quiet(&results);
 }

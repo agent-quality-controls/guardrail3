@@ -1,12 +1,31 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::indexing_slicing,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::match_same_arms,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use g3rs_hooks_types::{G3RsHookScriptKind, G3RsHooksSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
-use hook_shell_parser::parse_script;
 
+use crate::compat::{G3CheckResult as CompatResult, G3Severity};
+
+#[must_use]
 pub fn check(input: &G3RsHooksSourceChecksInput) -> Vec<G3CheckResult> {
     check_single(input, true)
 }
 
+#[must_use]
 pub fn check_all(inputs: &[G3RsHooksSourceChecksInput]) -> Vec<G3CheckResult> {
     let mut results = inputs
         .iter()
@@ -18,6 +37,7 @@ pub fn check_all(inputs: &[G3RsHooksSourceChecksInput]) -> Vec<G3CheckResult> {
     results
 }
 
+/// `check_single` function.
 fn check_single(
     input: &G3RsHooksSourceChecksInput,
     include_required_contracts: bool,
@@ -25,7 +45,10 @@ fn check_single(
     let kind = match input.kind {
         G3RsHookScriptKind::PreCommit => crate::facts::HookScriptKind::PreCommit,
         G3RsHookScriptKind::Modular => crate::facts::HookScriptKind::Modular,
-        G3RsHookScriptKind::G3RsVerifier => crate::facts::HookScriptKind::G3RsVerifier,
+        // Reason: the bash verifier was deleted; the verifier is now in-binary
+        // (`g3rs validate --path` / `g3rs validate-repo`). Any leftover ingestion
+        // input in the verifier slot is treated as a modular script for shape checks.
+        G3RsHookScriptKind::G3RsVerifier => crate::facts::HookScriptKind::Modular,
     };
     let rust_input = crate::inputs::RustHookCommandInput {
         rel_path: &input.rel_path,
@@ -56,15 +79,20 @@ fn check_single(
         crate::shell_safety::real_dispatcher_syntax_only::check(&dispatcher_input, &mut results);
 
         crate::gitleaks_step_present::check(&rust_input, &mut results);
-        check_precommit_calls_g3rs_verifier(input, &mut results);
+        crate::routing::scope_not_hardcoded_literal::check(&rust_input, &mut results);
+        crate::routing::no_env_override_routing::check(&rust_input, &mut results);
+        crate::routing::no_upward_walk_from_units::check(&rust_input, &mut results);
+        crate::routing::discovers_marker_pair::check(&rust_input, &mut results);
+        crate::routing::staged_files_diff_filter_acm::check(&rust_input, &mut results);
+        check_calls_validate_repo(&rust_input, &mut results);
+        check_dispatches_per_unit_validate_staged(&rust_input, &mut results);
+        check_dedups_owning_units(&rust_input, &mut results);
+        check_skips_when_no_owning_unit(&rust_input, &mut results);
+        check_no_toolchain_invocation(&rust_input, &mut results);
         crate::contract_trigger_coverage::rule::check(&rust_input, &mut results);
         if include_required_contracts {
             crate::required_contract_command_present::rule::check(&rust_input, &mut results);
         }
-    }
-
-    if input.kind == G3RsHookScriptKind::G3RsVerifier {
-        check_g3rs_verifier_contract(input, &mut results);
     }
 
     if !input.exists {
@@ -73,7 +101,7 @@ fn check_single(
 
     crate::shell_safety::shell_error_handling::check(&executable_input, &mut results);
     crate::shell_safety::valid_shebang::check(&executable_input, &mut results);
-    if input.exists && input.kind != G3RsHookScriptKind::G3RsVerifier {
+    if input.exists {
         crate::shell_safety::no_unconditional_exit_zero::check(&executable_input, &mut results);
         crate::shell_safety::no_bypass_instructions::check(&executable_input, &mut results);
         crate::workflow::merge_conflict_step_present::check(&executable_input, &mut results);
@@ -92,439 +120,288 @@ fn check_single(
     crate::compat::finish(results)
 }
 
-const PRECOMMIT_CALLS_G3RS_VERIFIER_ID: &str = "g3rs-hooks/precommit-calls-g3rs-verifier";
-const G3RS_VERIFIER_EXISTS_ID: &str = "g3rs-hooks/g3rs-verifier-exists";
-const G3RS_VERIFIER_DOES_NOT_CALL_G3TS_ID: &str = "g3rs-hooks/verifier-does-not-call-g3ts";
-const G3RS_VERIFIER_DOES_NOT_CALL_TS_PACKAGE_MANAGER_ID: &str =
-    "g3rs-hooks/verifier-does-not-call-ts-package-manager";
+/// `CALLS_VALIDATE_REPO_ID` constant.
+const CALLS_VALIDATE_REPO_ID: &str = "g3rs-hooks/calls-validate-repo";
+/// `DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID` constant.
+const DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID: &str =
+    "g3rs-hooks/dispatches-per-unit-validate-staged";
+/// `DEDUPS_OWNING_UNITS_ID` constant.
+const DEDUPS_OWNING_UNITS_ID: &str = "g3rs-hooks/dedups-owning-units";
+/// `SKIPS_WHEN_NO_OWNING_UNIT_ID` constant.
+const SKIPS_WHEN_NO_OWNING_UNIT_ID: &str = "g3rs-hooks/skips-when-no-owning-unit";
+/// `NO_TOOLCHAIN_INVOCATION_ID` constant.
+const NO_TOOLCHAIN_INVOCATION_ID: &str = "g3rs-hooks/no-toolchain-invocation";
 
-fn check_precommit_calls_g3rs_verifier(
-    input: &G3RsHooksSourceChecksInput,
-    results: &mut Vec<crate::compat::G3CheckResult>,
+/// `check_calls_validate_repo` function.
+fn check_calls_validate_repo(
+    input: &crate::inputs::RustHookCommandInput<'_>,
+    results: &mut Vec<CompatResult>,
 ) {
-    push(
-        any_resolved_command(&input.parsed, is_g3rs_verify_precommit_scope_command),
-        PRECOMMIT_CALLS_G3RS_VERIFIER_ID,
-        input.rel_path.as_str(),
-        "pre-commit calls Rust verifier",
-        ".githooks/pre-commit runs scripts/g3rs/verify with --mode pre-commit and --scope.",
-        ".githooks/pre-commit does not call Rust verifier",
-        ".githooks/pre-commit must run scripts/g3rs/verify --mode pre-commit --scope <scope>.",
-        results,
-    );
-}
-
-fn check_g3rs_verifier_contract(
-    input: &G3RsHooksSourceChecksInput,
-    results: &mut Vec<crate::compat::G3CheckResult>,
-) {
-    push(
-        input.exists,
-        G3RS_VERIFIER_EXISTS_ID,
-        input.rel_path.as_str(),
-        "Rust verifier script exists",
-        "scripts/g3rs/verify exists.",
-        "Rust verifier script missing",
-        "scripts/g3rs/verify must exist.",
-        results,
-    );
-    if !input.exists {
+    let found = any_resolved_command(input.parsed, |command| {
+        command.command_name() == "g3rs"
+            && command.args().first().map(String::as_str) == Some("validate-repo")
+    });
+    if found {
+        results.push(
+            CompatResult::from_parts(
+                CALLS_VALIDATE_REPO_ID.to_owned(),
+                G3Severity::Warn,
+                "hook calls g3rs validate-repo".to_owned(),
+                ".githooks/pre-commit invokes `g3rs validate-repo` for repo-level invariants."
+                    .to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
         return;
     }
+    results.push(CompatResult::from_parts(
+        CALLS_VALIDATE_REPO_ID.to_owned(),
+        G3Severity::Error,
+        "hook does not call g3rs validate-repo".to_owned(),
+        ".githooks/pre-commit must invoke `g3rs validate-repo` to enforce repo-level invariants \
+         (hook shape, tool presence, repo-wide topology, marker-pair completeness)."
+            .to_owned(),
+        Some(input.rel_path.to_owned()),
+        None,
+        false,
+    ));
+}
 
-    let pre_commit_parsed = parse_script(verifier_mode_body(input, "pre-commit").as_str());
-    let workspace_parsed = parse_script(verifier_mode_body(input, "workspace").as_str());
-    for requirement in REQUIRED_VERIFIER_COMMANDS {
-        let pre_commit_found = any_resolved_command(&pre_commit_parsed, requirement.predicate);
-        let workspace_found = any_resolved_command(&workspace_parsed, requirement.predicate);
-        push(
-            pre_commit_found && workspace_found,
-            requirement.id,
-            input.rel_path.as_str(),
-            requirement.ok_title,
-            requirement.ok_message,
-            requirement.missing_title,
-            requirement.missing_message,
-            results,
-        );
+/// `check_dispatches_per_unit_validate_staged` function.
+fn check_dispatches_per_unit_validate_staged(
+    input: &crate::inputs::RustHookCommandInput<'_>,
+    results: &mut Vec<CompatResult>,
+) {
+    // Walk source lines, find a `g3rs validate --path <var> --staged` call inside a `while`
+    // or `for` loop body.
+    let lines: Vec<&str> = input
+        .parsed
+        .source_lines
+        .iter()
+        .map(|line| line.raw.as_str())
+        .collect();
+    let mut depth: usize = 0;
+    let mut found = false;
+    for line in &lines {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with('#') {
+            continue;
+        }
+        if trimmed.starts_with("for ") || trimmed.starts_with("while ") {
+            depth += 1;
+            continue;
+        }
+        if trimmed.starts_with("done") {
+            depth = depth.saturating_sub(1);
+            continue;
+        }
+        if depth > 0 && line_is_g3rs_validate_path_staged(trimmed) {
+            found = true;
+            break;
+        }
     }
-    if let Some((line_no, command_text)) = first_fail_open_required_verifier_command(&input.parsed)
-    {
-        results.push(crate::compat::G3CheckResult::from_parts(
-            "g3rs-hooks/verifier-required-command-not-fail-open".to_owned(),
-            crate::compat::G3Severity::Error,
-            "Rust verifier required command is fail-open".to_owned(),
+    if found {
+        results.push(
+            CompatResult::from_parts(
+                DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID.to_owned(),
+                G3Severity::Warn,
+                "hook dispatches per-unit g3rs validate --staged".to_owned(),
+                ".githooks/pre-commit invokes `g3rs validate --path <unit> --staged` from a discovery loop."
+                    .to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
+        return;
+    }
+    results.push(CompatResult::from_parts(
+        DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID.to_owned(),
+        G3Severity::Error,
+        "hook does not dispatch per-unit g3rs validate --staged".to_owned(),
+        ".githooks/pre-commit must invoke `g3rs validate --path <unit> --staged` from a discovery loop over staged files."
+            .to_owned(),
+        Some(input.rel_path.to_owned()),
+        None,
+        false,
+    ));
+}
+
+/// `line_is_g3rs_validate_path_staged` function.
+fn line_is_g3rs_validate_path_staged(line: &str) -> bool {
+    let words = hook_shell_parser::command_query::shell_words(line);
+    let mut i = 0;
+    while i + 1 < words.len() {
+        if words[i] == "g3rs" && words[i + 1] == "validate" {
+            // Must contain --staged and --path among following args.
+            let tail = &words[i + 2..];
+            let has_staged = tail.iter().any(|w| w == "--staged");
+            let has_path = tail
+                .iter()
+                .any(|w| w == "--path" || w.starts_with("--path="));
+            return has_staged && has_path;
+        }
+        i += 1;
+    }
+    false
+}
+
+/// `check_dedups_owning_units` function.
+fn check_dedups_owning_units(
+    input: &crate::inputs::RustHookCommandInput<'_>,
+    results: &mut Vec<CompatResult>,
+) {
+    let body = source_text(input.parsed);
+    let dedup_present = body.lines().any(|line| {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with('#') {
+            return false;
+        }
+        line.contains("sort -u")
+            || line.contains("sort --unique")
+            || line.contains("uniq")
+            || line.contains("awk '!seen")
+    });
+    if dedup_present {
+        results.push(
+            CompatResult::from_parts(
+                DEDUPS_OWNING_UNITS_ID.to_owned(),
+                G3Severity::Warn,
+                "hook dedups owning units".to_owned(),
+                ".githooks/pre-commit dedups owning units before invoking `g3rs validate`."
+                    .to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
+        return;
+    }
+    results.push(CompatResult::from_parts(
+        DEDUPS_OWNING_UNITS_ID.to_owned(),
+        G3Severity::Error,
+        "hook does not dedup owning units".to_owned(),
+        ".githooks/pre-commit must dedup discovered owning Rust units (e.g. `sort -u`, `uniq`, or equivalent) before invoking `g3rs validate`."
+            .to_owned(),
+        Some(input.rel_path.to_owned()),
+        None,
+        false,
+    ));
+}
+
+/// `check_skips_when_no_owning_unit` function.
+fn check_skips_when_no_owning_unit(
+    input: &crate::inputs::RustHookCommandInput<'_>,
+    results: &mut Vec<CompatResult>,
+) {
+    let body = source_text(input.parsed);
+    // Lenient policy: when no owning unit found the hook must continue silently. Detect the
+    // presence of any `[ -z "$X" ]` / `[ -n "$X" ]` test that gates the validate dispatch
+    // OR a `continue` inside the discovery loop.
+    let lenient = body.lines().any(|line| {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with('#') {
+            return false;
+        }
+        trimmed.starts_with("continue")
+            || trimmed.contains("[ -z ")
+            || trimmed.contains("[ -n ")
+            || trimmed.contains("[[ -z ")
+            || trimmed.contains("[[ -n ")
+    });
+    if lenient {
+        results.push(
+            CompatResult::from_parts(
+                SKIPS_WHEN_NO_OWNING_UNIT_ID.to_owned(),
+                G3Severity::Warn,
+                "hook skips silently when no owning unit".to_owned(),
+                ".githooks/pre-commit gates the per-unit Rust validate on having discovered an owning adopted unit."
+                    .to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
+            .into_inventory(),
+        );
+        return;
+    }
+    results.push(CompatResult::from_parts(
+        SKIPS_WHEN_NO_OWNING_UNIT_ID.to_owned(),
+        G3Severity::Error,
+        "hook does not skip when no owning unit".to_owned(),
+        ".githooks/pre-commit must silently skip Rust-relevant staged files that have no owning adopted unit (lenient policy)."
+            .to_owned(),
+        Some(input.rel_path.to_owned()),
+        None,
+        false,
+    ));
+}
+
+/// `check_no_toolchain_invocation` function.
+fn check_no_toolchain_invocation(
+    input: &crate::inputs::RustHookCommandInput<'_>,
+    results: &mut Vec<CompatResult>,
+) {
+    // Cargo invocation outside of allowed contexts (e.g. inside command-substitution
+    // for environment metadata). The new contract: hook must not run `cargo` directly.
+    // All cargo work is inside `g3rs validate --path X --staged`.
+    let offending = first_offending_cargo_call(input.parsed);
+    if let Some((line_no, command_text)) = offending {
+        results.push(CompatResult::from_parts(
+            NO_TOOLCHAIN_INVOCATION_ID.to_owned(),
+            G3Severity::Error,
+            "hook invokes cargo directly".to_owned(),
             format!(
-                "Required verifier command `{command_text}` is softened by a fail-open wrapper. Remove the wrapper so scripts/g3rs/verify fails closed."
+                "`.githooks/pre-commit` invokes `{command_text}` directly. The hook must delegate all cargo work to `g3rs validate --path <unit> --staged`; no direct `cargo` invocations are allowed."
             ),
             Some(input.rel_path.to_owned()),
             Some(line_no),
             false,
         ));
+        return;
     }
-    push(
-        any_resolved_command(&input.parsed, is_git_rev_parse_root_command),
-        "g3rs-hooks/verifier-resolves-git-root",
-        input.rel_path.as_str(),
-        "Rust verifier resolves git root",
-        "scripts/g3rs/verify uses git rev-parse --show-toplevel.",
-        "Rust verifier does not resolve git root",
-        "scripts/g3rs/verify must resolve relative scopes from git rev-parse --show-toplevel.",
-        results,
-    );
-    push(
-        any_resolved_command(&pre_commit_parsed, is_git_cached_diff_name_only_command),
-        "g3rs-hooks/verifier-precommit-reads-staged-files",
-        input.rel_path.as_str(),
-        "Rust pre-commit verifier reads staged files",
-        "scripts/g3rs/verify pre-commit mode reads git diff --cached --name-only.",
-        "Rust pre-commit verifier does not read staged files",
-        "scripts/g3rs/verify --mode pre-commit must read git diff --cached --name-only.",
-        results,
-    );
-
-    push(
-        !any_resolved_command(&input.parsed, is_g3ts_command),
-        G3RS_VERIFIER_DOES_NOT_CALL_G3TS_ID,
-        input.rel_path.as_str(),
-        "Rust verifier does not call g3ts",
-        "scripts/g3rs/verify does not call the TypeScript verifier.",
-        "Rust verifier calls g3ts",
-        "scripts/g3rs/verify must not call g3ts.",
-        results,
-    );
-    push(
-        !any_resolved_command(&input.parsed, is_typescript_package_manager_command),
-        G3RS_VERIFIER_DOES_NOT_CALL_TS_PACKAGE_MANAGER_ID,
-        input.rel_path.as_str(),
-        "Rust verifier does not call TypeScript package managers",
-        "scripts/g3rs/verify does not call pnpm, npm, yarn, or bun.",
-        "Rust verifier calls a TypeScript package manager",
-        "scripts/g3rs/verify must not call pnpm, npm, yarn, or bun.",
-        results,
+    results.push(
+        CompatResult::from_parts(
+            NO_TOOLCHAIN_INVOCATION_ID.to_owned(),
+            G3Severity::Warn,
+            "hook does not invoke cargo directly".to_owned(),
+            ".githooks/pre-commit does not invoke cargo directly.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
+        )
+        .into_inventory(),
     );
 }
 
-fn first_fail_open_required_verifier_command(
+/// `first_offending_cargo_call` function.
+fn first_offending_cargo_call(
     parsed: &hook_shell_parser::types::ParsedShellScript,
 ) -> Option<(usize, String)> {
-    parsed.executable_lines.iter().find_map(|line| {
-        if line.softened_by.is_none() {
-            return None;
-        }
-        let line_has_required_command = REQUIRED_VERIFIER_COMMANDS.iter().any(|requirement| {
-            hook_shell_parser::command_query::any_resolved_command_on_line_in_context(
-                parsed,
-                parsed,
-                &line.raw,
-                line.line_no,
-                line.line_no,
-                requirement.predicate,
-            )
-        });
-        line_has_required_command.then(|| (line.line_no, line.command_text.to_owned()))
-    })
-}
-
-fn verifier_mode_body(input: &G3RsHooksSourceChecksInput, mode: &str) -> String {
-    let mut in_branch = false;
-    let mut body = String::new();
-    let branch_start = format!("{mode})");
-    for line in &input.parsed.source_lines {
-        let trimmed = line.raw.trim();
-        if trimmed == branch_start {
-            in_branch = true;
-            continue;
-        }
-        if in_branch && trimmed == ";;" {
-            break;
-        }
-        if in_branch {
-            body.push_str(line.raw.as_str());
-            body.push('\n');
+    for line in &parsed.executable_lines {
+        if line.command_name == "cargo" {
+            return Some((line.line_no, line.command_text.clone()));
         }
     }
-    body
+    None
 }
 
-struct VerifierCommandRequirement {
-    id: &'static str,
-    predicate: fn(&ResolvedCommand) -> bool,
-    ok_title: &'static str,
-    ok_message: &'static str,
-    missing_title: &'static str,
-    missing_message: &'static str,
+/// `source_text` function.
+fn source_text(parsed: &hook_shell_parser::types::ParsedShellScript) -> String {
+    parsed
+        .source_lines
+        .iter()
+        .map(|line| line.raw.as_str())
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
-const REQUIRED_VERIFIER_COMMANDS: &[VerifierCommandRequirement] = &[
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-g3rs-validate",
-        predicate: is_g3rs_validate_scope_command,
-        ok_title: "Rust verifier runs g3rs validate",
-        ok_message: "scripts/g3rs/verify runs g3rs validate --path \"$SCOPE\".",
-        missing_title: "Rust verifier missing g3rs validate",
-        missing_message: "scripts/g3rs/verify must run g3rs validate --path \"$SCOPE\".",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-metadata-locked",
-        predicate: is_cargo_metadata_locked_command,
-        ok_title: "Rust verifier runs cargo metadata",
-        ok_message: "scripts/g3rs/verify runs cargo metadata --locked.",
-        missing_title: "Rust verifier missing cargo metadata",
-        missing_message: "scripts/g3rs/verify must run cargo metadata --locked.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-fmt-all-check",
-        predicate: is_cargo_fmt_all_check_command,
-        ok_title: "Rust verifier runs cargo fmt",
-        ok_message: "scripts/g3rs/verify runs cargo fmt --all -- --check.",
-        missing_title: "Rust verifier missing cargo fmt",
-        missing_message: "scripts/g3rs/verify must run cargo fmt --all -- --check.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-clippy-deny-warnings",
-        predicate: is_cargo_clippy_warnings_command,
-        ok_title: "Rust verifier runs clippy with warnings denied",
-        ok_message: "scripts/g3rs/verify runs cargo clippy with -D warnings.",
-        missing_title: "Rust verifier missing clippy warning denial",
-        missing_message: "scripts/g3rs/verify must run cargo clippy --workspace --all-targets --all-features -- -D warnings.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-deny-check",
-        predicate: is_cargo_deny_check_command,
-        ok_title: "Rust verifier runs cargo deny",
-        ok_message: "scripts/g3rs/verify runs cargo deny check.",
-        missing_title: "Rust verifier missing cargo deny",
-        missing_message: "scripts/g3rs/verify must run cargo deny check.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-machete",
-        predicate: is_cargo_machete_command,
-        ok_title: "Rust verifier runs cargo machete",
-        ok_message: "scripts/g3rs/verify runs cargo machete.",
-        missing_title: "Rust verifier missing cargo machete",
-        missing_message: "scripts/g3rs/verify must run cargo machete.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-test-workspace",
-        predicate: is_cargo_test_workspace_command,
-        ok_title: "Rust verifier runs workspace tests",
-        ok_message: "scripts/g3rs/verify runs cargo test --workspace.",
-        missing_title: "Rust verifier missing workspace tests",
-        missing_message: "scripts/g3rs/verify must run cargo test --workspace.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-mutants-check-in-place",
-        predicate: is_cargo_mutants_check_in_place_command,
-        ok_title: "Rust verifier runs cargo mutants check",
-        ok_message: "scripts/g3rs/verify runs cargo mutants --check --in-place.",
-        missing_title: "Rust verifier missing cargo mutants check",
-        missing_message: "scripts/g3rs/verify must run cargo mutants --check --in-place.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-dupes-thresholds",
-        predicate: is_cargo_dupes_threshold_command,
-        ok_title: "Rust verifier runs cargo dupes with thresholds",
-        ok_message: "scripts/g3rs/verify runs cargo dupes check with required thresholds.",
-        missing_title: "Rust verifier missing cargo dupes thresholds",
-        missing_message: "scripts/g3rs/verify must run cargo dupes check --max-exact 85 --max-exact-percent 10.",
-    },
-    VerifierCommandRequirement {
-        id: "g3rs-hooks/verifier-runs-cargo-dupes-exclude-tests",
-        predicate: is_cargo_dupes_exclude_tests_command,
-        ok_title: "Rust verifier excludes test duplicates",
-        ok_message: "scripts/g3rs/verify runs cargo dupes check --exclude-tests.",
-        missing_title: "Rust verifier includes test duplicates",
-        missing_message: "scripts/g3rs/verify must run cargo dupes check --exclude-tests.",
-    },
-];
-
-fn push(
-    found: bool,
-    id: &str,
-    rel_path: &str,
-    ok_title: &str,
-    ok_message: &str,
-    missing_title: &str,
-    missing_message: &str,
-    results: &mut Vec<crate::compat::G3CheckResult>,
-) {
-    let result = if found {
-        crate::compat::G3CheckResult::from_parts(
-            id.to_owned(),
-            crate::compat::G3Severity::Warn,
-            ok_title.to_owned(),
-            ok_message.to_owned(),
-            Some(rel_path.to_owned()),
-            None,
-            false,
-        )
-        .into_inventory()
-    } else {
-        crate::compat::G3CheckResult::from_parts(
-            id.to_owned(),
-            crate::compat::G3Severity::Warn,
-            missing_title.to_owned(),
-            missing_message.to_owned(),
-            Some(rel_path.to_owned()),
-            None,
-            false,
-        )
-    };
-    results.push(result);
-}
-
-fn is_g3rs_verify_precommit_scope_command(command: &ResolvedCommand) -> bool {
-    is_g3rs_verify_command(command)
-        && args_contain_pair(command.args(), "--mode", "pre-commit")
-        && args_contain_scope_value(command.args(), "apps/guardrail3-rs")
-}
-
-fn is_g3rs_verify_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "verify"
-        && command
-            .command_path()
-            .trim_matches('"')
-            .ends_with("scripts/g3rs/verify")
-}
-
-fn is_g3rs_validate_scope_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "g3rs"
-        && command.args().first().map(String::as_str) == Some("validate")
-        && args_contain_pair(command.args(), "--path", "$SCOPE")
-}
-
-fn is_git_rev_parse_root_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "git"
-        && command.args().first().map(String::as_str) == Some("rev-parse")
-        && command.args().iter().any(|arg| arg == "--show-toplevel")
-}
-
-fn is_git_cached_diff_name_only_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "git"
-        && command.args().first().map(String::as_str) == Some("diff")
-        && command.args().iter().any(|arg| arg == "--cached")
-        && command.args().iter().any(|arg| arg == "--name-only")
-        && (command.args().iter().any(|arg| arg == "--diff-filter=ACM")
-            || command
-                .args()
-                .windows(2)
-                .any(|window| window[0] == "--diff-filter" && window[1] == "ACM"))
-}
-
-fn is_cargo_metadata_locked_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "metadata") else {
-        return false;
-    };
-    args.iter().any(|arg| arg == "--locked")
-}
-
-fn is_cargo_fmt_all_check_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "fmt") else {
-        return false;
-    };
-    args.windows(2)
-        .any(|window| window[0] == "--" && window[1] == "--check")
-        && args.iter().any(|arg| arg == "--all")
-}
-
-fn is_cargo_clippy_warnings_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "clippy") else {
-        return false;
-    };
-    args.iter().any(|arg| arg == "--workspace")
-        && args.iter().any(|arg| arg == "--all-targets")
-        && args.iter().any(|arg| arg == "--all-features")
-        && args
-            .windows(3)
-            .any(|window| window[0] == "--" && window[1] == "-D" && window[2] == "warnings")
-}
-
-fn is_cargo_deny_check_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "deny") else {
-        return false;
-    };
-    args.first().map(String::as_str) == Some("check")
-}
-
-fn is_cargo_machete_command(command: &ResolvedCommand) -> bool {
-    crate::support::cargo_subcommand_tail(command, "machete").is_some()
-}
-
-fn is_cargo_test_workspace_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "test") else {
-        return false;
-    };
-    args.iter().any(|arg| arg == "--workspace")
-}
-
-fn is_cargo_mutants_check_in_place_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "mutants") else {
-        return false;
-    };
-    args.iter().any(|arg| arg == "--check") && args.iter().any(|arg| arg == "--in-place")
-}
-
-fn is_cargo_dupes_threshold_command(command: &ResolvedCommand) -> bool {
-    is_cargo_dupes_full_command(command)
-}
-
-fn is_cargo_dupes_exclude_tests_command(command: &ResolvedCommand) -> bool {
-    is_cargo_dupes_full_command(command)
-}
-
-fn is_cargo_dupes_full_command(command: &ResolvedCommand) -> bool {
-    let Some(args) = crate::support::cargo_subcommand_tail(command, "dupes") else {
-        return false;
-    };
-    args.first().map(String::as_str) == Some("check")
-        && args_contain_pair(args, "--max-exact", "85")
-        && args_contain_pair(args, "--max-exact-percent", "10")
-        && args.iter().any(|arg| arg == "--exclude-tests")
-}
-
-fn is_g3ts_command(command: &ResolvedCommand) -> bool {
-    command.command_name() == "g3ts"
-        || command
-            .command_path()
-            .trim_matches('"')
-            .ends_with("scripts/g3ts/verify")
-}
-
-fn is_typescript_package_manager_command(command: &ResolvedCommand) -> bool {
-    matches!(command.command_name(), "pnpm" | "npm" | "yarn" | "bun")
-}
-
-fn args_contain_scope_value(args: &[String], _scope: &str) -> bool {
-    args.windows(2).any(|window| {
-        window[0] == "--scope"
-            && matches!(
-                window[1].as_str(),
-                "apps/guardrail3-rs"
-                    | "./apps/guardrail3-rs"
-                    | "$REPO_ROOT/apps/guardrail3-rs"
-                    | "${REPO_ROOT}/apps/guardrail3-rs"
-            )
-    }) || args.iter().any(|arg| {
-        matches!(
-            arg.strip_prefix("--scope="),
-            Some("apps/guardrail3-rs")
-                | Some("./apps/guardrail3-rs")
-                | Some("$REPO_ROOT/apps/guardrail3-rs")
-                | Some("${REPO_ROOT}/apps/guardrail3-rs")
-        )
-    })
-}
-
-fn args_contain_pair(args: &[String], flag: &str, value: &str) -> bool {
-    args.windows(2)
-        .any(|window| window[0] == flag && window[1] == value)
-        || args.iter().any(|arg| {
-            arg.strip_prefix(flag)
-                .is_some_and(|suffix| suffix == format!("={value}"))
-        })
-}
-
+/// `check_required_contracts_across_selected_surface` function.
 fn check_required_contracts_across_selected_surface(
     inputs: &[G3RsHooksSourceChecksInput],
     results: &mut Vec<G3CheckResult>,
@@ -544,7 +421,7 @@ fn check_required_contracts_across_selected_surface(
             content.push_str(script_content(input).as_str());
         }
     }
-    let parsed = parse_script(&content);
+    let parsed = hook_shell_parser::parse_script(&content);
     let input = crate::inputs::RustHookCommandInput {
         rel_path: pre_commit.rel_path.as_str(),
         parsed: &parsed,
@@ -552,10 +429,14 @@ fn check_required_contracts_across_selected_surface(
         requirements: &pre_commit.requirements,
     };
     let mut contract_results = Vec::new();
-    crate::required_contract_command_present::rule::check(&input, &mut contract_results);
+    crate::required_contract_command_present::rule::check_with_validate_dispatch(
+        &input,
+        &mut contract_results,
+    );
     results.extend(crate::compat::finish(contract_results));
 }
 
+/// `script_content` function.
 fn script_content(input: &G3RsHooksSourceChecksInput) -> String {
     let mut content = String::new();
     for line in &input.parsed.source_lines {
@@ -565,12 +446,14 @@ fn script_content(input: &G3RsHooksSourceChecksInput) -> String {
     content
 }
 
+/// `pre_commit_dispatches_modular_scripts` function.
 fn pre_commit_dispatches_modular_scripts(input: &G3RsHooksSourceChecksInput) -> bool {
     input.parsed.executable_lines.iter().any(|line| {
         line.is_dispatcher_syntax && dispatcher_invokes_modular_directory(&line.command_text)
     })
 }
 
+/// `dispatcher_invokes_modular_directory` function.
 fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
     let words = hook_shell_parser::command_query::shell_words(command_text);
     let Some(command) = words.first().map(String::as_str) else {
@@ -592,3 +475,8 @@ fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
 #[cfg(test)]
 #[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
 mod run_tests;
+
+// Suppress dead-code warnings for the legacy ResolvedCommand type alias.
+/// `_unused` function.
+#[allow(dead_code)] // reason: parking-only reference to keep the legacy ResolvedCommand alias alive while callers migrate to the new command-query surface.
+const fn _unused(_: &ResolvedCommand) {}

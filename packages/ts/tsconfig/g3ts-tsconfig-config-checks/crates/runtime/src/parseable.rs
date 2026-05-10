@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::info;
 
+/// Check ID emitted by this rule.
 const ID: &str = "g3ts-tsconfig/parseable";
 
+/// Emit findings describing whether the tsconfig parses successfully.
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     match &input.config {
         G3TsTsconfigState::Missing => {}

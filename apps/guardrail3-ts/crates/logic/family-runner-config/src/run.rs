@@ -56,5 +56,8 @@ pub fn run(
         SupportedFamily::Hooks => Err(FamilyRunError {
             message: "config group does not handle hooks".to_owned(),
         }),
+        SupportedFamily::Topology => Err(FamilyRunError {
+            message: "config group does not handle topology".to_owned(),
+        }),
     }
 }

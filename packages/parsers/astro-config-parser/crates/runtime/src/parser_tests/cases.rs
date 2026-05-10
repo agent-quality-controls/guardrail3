@@ -1,3 +1,9 @@
+#![allow(
+    clippy::disallowed_methods,
+    clippy::panic,
+    reason = "test fixture builder writes synthetic Astro config files via std::fs::write/create_dir_all into a tempdir; the fs.rs boundary applies to runtime code, not to per-test fixture authoring. panic! calls fail tests when the AST shape diverges, which is the test's contract"
+)]
+
 use astro_config_parser_runtime_assertions::parser as assertions;
 use astro_config_parser_runtime_assertions::parser::{
     AstroConfigParseState, AstroOutputMode, AstroStaticValue, AstroTrailingSlashPolicy,

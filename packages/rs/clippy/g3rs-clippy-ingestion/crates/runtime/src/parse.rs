@@ -8,10 +8,15 @@ use glob::Pattern;
 
 use crate::run::IngestionError;
 
+/// Result alias for fallible ingestion-time parsing helpers.
+type IngestResult<T> = Result<T, IngestionError>;
+
+/// read to string fn.
 pub(crate) fn read_to_string(abs_path: &Path) -> Result<String, String> {
     crate::fs::read_to_string(abs_path).map_err(|err| err.to_string())
 }
 
+/// parse clippy state fn.
 pub(crate) fn parse_clippy_state(abs_path: &Path) -> G3RsClippyConfigState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,
@@ -19,13 +24,14 @@ pub(crate) fn parse_clippy_state(abs_path: &Path) -> G3RsClippyConfigState {
     };
 
     match clippy_toml_parser::parse_document(&content) {
-        Ok(document) => G3RsClippyConfigState::Parsed(document),
+        Ok(document) => G3RsClippyConfigState::Parsed(Box::new(document)),
         Err(err) => G3RsClippyConfigState::ParseError {
             reason: err.to_string(),
         },
     }
 }
 
+/// parse rust policy state fn.
 pub(crate) fn parse_rust_policy_state(
     rel_path: &str,
     abs_path: &Path,
@@ -63,7 +69,8 @@ pub(crate) fn parse_rust_policy_state(
     }
 }
 
-pub(crate) fn parse_waivers(abs_path: &Path) -> Result<Vec<G3RsClippyWaiver>, IngestionError> {
+/// parse waivers fn.
+pub(crate) fn parse_waivers(abs_path: &Path) -> IngestResult<Vec<G3RsClippyWaiver>> {
     let content = read_to_string(abs_path).map_err(|reason| IngestionError::Unreadable {
         path: abs_path.to_path_buf(),
         reason,
@@ -86,6 +93,7 @@ pub(crate) fn parse_waivers(abs_path: &Path) -> Result<Vec<G3RsClippyWaiver>, In
         .collect())
 }
 
+/// parse cargo config state fn.
 pub(crate) fn parse_cargo_config_state(
     rel_path: &str,
     abs_path: &Path,
@@ -112,10 +120,11 @@ pub(crate) fn parse_cargo_config_state(
 
     G3RsClippyCargoConfigState::Parsed {
         rel_path: rel_path.to_owned(),
-        cargo_config,
+        cargo_config: Box::new(cargo_config),
     }
 }
 
+/// parse cargo root state fn.
 pub(crate) fn parse_cargo_root_state(rel_path: &str, abs_path: &Path) -> G3RsClippyCargoRootState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,
@@ -130,7 +139,7 @@ pub(crate) fn parse_cargo_root_state(rel_path: &str, abs_path: &Path) -> G3RsCli
     match cargo_toml_parser::parse_document(&content) {
         Ok(cargo) => G3RsClippyCargoRootState::Parsed {
             rel_path: rel_path.to_owned(),
-            cargo,
+            cargo: Box::new(cargo),
         },
         Err(err) => G3RsClippyCargoRootState::ParseError {
             rel_path: rel_path.to_owned(),
@@ -139,6 +148,7 @@ pub(crate) fn parse_cargo_root_state(rel_path: &str, abs_path: &Path) -> G3RsCli
     }
 }
 
+/// parse cargo member state fn.
 pub(crate) fn parse_cargo_member_state(
     member_rel: &str,
     rel_path: &str,
@@ -159,7 +169,7 @@ pub(crate) fn parse_cargo_member_state(
         Ok(cargo) => G3RsClippyCargoMemberState::Parsed {
             member_rel: member_rel.to_owned(),
             rel_path: rel_path.to_owned(),
-            cargo,
+            cargo: Box::new(cargo),
         },
         Err(err) => G3RsClippyCargoMemberState::ParseError {
             member_rel: member_rel.to_owned(),
@@ -169,10 +179,11 @@ pub(crate) fn parse_cargo_member_state(
     }
 }
 
+/// collect declared member rels fn.
 pub(crate) fn collect_declared_member_rels(
     root_abs_path: &Path,
     root_raw: &toml::Value,
-) -> Result<Vec<String>, IngestionError> {
+) -> IngestResult<Vec<String>> {
     let member_patterns = parse_string_array(
         root_raw
             .get("workspace")
@@ -213,11 +224,12 @@ pub(crate) fn collect_declared_member_rels(
     Ok(members.into_iter().collect())
 }
 
+/// parse string array fn.
 fn parse_string_array(
     value: Option<&toml::Value>,
     label: &str,
     root_abs_path: &Path,
-) -> Result<Vec<String>, IngestionError> {
+) -> IngestResult<Vec<String>> {
     let Some(value) = value else {
         return Ok(Vec::new());
     };
@@ -229,9 +241,8 @@ fn parse_string_array(
     };
     array
         .iter()
-        .map(|value| {
-            value
-                .as_str()
+        .map(|item| {
+            item.as_str()
                 .map(normalize_member_rel)
                 .ok_or_else(|| IngestionError::ParseFailed {
                     path: root_abs_path.join("Cargo.toml"),
@@ -241,46 +252,58 @@ fn parse_string_array(
         .collect()
 }
 
-fn expand_member_pattern(
-    root_abs_path: &Path,
-    pattern: &str,
-) -> Result<Vec<String>, IngestionError> {
-    if looks_like_glob(pattern) {
-        let compiled = Pattern::new(pattern).map_err(|err| IngestionError::ParseFailed {
-            path: root_abs_path.join("Cargo.toml"),
-            reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
-        })?;
+/// expand member pattern fn.
+fn expand_member_pattern(root_abs_path: &Path, pattern: &str) -> IngestResult<Vec<String>> {
+    if !looks_like_glob(pattern) {
+        return Ok(vec![pattern.to_owned()]);
+    }
+    let compiled = Pattern::new(pattern).map_err(|err| IngestionError::ParseFailed {
+        path: root_abs_path.join("Cargo.toml"),
+        reason: format!("invalid workspace member pattern `{pattern}`: {err}"),
+    })?;
 
-        let mut matches = Vec::new();
-        let mut stack = vec![root_abs_path.to_path_buf()];
-        while let Some(dir) = stack.pop() {
-            let Ok(entries) = crate::fs::read_dir(&dir) else {
-                continue;
-            };
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.is_dir() {
-                    stack.push(path.clone());
-                    let Ok(rel_path) = path.strip_prefix(root_abs_path) else {
-                        continue;
-                    };
-                    let rel_path = rel_path.to_string_lossy().replace('\\', "/");
-                    if !rel_path.is_empty() && compiled.matches(&rel_path) {
-                        matches.push(rel_path);
-                    }
-                }
-            }
+    let mut matches = Vec::new();
+    let mut stack = vec![root_abs_path.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        walk_dir_for_glob(&dir, root_abs_path, &compiled, &mut stack, &mut matches);
+    }
+    Ok(matches)
+}
+
+/// Walk one directory level, pushing subdirectories onto `stack` and recording
+/// matches for the compiled glob.
+fn walk_dir_for_glob(
+    dir: &Path,
+    root_abs_path: &Path,
+    compiled: &Pattern,
+    stack: &mut Vec<std::path::PathBuf>,
+    matches: &mut Vec<String>,
+) {
+    let Ok(entries) = crate::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
         }
-        Ok(matches)
-    } else {
-        Ok(vec![pattern.to_owned()])
+        stack.push(path.clone());
+        let Ok(rel_path) = path.strip_prefix(root_abs_path) else {
+            continue;
+        };
+        let rel_path = rel_path.to_string_lossy().replace('\\', "/");
+        if !rel_path.is_empty() && compiled.matches(&rel_path) {
+            matches.push(rel_path);
+        }
     }
 }
 
+/// looks like glob fn.
 fn looks_like_glob(pattern: &str) -> bool {
     pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
 }
 
+/// normalize member rel fn.
 fn normalize_member_rel(pattern: &str) -> String {
     let trimmed = pattern.trim_matches('/');
     let stripped = trimmed

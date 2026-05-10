@@ -2,25 +2,21 @@
     clippy::expect_used,
     clippy::missing_const_for_fn,
     clippy::missing_panics_doc,
-    reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
+    clippy::missing_assert_message,
+    clippy::indexing_slicing,
+    clippy::too_many_lines,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses; assert_eq! mismatches already pinpoint the failing field, and indexed access into fixture-controlled BTreeMaps panics on the same line that proves the missing key"
 )]
 
 use std::collections::BTreeMap;
-use std::io::Write;
 
 use nextest_toml_parser_runtime::Value;
 use nextest_toml_parser_runtime::types;
 use nextest_toml_parser_runtime::types::nextest_toml::{basics, execution, profile, scripts};
 
+#[must_use]
 pub fn parse_fixture(input: &str) -> types::NextestToml {
     nextest_toml_parser_runtime::parse(input).expect("should parse valid nextest.toml")
-}
-
-pub fn parse_from_tempfile(input: &str) -> types::NextestToml {
-    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
-    file.write_all(input.as_bytes())
-        .expect("nextest config should be written");
-    nextest_toml_parser_runtime::from_path(file.path()).expect("file should parse")
 }
 
 pub fn assert_empty_toml(cfg: &types::NextestToml) {

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::panic,
+    reason = "rule check fns intentionally call std::panic::panic_any to surface unparseable input bubbled up by the upstream parser; this is the documented fail-fast contract for the source-checks family"
+)]
+
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::reason_text_is_useful;
 
@@ -6,8 +11,10 @@ use crate::parse::find_garde_skips_with_types;
 use crate::parse::types::GardeSkipInfo;
 use crate::support::CodeSourceRuleInput;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-code/garde-skip-with-comment";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_garde_skips_with_types(input.source) {
         if info.is_exempt {
@@ -58,6 +65,7 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     }
 }
 
+/// Implements `target label`.
 fn target_label(info: &GardeSkipInfo) -> String {
     if info.is_type_level {
         format!("type `{}`", info.field_name)

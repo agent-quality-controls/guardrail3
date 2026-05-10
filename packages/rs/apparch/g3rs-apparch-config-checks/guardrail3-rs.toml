@@ -11,15 +11,3 @@ allowed_deps = [
 
 [checks]
 garde = false
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "Runtime crate intentionally keeps one apparch policy rule per module."
-
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/assertions/Cargo.toml"
-selector = "structural-split"
-reason = "Assertions crate intentionally keeps one shared proof module per apparch rule."

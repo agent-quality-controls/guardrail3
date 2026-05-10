@@ -2,8 +2,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFunctionInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/weak-matches-assert";
 
+/// `check` function.
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
     for line in &input.function.harness.weak_matches_lines {
         results.push(G3CheckResult::new(

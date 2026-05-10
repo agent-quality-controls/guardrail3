@@ -1,3 +1,4 @@
+/// Top-level file-tree check entry point.
 #[cfg(feature = "api")]
 mod run;
 

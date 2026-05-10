@@ -6,8 +6,10 @@ use crate::support::{
     value_kind,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/avoid-breaking-exported-api";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;

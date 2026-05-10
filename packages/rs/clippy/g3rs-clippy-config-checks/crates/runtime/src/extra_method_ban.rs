@@ -7,8 +7,10 @@ use crate::support::{
     clippy_document, expected_method_bans, garde_enabled, parse_ban_section, rust_policy_valid,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/extra-method-ban";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;
@@ -20,7 +22,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     let section = parse_ban_section(document, "disallowed-methods");
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
-        malformed_count += 1;
+        malformed_count = malformed_count.saturating_add(1);
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -37,7 +39,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
     let mut extra_count = 0usize;
     for found in section.entries.into_iter().map(|entry| entry.path) {
         if !expected.contains(found.as_str()) {
-            extra_count += 1;
+            extra_count = extra_count.saturating_add(1);
             results.push(
                 G3CheckResult::new(
                     ID.to_owned(),

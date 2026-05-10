@@ -1,8 +1,10 @@
 use g3ts_astro_content_types::G3TsAstroContentAppRootInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3ts-astro-content/content-config-exists";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(root: &G3TsAstroContentAppRootInput, results: &mut Vec<G3CheckResult>) {
     if let Some(rel_path) = &root.content_config_rel_path {
         results.push(

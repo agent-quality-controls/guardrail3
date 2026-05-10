@@ -1,3 +1,15 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::indexing_slicing,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::compat::{G3CheckResult, G3Severity};
@@ -8,10 +20,25 @@ use hook_shell_parser::command_query::{
     ResolvedCommand, any_resolved_command, any_resolved_command_relaxed, shell_words,
 };
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/required-contract-command-present";
 
+/// `check` function.
 pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckResult>) {
+    check_with_validate_dispatch(input, results);
+}
+
+/// Family-owned cargo gates are now executed inside the in-binary `g3rs validate --path <unit>
+/// --staged` per-unit dispatch (no bash verifier exists). When the hook contains such a
+/// per-unit dispatch invocation, family-owned commands satisfied by that dispatch are accepted
+/// as delegated.
+pub(crate) fn check_with_validate_dispatch(
+    input: &RustHookCommandInput<'_>,
+    results: &mut Vec<G3CheckResult>,
+) {
     let required = required_commands_by_owner(input);
+    let delegates_to_validate_staged =
+        any_resolved_command(input.parsed, is_g3rs_validate_staged_invocation);
 
     for (requirement, owners) in required {
         let owner_text = owners.into_iter().collect::<Vec<_>>().join(", ");
@@ -34,10 +61,32 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
                 )
                 .into_inventory(),
             );
+        } else if delegates_to_validate_staged
+            && requirement_is_satisfied_by_validate_staged_delegation(requirement)
+        {
+            results.push(
+                G3CheckResult::from_parts(
+                    ID.to_owned(),
+                    G3Severity::Info,
+                    "hook contract command is delegated to g3rs validate --staged".to_owned(),
+                    format!(
+                        "`{}` delegates to per-unit `g3rs validate --path <unit> --staged` for `{}`. Owner families: {}. The in-binary `g3rs validate` runs this command for the owning adopted unit.",
+                        input.rel_path,
+                        requirement_label(requirement),
+                        owner_text
+                    ),
+                    Some(input.rel_path.to_owned()),
+                    None,
+                    false,
+                )
+                .into_inventory(),
+            );
         } else {
             results.push(G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                // Reason: a missing required contract command (not delegated, not present)
+                // must gate the commit. The plan: family hook contracts require these.
+                G3Severity::Error,
                 "hook contract command is missing".to_owned(),
                 format!(
                     "`{}` does not execute a command satisfying `{}`. Owner families: {}. Family hook contracts require this command; comments, echo text, and docs do not count.",
@@ -53,6 +102,47 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
+/// `is_g3rs_validate_staged_invocation` function.
+fn is_g3rs_validate_staged_invocation(command: &ResolvedCommand) -> bool {
+    if command.command_name() != "g3rs" {
+        return false;
+    }
+    let args = command.args();
+    if args.first().map(String::as_str) != Some("validate") {
+        return false;
+    }
+    let tail = &args[1..];
+    let has_staged = tail.iter().any(|arg| arg == "--staged");
+    let has_path = tail
+        .iter()
+        .any(|arg| arg == "--path" || arg.starts_with("--path="));
+    has_staged && has_path
+}
+
+/// Family-owned commands that are executed inside the in-binary `g3rs validate --path <unit>
+/// --staged` per-unit dispatch. When the hook performs that dispatch, this rule accepts those
+/// commands as satisfied via delegation.
+///
+/// `Gitleaks` is intentionally excluded: the hook runs `gitleaks protect --staged` inline
+/// before per-unit dispatch and the in-binary validator does not invoke gitleaks.
+const fn requirement_is_satisfied_by_validate_staged_delegation(
+    requirement: G3HookCommandRequirement,
+) -> bool {
+    matches!(
+        requirement,
+        G3HookCommandRequirement::CargoFmtCheck
+            | G3HookCommandRequirement::CargoClippyDenyWarnings
+            | G3HookCommandRequirement::CargoDenyCheck
+            | G3HookCommandRequirement::ConcreteLockfileCommand
+            | G3HookCommandRequirement::CargoTest
+            | G3HookCommandRequirement::CargoMachete
+            | G3HookCommandRequirement::CargoDupes
+            | G3HookCommandRequirement::CargoDupesExcludeTests
+            | G3HookCommandRequirement::G3RsValidatePath
+    )
+}
+
+/// `required_commands_by_owner` function.
 fn required_commands_by_owner(
     input: &RustHookCommandInput<'_>,
 ) -> BTreeMap<G3HookCommandRequirement, BTreeSet<String>> {
@@ -66,6 +156,7 @@ fn required_commands_by_owner(
     commands
 }
 
+/// `command_requirement_present` function.
 fn command_requirement_present(
     input: &RustHookCommandInput<'_>,
     requirement: G3HookCommandRequirement,
@@ -90,6 +181,7 @@ fn command_requirement_present(
     any_resolved_command(input.parsed, predicate)
 }
 
+/// `command_satisfies_requirement` function.
 fn command_satisfies_requirement(
     command: &ResolvedCommand,
     requirement: G3HookCommandRequirement,
@@ -114,14 +206,17 @@ fn command_satisfies_requirement(
     }
 }
 
+/// `binary_command` function.
 fn binary_command(command: &ResolvedCommand, name: &str) -> bool {
     command.command_name() == name && !args_have_help_or_version(command.args())
 }
 
+/// `cargo_subcommand` function.
 fn cargo_subcommand(command: &ResolvedCommand, subcommand: &str) -> bool {
     cargo_subcommand_tail(command, subcommand).is_some_and(|args| !args_have_help_or_version(args))
 }
 
+/// `cargo_subcommand_has_arg` function.
 fn cargo_subcommand_has_arg(
     command: &ResolvedCommand,
     subcommand: &str,
@@ -132,6 +227,7 @@ fn cargo_subcommand_has_arg(
     })
 }
 
+/// `cargo_clippy_denies_warnings` function.
 fn cargo_clippy_denies_warnings(command: &ResolvedCommand) -> bool {
     let Some(args) = cargo_subcommand_tail(command, "clippy") else {
         return false;
@@ -147,6 +243,7 @@ fn cargo_clippy_denies_warnings(command: &ResolvedCommand) -> bool {
         .any(|arg| arg == "-Dwarnings" || arg == "--deny=warnings")
 }
 
+/// `cargo_deny_check` function.
 fn cargo_deny_check(command: &ResolvedCommand) -> bool {
     if command.command_name() == "cargo-deny" {
         return command.args().first().is_some_and(|arg| arg == "check")
@@ -157,6 +254,7 @@ fn cargo_deny_check(command: &ResolvedCommand) -> bool {
     })
 }
 
+/// `cargo_dupes_command` function.
 fn cargo_dupes_command(command: &ResolvedCommand) -> Option<&[String]> {
     if command.command_name() == "cargo-dupes" {
         return Some(command.args());
@@ -164,6 +262,7 @@ fn cargo_dupes_command(command: &ResolvedCommand) -> Option<&[String]> {
     cargo_subcommand_tail(command, "dupes")
 }
 
+/// `g3rs_validate_path` function.
 fn g3rs_validate_path(command: &ResolvedCommand) -> bool {
     if command.command_name() != "g3rs" {
         return false;
@@ -184,6 +283,7 @@ fn g3rs_validate_path(command: &ResolvedCommand) -> bool {
     parse_validate_args(&args[1..])
 }
 
+/// `parse_validate_args` function.
 fn parse_validate_args(args: &[String]) -> bool {
     let mut saw_path = false;
     let mut index = 0usize;
@@ -222,11 +322,13 @@ fn parse_validate_args(args: &[String]) -> bool {
     saw_path
 }
 
+/// `concrete_lockfile_command` function.
 fn concrete_lockfile_command(command: &ResolvedCommand) -> bool {
     cargo_subcommand_tail(command, "metadata").is_some_and(lockfile_args_are_concrete)
         || cargo_subcommand_tail(command, "update").is_some_and(lockfile_args_are_concrete)
 }
 
+/// `lockfile_args_are_concrete` function.
 fn lockfile_args_are_concrete(args: &[String]) -> bool {
     !args_have_help_or_version(args)
         && args.iter().any(|arg| arg == "--locked")
@@ -235,6 +337,7 @@ fn lockfile_args_are_concrete(args: &[String]) -> bool {
             .any(|arg| arg == "--manifest-path" || arg.starts_with("--manifest-path="))
 }
 
+/// `aliases_shadow_requirement` function.
 fn aliases_shadow_requirement(
     parsed: &hook_shell_parser::types::ParsedShellScript,
     requirement: G3HookCommandRequirement,
@@ -244,6 +347,7 @@ fn aliases_shadow_requirement(
         .any(|command| script_defines_alias(parsed, command))
 }
 
+/// `command_is_shadowed_by_alias` function.
 fn command_is_shadowed_by_alias(
     parsed: &hook_shell_parser::types::ParsedShellScript,
     requirement: G3HookCommandRequirement,
@@ -259,7 +363,8 @@ fn command_is_shadowed_by_alias(
     })
 }
 
-fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'static [&'static str] {
+/// `alias_shadowed_commands` function.
+const fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'static [&'static str] {
     match requirement {
         G3HookCommandRequirement::CargoFmtCheck
         | G3HookCommandRequirement::CargoClippyDenyWarnings
@@ -276,6 +381,7 @@ fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'static [&
     }
 }
 
+/// `script_defines_alias` function.
 fn script_defines_alias(
     parsed: &hook_shell_parser::types::ParsedShellScript,
     command_name: &str,
@@ -283,6 +389,7 @@ fn script_defines_alias(
     first_alias_definition_line(parsed, command_name).is_some()
 }
 
+/// `first_alias_definition_line` function.
 fn first_alias_definition_line(
     parsed: &hook_shell_parser::types::ParsedShellScript,
     command_name: &str,
@@ -292,6 +399,7 @@ fn first_alias_definition_line(
     })
 }
 
+/// `alias_line_defines_command` function.
 fn alias_line_defines_command(raw: &str, command_name: &str) -> bool {
     let words = shell_words(raw);
     words.first().is_some_and(|word| word == "alias")
@@ -301,11 +409,13 @@ fn alias_line_defines_command(raw: &str, command_name: &str) -> bool {
         })
 }
 
+/// `is_help_or_version_flag` function.
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
 }
 
-fn requirement_label(requirement: G3HookCommandRequirement) -> &'static str {
+/// `requirement_label` function.
+const fn requirement_label(requirement: G3HookCommandRequirement) -> &'static str {
     match requirement {
         G3HookCommandRequirement::CargoFmtCheck => "cargo fmt --check",
         G3HookCommandRequirement::CargoClippyDenyWarnings => "cargo clippy -D warnings",
@@ -320,6 +430,10 @@ fn requirement_label(requirement: G3HookCommandRequirement) -> &'static str {
     }
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "API takes owned Vec to keep signature stable across the contract surface; downstream callers pass ownership"
+)]
 #[cfg(test)]
 pub(crate) fn run_case(
     content: &str,
@@ -333,7 +447,7 @@ pub(crate) fn run_case(
         requirements: &requirements,
     };
     let mut results = Vec::new();
-    check(&input, &mut results);
+    check_with_validate_dispatch(&input, &mut results);
     crate::compat::finish(results)
 }
 

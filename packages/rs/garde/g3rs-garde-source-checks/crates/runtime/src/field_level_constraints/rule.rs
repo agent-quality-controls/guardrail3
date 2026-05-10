@@ -2,8 +2,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{BoundaryFieldSite, error};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-garde/field-level-constraints";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(field: &BoundaryFieldSite, results: &mut Vec<G3CheckResult>) {
     if !field.requires_field_validation
         || field.has_garde_skip

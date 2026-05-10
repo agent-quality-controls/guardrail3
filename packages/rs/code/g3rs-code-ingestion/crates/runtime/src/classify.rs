@@ -30,28 +30,46 @@ pub(crate) fn is_test_root_path(rel_path: &str) -> bool {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// Struct `SourceProfile` used by this module.
 pub(crate) struct SourceProfile {
+    /// Field `profile_name`.
     pub(crate) profile_name: Option<String>,
+    /// Field `is_library_root`.
     pub(crate) is_library_root: bool,
+    /// Field `is_shared_crate`.
     pub(crate) is_shared_crate: bool,
+    /// Field `waivers`.
     pub(crate) waivers: Vec<G3RsCodeWaiver>,
 }
 
 #[derive(Debug)]
+/// Struct `CargoTargetClassifier` used by this module.
 pub(crate) struct CargoTargetClassifier {
+    /// Field `packages`.
     packages: Vec<PackageTargets>,
 }
 
 #[derive(Debug)]
+/// Struct `PackageTargets` used by this module.
 struct PackageTargets {
+    /// Field `package_dir_rel`.
     package_dir_rel: String,
+    /// Field `library_root_rel`.
     library_root_rel: Option<String>,
+    /// Field `binary_root_rels`.
     binary_root_rels: Vec<String>,
+    /// Field `is_shared_crate`.
     is_shared_crate: bool,
+    /// Field `waivers`.
     waivers: Vec<G3RsCodeWaiver>,
 }
 
 impl CargoTargetClassifier {
+    /// Builds a classifier by reading every relevant manifest discovered in `crawl`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an `IngestionError` when a relevant manifest cannot be read or parsed.
     pub(crate) fn build(
         crawl: &G3RsWorkspaceCrawl,
         selected_source_rels: &[String],
@@ -69,6 +87,7 @@ impl CargoTargetClassifier {
         Ok(Self { packages })
     }
 
+    /// Implements `classify`.
     pub(crate) fn classify(&self, rel_path: &str, is_test: bool) -> SourceProfile {
         if is_test {
             return SourceProfile {
@@ -132,6 +151,7 @@ impl CargoTargetClassifier {
 }
 
 impl PackageTargets {
+    /// Implements `is binary owned file`.
     fn is_binary_owned_file(&self, rel_path: &str) -> bool {
         let package_src_dir = join_rel(&self.package_dir_rel, "src");
         let package_src_bin_dir = join_rel(&self.package_dir_rel, "src/bin");
@@ -146,6 +166,7 @@ impl PackageTargets {
         })
     }
 
+    /// Implements `is library owned file`.
     fn is_library_owned_file(&self, rel_path: &str) -> bool {
         let Some(library_root_rel) = self.library_root_rel.as_deref() else {
             return false;
@@ -175,6 +196,7 @@ impl PackageTargets {
     }
 }
 
+/// Implements `load package targets`.
 fn load_package_targets(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
@@ -215,10 +237,14 @@ fn load_package_targets(
     })
 }
 
+/// List of waivers parsed from a `guardrail3-rs.toml` policy file.
+type ManifestWaivers = Vec<G3RsCodeWaiver>;
+
+/// Implements `manifest guardrail3 waivers`.
 fn manifest_guardrail3_waivers(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
-) -> Result<Vec<G3RsCodeWaiver>, IngestionError> {
+) -> Result<ManifestWaivers, IngestionError> {
     let Some(config_rel_path) =
         nearest_guardrail3_rel_path(crawl, &manifest_dir_rel(manifest_rel_path))
     else {
@@ -257,6 +283,7 @@ fn manifest_guardrail3_waivers(
         .collect())
 }
 
+/// Implements `nearest guardrail3 rel path`.
 fn nearest_guardrail3_rel_path(crawl: &G3RsWorkspaceCrawl, start_dir_rel: &str) -> Option<String> {
     let mut current = start_dir_rel.to_owned();
     loop {
@@ -271,6 +298,7 @@ fn nearest_guardrail3_rel_path(crawl: &G3RsWorkspaceCrawl, start_dir_rel: &str) 
     }
 }
 
+/// Implements `manifest shared flag`.
 fn manifest_shared_flag(manifest: &CargoToml) -> bool {
     manifest
         .package
@@ -279,20 +307,24 @@ fn manifest_shared_flag(manifest: &CargoToml) -> bool {
         .and_then(|metadata| metadata.get("guardrail3"))
         .and_then(|value| match value {
             Value::Table(table) => table.get("shared"),
-            _ => None,
+            Value::String(_)
+            | Value::Integer(_)
+            | Value::Float(_)
+            | Value::Boolean(_)
+            | Value::Datetime(_)
+            | Value::Array(_) => None,
         })
         .and_then(Value::as_bool)
         .unwrap_or(false)
 }
 
+/// Implements `resolve library root`.
 fn resolve_library_root(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
     manifest: &CargoToml,
 ) -> Option<String> {
-    let Some(package) = manifest.package.as_ref() else {
-        return None;
-    };
+    let package = manifest.package.as_ref()?;
     let package_dir_rel = manifest_dir_rel(manifest_rel_path);
     let autolib_enabled = package.autolib.unwrap_or(true);
 
@@ -317,6 +349,7 @@ fn resolve_library_root(
     g3rs_workspace_crawl::entry(crawl, &default_rel).map(|_| default_rel)
 }
 
+/// Implements `resolve binary roots`.
 fn resolve_binary_roots(
     crawl: &G3RsWorkspaceCrawl,
     manifest_rel_path: &str,
@@ -349,10 +382,13 @@ fn resolve_binary_roots(
                 .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
                 .filter_map(|entry| {
                     let rel_path = entry.path.rel_path.as_str();
-                    if !rel_path.ends_with(".rs") {
+                    let rel_path_obj = Path::new(rel_path);
+                    if rel_path_obj
+                        .extension()
+                        .is_none_or(|ext| !ext.eq_ignore_ascii_case("rs"))
+                    {
                         return None;
                     }
-                    let rel_path_obj = Path::new(rel_path);
                     if !rel_path_obj.starts_with(&src_bin_dir) {
                         return None;
                     }
@@ -369,6 +405,7 @@ fn resolve_binary_roots(
     roots
 }
 
+/// Implements `nearest manifest rel path`.
 fn nearest_manifest_rel_path(crawl: &G3RsWorkspaceCrawl, source_rel_path: &str) -> Option<String> {
     let mut current = Path::new(source_rel_path).parent().map(PathBuf::from)?;
 
@@ -391,6 +428,7 @@ fn nearest_manifest_rel_path(crawl: &G3RsWorkspaceCrawl, source_rel_path: &str) 
     None
 }
 
+/// Implements `manifest dir rel`.
 fn manifest_dir_rel(manifest_rel_path: &str) -> String {
     Path::new(manifest_rel_path)
         .parent()
@@ -398,6 +436,7 @@ fn manifest_dir_rel(manifest_rel_path: &str) -> String {
         .unwrap_or_default()
 }
 
+/// Implements `join rel`.
 fn join_rel(base_rel: &str, child_rel: &str) -> String {
     if base_rel.is_empty() {
         child_rel.to_owned()
@@ -409,12 +448,14 @@ fn join_rel(base_rel: &str, child_rel: &str) -> String {
     }
 }
 
+/// Implements `parent rel dir`.
 fn parent_rel_dir(rel_path: &str) -> Option<String> {
     Path::new(rel_path)
         .parent()
         .map(|path| path.to_string_lossy().into_owned())
 }
 
+/// Implements `path is within`.
 fn path_is_within(rel_path: &str, dir_rel: &str) -> bool {
     if dir_rel.is_empty() {
         return true;
@@ -423,6 +464,7 @@ fn path_is_within(rel_path: &str, dir_rel: &str) -> bool {
     rel_path == dir_rel || rel_path.starts_with(&format!("{dir_rel}/"))
 }
 
+/// Implements `path from rel`.
 fn path_from_rel(rel_path: &str) -> PathBuf {
     if rel_path.is_empty() {
         PathBuf::new()

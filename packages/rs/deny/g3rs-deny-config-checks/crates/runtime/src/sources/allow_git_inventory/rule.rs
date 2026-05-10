@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::findings::{error, inventory, warn};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/allow-git-inventory";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(sources) = deny.sources.as_ref() else {
         return;

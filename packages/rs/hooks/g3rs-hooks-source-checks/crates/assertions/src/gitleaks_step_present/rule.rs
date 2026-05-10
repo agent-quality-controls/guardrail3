@@ -16,8 +16,19 @@ pub fn assert_missing(results: &[G3CheckResult]) {
     self::assert_rule_results(
         results,
         &[ExpectedRuleResult {
-            severity: Some(Severity::Warn),
+            severity: Some(Severity::Error),
             title: Some("gitleaks step missing"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+pub fn assert_error_finding(results: &[G3CheckResult]) {
+    self::assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
             inventory: Some(false),
             ..Default::default()
         }],

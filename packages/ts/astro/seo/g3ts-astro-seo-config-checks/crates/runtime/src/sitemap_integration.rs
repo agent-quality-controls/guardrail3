@@ -1,10 +1,15 @@
 use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/sitemap-integration-present";
+/// Static rule data.
 const GENERATOR_DEPENDENCY_NAME: &str = "@astrojs/sitemap";
+/// Static rule data.
 const AUDITOR_DEPENDENCY_NAME: &str = "g3ts-astro-sitemap-auditor";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -21,14 +26,12 @@ pub(crate) fn check(
     };
 
     if has_generator && has_auditor {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Astro sitemap integration is wired",
-                format!("`{rel_path}` wires `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` integrations with static required auditor config."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Astro sitemap integration is wired",
+            format!("`{rel_path}` wires `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` integrations with static required auditor config."),
+            rel_path,
+        ));
         return;
     }
 
@@ -38,10 +41,11 @@ pub(crate) fn check(
             format!(
                     "This Astro app must include integrations imported from `{GENERATOR_DEPENDENCY_NAME}` and `{AUDITOR_DEPENDENCY_NAME}` in `astro.config`. `{AUDITOR_DEPENDENCY_NAME}` must be called with a static object containing HTTPS `site` and `trailingSlash: \"always\" | \"never\"`."
             ),
-            rel_path,
+            Some(rel_path),
         ));
 }
 
+/// Internal helper used by the rule.
 fn sitemap_auditor_config_is_strict(
     snapshot: &g3ts_astro_seo_types::G3TsAstroConfigSurfaceSnapshot,
 ) -> bool {

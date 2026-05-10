@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "687bb80770a2352d"
+reason = "rust-toolchain.toml schema mirror tests and assertion helpers share parse + assert shape; each proves a different schema rejection or assertion path"
+
+[[ignore]]
+fingerprint = "d23d8072442f8fd8"
+reason = "rust-toolchain.toml schema mirror tests and assertion helpers share parse + assert shape; each proves a different schema rejection or assertion path"
+
+[[ignore]]
+fingerprint = "e28bbdcf55b40fe8"
+reason = "rust-toolchain.toml schema mirror tests and assertion helpers share parse + assert shape; each proves a different schema rejection or assertion path"

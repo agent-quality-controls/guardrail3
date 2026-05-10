@@ -12,6 +12,10 @@ pub struct ExpectedRuleResult<'a> {
     pub line: Option<usize>,
 }
 
+/// Implements `rule results`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub(crate) fn rule_results<'a>(
     results: &'a [G3CheckResult],
     rule_id: &str,
@@ -22,6 +26,10 @@ pub(crate) fn rule_results<'a>(
         .collect()
 }
 
+/// Asserts the `rule results` invariant on `results`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub(crate) fn assert_rule_results(
     results: &[G3CheckResult],
     rule_id: &str,
@@ -71,13 +79,13 @@ pub(crate) fn assert_rule_results(
 #[macro_export]
 macro_rules! define_rule_assertions {
     ($rule_id:literal) => {
-        pub use crate::common::ExpectedRuleResult;
         pub use guardrail3_check_types::{G3CheckResult, G3Severity};
+        pub use $crate::common::ExpectedRuleResult;
 
         const RULE_ID: &str = $rule_id;
 
         pub fn assert_rule_results(results: &[G3CheckResult], expected: &[ExpectedRuleResult<'_>]) {
-            crate::common::assert_rule_results(results, RULE_ID, expected);
+            $crate::common::assert_rule_results(results, RULE_ID, expected);
         }
     };
 }

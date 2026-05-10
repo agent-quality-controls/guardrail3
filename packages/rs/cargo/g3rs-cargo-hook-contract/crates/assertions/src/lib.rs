@@ -1,3 +1,5 @@
+//! Assertions for cargo hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

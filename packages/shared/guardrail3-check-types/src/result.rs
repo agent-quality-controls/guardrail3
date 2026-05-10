@@ -63,16 +63,23 @@ impl G3CheckResult {
         self.severity
     }
 
+    /// Returns title and message string slices as a tuple.
+    #[must_use]
+    pub fn text(&self) -> (&str, &str) {
+        (self.title.as_str(), self.message.as_str())
+    }
+
     /// Short title.
     #[must_use]
     pub fn title(&self) -> &str {
-        &self.title
+        self.text().0
     }
 
     /// Full message.
     #[must_use]
     pub fn message(&self) -> &str {
-        &self.message
+        let (_, body) = self.text();
+        body
     }
 
     /// File path if available.

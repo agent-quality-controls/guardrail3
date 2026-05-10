@@ -1,51 +1,36 @@
+/// `bootstrap` module.
 mod bootstrap;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod cargo_deny_step_present;
-#[allow(dead_code, unused_imports)]
+/// `cargo_dupes_excludes` module.
+#[allow(dead_code, unused_imports)] // reason: legacy cargo dupes-excludes rule retained behind feature flag.
+#[rustfmt::skip]
 mod cargo_dupes_excludes;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod cargo_dupes_step_present;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod cargo_machete_step_present;
-#[allow(dead_code, unused_imports)]
+/// `clippy_denies_warnings` module.
+#[allow(dead_code, unused_imports)] // reason: legacy clippy-denies-warnings rule retained behind feature flag.
+#[rustfmt::skip]
 mod clippy_denies_warnings;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod clippy_step_present;
+/// `compat` module.
 mod compat;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod config_changes_trigger_validation;
+/// `contract_critical_command_not_fail_open` module.
 mod contract_critical_command_not_fail_open;
+/// `contract_trigger_coverage` module.
 mod contract_trigger_coverage;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod duplication_tool_is_cargo_dupes;
+/// `facts` module.
 mod facts;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod fmt_step_present;
+/// `gitleaks_step_present` module.
 mod gitleaks_step_present;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod guardrail_validate_staged_present;
+/// `inputs` module.
 mod inputs;
+/// `required_contract_command_present` module.
 mod required_contract_command_present;
+/// `routing` module.
+mod routing;
+/// `run` module.
 mod run;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod shared_target_dir_present;
+/// `shell_safety` module.
 mod shell_safety;
+/// `support` module.
 mod support;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod test_step_present;
-#[cfg(test)]
-#[allow(unused_imports)]
-mod test_uses_workspace;
+/// `workflow` module.
 mod workflow;
 
 #[cfg(feature = "checks")]

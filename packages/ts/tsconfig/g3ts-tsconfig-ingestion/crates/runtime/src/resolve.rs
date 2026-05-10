@@ -4,6 +4,14 @@ use g3ts_tsconfig_types::G3TsTsconfigExtendsState;
 use tsconfig_json_parser::types::{TsconfigCompilerOptions, TsconfigDocument};
 use tsconfig_json_parser::{extends_entries, from_path_document, parse_error_reason, typed};
 
+/// Resolve the tsconfig `extends` chain rooted at `document`, returning
+/// the per-entry resolution states and the merged effective compiler options.
+#[expect(
+    clippy::type_complexity,
+    reason = "Returns the resolved extends chain alongside the effective compiler options; \
+              both are needed at the call site as a single bundle and introducing a named \
+              wrapper struct would not add semantics"
+)]
 pub(crate) fn build_extends_chain(
     workspace_root: &Path,
     root_abs_path: &Path,
@@ -31,6 +39,9 @@ pub(crate) fn build_extends_chain(
     (chain, effective)
 }
 
+/// Resolve a single `extends` specifier, appending the resolution state to
+/// `chain` and merging its compiler options into `effective`. `active_stack`
+/// is used to detect extends cycles.
 fn resolve_entry(
     workspace_root: &Path,
     current_config_abs_path: &Path,
@@ -112,12 +123,17 @@ fn resolve_entry(
     let _ = active_stack.pop();
 }
 
+/// Whether `specifier` refers to a local extends target (relative or
+/// absolute path) rather than a package or external reference.
 fn is_local_extends(specifier: &str) -> bool {
     specifier.starts_with("./")
         || specifier.starts_with("../")
         || Path::new(specifier).is_absolute()
 }
 
+/// Resolve `specifier` against the directory containing
+/// `current_config_abs_path`, trying explicit, `.json`-extended, and
+/// directory-with-`tsconfig.json` candidates.
 fn resolve_local_extends_path(current_config_abs_path: &Path, specifier: &str) -> Option<PathBuf> {
     let base_dir = current_config_abs_path.parent()?;
     let joined = if Path::new(specifier).is_absolute() {
@@ -139,14 +155,21 @@ fn resolve_local_extends_path(current_config_abs_path: &Path, specifier: &str) -
     candidates.into_iter().find(|candidate| candidate.is_file())
 }
 
+/// Render `abs_path` as a workspace-relative display string when it falls
+/// under `workspace_root`, otherwise as its absolute path.
 fn display_path(workspace_root: &Path, abs_path: &Path) -> String {
-    match abs_path.strip_prefix(workspace_root) {
-        Ok(rel_path) => rel_path.display().to_string(),
-        Err(_) => abs_path.display().to_string(),
-    }
+    abs_path.strip_prefix(workspace_root).map_or_else(
+        |_| abs_path.display().to_string(),
+        |rel_path| rel_path.display().to_string(),
+    )
 }
 
-fn merge_compiler_options(target: &mut TsconfigCompilerOptions, overlay: &TsconfigCompilerOptions) {
+/// Merge `overlay` into `target`, treating `None` overlay values as
+/// "no override" and preserving target values that have already been set.
+const fn merge_compiler_options(
+    target: &mut TsconfigCompilerOptions,
+    overlay: &TsconfigCompilerOptions,
+) {
     merge_bool(&mut target.strict, overlay.strict);
     merge_bool(&mut target.no_implicit_returns, overlay.no_implicit_returns);
     merge_bool(&mut target.no_unused_locals, overlay.no_unused_locals);
@@ -186,7 +209,9 @@ fn merge_compiler_options(target: &mut TsconfigCompilerOptions, overlay: &Tsconf
     merge_bool(&mut target.allow_unused_labels, overlay.allow_unused_labels);
 }
 
-fn merge_bool(target: &mut Option<bool>, overlay: Option<bool>) {
+/// Apply `overlay` onto `target`, treating `Some(value)` as an override
+/// and `None` as preserving the existing target value.
+const fn merge_bool(target: &mut Option<bool>, overlay: Option<bool>) {
     if let Some(value) = overlay {
         *target = Some(value);
     }

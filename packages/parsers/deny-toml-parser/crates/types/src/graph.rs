@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "deny.toml schema mirror: types in this module intentionally repeat the deny.toml graph table name"
+)]
+
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};

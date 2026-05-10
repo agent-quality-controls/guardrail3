@@ -15,12 +15,12 @@ pub(super) fn run_check(
 ) -> Vec<G3CheckResult> {
     let input = G3RsFmtConfigChecksInput {
         rustfmt_rel_path: "rustfmt.toml".to_owned(),
-        rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(
+        rustfmt_state: G3RsFmtRustfmtConfigState::Parsed(Box::new(
             parse_rustfmt_toml(rustfmt_toml).expect("rustfmt test fixture should parse"),
-        ),
+        )),
         rustfmt_explicit_keys: Vec::new(),
         cargo_rel_path: "Cargo.toml".to_owned(),
-        cargo_state: G3RsFmtCargoState::Parsed(
+        cargo_state: G3RsFmtCargoState::Parsed(Box::new(
             parse_cargo_toml(
                 r#"
 [workspace.package]
@@ -28,7 +28,7 @@ edition = "2024"
 "#,
             )
             .expect("cargo fixture should parse"),
-        ),
+        )),
         toolchain_rel_path: "rust-toolchain.toml".to_owned(),
         toolchain_state,
         rust_policy: G3RsFmtRustPolicyState::Missing,
@@ -39,7 +39,7 @@ edition = "2024"
 }
 
 pub(super) fn parsed_toolchain(toolchain_toml: &str) -> G3RsFmtToolchainState {
-    G3RsFmtToolchainState::Parsed(
+    G3RsFmtToolchainState::Parsed(Box::new(
         parse_toolchain_toml(toolchain_toml).expect("toolchain test fixture should parse"),
-    )
+    ))
 }

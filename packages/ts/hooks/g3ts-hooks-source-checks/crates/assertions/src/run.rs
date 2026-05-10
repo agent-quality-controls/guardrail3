@@ -1,32 +1,33 @@
-use guardrail3_check_types::{G3CheckResult, G3Severity};
+use guardrail3_check_types::G3CheckResult;
 
-pub fn assert_has_id(results: &[G3CheckResult], expected: &str, context: &str) {
-    assert!(
-        results.iter().any(|result| result.id() == expected),
-        "expected result id `{expected}` for {context}, got {results:#?}"
-    );
-}
-
-pub fn assert_missing_id(results: &[G3CheckResult], expected: &str, context: &str) {
-    assert!(
-        !results.iter().any(|result| result.id() == expected),
-        "did not expect result id `{expected}` for {context}, got {results:#?}"
-    );
-}
-
-pub fn assert_result_id_severity(
-    results: &[G3CheckResult],
-    result_id: &str,
-    expected: G3Severity,
-    context: &str,
-) {
-    let result = results
+/// Asserts that `results` contains zero non-inventory entries.
+///
+/// # Panics
+///
+/// Panics when at least one non-inventory result is present.
+pub fn assert_no_non_inventory_findings(results: &[G3CheckResult], context: &str) {
+    let non_inventory: Vec<_> = results
         .iter()
-        .find(|result| result.id() == result_id)
-        .expect("expected result id to be present before checking severity");
-    assert_eq!(
-        result.severity(),
-        expected,
-        "severity mismatch for {context}"
+        .filter(|result| !result.inventory())
+        .collect();
+    assert!(
+        non_inventory.is_empty(),
+        "{context}: expected zero non-inventory findings, got {non_inventory:#?}",
+    );
+}
+
+/// Asserts that `results` contains no entry whose id is `expected`.
+///
+/// # Panics
+///
+/// Panics when at least one result with id `expected` is present.
+pub fn assert_missing_id(results: &[G3CheckResult], expected: &str) {
+    let matched: Vec<_> = results
+        .iter()
+        .filter(|result| result.id() == expected)
+        .collect();
+    assert!(
+        matched.is_empty(),
+        "did not expect any result for `{expected}`, got {matched:#?}",
     );
 }

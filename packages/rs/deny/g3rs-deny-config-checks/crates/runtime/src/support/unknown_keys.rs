@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use deny_toml_parser::types as deny;
 
+/// Implements `known top level keys`.
 pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
     BTreeSet::from([
         "graph",
@@ -14,6 +15,7 @@ pub(crate) fn known_top_level_keys() -> BTreeSet<&'static str> {
     ])
 }
 
+/// Implements `feature entry unknown keys`.
 pub(crate) fn feature_entry_unknown_keys(entry: &deny::BanFeatureEntry) -> Vec<String> {
     entry
         .extra
@@ -23,6 +25,7 @@ pub(crate) fn feature_entry_unknown_keys(entry: &deny::BanFeatureEntry) -> Vec<S
         .collect()
 }
 
+/// Implements `graph target unknown keys`.
 pub(crate) fn graph_target_unknown_keys(entry: &deny::GraphTargetEntry) -> Vec<String> {
     match entry {
         deny::GraphTargetEntry::Simple(_) => Vec::new(),
@@ -35,6 +38,7 @@ pub(crate) fn graph_target_unknown_keys(entry: &deny::GraphTargetEntry) -> Vec<S
     }
 }
 
+/// Implements `license clarification unknown keys`.
 pub(crate) fn license_clarification_unknown_keys(
     entry: &deny::LicenseClarification,
 ) -> Vec<String> {
@@ -46,6 +50,7 @@ pub(crate) fn license_clarification_unknown_keys(
         .collect()
 }
 
+/// Implements `license clarification file unknown keys`.
 pub(crate) fn license_clarification_file_unknown_keys(
     entry: &deny::LicenseClarificationFile,
 ) -> Vec<String> {
@@ -57,6 +62,7 @@ pub(crate) fn license_clarification_file_unknown_keys(
         .collect()
 }
 
+/// Implements `license exception unknown keys`.
 pub(crate) fn license_exception_unknown_keys(entry: &deny::LicenseException) -> Vec<String> {
     entry
         .extra
@@ -66,6 +72,7 @@ pub(crate) fn license_exception_unknown_keys(entry: &deny::LicenseException) -> 
         .collect()
 }
 
+/// Implements `allow entry unknown keys`.
 pub(crate) fn allow_entry_unknown_keys(entry: &deny::BanAllowEntry) -> Vec<String> {
     match entry {
         deny::BanAllowEntry::Simple(_) => Vec::new(),
@@ -78,6 +85,7 @@ pub(crate) fn allow_entry_unknown_keys(entry: &deny::BanAllowEntry) -> Vec<Strin
     }
 }
 
+/// Implements `advisory ignore unknown keys`.
 pub(crate) fn advisory_ignore_unknown_keys(entry: &deny::AdvisoryIgnoreEntry) -> Vec<String> {
     match entry {
         deny::AdvisoryIgnoreEntry::Simple(_) => Vec::new(),
@@ -90,6 +98,7 @@ pub(crate) fn advisory_ignore_unknown_keys(entry: &deny::AdvisoryIgnoreEntry) ->
     }
 }
 
+/// Implements `private unknown keys`.
 pub(crate) fn private_unknown_keys(config: &deny::LicensesPrivateConfig) -> Vec<String> {
     config
         .extra
@@ -99,6 +108,7 @@ pub(crate) fn private_unknown_keys(config: &deny::LicensesPrivateConfig) -> Vec<
         .collect()
 }
 
+/// Implements `graph unknown keys`.
 pub(crate) fn graph_unknown_keys(graph: &deny::GraphConfig) -> Vec<String> {
     graph
         .extra
@@ -108,6 +118,7 @@ pub(crate) fn graph_unknown_keys(graph: &deny::GraphConfig) -> Vec<String> {
         .collect()
 }
 
+/// Implements `advisories unknown keys`.
 pub(crate) fn advisories_unknown_keys(config: &deny::AdvisoriesConfig) -> Vec<String> {
     config
         .extra
@@ -117,6 +128,7 @@ pub(crate) fn advisories_unknown_keys(config: &deny::AdvisoriesConfig) -> Vec<St
         .collect()
 }
 
+/// Implements `bans unknown keys`.
 pub(crate) fn bans_unknown_keys(config: &deny::BansConfig) -> Vec<String> {
     config
         .extra
@@ -126,6 +138,7 @@ pub(crate) fn bans_unknown_keys(config: &deny::BansConfig) -> Vec<String> {
         .collect()
 }
 
+/// Implements `licenses unknown keys`.
 pub(crate) fn licenses_unknown_keys(config: &deny::LicensesConfig) -> Vec<String> {
     config
         .extra
@@ -135,6 +148,7 @@ pub(crate) fn licenses_unknown_keys(config: &deny::LicensesConfig) -> Vec<String
         .collect()
 }
 
+/// Implements `sources unknown keys`.
 pub(crate) fn sources_unknown_keys(config: &deny::SourcesConfig) -> Vec<String> {
     config
         .extra
@@ -144,6 +158,7 @@ pub(crate) fn sources_unknown_keys(config: &deny::SourcesConfig) -> Vec<String> 
         .collect()
 }
 
+/// Implements `skip tree unknown keys`.
 pub(crate) fn skip_tree_unknown_keys(entry: &deny::BanSkipTreeEntry) -> Vec<String> {
     match entry {
         deny::BanSkipTreeEntry::Simple(_) => Vec::new(),
@@ -156,6 +171,7 @@ pub(crate) fn skip_tree_unknown_keys(entry: &deny::BanSkipTreeEntry) -> Vec<Stri
     }
 }
 
+/// Implements `workspace dependencies unknown keys`.
 pub(crate) fn workspace_dependencies_unknown_keys(
     config: &deny::BanWorkspaceDependenciesConfig,
 ) -> Vec<String> {
@@ -167,6 +183,7 @@ pub(crate) fn workspace_dependencies_unknown_keys(
         .collect()
 }
 
+/// Implements `build unknown keys`.
 pub(crate) fn build_unknown_keys(config: &deny::BanBuildConfig) -> Vec<String> {
     config
         .extra
@@ -176,6 +193,7 @@ pub(crate) fn build_unknown_keys(config: &deny::BanBuildConfig) -> Vec<String> {
         .collect()
 }
 
+/// Implements `build allow build script unknown keys`.
 pub(crate) fn build_allow_build_script_unknown_keys(
     entry: &deny::BanBuildAllowBuildScriptEntry,
 ) -> Vec<String> {
@@ -190,6 +208,7 @@ pub(crate) fn build_allow_build_script_unknown_keys(
     }
 }
 
+/// Implements `build bypass unknown keys`.
 pub(crate) fn build_bypass_unknown_keys(entry: &deny::BanBuildBypassEntry) -> Vec<String> {
     entry
         .extra
@@ -199,6 +218,7 @@ pub(crate) fn build_bypass_unknown_keys(entry: &deny::BanBuildBypassEntry) -> Ve
         .collect()
 }
 
+/// Implements `build bypass allow unknown keys`.
 pub(crate) fn build_bypass_allow_unknown_keys(
     entry: &deny::BanBuildBypassAllowEntry,
 ) -> Vec<String> {
@@ -210,6 +230,7 @@ pub(crate) fn build_bypass_allow_unknown_keys(
         .collect()
 }
 
+/// Implements `output unknown keys`.
 pub(crate) fn output_unknown_keys(config: &deny::OutputConfig) -> Vec<String> {
     config
         .extra
@@ -219,6 +240,7 @@ pub(crate) fn output_unknown_keys(config: &deny::OutputConfig) -> Vec<String> {
         .collect()
 }
 
+/// Implements `allow org unknown keys`.
 pub(crate) fn allow_org_unknown_keys(config: &deny::SourcesAllowOrg) -> Vec<String> {
     config
         .extra
@@ -228,6 +250,7 @@ pub(crate) fn allow_org_unknown_keys(config: &deny::SourcesAllowOrg) -> Vec<Stri
         .collect()
 }
 
+/// Implements `known section keys`.
 fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
     SECTION_KEYS
         .iter()
@@ -236,6 +259,7 @@ fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
         .unwrap_or_default()
 }
 
+/// Constant value used by the surrounding module.
 const GRAPH_KEYS: &[&str] = &[
     "all-features",
     "no-default-features",
@@ -245,7 +269,9 @@ const GRAPH_KEYS: &[&str] = &[
     "exclude-dev",
     "exclude-unpublished",
 ];
+/// Constant value used by the surrounding module.
 const GRAPH_TARGET_KEYS: &[&str] = &["triple", "features"];
+/// Constant value used by the surrounding module.
 const BANS_KEYS: &[&str] = &[
     "multiple-versions",
     "multiple-versions-include-dev",
@@ -263,9 +289,13 @@ const BANS_KEYS: &[&str] = &[
     "workspace-dependencies",
     "build",
 ];
+/// Constant value used by the surrounding module.
 const ALLOW_KEYS: &[&str] = &["name", "crate", "version", "reason"];
+/// Constant value used by the surrounding module.
 const SKIP_TREE_KEYS: &[&str] = &["name", "crate", "version", "depth", "reason"];
+/// Constant value used by the surrounding module.
 const WORKSPACE_DEPENDENCIES_KEYS: &[&str] = &["duplicates", "include-path-dependencies", "unused"];
+/// Constant value used by the surrounding module.
 const BUILD_KEYS: &[&str] = &[
     "allow-build-scripts",
     "executables",
@@ -277,7 +307,9 @@ const BUILD_KEYS: &[&str] = &[
     "include-archives",
     "bypass",
 ];
+/// Constant value used by the surrounding module.
 const BUILD_ALLOW_BUILD_SCRIPTS_KEYS: &[&str] = &["name", "crate", "version"];
+/// Constant value used by the surrounding module.
 const BUILD_BYPASS_KEYS: &[&str] = &[
     "name",
     "crate",
@@ -287,7 +319,9 @@ const BUILD_BYPASS_KEYS: &[&str] = &[
     "allow-globs",
     "allow",
 ];
+/// Constant value used by the surrounding module.
 const BUILD_BYPASS_ALLOW_KEYS: &[&str] = &["path", "checksum"];
+/// Constant value used by the surrounding module.
 const LICENSES_KEYS: &[&str] = &[
     "version",
     "include-dev",
@@ -300,10 +334,15 @@ const LICENSES_KEYS: &[&str] = &[
     "exceptions",
     "clarify",
 ];
+/// Constant value used by the surrounding module.
 const CLARIFY_KEYS: &[&str] = &["name", "crate", "version", "expression", "license-files"];
+/// Constant value used by the surrounding module.
 const CLARIFY_FILE_KEYS: &[&str] = &["path", "hash"];
+/// Constant value used by the surrounding module.
 const PRIVATE_KEYS: &[&str] = &["ignore", "registries", "ignore-sources"];
+/// Constant value used by the surrounding module.
 const EXCEPTION_KEYS: &[&str] = &["allow", "name", "crate", "version", "reason"];
+/// Constant value used by the surrounding module.
 const ADVISORIES_KEYS: &[&str] = &[
     "db-path",
     "db-urls",
@@ -316,7 +355,9 @@ const ADVISORIES_KEYS: &[&str] = &[
     "notice",
     "unsound",
 ];
+/// Constant value used by the surrounding module.
 const IGNORE_KEYS: &[&str] = &["id", "crate", "name", "version", "reason"];
+/// Constant value used by the surrounding module.
 const SOURCES_KEYS: &[&str] = &[
     "unknown-registry",
     "unknown-git",
@@ -327,13 +368,21 @@ const SOURCES_KEYS: &[&str] = &[
     "unused-allowed-source",
     "allow-org",
 ];
+/// Constant value used by the surrounding module.
 const SKIP_KEYS: &[&str] = &["name", "crate", "version", "reason"];
+/// Constant value used by the surrounding module.
 const FEATURE_KEYS: &[&str] = &[
     "name", "crate", "version", "deny", "allow", "reason", "exact",
 ];
+/// Constant value used by the surrounding module.
 const ALLOW_ORG_KEYS: &[&str] = &["github", "gitlab", "bitbucket"];
+/// Constant value used by the surrounding module.
 const OUTPUT_KEYS: &[&str] = &["feature-depth"];
-const SECTION_KEYS: &[(&str, &[&str])] = &[
+/// Mapping from a deny.toml section name to its allowlist of recognized keys.
+type SectionKeyAllowlist = (&'static str, &'static [&'static str]);
+
+/// Constant value used by the surrounding module.
+const SECTION_KEYS: &[SectionKeyAllowlist] = &[
     ("graph", GRAPH_KEYS),
     ("graph-target", GRAPH_TARGET_KEYS),
     ("bans", BANS_KEYS),

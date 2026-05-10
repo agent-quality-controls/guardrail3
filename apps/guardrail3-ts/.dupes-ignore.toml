@@ -1,0 +1,43 @@
+[[ignore]]
+fingerprint = "b60429fb0dba5b94"
+reason = "test fixture builders share a structural shape per g3rs-test/real-proof-site (one fixture per proof site)"
+
+[[ignore]]
+fingerprint = "1c29616b5947d210"
+reason = "per-family runner harness skeletons are parallel by g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "58041790fc201e81"
+reason = "parallel CLI subcommand wiring per family; each subcommand is a distinct proof site"
+
+[[ignore]]
+fingerprint = "078493000c9b501f"
+reason = "parallel assertion helpers for two family runners; runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "12ee6188b61fdbc9"
+reason = "parallel test bodies for two family runner cases; real-proof-site contract"
+
+[[ignore]]
+fingerprint = "15454e94f5e4376a"
+reason = "parallel CLI dispatch arms per family; collapsing would lose the per-family routing clarity"
+
+[[ignore]]
+fingerprint = "3b81d11e0d68ccf2"
+reason = "parallel input-parse helpers per command; one helper per CLI command"
+
+[[ignore]]
+fingerprint = "5011d0cf960f1121"
+reason = "parallel CLI execute helpers per family; one execute path per family"
+
+[[ignore]]
+fingerprint = "63e00a4b51814b40"
+reason = "parallel test-fixture writer helpers per command kind"
+
+[[ignore]]
+fingerprint = "846c78d9c3b31db2"
+reason = "parallel test-fixture writer helpers for tool-presence cases"
+
+[[ignore]]
+fingerprint = "da28ef43223100f6"
+reason = "parallel marker-pair assertions per language; one per (rs/ts) language scope"

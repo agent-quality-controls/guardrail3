@@ -26,6 +26,12 @@ fn package_json_suffix_file_does_not_create_root() {
 }
 
 #[test]
+#[allow(
+    clippy::disallowed_methods,
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "test fixture writes via std::fs and asserts surface variants by panicking on mismatch"
+)]
 fn ignored_syncpack_config_is_missing() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace");
     std::fs::write(tempdir.path().join("package.json"), "{}\n").expect("write package manifest");
@@ -57,6 +63,11 @@ fn ignored_syncpack_config_is_missing() {
 }
 
 #[test]
+#[allow(
+    clippy::disallowed_methods,
+    clippy::panic,
+    reason = "test fixture writes via std::fs and asserts surface variants by panicking on mismatch"
+)]
 fn fail_open_type_coverage_script_preserves_or_separator() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace");
     std::fs::write(
@@ -89,6 +100,11 @@ fn fail_open_type_coverage_script_preserves_or_separator() {
 }
 
 #[test]
+#[allow(
+    clippy::disallowed_methods,
+    clippy::panic,
+    reason = "test fixture writes via std::fs and asserts surface variants by panicking on mismatch"
+)]
 fn unsupported_typecov_script_is_preserved_as_parse_blocker() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace");
     std::fs::write(

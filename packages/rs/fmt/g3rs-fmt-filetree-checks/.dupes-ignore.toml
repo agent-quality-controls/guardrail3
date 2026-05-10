@@ -1,0 +1,7 @@
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "per-rule assertion modules share macro-based emission shape"
+
+[[ignore]]
+fingerprint = "8acede4f8d85f5af"
+reason = "per-rule assertion modules share macro-based emission shape"

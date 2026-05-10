@@ -1,3 +1,4 @@
+/// Rule implementation for `scan`.
 mod scan;
 
 pub(crate) use scan::{

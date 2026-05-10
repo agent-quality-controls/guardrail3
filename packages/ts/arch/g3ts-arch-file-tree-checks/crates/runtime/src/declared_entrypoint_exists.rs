@@ -1,8 +1,10 @@
 use g3ts_arch_types::{G3TsArchFileTreeChecksInput, G3TsArchManifestState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier for the declared-entrypoint-exists check.
 const ID: &str = "g3ts-arch/declared-entrypoint-exists";
 
+/// Verify each declared facade entrypoint resolves to an existing file.
 pub(crate) fn check(input: &G3TsArchFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     let G3TsArchManifestState::Parsed { snapshot } = &input.manifest else {
         return;

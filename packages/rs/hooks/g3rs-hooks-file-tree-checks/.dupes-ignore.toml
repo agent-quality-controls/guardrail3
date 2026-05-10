@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "a75c08f0b98540a0"
+reason = "Test helper duplicated per-rule by design (each rule owns its sidecar tests)"
+
+[[ignore]]
+fingerprint = "500f938b59bfe801"
+reason = "Test case bodies are structurally similar by intent across rules"
+
+[[ignore]]
+fingerprint = "7a3e4eb247b7e344"
+reason = "Parallel test cases for modular vs monolithic inventory"
+
+[[ignore]]
+fingerprint = "8d9562061902e834"
+reason = "Parallel test cases for hooks-path-configured rule"
+
+[[ignore]]
+fingerprint = "a326d9b21a0b3bea"
+reason = "Parallel test cases for executable vs inventory variants"
+
+[[ignore]]
+fingerprint = "cca85cdc0c54e8a6"
+reason = "Parallel test cases for empty-dir inventory variants"

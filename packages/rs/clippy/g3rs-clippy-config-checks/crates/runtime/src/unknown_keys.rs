@@ -7,8 +7,10 @@ use crate::support::{
     clippy_document, known_top_level_keys, managed_non_threshold_keys, normalized_key_distance,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/unknown-keys";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(document) = clippy_document(input) else {
         return;
@@ -26,7 +28,7 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
                 .copied()
                 .any(|managed| normalized_key_distance(key, managed) <= 2);
         if looks_like_managed_typo {
-            typo_count += 1;
+            typo_count = typo_count.saturating_add(1);
             results.push(G3CheckResult::new(
                 ID.to_owned(),
                 G3Severity::Warn,

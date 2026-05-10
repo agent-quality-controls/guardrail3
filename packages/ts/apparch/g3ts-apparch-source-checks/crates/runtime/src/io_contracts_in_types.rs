@@ -3,8 +3,10 @@ use g3ts_apparch_types::{
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable identifier for the io-contracts-in-types rule.
 const ID: &str = "g3ts-apparch/io-contracts-in-types";
 
+/// Flags exported interfaces in `io/inbound` and `io/outbound`, emits inventory when clean.
 pub(crate) fn check(input: &G3TsApparchSourceChecksInput, results: &mut Vec<G3CheckResult>) {
     let violating = input
         .public_items

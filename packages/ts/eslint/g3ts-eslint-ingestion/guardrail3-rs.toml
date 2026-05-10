@@ -8,11 +8,5 @@ allowed_deps = [
   "tempfile",
 ]
 
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/assertions/Cargo.toml"
-selector = "structural-split"
-reason = "Assertions crate intentionally keeps one shared proof module per tested ingestion surface."
-
 [checks]
 garde = false

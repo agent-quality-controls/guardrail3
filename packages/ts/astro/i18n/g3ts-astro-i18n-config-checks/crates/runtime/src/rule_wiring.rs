@@ -3,25 +3,35 @@ use g3ts_astro_i18n_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `I18NEXT_ID`.
 const I18NEXT_ID: &str = "g3ts-astro-i18n/i18next-plugin-wired";
+/// Internal constant `POLICY_ID`.
 const POLICY_ID: &str = "g3ts-astro-i18n/i18n-policy-plugin-wired";
+/// Internal constant `LINK_RULE_ID`.
 const LINK_RULE_ID: &str = "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule";
+/// Internal constant `FORMAT_ID`.
 const FORMAT_ID: &str = "g3ts-astro-i18n/raw-date-number-formatting-bans";
+/// Internal constant `DISABLE_ID`.
 const DISABLE_ID: &str = "g3ts-astro-i18n/protected-i18n-rule-disables-restricted";
+/// Internal constant `I18NEXT_RULE`.
 const I18NEXT_RULE: &str = "i18next/no-literal-string";
+/// Internal constant `LINK_RULE`.
 const LINK_RULE: &str = "astro-i18n-policy/no-unlocalized-internal-hrefs";
+/// Internal constant `REQUIRED_SELECTORS`.
 const REQUIRED_SELECTORS: [&str; 4] = [
     "CallExpression[callee.property.name='toLocaleDateString']",
     "CallExpression[callee.property.name='toLocaleString']",
     "NewExpression[callee.object.name='Intl'][callee.property.name='DateTimeFormat']",
     "NewExpression[callee.object.name='Intl'][callee.property.name='NumberFormat']",
 ];
+/// Internal constant `PROTECTED_DISABLES`.
 const PROTECTED_DISABLES: [&str; 3] = [
     "i18next/no-literal-string",
     "astro-i18n-policy/*",
     "no-restricted-syntax",
 ];
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -33,6 +43,7 @@ pub(crate) fn check(
     check_disable_protection(contract, results);
 }
 
+/// Internal function `check_i18next`.
 fn check_i18next(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -56,14 +67,12 @@ fn check_i18next(
                 .iter()
                 .any(|rule| rule == I18NEXT_RULE)
     }) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                I18NEXT_ID,
-                "i18next public-copy rule is wired",
-                format!("`{rel_path}` activates `{I18NEXT_RULE}` at error severity on the Astro i18n public source probe."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            I18NEXT_ID,
+            "i18next public-copy rule is wired",
+            format!("`{rel_path}` activates `{I18NEXT_RULE}` at error severity on the Astro i18n public source probe."),
+            rel_path,
+        ));
         return;
     }
 
@@ -71,13 +80,13 @@ fn check_i18next(
         I18NEXT_ID,
         "i18next public-copy rule is not wired",
         format!(
-            "`{}` must activate plugin `i18next` from `eslint-plugin-i18next` and `{I18NEXT_RULE}` at `error` on `[ts.astro.i18n].public_source_globs`.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must activate plugin `i18next` from `eslint-plugin-i18next` and `{I18NEXT_RULE}` at `error` on `[ts.astro.i18n].public_source_globs`."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal function `check_policy_plugin`.
 fn check_policy_plugin(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -97,14 +106,12 @@ fn check_policy_plugin(
                         .any(|package| package == "g3ts-eslint-plugin-astro-i18n-policy")
                 })
     }) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                POLICY_ID,
-                "Astro i18n policy plugin is wired",
-                format!("`{rel_path}` activates `astro-i18n-policy` from `g3ts-eslint-plugin-astro-i18n-policy`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            POLICY_ID,
+            "Astro i18n policy plugin is wired",
+            format!("`{rel_path}` activates `astro-i18n-policy` from `g3ts-eslint-plugin-astro-i18n-policy`."),
+            rel_path,
+        ));
         return;
     }
 
@@ -112,13 +119,13 @@ fn check_policy_plugin(
         POLICY_ID,
         "Astro i18n policy plugin is not wired",
         format!(
-            "`{}` must activate plugin namespace `astro-i18n-policy` from `g3ts-eslint-plugin-astro-i18n-policy` on `[ts.astro.i18n].public_source_globs`.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must activate plugin namespace `astro-i18n-policy` from `g3ts-eslint-plugin-astro-i18n-policy` on `[ts.astro.i18n].public_source_globs`."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal function `check_rule`.
 fn check_rule(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -132,16 +139,14 @@ fn check_rule(
             .iter()
             .any(|rule| rule == rule_name)
     }) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                id,
-                "Astro i18n policy rule is effective",
-                format!(
-                    "`{rel_path}` activates `{rule_name}` at error severity with explicit options."
-                ),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            id,
+            "Astro i18n policy rule is effective",
+            format!(
+                "`{rel_path}` activates `{rule_name}` at error severity with explicit options."
+            ),
+            rel_path,
+        ));
         return;
     }
 
@@ -149,13 +154,13 @@ fn check_rule(
         id,
         "Astro i18n policy rule is not effective",
         format!(
-            "`{}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.i18n]`: `locales`, `defaultLocale` only when `default_locale` is configured, `requireLocalePrefixForContentRoutes`, `allowedUnprefixedRoutes`, `contentRoutePrefixes`, `checkedInternalLinkHelpers`, `approvedInternalLinkHelpers`, and `approvedLocalizedLinkComponents`.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must activate `{rule_name}` at `error` with explicit options matching `[ts.astro.i18n]`: `locales`, `defaultLocale` only when `default_locale` is configured, `requireLocalePrefixForContentRoutes`, `allowedUnprefixedRoutes`, `contentRoutePrefixes`, `checkedInternalLinkHelpers`, `approvedInternalLinkHelpers`, and `approvedLocalizedLinkComponents`."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal function `check_formatting_bans`.
 fn check_formatting_bans(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -176,14 +181,12 @@ fn check_formatting_bans(
                     .any(|required| required == selector)
             })
     }) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                FORMAT_ID,
-                "Raw date and number formatting bans are wired",
-                format!("`{rel_path}` bans raw locale formatting on public source probes and keeps approved helper probes unblocked."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            FORMAT_ID,
+            "Raw date and number formatting bans are wired",
+            format!("`{rel_path}` bans raw locale formatting on public source probes and keeps approved helper probes unblocked."),
+            rel_path,
+        ));
         return;
     }
 
@@ -191,13 +194,13 @@ fn check_formatting_bans(
         FORMAT_ID,
         "Raw date and number formatting bans are not wired",
         format!(
-            "`{}` must configure `no-restricted-syntax` at `error` on public source probes for toLocaleDateString, toLocaleString, Intl.DateTimeFormat, and Intl.NumberFormat, while approved helper probes must not inherit those bans.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must configure `no-restricted-syntax` at `error` on public source probes for toLocaleDateString, toLocaleString, Intl.DateTimeFormat, and Intl.NumberFormat, while approved helper probes must not inherit those bans."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
+/// Internal function `check_disable_protection`.
 fn check_disable_protection(
     contract: &G3TsAstroI18nEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -211,14 +214,12 @@ fn check_disable_protection(
                 .any(|candidate| candidate == pattern)
         })
     }) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                DISABLE_ID,
-                "Astro i18n delegated rule disables are restricted",
-                format!("`{rel_path}` protects i18n delegated rules with `@eslint-community/eslint-comments/no-restricted-disable`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            DISABLE_ID,
+            "Astro i18n delegated rule disables are restricted",
+            format!("`{rel_path}` protects i18n delegated rules with `@eslint-community/eslint-comments/no-restricted-disable`."),
+            rel_path,
+        ));
         return;
     }
 
@@ -226,14 +227,14 @@ fn check_disable_protection(
         DISABLE_ID,
         "Astro i18n delegated rule disables are not restricted",
         format!(
-            "`{}` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `i18next/no-literal-string`, `astro-i18n-policy/*`, and `no-restricted-syntax`.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `i18next/no-literal-string`, `astro-i18n-policy/*`, and `no-restricted-syntax`."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
-fn public_config(
+/// Internal function `fn`.
+const fn public_config(
     contract: &G3TsAstroI18nEslintPluginContractInput,
 ) -> Option<&g3ts_astro_i18n_types::G3TsAstroI18nEslintSurfaceSnapshot> {
     match &contract.config {

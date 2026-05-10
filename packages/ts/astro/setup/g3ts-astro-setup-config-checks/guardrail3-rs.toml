@@ -8,12 +8,6 @@ allowed_deps = [
   "url",
 ]
 
-[[waivers]]
-rule = "g3rs-arch/structural-split"
-file = "crates/runtime/Cargo.toml"
-selector = "structural-split"
-reason = "setup config keeps one rule per file at runtime root; further split would create artificial packages around tightly related setup assertions."
-
 [checks]
 garde = false
 

@@ -8,6 +8,7 @@ use g3rs_clippy_types::{
 };
 use guardrail3_rs_toml_parser::types::RustProfile;
 
+#[must_use]
 pub fn parsed_rust_policy(
     rel_path: &str,
     profile: Option<RustProfile>,
@@ -20,6 +21,7 @@ pub fn parsed_rust_policy(
     }
 }
 
+#[must_use]
 pub fn parse_error_rust_policy(rel_path: &str, reason: &str) -> G3RsClippyRustPolicyState {
     G3RsClippyRustPolicyState::ParseError {
         rel_path: rel_path.to_owned(),
@@ -27,6 +29,7 @@ pub fn parse_error_rust_policy(rel_path: &str, reason: &str) -> G3RsClippyRustPo
     }
 }
 
+#[must_use]
 pub fn unreadable_cargo_config(rel_path: &str, reason: &str) -> G3RsClippyCargoConfigState {
     G3RsClippyCargoConfigState::Unreadable {
         rel_path: rel_path.to_owned(),
@@ -34,6 +37,7 @@ pub fn unreadable_cargo_config(rel_path: &str, reason: &str) -> G3RsClippyCargoC
     }
 }
 
+#[must_use]
 pub fn parse_error_cargo_config(rel_path: &str, reason: &str) -> G3RsClippyCargoConfigState {
     G3RsClippyCargoConfigState::ParseError {
         rel_path: rel_path.to_owned(),
@@ -41,17 +45,31 @@ pub fn parse_error_cargo_config(rel_path: &str, reason: &str) -> G3RsClippyCargo
     }
 }
 
+/// Build a `Parsed` `cargo/config.toml` state at `rel_path` from raw TOML text.
+///
+/// # Panics
+///
+/// Panics when `raw` does not parse as `cargo/config.toml`; intended for fixture-only use.
+#[must_use]
+#[expect(
+    clippy::expect_used,
+    reason = "test-support fixture builder: malformed `raw` is a fixture bug, not a runtime error; surfacing it via panic gives a clear test failure"
+)]
 pub fn cargo_config(rel_path: &str, raw: &str) -> G3RsClippyCargoConfigState {
     G3RsClippyCargoConfigState::Parsed {
         rel_path: rel_path.to_owned(),
-        cargo_config: parse_cargo_config_toml(raw).expect("cargo config fixture should parse"),
+        cargo_config: Box::new(
+            parse_cargo_config_toml(raw).expect("cargo config fixture should parse"),
+        ),
     }
 }
 
-pub fn missing_cargo_root() -> G3RsClippyCargoRootState {
+#[must_use]
+pub const fn missing_cargo_root() -> G3RsClippyCargoRootState {
     G3RsClippyCargoRootState::Missing
 }
 
+#[must_use]
 pub fn unreadable_cargo_root(rel_path: &str, reason: &str) -> G3RsClippyCargoRootState {
     G3RsClippyCargoRootState::Unreadable {
         rel_path: rel_path.to_owned(),
@@ -59,6 +77,7 @@ pub fn unreadable_cargo_root(rel_path: &str, reason: &str) -> G3RsClippyCargoRoo
     }
 }
 
+#[must_use]
 pub fn parse_error_cargo_root(rel_path: &str, reason: &str) -> G3RsClippyCargoRootState {
     G3RsClippyCargoRootState::ParseError {
         rel_path: rel_path.to_owned(),
@@ -66,21 +85,42 @@ pub fn parse_error_cargo_root(rel_path: &str, reason: &str) -> G3RsClippyCargoRo
     }
 }
 
+/// Build a `Parsed` workspace root `Cargo.toml` state at `rel_path` from raw TOML text.
+///
+/// # Panics
+///
+/// Panics when `raw` does not parse as a Cargo.toml document; intended for fixture-only use.
+#[must_use]
+#[expect(
+    clippy::expect_used,
+    reason = "test-support fixture builder: malformed `raw` is a fixture bug, not a runtime error; surfacing it via panic gives a clear test failure"
+)]
 pub fn cargo_root(rel_path: &str, raw: &str) -> G3RsClippyCargoRootState {
     G3RsClippyCargoRootState::Parsed {
         rel_path: rel_path.to_owned(),
-        cargo: parse_cargo_document(raw).expect("cargo root fixture should parse"),
+        cargo: Box::new(parse_cargo_document(raw).expect("cargo root fixture should parse")),
     }
 }
 
+/// Build a `Parsed` workspace-member `Cargo.toml` state at `rel_path` from raw TOML text.
+///
+/// # Panics
+///
+/// Panics when `raw` does not parse as a Cargo.toml document; intended for fixture-only use.
+#[must_use]
+#[expect(
+    clippy::expect_used,
+    reason = "test-support fixture builder: malformed `raw` is a fixture bug, not a runtime error; surfacing it via panic gives a clear test failure"
+)]
 pub fn cargo_member(member_rel: &str, rel_path: &str, raw: &str) -> G3RsClippyCargoMemberState {
     G3RsClippyCargoMemberState::Parsed {
         member_rel: member_rel.to_owned(),
         rel_path: rel_path.to_owned(),
-        cargo: parse_cargo_document(raw).expect("cargo member fixture should parse"),
+        cargo: Box::new(parse_cargo_document(raw).expect("cargo member fixture should parse")),
     }
 }
 
+#[must_use]
 pub fn input_from_raw(rel_path: &str, raw: &str) -> G3RsClippyConfigChecksInput {
     input_with_raw_and_waivers(
         rel_path,
@@ -93,6 +133,7 @@ pub fn input_from_raw(rel_path: &str, raw: &str) -> G3RsClippyConfigChecksInput 
     )
 }
 
+#[must_use]
 pub fn input_with_raw(
     rel_path: &str,
     raw: &str,
@@ -112,6 +153,7 @@ pub fn input_with_raw(
     )
 }
 
+#[must_use]
 pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsClippyWaiver {
     G3RsClippyWaiver {
         rule: rule.to_owned(),
@@ -121,6 +163,7 @@ pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsClipp
     }
 }
 
+#[must_use]
 pub fn input_with_raw_and_waivers(
     rel_path: &str,
     raw: &str,
@@ -131,7 +174,7 @@ pub fn input_with_raw_and_waivers(
     waivers: Vec<G3RsClippyWaiver>,
 ) -> G3RsClippyConfigChecksInput {
     let clippy = match parse_clippy_document(raw) {
-        Ok(document) => G3RsClippyConfigState::Parsed(document),
+        Ok(document) => G3RsClippyConfigState::Parsed(Box::new(document)),
         Err(err) => G3RsClippyConfigState::ParseError {
             reason: err.to_string(),
         },

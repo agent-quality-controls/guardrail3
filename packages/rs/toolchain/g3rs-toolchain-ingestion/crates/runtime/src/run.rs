@@ -56,12 +56,27 @@ pub fn ingest_for_config_checks(
 }
 
 /// Stub source ingestion entry point for the toolchain family.
-pub fn ingest_for_source_checks(
+///
+/// # Errors
+///
+/// Always returns [`IngestionError::SourceIngestionNotImplemented`] until source
+/// ingestion is supported by the toolchain family.
+pub const fn ingest_for_source_checks(
     _crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainSourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
 
+/// Build the toolchain file-tree checks input from a workspace crawl.
+///
+/// # Errors
+///
+/// Currently never returns an error; the [`Result`] return type is reserved for
+/// future ingestion failures and matches the family's other entry points.
+#[allow(
+    clippy::unnecessary_wraps,
+    reason = "shape parity across `ingest_for_*` entry points; future failures will populate the Err arm"
+)]
 pub fn ingest_for_file_tree_checks(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Result<G3RsToolchainFileTreeChecksInput, IngestionError> {

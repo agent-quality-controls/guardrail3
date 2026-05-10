@@ -5,15 +5,14 @@ use npmrc_parser_runtime_assertions::parser::{
 #[test]
 fn parses_narrow_npmrc_surface() {
     let document = super::super::parse_document(
-        r#"
+        r"
         strict-peer-dependencies=true
         engine-strict=true
         minimum-release-age=1440
         minimum-release-age-exclude=@base-ui/react
         //registry.npmjs.org/:_authToken=${NPM_TOKEN}
-        "#,
-    )
-    .expect(".npmrc document should parse");
+        ",
+    );
 
     assert_parsed_document(&document);
     assert_effective_value(&document, "strict-peer-dependencies", Some("true"));
@@ -40,8 +39,7 @@ fn strips_inline_comments_and_quotes() {
         save-prefix=""
         public-hoist-pattern='' ; comment
         "#,
-    )
-    .expect(".npmrc document should parse");
+    );
 
     assert_parsed_document(&document);
     assert_effective_value(&document, "strict-peer-dependencies", Some("true"));
@@ -52,12 +50,11 @@ fn strips_inline_comments_and_quotes() {
 #[test]
 fn preserves_duplicate_keys_but_reports_them() {
     let document = super::super::parse_document(
-        r#"
+        r"
         strict-peer-dependencies=true
         strict-peer-dependencies=false
-        "#,
-    )
-    .expect(".npmrc document should parse");
+        ",
+    );
 
     assert_parsed_document(&document);
     assert_effective_value(&document, "strict-peer-dependencies", Some("false"));
@@ -66,8 +63,7 @@ fn preserves_duplicate_keys_but_reports_them() {
 
 #[test]
 fn rejects_lines_without_key_value_syntax() {
-    let document = super::super::parse_document("not-a-setting")
-        .expect(".npmrc parser should produce a document");
+    let document = super::super::parse_document("not-a-setting");
 
     assert_invalid_document(&document, "must use key=value syntax");
 }

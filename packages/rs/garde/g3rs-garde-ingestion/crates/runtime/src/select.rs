@@ -30,18 +30,23 @@ pub(crate) fn select_ast_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
     files
 }
 
+/// Implements `is runtime source path`.
 fn is_runtime_source_path(rel_path: &str) -> bool {
     rel_path == "src/lib.rs"
         || rel_path == "src/main.rs"
-        || rel_path
-            .strip_prefix("src/")
-            .is_some_and(|rest| rest.ends_with(".rs"))
+        || rel_path.strip_prefix("src/").is_some_and(|rest| {
+            std::path::Path::new(rest)
+                .extension()
+                .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
+        })
 }
 
+/// Implements `is fixture path`.
 fn is_fixture_path(rel_path: &str) -> bool {
     rel_path.contains("/tests/fixtures/") || rel_path.starts_with("tests/fixtures/")
 }
 
+/// Implements `is test path`.
 fn is_test_path(rel_path: &str) -> bool {
     rel_path == "tests.rs"
         || rel_path == "src/test.rs"
@@ -57,6 +62,7 @@ fn is_test_path(rel_path: &str) -> bool {
         || rel_path.ends_with("_tests.rs")
 }
 
+/// Implements `is nested cargo root member`.
 fn is_nested_cargo_root_member(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bool {
     let mut prefix = rel_path.rsplit_once('/').map(|(parent, _)| parent);
 

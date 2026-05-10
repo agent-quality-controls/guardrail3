@@ -1,3 +1,11 @@
+#![allow(
+    clippy::excessive_nesting,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    clippy::indexing_slicing,
+    reason = "source-support helpers traverse syn::UseTree/syn::Item trees with inherent depth; flattening would split a single AST walk across multiple files. Argument count threads the apparch fact accumulator, view, and rel-path context through each walker. The two indexing sites operate on `path.segments` after explicit `.is_empty()` checks make panic unreachable."
+)]
+
 use g3rs_apparch_types as apparch;
 
 use super::error::G3RsApparchIngestionError;
@@ -163,7 +171,7 @@ fn collect_public_use_target(
                                 cargo_rel_path: cargo_rel_path.to_owned(),
                                 rel_path: rel_path.to_owned(),
                                 item_name: exported_name.to_owned(),
-                                owner_name: owner_name.clone(),
+                                owner_name,
                                 kind: apparch::G3RsApparchPublicItemKind::InherentMethod,
                             },
                         );
@@ -331,7 +339,7 @@ fn cfg_meta_is_test_only(meta: &syn::Meta) -> bool {
     match meta {
         syn::Meta::Path(path) => path.is_ident("test"),
         syn::Meta::List(list) => {
-            let Some(ident) = list.path.get_ident().map(|ident| ident.to_string()) else {
+            let Some(ident) = list.path.get_ident().map(std::string::ToString::to_string) else {
                 return false;
             };
             let nested = list
@@ -340,7 +348,7 @@ fn cfg_meta_is_test_only(meta: &syn::Meta) -> bool {
                 )
                 .ok();
             match (ident.as_str(), nested) {
-                ("all", Some(items)) | ("any", Some(items)) => {
+                ("all" | "any", Some(items)) => {
                     !items.is_empty() && items.iter().all(cfg_meta_is_test_only)
                 }
                 _ => false,
@@ -357,21 +365,21 @@ pub(crate) trait ItemAttrs {
 impl ItemAttrs for syn::Item {
     fn attrs(&self) -> &[syn::Attribute] {
         match self {
-            syn::Item::Const(item) => &item.attrs,
-            syn::Item::Enum(item) => &item.attrs,
-            syn::Item::ExternCrate(item) => &item.attrs,
-            syn::Item::Fn(item) => &item.attrs,
-            syn::Item::ForeignMod(item) => &item.attrs,
-            syn::Item::Impl(item) => &item.attrs,
-            syn::Item::Macro(item) => &item.attrs,
-            syn::Item::Mod(item) => &item.attrs,
-            syn::Item::Static(item) => &item.attrs,
-            syn::Item::Struct(item) => &item.attrs,
-            syn::Item::Trait(item) => &item.attrs,
-            syn::Item::TraitAlias(item) => &item.attrs,
-            syn::Item::Type(item) => &item.attrs,
-            syn::Item::Union(item) => &item.attrs,
-            syn::Item::Use(item) => &item.attrs,
+            Self::Const(item) => &item.attrs,
+            Self::Enum(item) => &item.attrs,
+            Self::ExternCrate(item) => &item.attrs,
+            Self::Fn(item) => &item.attrs,
+            Self::ForeignMod(item) => &item.attrs,
+            Self::Impl(item) => &item.attrs,
+            Self::Macro(item) => &item.attrs,
+            Self::Mod(item) => &item.attrs,
+            Self::Static(item) => &item.attrs,
+            Self::Struct(item) => &item.attrs,
+            Self::Trait(item) => &item.attrs,
+            Self::TraitAlias(item) => &item.attrs,
+            Self::Type(item) => &item.attrs,
+            Self::Union(item) => &item.attrs,
+            Self::Use(item) => &item.attrs,
             _ => &[],
         }
     }

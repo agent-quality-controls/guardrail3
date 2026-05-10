@@ -1,3 +1,6 @@
+//! Shared types for the g3rs hooks family.
+
+/// Hook-family input types.
 #[cfg(feature = "api")]
 mod types;
 

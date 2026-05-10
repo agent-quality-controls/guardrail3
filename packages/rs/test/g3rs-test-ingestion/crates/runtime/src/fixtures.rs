@@ -20,6 +20,11 @@ pub fn file(
     }
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn input(
     files: Vec<G3RsTestSourceFile>,
     assertions_package_name: Option<&str>,
@@ -45,7 +50,10 @@ pub fn input(
 pub mod file_tree {
     use std::collections::BTreeSet;
 
-    use super::*;
+    use super::{
+        G3RsTestComponentFileTreeFacts, G3RsTestFileKind, G3RsTestFileTreeChecksInput,
+        G3RsTestOwnedSidecarFacts, G3RsTestSourceFile,
+    };
 
     pub fn file(
         rel_path: &str,
@@ -106,6 +114,7 @@ pub mod file_tree {
         }
     }
 
+    #[must_use]
     pub fn with_sidecar(
         mut component: G3RsTestComponentFileTreeFacts,
         mod_rel_path: &str,
@@ -118,6 +127,7 @@ pub mod file_tree {
         component
     }
 
+    #[must_use]
     pub fn with_external_harness(
         mut component: G3RsTestComponentFileTreeFacts,
         rel_path: &str,
@@ -126,6 +136,7 @@ pub mod file_tree {
         component
     }
 
+    #[must_use]
     pub fn with_nested_assertions_manifest(
         mut component: G3RsTestComponentFileTreeFacts,
         nested_assertions_cargo_rel_path: &str,
@@ -135,6 +146,7 @@ pub mod file_tree {
         component
     }
 
+    #[must_use]
     pub fn input(
         files: Vec<G3RsTestSourceFile>,
         components: Vec<G3RsTestComponentFileTreeFacts>,
@@ -158,6 +170,7 @@ pub mod file_tree {
         )
     }
 
+    /// `parent_dir` function.
     fn parent_dir(rel_path: &str) -> &str {
         rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
     }

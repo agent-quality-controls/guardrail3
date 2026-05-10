@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "640c3f82b7b969d5"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"
+
+[[ignore]]
+fingerprint = "32ba71506d9724fc"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"
+
+[[ignore]]
+fingerprint = "3ef3dab99e8dcc0c"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"
+
+[[ignore]]
+fingerprint = "6221216ba729dfb0"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"
+
+[[ignore]]
+fingerprint = "a5ce49cf5a1f9fa8"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"
+
+[[ignore]]
+fingerprint = "e6060ddb49267055"
+reason = "Parallel single-line wrapper helpers or one-test-per-scenario test cases sharing fixture/assert structure by design"

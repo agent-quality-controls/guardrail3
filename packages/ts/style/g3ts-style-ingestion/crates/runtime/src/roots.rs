@@ -2,6 +2,9 @@ use std::collections::BTreeSet;
 
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 
+/// Enumerate the relative directory paths within `crawl` that should be
+/// inspected for style configuration (each `guardrail3-ts.toml` or
+/// style-dependency-bearing `package.json` marks a candidate root).
 #[must_use]
 pub(crate) fn style_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
@@ -15,6 +18,8 @@ pub(crate) fn style_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// Whether `entry` is a readable `package.json` that declares any
+/// style-related dependency or dev-dependency.
 fn package_manifest_has_style_surface(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
     if !entry.path.rel_path.ends_with("package.json") || !entry.readable {
         return false;
@@ -37,6 +42,8 @@ fn package_manifest_has_style_surface(entry: &g3_workspace_crawl::G3RsWorkspaceE
         })
 }
 
+/// Join `local` onto `scope` to produce a workspace-relative path, treating
+/// an empty or `"."` scope as the workspace root.
 pub(crate) fn scoped_rel_path(scope: &str, local: &str) -> String {
     if scope.is_empty() || scope == "." {
         return local.to_owned();
@@ -48,6 +55,8 @@ pub(crate) fn scoped_rel_path(scope: &str, local: &str) -> String {
     )
 }
 
+/// Return the parent directory of `rel_path` as a workspace-relative path,
+/// using `.` for the workspace root.
 fn parent_rel_path(rel_path: &str) -> String {
     std::path::Path::new(rel_path)
         .parent()

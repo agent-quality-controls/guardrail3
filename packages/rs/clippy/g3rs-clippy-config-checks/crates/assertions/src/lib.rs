@@ -1,3 +1,9 @@
+//! Test assertion helpers for `g3rs-clippy-config-checks` rules.
+//!
+//! Each submodule mirrors a check rule and exposes `assert_findings` / `assert_no_findings`
+//! so internal sidecar tests and downstream consumers prove the same finding shape.
+
+/// Shared finding-comparison primitives wired into the per-rule modules via `define_result_assertions!`.
 mod common;
 #[cfg(feature = "checks")]
 use g3rs_clippy_config_checks_runtime as _;

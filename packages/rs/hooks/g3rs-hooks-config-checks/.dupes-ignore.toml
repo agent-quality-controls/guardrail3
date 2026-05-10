@@ -1,0 +1,39 @@
+[[ignore]]
+fingerprint = "a19e9c673328f57f"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "d28bfb239cf3b089"
+reason = "is_path_qualified_<tool>_command predicates are intentionally parallel by tool"
+
+[[ignore]]
+fingerprint = "892491c32ce9be5b"
+reason = "Parallel closures over hook commands by tool family"
+
+[[ignore]]
+fingerprint = "c9bba83c4bf461ca"
+reason = "Parallel test helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "3dfc6bfa90d0c685"
+reason = "Parallel hook predicate helpers (g3rs/cargo-dupes) by tool"
+
+[[ignore]]
+fingerprint = "42daa6c354226913"
+reason = "Parallel path-qualified satisfaction tests by tool"
+
+[[ignore]]
+fingerprint = "86e790b915c0d1e5"
+reason = "Parallel quiet-when-not-required tests by tool"
+
+[[ignore]]
+fingerprint = "b4658b626813972f"
+reason = "Parallel installed-tool inventory tests by tool"
+
+[[ignore]]
+fingerprint = "d67b803478a7267f"
+reason = "Parallel rule check bodies (g3rs/cargo-dupes) by tool"
+
+[[ignore]]
+fingerprint = "ef37cf3e1292edb2"
+reason = "Parallel hook_uses_path_qualified helpers by tool"

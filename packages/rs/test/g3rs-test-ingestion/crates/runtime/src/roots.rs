@@ -1,3 +1,7 @@
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{parse, types::CargoToml};
@@ -6,22 +10,33 @@ use glob::Pattern;
 
 use crate::ingest::IngestionError;
 
+/// `OwnedTestRoot` struct.
 #[derive(Debug, Clone)]
 pub(crate) struct OwnedTestRoot {
+    /// `root_rel_dir` item.
     pub(crate) root_rel_dir: String,
+    /// `runtime_rel_dir` item.
     pub(crate) runtime_rel_dir: String,
+    /// `cargo_rel_path` item.
     pub(crate) cargo_rel_path: String,
+    /// `cargo` item.
     pub(crate) cargo: CargoToml,
+    /// `root_manifest` item.
     pub(crate) root_manifest: Option<CargoToml>,
 }
 
+/// `TestRootDiscovery` struct.
 #[derive(Debug, Clone)]
 pub(crate) struct TestRootDiscovery {
+    /// `roots` item.
     pub(crate) roots: Vec<OwnedTestRoot>,
+    /// `workspace_manifest` item.
     pub(crate) workspace_manifest: Option<CargoToml>,
+    /// `workspace_members` item.
     pub(crate) workspace_members: BTreeSet<String>,
 }
 
+/// `discover` function.
 pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, IngestionError> {
     let Some(root_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Ok(TestRootDiscovery {
@@ -46,8 +61,7 @@ pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, 
     owned_root_dirs.extend(
         workspace_members
             .iter()
-            .map(|member_dir| component_container_root(member_dir, crawl))
-            .collect::<BTreeSet<_>>(),
+            .map(|member_dir| component_container_root(member_dir, crawl)),
     );
 
     let mut roots = owned_root_dirs
@@ -65,6 +79,7 @@ pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, 
     })
 }
 
+/// `build_owned_root` function.
 fn build_owned_root(
     crawl: &G3RsWorkspaceCrawl,
     root_rel_dir: &str,
@@ -109,6 +124,7 @@ fn build_owned_root(
     }))
 }
 
+/// `component_container_root` function.
 fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String {
     let candidate = if matches!(
         rel_dir,
@@ -148,6 +164,7 @@ fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String
     }
 }
 
+/// `parse_required_manifest` function.
 fn parse_required_manifest(
     crawl: &G3RsWorkspaceCrawl,
     rel_path: &str,
@@ -176,6 +193,7 @@ fn parse_required_manifest(
     })
 }
 
+/// `select_workspace_member_dirs` function.
 fn select_workspace_member_dirs(
     crawl: &G3RsWorkspaceCrawl,
     members: &[String],
@@ -234,6 +252,7 @@ fn select_workspace_member_dirs(
     Ok(member_dirs)
 }
 
+/// `join_under_root` function.
 pub(crate) fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
     if root_rel_dir.is_empty() {
         child_rel.to_owned()
@@ -242,10 +261,12 @@ pub(crate) fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
     }
 }
 
+/// `parent_dir` function.
 pub(crate) fn parent_dir(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
 }
 
+/// `manifest_dir_from_manifest_path` function.
 fn manifest_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     if rel_path == "Cargo.toml" {
         return Some("");

@@ -2,7 +2,8 @@
 members = [
     "crates/types/app-types",
     "crates/logic/family-runner-config",
-    "crates/logic/family-runner-hooks",
+    "crates/logic/family-runner-hooks/crates/assertions",
+    "crates/logic/family-runner-hooks/crates/runtime",
     "crates/logic/family-runner-structure",
     "crates/logic/validate-command/crates/assertions",
     "crates/logic/validate-command/crates/runtime",
@@ -79,6 +80,8 @@ g3ts-arch-source-checks = { path = "../../packages/ts/arch/g3ts-arch-source-chec
 g3ts-apparch-config-checks = { path = "../../packages/ts/apparch/g3ts-apparch-config-checks" }
 g3ts-apparch-ingestion = { path = "../../packages/ts/apparch/g3ts-apparch-ingestion" }
 g3ts-apparch-source-checks = { path = "../../packages/ts/apparch/g3ts-apparch-source-checks" }
+g3ts-topology-file-tree-checks = { path = "../../packages/ts/topology/g3ts-topology-file-tree-checks", features = ["api"] }
+g3ts-topology-ingestion = { path = "../../packages/ts/topology/g3ts-topology-ingestion", features = ["api"] }
 tempfile = "3.18.0"
 
 [workspace.lints.rust]

@@ -5,6 +5,7 @@ use g3ts_astro_media_types::G3TsAstroMediaPolicySurfaceState;
 // reason: keep private target-generation tests in the owned sidecar directory.
 mod targets_tests;
 
+/// `probe_targets`: probe targets.
 pub(crate) fn probe_targets(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroMediaPolicySurfaceState,
@@ -12,6 +13,7 @@ pub(crate) fn probe_targets(
     public_probe_targets(app_root_rel_path, astro_policy)
 }
 
+/// `public_probe_targets`: public probe targets.
 pub(crate) fn public_probe_targets(
     app_root_rel_path: &str,
     policy: &G3TsAstroMediaPolicySurfaceState,
@@ -32,6 +34,7 @@ pub(crate) fn public_probe_targets(
     }
 }
 
+/// `fallback_public_probe_targets`: fallback public probe targets.
 fn fallback_public_probe_targets(
     app_root_rel_path: &str,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
@@ -54,6 +57,7 @@ fn fallback_public_probe_targets(
     ]
 }
 
+/// `probe_targets_from_glob`: probe targets from glob.
 fn probe_targets_from_glob(
     app_root_rel_path: &str,
     glob: &str,
@@ -75,6 +79,7 @@ fn probe_targets_from_glob(
         .collect()
 }
 
+/// `literal_probe_targets`: literal probe targets.
 fn literal_probe_targets(
     app_root_rel_path: &str,
     rel_path: &str,
@@ -99,11 +104,13 @@ fn literal_probe_targets(
         .collect()
 }
 
+/// `has_glob_meta`: has glob meta.
 fn has_glob_meta(glob: &str) -> bool {
     glob.chars()
         .any(|character| matches!(character, '*' | '?' | '[' | ']' | '{' | '}'))
 }
 
+/// `extensions_from_glob`: extensions from glob.
 fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
     let glob = glob_after_first_meta(glob);
     let mut extensions = Vec::new();
@@ -127,11 +134,14 @@ fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
     extensions
 }
 
+/// `glob_after_first_meta`: glob after first meta.
 fn glob_after_first_meta(glob: &str) -> &str {
-    glob.find(|character| matches!(character, '*' | '?' | '[' | '{'))
-        .map_or(glob, |index| &glob[index..])
+    glob.find(['*', '?', '[', '{'])
+        .and_then(|index| glob.get(index..))
+        .unwrap_or(glob)
 }
 
+/// `probe_kind_for_extension`: probe kind for extension.
 fn probe_kind_for_extension(
     extension: &str,
 ) -> Option<eslint_config_parser::types::EslintProbeKind> {
@@ -144,6 +154,7 @@ fn probe_kind_for_extension(
     }
 }
 
+/// `target`: target.
 fn target(
     app_root_rel_path: &str,
     local_rel_path: &str,
@@ -158,6 +169,7 @@ fn target(
     }
 }
 
+/// `probe_from_glob`: probe from glob.
 fn probe_from_glob(glob: &str, extension: &str) -> Option<String> {
     let prefix = glob_prefix(glob)?;
     let prefix = glob_prefix_directory(prefix, glob_after_first_meta(glob))?;
@@ -165,13 +177,15 @@ fn probe_from_glob(glob: &str, extension: &str) -> Option<String> {
     Some(format!("{prefix}/__g3ts_media_probe__.{extension}"))
 }
 
+/// `glob_prefix`: glob prefix.
 fn glob_prefix(glob: &str) -> Option<&str> {
-    glob.split(|character| matches!(character, '*' | '?' | '[' | '{'))
+    glob.split(['*', '?', '[', '{'])
         .next()
         .map(str::trim)
         .filter(|prefix| !prefix.is_empty())
 }
 
+/// `glob_prefix_directory`: glob prefix directory.
 fn glob_prefix_directory(prefix: &str, glob_suffix: &str) -> Option<String> {
     let had_trailing_slash = prefix.ends_with('/');
     let prefix = prefix.trim_end_matches('/');
@@ -201,17 +215,20 @@ fn glob_prefix_directory(prefix: &str, glob_suffix: &str) -> Option<String> {
         .or_else(|| Some(prefix.to_owned()))
 }
 
+/// `suffix_declares_extension`: suffix declares extension.
 fn suffix_declares_extension(glob_suffix: &str) -> bool {
     [".astro", ".ts", ".tsx", ".mdx"]
         .into_iter()
         .any(|extension| glob_suffix.contains(extension))
 }
 
+/// `source_file_extension`: source file extension.
 fn source_file_extension(rel_path: &str) -> Option<&str> {
     let extension = rel_path.rsplit_once('.').map(|(_, extension)| extension)?;
     probe_kind_for_extension(extension).map(|_| extension)
 }
 
+/// `dedupe_targets`: dedupe targets.
 fn dedupe_targets(
     targets: Vec<eslint_config_parser::types::EslintProbeTarget>,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {

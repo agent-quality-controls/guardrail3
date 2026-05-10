@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{extends_chain_issues, info};
 
+/// Check ID emitted by this rule.
 const ID: &str = "g3ts-tsconfig/extends-chain-resolves";
 
+/// Emit a finding describing whether the tsconfig `extends` chain resolves.
 pub(crate) fn check(input: &G3TsTsconfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let G3TsTsconfigState::Parsed { rel_path, .. } = &input.config else {
         return;

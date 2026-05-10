@@ -9,6 +9,8 @@ use package_script_command_parser::types::{
     PackageScriptToolInvocation,
 };
 
+/// Read and parse the `package.json` at `app_root_rel_path` from `crawl`,
+/// returning a surface-state describing what was found.
 pub(crate) fn ingest_package_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -74,6 +76,8 @@ pub(crate) fn ingest_package_surface(
     }
 }
 
+/// Parse a single `name`/`body` script entry into a parse-fact, mapping any
+/// parser error into a `ParseError` state for downstream checks.
 fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     match package_script_command_parser::parse(name, body) {
         Ok(fact) => fact,
@@ -89,6 +93,8 @@ fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
     }
 }
 
+/// Project all tool invocations recorded for `fact` into the spelling
+/// snapshot variant.
 fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsSpellingPackageScriptToolInvocation> {
@@ -98,6 +104,7 @@ fn script_tool_invocations(
         .collect()
 }
 
+/// Project a single parsed tool invocation into the spelling snapshot variant.
 fn script_tool_invocation(
     invocation: &PackageScriptToolInvocation,
 ) -> G3TsSpellingPackageScriptToolInvocation {
@@ -110,7 +117,8 @@ fn script_tool_invocation(
     }
 }
 
-fn script_command_separator(
+/// Map a parser-side command separator to the spelling snapshot enum.
+const fn script_command_separator(
     separator: PackageScriptCommandSeparator,
 ) -> G3TsSpellingPackageScriptCommandSeparator {
     match separator {
@@ -119,6 +127,8 @@ fn script_command_separator(
     }
 }
 
+/// Return a parse-blocker descriptor for `fact` when its state represents
+/// an unsupported or parse-failed script body.
 fn script_parse_blocker(
     fact: &PackageScriptParseFact,
 ) -> Option<G3TsSpellingPackageScriptParseBlocker> {

@@ -8,6 +8,9 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+/// Maps each `ESLint` plugin alias to the `npm` package names it resolves to during effective-config resolution.
+pub type PluginPackageNamesMap = BTreeMap<String, Vec<String>>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EslintConfigDocument {
     pub raw: Value,
@@ -55,7 +58,7 @@ pub struct EslintEffectiveConfigProbe {
     pub ignored: bool,
     pub plugins: Vec<String>,
     pub plugin_meta_names: BTreeMap<String, String>,
-    pub plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub plugin_package_names: PluginPackageNamesMap,
     pub rules: BTreeMap<String, EslintRuleSetting>,
     pub project_service: Option<bool>,
     pub linter_options_no_inline_config: Option<bool>,

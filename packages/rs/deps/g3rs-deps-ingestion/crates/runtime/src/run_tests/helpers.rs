@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test fixtures need direct filesystem and process access to build temp workspaces"
+)]
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;

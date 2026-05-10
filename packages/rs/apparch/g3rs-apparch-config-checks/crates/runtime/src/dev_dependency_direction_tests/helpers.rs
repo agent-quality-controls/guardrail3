@@ -13,10 +13,14 @@ fn crate_input(name: &str, layer: G3RsApparchLayer, cargo_rel_path: &str) -> G3R
     }
 }
 
+#[allow(
+    clippy::needless_pass_by_value,
+    reason = "test fixture builder owns the edge so callers can write `input(Some(G3RsApparchDependencyEdge { ... }))` inline without an extra reference dance"
+)]
 pub(super) fn input(
     edge: Option<G3RsApparchDependencyEdge>,
 ) -> Vec<G3RsApparchCrateDependencyChecksInput> {
-    let crates = vec![
+    let crates = [
         crate_input(
             "service",
             G3RsApparchLayer::Logic,

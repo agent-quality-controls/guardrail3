@@ -1,5 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Asserts that `results` contains the error finding emitted when a `.gitignore` ignores `Cargo.lock`.
+///
+/// # Panics
+/// Panics when no matching error finding is present in `results`.
 pub fn assert_ignored_lockfile(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

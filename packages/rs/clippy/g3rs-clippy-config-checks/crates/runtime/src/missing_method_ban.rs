@@ -7,8 +7,10 @@ use crate::support::{
     clippy_document, expected_method_bans, garde_enabled, parse_ban_section, rust_policy_valid,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/missing-method-ban";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;

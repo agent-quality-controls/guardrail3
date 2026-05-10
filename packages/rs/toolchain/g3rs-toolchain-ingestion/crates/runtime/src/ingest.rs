@@ -4,7 +4,7 @@ use g3rs_toolchain_types::G3RsToolchainConfigChecksInput;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 
 /// Build the checks input from parsed config files.
-pub(crate) fn assemble(
+pub(crate) const fn assemble(
     toolchain_rel_path: String,
     toolchain_toml: RustToolchainToml,
     cargo_rel_path: Option<String>,

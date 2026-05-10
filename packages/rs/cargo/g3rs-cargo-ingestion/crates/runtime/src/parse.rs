@@ -27,6 +27,7 @@ pub(crate) fn parse_root_cargo_toml(abs_path: &Path) -> Result<CargoTomlDocument
     Ok(document)
 }
 
+/// parse member cargo toml fn.
 pub(crate) fn parse_member_cargo_toml(
     abs_path: &Path,
 ) -> Result<CargoTomlDocument, IngestionError> {
@@ -41,6 +42,16 @@ pub(crate) fn parse_member_cargo_toml(
     })
 }
 
+/// Parse a TOML file into an untyped [`toml::Value`] tree.
+///
+/// # Errors
+///
+/// Returns [`IngestionError::Unreadable`] when the file cannot be read, or
+/// [`IngestionError::ParseFailed`] when the contents are not valid TOML.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the toml::from_str ban exists to force typed deserialization through Validated<T>::new(); this call deserializes into untyped toml::Value to inspect raw workspace section shape across heterogeneous Cargo.toml files, which has no garde-validatable schema"
+)]
 pub(crate) fn parse_raw_toml(abs_path: &Path) -> Result<toml::Value, IngestionError> {
     let content =
         crate::fs::read_to_string(abs_path).map_err(|err| IngestionError::Unreadable {
@@ -53,6 +64,7 @@ pub(crate) fn parse_raw_toml(abs_path: &Path) -> Result<toml::Value, IngestionEr
     })
 }
 
+/// parse rust policy state fn.
 pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsCargoRustPolicyState {
     let content = match crate::fs::read_to_string(abs_path) {
         Ok(content) => content,

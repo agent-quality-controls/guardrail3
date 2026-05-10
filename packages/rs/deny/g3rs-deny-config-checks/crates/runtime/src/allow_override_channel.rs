@@ -7,8 +7,10 @@ use crate::support::expectations::expected_bans;
 use crate::support::identities::{allow_name, join_set};
 use crate::support::policy::{managed_profile_name, rust_policy_valid};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/allow-override-channel";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;

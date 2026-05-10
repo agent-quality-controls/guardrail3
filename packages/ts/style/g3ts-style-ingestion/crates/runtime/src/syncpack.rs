@@ -1,11 +1,13 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_style_types::{
-    G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState,
-    G3TsStyleSyncpackVersionGroupSnapshot,
+    G3TsStyleSyncpackSnapshot, G3TsStyleSyncpackSurfaceState, G3TsStyleSyncpackVersionGroupSnapshot,
 };
 
+/// Workspace-relative file name of the Syncpack config.
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
 
+/// Read and parse the `.syncpackrc` under `app_root_rel_path` from `crawl`,
+/// returning a surface-state describing what was found.
 pub(crate) fn ingest_syncpack_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -40,8 +42,12 @@ pub(crate) fn ingest_syncpack_config(
         };
     }
 
-    let typed = syncpack_config_parser::typed(&document)
-        .expect("parsed Syncpack config document should stay typed");
+    let Some(typed) = syncpack_config_parser::typed(&document) else {
+        return G3TsStyleSyncpackSurfaceState::ParseError {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "parsed Syncpack config document is not typed".to_owned(),
+        };
+    };
     G3TsStyleSyncpackSurfaceState::Parsed {
         snapshot: G3TsStyleSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
@@ -56,6 +62,8 @@ pub(crate) fn ingest_syncpack_config(
     }
 }
 
+/// Project a parsed Syncpack version-group into the style-specific snapshot
+/// variant retained for downstream checks.
 fn syncpack_version_group(
     group: syncpack_config_parser::types::SyncpackVersionGroup,
 ) -> G3TsStyleSyncpackVersionGroupSnapshot {
@@ -70,6 +78,8 @@ fn syncpack_version_group(
     }
 }
 
+/// Locate the `.syncpackrc` workspace entry for `app_root_rel_path`, if
+/// present and included.
 fn select_syncpack_config<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -82,6 +92,8 @@ fn select_syncpack_config<'crawl>(
     })
 }
 
+/// Compute the rel-path used for the `Missing` surface variant when no
+/// Syncpack config is found.
 fn missing_syncpack_config_rel_path(app_root_rel_path: &str) -> String {
     crate::roots::scoped_rel_path(app_root_rel_path, SYNCPACK_CONFIG_REL_PATH)
 }

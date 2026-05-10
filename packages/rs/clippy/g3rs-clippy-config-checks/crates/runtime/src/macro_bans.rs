@@ -5,8 +5,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::{EXPECTED_MACRO_BANS, clippy_document, display_macro_name, parse_ban_section};
 
+/// I D const.
 const ID: &str = "g3rs-clippy/macro-bans";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(document) = clippy_document(input) else {
         return;

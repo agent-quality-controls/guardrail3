@@ -1,3 +1,11 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::arithmetic_side_effects,
+    clippy::indexing_slicing,
+    clippy::string_slice,
+    reason = "shell_ast.rs IS the tree-sitter scaffolding; offsets, slicing, and arithmetic mirror tree-sitter's byte-position API"
+)]
+
 use tree_sitter::{Node, Parser, Tree};
 
 #[derive(Debug, Clone, PartialEq, Eq)]

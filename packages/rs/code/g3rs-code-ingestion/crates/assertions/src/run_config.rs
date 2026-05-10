@@ -9,6 +9,7 @@ use cargo_toml_parser::types::LintValue;
 use g3rs_code_types as code_types;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+#[must_use]
 pub fn require_config_file<'a>(
     input: &'a code_types::G3RsCodeConfigChecksInput,
     rel_path: &str,
@@ -110,7 +111,9 @@ pub fn assert_workspace_unsafe_code_detailed_level(
         .and_then(|tool| tool.get("unsafe_code"));
     match value {
         Some(LintValue::Detailed(detail)) => assert_eq!(detail.level, expected),
-        _ => assert!(false, "expected detailed unsafe_code lint in {rel_path}"),
+        Some(LintValue::Level(_)) | None => {
+            panic!("expected detailed unsafe_code lint in {rel_path}")
+        }
     }
 }
 
@@ -184,6 +187,7 @@ pub fn assert_config_pipeline_reports_deny_through_full_lane(results: &[G3CheckR
     );
 }
 
+/// `assert_file_result_count` test helper.
 fn assert_file_result_count(results: &[G3CheckResult], file: &str, expected: usize) {
     let actual = results
         .iter()
@@ -192,6 +196,7 @@ fn assert_file_result_count(results: &[G3CheckResult], file: &str, expected: usi
     assert_eq!(actual, expected, "{results:#?}");
 }
 
+/// `assert_has_result_id` test helper.
 fn assert_has_result_id(results: &[G3CheckResult], file: &str, id: &str) {
     assert!(
         results
@@ -201,6 +206,7 @@ fn assert_has_result_id(results: &[G3CheckResult], file: &str, id: &str) {
     );
 }
 
+/// `assert_has_result_id_with_severity` test helper.
 fn assert_has_result_id_with_severity(
     results: &[G3CheckResult],
     file: &str,
@@ -215,6 +221,7 @@ fn assert_has_result_id_with_severity(
     );
 }
 
+/// `assert_no_results_for_file` test helper.
 fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     assert!(
         !results.iter().any(|result| result.file() == Some(file)),
@@ -222,10 +229,12 @@ fn assert_no_results_for_file(results: &[G3CheckResult], file: &str) {
     );
 }
 
+/// `assert_result_count` test helper.
 fn assert_result_count(results: &[G3CheckResult], expected: usize) {
     assert_eq!(results.len(), expected, "{results:#?}");
 }
 
+/// `assert_result_set` test helper.
 fn assert_result_set(results: &[G3CheckResult], file: &str, count: usize, ids: &[&str]) {
     assert_file_result_count(results, file, count);
     for id in ids {

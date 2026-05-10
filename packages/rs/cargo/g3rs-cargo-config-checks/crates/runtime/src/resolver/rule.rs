@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{CargoRole, cargo_role, error, info, workspace_resolver};
 
+/// I D const.
 const ID: &str = "g3rs-cargo/resolver";
 
+/// check fn.
 pub(crate) fn check(cargo_rel_path: &str, cargo: &CargoToml, results: &mut Vec<G3CheckResult>) {
     if cargo_role(cargo) != CargoRole::WorkspaceRoot {
         return;

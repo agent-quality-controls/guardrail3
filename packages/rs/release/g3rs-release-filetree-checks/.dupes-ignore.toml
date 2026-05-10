@@ -1,0 +1,23 @@
+[[ignore]]
+fingerprint = "0a6708ac1058bfc1"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "64990734502dba8e"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "674f92506be74c1b"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "7315a115a2322dcb"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "94d85b85828e2789"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"
+
+[[ignore]]
+fingerprint = "fe407af55b9941cf"
+reason = "Parallel test bodies / helpers structurally similar by per-rule sidecar test architecture"

@@ -1,8 +1,10 @@
 use g3rs_deny_types::G3RsDenyFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable identifier for the deny coverage rule.
 const ID: &str = "g3rs-deny/coverage";
 
+/// Runs the deny coverage rule and appends its findings to `results`.
 pub(crate) fn check(input: &G3RsDenyFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     for failure in &input.input_failures {
         results.push(G3CheckResult::new(

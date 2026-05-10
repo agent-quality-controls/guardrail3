@@ -4,7 +4,8 @@ use g3rs_clippy_types::{
     G3RsClippyRustPolicyState, G3RsClippyShadowedConfig, G3RsClippyWaiver,
 };
 
-pub(crate) fn assemble_config_input(
+/// assemble config input fn.
+pub(crate) const fn assemble_config_input(
     clippy_rel_path: String,
     clippy: G3RsClippyConfigState,
     rust_policy: G3RsClippyRustPolicyState,
@@ -24,7 +25,8 @@ pub(crate) fn assemble_config_input(
     }
 }
 
-pub(crate) fn assemble_filetree_input(
+/// assemble filetree input fn.
+pub(crate) const fn assemble_filetree_input(
     preferred_root_config_rel_path: Option<String>,
     shadowed_same_root_configs: Vec<G3RsClippyShadowedConfig>,
 ) -> G3RsClippyFileTreeChecksInput {

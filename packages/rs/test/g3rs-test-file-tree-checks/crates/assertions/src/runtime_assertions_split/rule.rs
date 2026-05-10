@@ -1,9 +1,19 @@
+#![expect(
+    clippy::expect_used,
+    reason = "structural assertion helper code where lint conflicts with verification surface"
+)]
+#[must_use]
 pub fn check(
     input: &g3rs_test_types::G3RsTestFileTreeChecksInput,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
     g3rs_test_file_tree_checks_runtime::check(input)
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_result(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,
@@ -24,6 +34,11 @@ pub fn assert_has_result(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_has_inventory(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,
@@ -53,6 +68,11 @@ pub fn find_result<'a>(
     })
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_message(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,
@@ -61,9 +81,14 @@ pub fn assert_message(
     message: &str,
 ) {
     let result = find_result(results, rule_id, title, file).expect("missing expected result");
-    assert_eq!(result.message(), message);
+    assert_eq!(result.message(), message, "assertion failed");
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_no_title(
     results: &[guardrail3_check_types::G3CheckResult],
     rule_id: &str,

@@ -1,0 +1,55 @@
+[[ignore]]
+fingerprint = "a9555a183e088f4d"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "d6f433849219da7a"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "5f3379be8f92f3f4"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "c26c2c02d91a3602"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "a130420960f89a32"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "ebca207f47110b29"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "0c035e314f8bf574"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "4403f03508391de1"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "708b91f752c8f6be"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "719f2da72767f567"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "73b5ebe0f5dbfcc2"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "7807b1109a745225"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "a16efc0533aa867c"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"
+
+[[ignore]]
+fingerprint = "b6e5aa97ba4da046"
+reason = "per-rule helper: each MDX rule maintains its own check_eslint / effective / rel_path helpers; deduping would couple unrelated rules and break per-rule fixture, conflicts with real-proof-site contract"

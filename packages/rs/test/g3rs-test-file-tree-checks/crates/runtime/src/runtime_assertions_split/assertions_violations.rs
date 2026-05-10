@@ -1,3 +1,7 @@
+#![expect(
+    clippy::too_many_lines,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestFileKind};
@@ -5,6 +9,7 @@ use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestFileKind};
 use super::helpers;
 use super::violations::RuntimeAssertionsViolation;
 
+/// `collect_assertions_module_violations` function.
 pub(super) fn collect_assertions_module_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
@@ -67,8 +72,7 @@ pub(super) fn collect_assertions_module_violations(
                 line: None,
                 title: "assertions module calls disallowed local crate".to_owned(),
                 message: format!(
-                    "Assertions modules must not call local crate `{}` directly.",
-                    local_root
+                    "Assertions modules must not call local crate `{local_root}` directly."
                 ),
             });
         }
@@ -107,6 +111,7 @@ pub(super) fn collect_assertions_module_violations(
     }
 }
 
+/// `is_public_assertion_reexport` function.
 fn is_public_assertion_reexport(
     binding: &g3rs_test_types::ast::UseBinding,
     proof_bearing_assertion_functions: &BTreeSet<String>,
@@ -116,6 +121,7 @@ fn is_public_assertion_reexport(
             .is_some_and(|target| proof_bearing_assertion_functions.contains(&target))
 }
 
+/// `public_reexport_target_path` function.
 fn public_reexport_target_path(path_segments: &[String]) -> Option<String> {
     let [root, rest @ ..] = path_segments else {
         return None;
@@ -126,6 +132,7 @@ fn public_reexport_target_path(path_segments: &[String]) -> Option<String> {
     }
 }
 
+/// `path_mentions_route_construction` function.
 fn path_mentions_route_construction(path: &[String]) -> bool {
     path.iter().any(|segment| {
         matches!(

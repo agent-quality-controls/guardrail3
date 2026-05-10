@@ -3,29 +3,13 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::{cargo, cargo_edition, rustfmt, rustfmt_edition, rustfmt_style_edition};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-fmt/rustfmt-required-settings";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(rustfmt) = rustfmt(input) else {
-        let (title, message) = match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => (
-                "rustfmt config unreadable".to_owned(),
-                "rustfmt config exists but could not be read from disk".to_owned(),
-            ),
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => (
-                "rustfmt config parse error".to_owned(),
-                "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
-            ),
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(_) => return,
-        };
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Error,
-            title,
-            message,
-            Some(input.rustfmt_rel_path.clone()),
-            None,
-        ));
+        emit_rustfmt_state_blocker(input, results);
         return;
     };
     let expected_edition = cargo(input).and_then(cargo_edition).unwrap_or("2024");
@@ -92,6 +76,31 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
+/// Emits the blocker finding describing why the rustfmt config could not be read or parsed.
+/// Returns silently when the rustfmt state is `Parsed` (the caller would have early-returned).
+fn emit_rustfmt_state_blocker(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
+    let (title, message) = match &input.rustfmt_state {
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => (
+            "rustfmt config unreadable".to_owned(),
+            "rustfmt config exists but could not be read from disk".to_owned(),
+        ),
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => (
+            "rustfmt config parse error".to_owned(),
+            "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
+        ),
+        g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(_) => return,
+    };
+    results.push(G3CheckResult::new(
+        ID.to_owned(),
+        G3Severity::Error,
+        title,
+        message,
+        Some(input.rustfmt_rel_path.clone()),
+        None,
+    ));
+}
+
+/// Implements `check string`.
 fn check_string(
     rustfmt_rel_path: &str,
     key: &str,
@@ -106,6 +115,7 @@ fn check_string(
     }
 }
 
+/// Implements `check int`.
 fn check_int(
     rustfmt_rel_path: &str,
     key: &str,
@@ -120,6 +130,7 @@ fn check_int(
     }
 }
 
+/// Implements `check bool`.
 fn check_bool(
     rustfmt_rel_path: &str,
     key: &str,
@@ -134,6 +145,7 @@ fn check_bool(
     }
 }
 
+/// Implements `push wrong`.
 fn push_wrong(
     rel: &str,
     key: &str,
@@ -151,6 +163,7 @@ fn push_wrong(
     ));
 }
 
+/// Implements `push missing`.
 fn push_missing(
     rel: &str,
     key: &str,

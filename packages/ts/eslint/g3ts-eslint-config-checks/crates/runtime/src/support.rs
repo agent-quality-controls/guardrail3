@@ -7,6 +7,7 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 use serde_json::Value;
 
 #[must_use]
+/// Internal function `selected_rel_path`.
 pub(crate) fn selected_rel_path(input: &G3TsEslintConfigChecksInput) -> Option<&str> {
     match &input.config {
         G3TsEslintConfigState::Missing => None,
@@ -17,7 +18,8 @@ pub(crate) fn selected_rel_path(input: &G3TsEslintConfigChecksInput) -> Option<&
 }
 
 #[must_use]
-pub(crate) fn parsed_snapshot(
+/// Internal function `fn`.
+pub(crate) const fn parsed_snapshot(
     input: &G3TsEslintConfigChecksInput,
 ) -> Option<&G3TsEslintConfigSnapshot> {
     match &input.config {
@@ -29,33 +31,39 @@ pub(crate) fn parsed_snapshot(
 }
 
 #[must_use]
-pub(crate) fn parsed_document(
+/// Internal function `fn`.
+pub(crate) const fn parsed_document(
     input: &G3TsEslintConfigChecksInput,
 ) -> Option<&G3TsEslintConfigSnapshot> {
     parsed_snapshot(input)
 }
 
 #[must_use]
+/// Internal function `has_ts_plugin`.
 pub(crate) fn has_ts_plugin(input: &G3TsEslintConfigChecksInput) -> bool {
     has_plugin_for(input, EslintProbeKind::TsSource, "@typescript-eslint")
 }
 
 #[must_use]
+/// Internal function `has_tsx_source_probe`.
 pub(crate) fn has_tsx_source_probe(input: &G3TsEslintConfigChecksInput) -> bool {
     probe_for(input, EslintProbeKind::TsxSource).is_some_and(|probe| !probe.ignored)
 }
 
 #[must_use]
+/// Internal function `project_service_enabled`.
 pub(crate) fn project_service_enabled(input: &G3TsEslintConfigChecksInput) -> bool {
     project_service_enabled_for(input, EslintProbeKind::TsSource)
 }
 
 #[must_use]
+/// Internal function `rule_is_error`.
 pub(crate) fn rule_is_error(input: &G3TsEslintConfigChecksInput, rule_name: &str) -> bool {
     rule_is_error_for(input, EslintProbeKind::TsSource, rule_name)
 }
 
 #[must_use]
+/// Internal function `probe_for`.
 pub(crate) fn probe_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -67,6 +75,7 @@ pub(crate) fn probe_for(
 }
 
 #[must_use]
+/// Internal function `has_plugin_for`.
 pub(crate) fn has_plugin_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -77,6 +86,7 @@ pub(crate) fn has_plugin_for(
 }
 
 #[must_use]
+/// Internal function `missing_plugins_for`.
 pub(crate) fn missing_plugins_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -90,6 +100,7 @@ pub(crate) fn missing_plugins_for(
 }
 
 #[must_use]
+/// Internal function `project_service_enabled_for`.
 pub(crate) fn project_service_enabled_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -98,6 +109,7 @@ pub(crate) fn project_service_enabled_for(
 }
 
 #[must_use]
+/// Internal function `project_service_disabled_for`.
 pub(crate) fn project_service_disabled_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -106,6 +118,7 @@ pub(crate) fn project_service_disabled_for(
 }
 
 #[must_use]
+/// Internal function `rule_setting_for`.
 pub(crate) fn rule_setting_for<'a>(
     input: &'a G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -115,6 +128,7 @@ pub(crate) fn rule_setting_for<'a>(
 }
 
 #[must_use]
+/// Internal function `rule_is_error_for`.
 pub(crate) fn rule_is_error_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -125,6 +139,7 @@ pub(crate) fn rule_is_error_for(
 }
 
 #[must_use]
+/// Internal function `rule_is_off_for`.
 pub(crate) fn rule_is_off_for(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -135,6 +150,7 @@ pub(crate) fn rule_is_off_for(
 }
 
 #[must_use]
+/// Internal function `missing_error_rules`.
 pub(crate) fn missing_error_rules(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -148,6 +164,7 @@ pub(crate) fn missing_error_rules(
 }
 
 #[must_use]
+/// Internal function `present_error_rules`.
 pub(crate) fn present_error_rules(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -161,6 +178,7 @@ pub(crate) fn present_error_rules(
 }
 
 #[must_use]
+/// Internal function `threshold_matches`.
 pub(crate) fn threshold_matches(
     input: &G3TsEslintConfigChecksInput,
     probe_kind: EslintProbeKind,
@@ -182,6 +200,7 @@ pub(crate) fn threshold_matches(
 }
 
 #[must_use]
+/// Internal function `format_rule_list`.
 pub(crate) fn format_rule_list(rule_names: &[String]) -> String {
     rule_names
         .iter()
@@ -191,6 +210,7 @@ pub(crate) fn format_rule_list(rule_names: &[String]) -> String {
 }
 
 #[must_use]
+/// Internal function `format_plugin_list`.
 pub(crate) fn format_plugin_list(plugin_names: &[String]) -> String {
     plugin_names
         .iter()
@@ -200,6 +220,7 @@ pub(crate) fn format_plugin_list(plugin_names: &[String]) -> String {
 }
 
 #[must_use]
+/// Internal function `missing_error_rules_for_tsx`.
 pub(crate) fn missing_error_rules_for_tsx(
     input: &G3TsEslintConfigChecksInput,
     rule_names: &[&str],
@@ -208,6 +229,7 @@ pub(crate) fn missing_error_rules_for_tsx(
 }
 
 #[must_use]
+/// Internal function `missing_plugins_for_tsx`.
 pub(crate) fn missing_plugins_for_tsx(
     input: &G3TsEslintConfigChecksInput,
     plugin_names: &[&str],
@@ -216,6 +238,7 @@ pub(crate) fn missing_plugins_for_tsx(
 }
 
 #[must_use]
+/// Internal function `info`.
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -229,6 +252,7 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3Chec
 }
 
 #[must_use]
+/// Internal function `error`.
 pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
         id.to_owned(),
@@ -240,6 +264,7 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3Che
     )
 }
 
+/// Internal function `option_matches_expected`.
 fn option_matches_expected(value: &Value, expected: i64, keys: &[&str]) -> bool {
     if value.as_i64().is_some_and(|number| number == expected) {
         return true;

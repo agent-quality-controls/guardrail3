@@ -4,7 +4,7 @@ use guardrail3_ts_app_types::{
     WorkspaceCrawler,
 };
 
-use crate::{ExecutionOutcome, family_cli_name, selected_families};
+use crate::{ExecutionOutcome, family_cli_name, family_opt_out, selected_families_with_opt_out};
 
 /// Executes one validated request through crawl, family run, and render steps.
 ///
@@ -21,7 +21,10 @@ pub fn execute(
     let mut report = ValidateReport::default();
     let mut family_errors = Vec::new();
 
-    for family in selected_families(request) {
+    let disabled = family_opt_out::disabled_families(&request.workspace_root);
+    let families = selected_families_with_opt_out(request, &disabled);
+
+    for family in families {
         match family_runner.run_family(family, &crawl) {
             Ok(results) => report.runs.push(FamilyRun { family, results }),
             Err(error) => family_errors.push(format!("{}: {}", family_cli_name(family), error)),

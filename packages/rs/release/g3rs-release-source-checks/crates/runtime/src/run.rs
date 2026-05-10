@@ -1,6 +1,7 @@
 use g3rs_release_types::G3RsReleaseSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsReleaseSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 

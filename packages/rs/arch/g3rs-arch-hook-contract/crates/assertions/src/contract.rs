@@ -1,3 +1,9 @@
+#![allow(
+    clippy::missing_panics_doc,
+    clippy::missing_assert_message,
+    reason = "contract assertion is a panic-based proof site; assert_eq! mismatch already pinpoints the diff"
+)]
+
 use g3rs_hooks_contract_types::{
     G3HookCommandRequirement, G3HookCriticalCommand, G3HookRequirement, G3HookTriggerPattern,
 };

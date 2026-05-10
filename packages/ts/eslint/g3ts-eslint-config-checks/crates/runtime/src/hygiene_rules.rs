@@ -9,8 +9,10 @@ use super::{
     },
 };
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-eslint/hygiene-rules";
 
+/// Internal function `check`.
 pub(crate) fn check(input: &G3TsEslintConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if parsed_document(input).is_none() {
         return;

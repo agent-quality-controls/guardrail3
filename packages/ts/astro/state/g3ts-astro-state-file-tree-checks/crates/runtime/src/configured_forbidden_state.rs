@@ -1,7 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-state/configured-forbidden-state";
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     app_root_rel_path: &str,
     forbidden_state_rel_path: &str,

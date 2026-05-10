@@ -1,0 +1,35 @@
+[[ignore]]
+fingerprint = "d41588dc63738f37"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "3e4649642d3ac2ee"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "01c4108314c721f4"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "2cd8297ef542ff8b"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "498a2aebc2df52bb"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "4fd10d09fa32d932"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "911f84479d945b74"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "ab61cc5e0e41ce54"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"
+
+[[ignore]]
+fingerprint = "fe81c21720b33d52"
+reason = "Parallel sibling helpers for distinct config kinds (eslint vs stylelint) or parallel test cases for distinct scenarios; intentional to keep helper shape identical"

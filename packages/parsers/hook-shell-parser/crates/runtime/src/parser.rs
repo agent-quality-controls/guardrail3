@@ -1,4 +1,21 @@
-use crate::support::*;
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::excessive_nesting,
+    clippy::too_many_lines,
+    clippy::arithmetic_side_effects,
+    reason = "parser.rs IS the top-level shell-script parser; it imports every support helper by name to keep the parse pipeline visible at one site, and its core loop has a single inline state machine over function/loop/if scopes"
+)]
+
+use crate::support::{
+    append_function_body_line, collect_logical_lines, dead_if_scope_depth_after_start,
+    dead_loop_scope_depth_after_start, function_definition_name,
+    function_scope_depth_after_definition, initial_function_body_fragment,
+    inline_command_after_function_definition, is_fi_line, is_function_definition_line,
+    parse_executable_line, parse_executable_segments, single_line_constant_if_taken_branch,
+    starts_dead_alternate_if_branch, starts_dead_if_scope, starts_dead_loop_scope,
+    starts_live_true_if_scope, update_dead_else_depth, update_dead_if_depth,
+    update_dead_loop_depth, update_function_scope_depth,
+};
 use crate::types::{ParsedShellScript, ShellFunction, SourceLine};
 
 struct PendingFunction {

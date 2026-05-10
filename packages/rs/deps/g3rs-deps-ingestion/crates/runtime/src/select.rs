@@ -3,6 +3,9 @@ use cargo_toml_parser::types::CargoToml;
 use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use glob::Pattern;
 
+/// Pair of (raw textual pattern, compiled glob) used to match workspace members and excludes.
+type NamedPattern<'a> = (&'a str, Pattern);
+
 /// Find `Cargo.toml` at the workspace root.
 pub(crate) fn select_workspace_cargo_toml(
     crawl: &G3RsWorkspaceCrawl,
@@ -17,11 +20,14 @@ pub(crate) fn select_workspace_guardrail3_rs_toml(
     g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
+/// List of crawl entries that correspond to selected workspace member `Cargo.toml` files.
+pub(crate) type WorkspaceMemberEntries<'a> = Vec<&'a G3RsWorkspaceEntry>;
+
 /// Find member `Cargo.toml` files declared by `[workspace].members`.
 pub(crate) fn select_member_cargo_tomls<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     workspace_cargo: &CargoToml,
-) -> Result<Vec<&'a G3RsWorkspaceEntry>, String> {
+) -> Result<WorkspaceMemberEntries<'a>, String> {
     let workspace = workspace_cargo
         .workspace
         .as_ref()
@@ -89,10 +95,12 @@ pub(crate) fn select_member_cargo_tomls<'a>(
     Ok(members)
 }
 
+/// Implements `is member manifest path`.
 fn is_member_manifest_path(rel_path: &str) -> bool {
     rel_path == "Cargo.toml" || rel_path.ends_with("/Cargo.toml")
 }
 
+/// Implements `member dir from manifest path`.
 pub(crate) fn member_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     if rel_path == "Cargo.toml" {
         return Some("");
@@ -101,7 +109,8 @@ pub(crate) fn member_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     rel_path.strip_suffix("/Cargo.toml")
 }
 
-fn workspace_root_is_excluded(exclude_patterns: &[(&str, Pattern)]) -> bool {
+/// Implements `workspace root is excluded`.
+fn workspace_root_is_excluded(exclude_patterns: &[NamedPattern<'_>]) -> bool {
     exclude_patterns
         .iter()
         .any(|(_, pattern)| pattern.matches(""))

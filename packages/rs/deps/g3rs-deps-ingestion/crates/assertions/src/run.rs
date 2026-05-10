@@ -1,16 +1,31 @@
+#![expect(
+    clippy::panic,
+    clippy::missing_assert_message,
+    reason = "this crate is the test-assertion harness for the deps-ingestion family; pub fn `assert_*` helpers exist precisely to fail-fast and panic with rich `{err:#?}` context, and the assert messages embedded directly in matches! / matches macros are the documented diagnostic"
+)]
+
 use g3rs_deps_ingestion_runtime::IngestionError;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Snapshot of the publicly observable fields of a `G3CheckResult` used to compare
+/// expected vs actual ingestion-pipeline outcomes in tests.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Finding {
+    /// Rule identifier emitted by the check that produced this finding.
     id: String,
+    /// Severity emitted by the check rule.
     severity: G3Severity,
+    /// Human-readable title emitted by the check rule.
     title: String,
+    /// Human-readable message emitted by the check rule.
     message: String,
+    /// File path the finding refers to, when set.
     file: Option<String>,
+    /// Whether the finding is an inventory record rather than a violation.
     inventory: bool,
 }
 
+/// Returns the deterministic, sorted list of `Finding`s extracted from `results`.
 fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
     let mut findings = results
         .iter()
@@ -44,12 +59,18 @@ fn findings(results: &[G3CheckResult]) -> Vec<Finding> {
     findings
 }
 
+/// Reports whether `results` contains a finding whose id, title, and optional file match.
 fn has_result(results: &[G3CheckResult], id: &str, title: &str, file: Option<&str>) -> bool {
     results
         .iter()
         .any(|result| result.id() == id && result.title() == title && result.file() == file)
 }
 
+/// Asserts that `err` is the missing-guardrail3-rs.toml ingestion error.
+///
+/// # Panics
+///
+/// Panics when `err` is any other variant of `IngestionError`.
 pub fn assert_missing_guardrail3_rs(err: &IngestionError) {
     assert!(
         matches!(err, IngestionError::Guardrail3RsTomlNotFound),
@@ -57,6 +78,11 @@ pub fn assert_missing_guardrail3_rs(err: &IngestionError) {
     );
 }
 
+/// Asserts that `err` is the source-ingestion-not-implemented stub error.
+///
+/// # Panics
+///
+/// Panics when `err` is any other variant of `IngestionError`.
 pub fn assert_source_ingestion_not_implemented(err: &IngestionError) {
     assert!(
         matches!(err, IngestionError::SourceIngestionNotImplemented),
@@ -64,40 +90,72 @@ pub fn assert_source_ingestion_not_implemented(err: &IngestionError) {
     );
 }
 
+/// Asserts that `err` is `Unreadable { path, reason }` with `path.ends_with(expected_suffix)`
+/// and a non-empty `reason`.
+///
+/// # Panics
+///
+/// Panics when `err` is any other variant or when the path/reason invariants do not hold.
 pub fn assert_unreadable_error(err: &IngestionError, expected_suffix: &str) {
-    if let IngestionError::Unreadable { path, reason } = err {
-        assert!(path.ends_with(expected_suffix), "{path:?}");
-        assert!(!reason.is_empty(), "{err:#?}");
-    } else {
-        assert!(false, "expected unreadable error, got {err:#?}");
-    }
+    let IngestionError::Unreadable { path, reason } = err else {
+        panic!("expected unreadable error, got {err:#?}");
+    };
+    assert!(
+        path.ends_with(expected_suffix),
+        "expected path ending with `{expected_suffix}`, got {}",
+        path.display()
+    );
+    assert!(!reason.is_empty(), "{err:#?}");
 }
 
+/// Asserts that `err` is `ParseFailed { path, reason }` with `path.ends_with(expected_suffix)`
+/// and a non-empty `reason`.
+///
+/// # Panics
+///
+/// Panics when `err` is any other variant or when the path/reason invariants do not hold.
 pub fn assert_parse_failed_error(err: &IngestionError, expected_suffix: &str) {
-    if let IngestionError::ParseFailed { path, reason } = err {
-        assert!(path.ends_with(expected_suffix), "{path:?}");
-        assert!(!reason.is_empty(), "{err:#?}");
-    } else {
-        assert!(false, "expected parse failure, got {err:#?}");
-    }
+    let IngestionError::ParseFailed { path, reason } = err else {
+        panic!("expected parse failure, got {err:#?}");
+    };
+    assert!(
+        path.ends_with(expected_suffix),
+        "expected path ending with `{expected_suffix}`, got {}",
+        path.display()
+    );
+    assert!(!reason.is_empty(), "{err:#?}");
 }
 
+/// Asserts that `err` is `NormalizationFailed { path, reason }` with `path.ends_with(expected_suffix)`
+/// and a `reason` that contains `expected_fragment`.
+///
+/// # Panics
+///
+/// Panics when `err` is any other variant or when the path/reason invariants do not hold.
 pub fn assert_normalization_failed_contains(
     err: &IngestionError,
     expected_suffix: &str,
     expected_fragment: &str,
 ) {
-    if let IngestionError::NormalizationFailed { path, reason } = err {
-        assert!(path.ends_with(expected_suffix), "{path:?}");
-        assert!(
-            reason.contains(expected_fragment),
-            "expected `{expected_fragment}` in `{reason}`"
-        );
-    } else {
-        assert!(false, "expected normalization failure, got {err:#?}");
-    }
+    let IngestionError::NormalizationFailed { path, reason } = err else {
+        panic!("expected normalization failure, got {err:#?}");
+    };
+    assert!(
+        path.ends_with(expected_suffix),
+        "expected path ending with `{expected_suffix}`, got {}",
+        path.display()
+    );
+    assert!(
+        reason.contains(expected_fragment),
+        "expected `{expected_fragment}` in `{reason}`"
+    );
 }
 
+/// Asserts the expected `assert_pipeline_missing_dependency_allowlist_for_library` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_pipeline_missing_dependency_allowlist_for_library(results: &[G3CheckResult]) {
     assert!(
         has_result(
@@ -110,6 +168,11 @@ pub fn assert_pipeline_missing_dependency_allowlist_for_library(results: &[G3Che
     );
 }
 
+/// Asserts the expected `assert_pipeline_workspace_tool_presence` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -119,14 +182,6 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
                 severity: G3Severity::Info,
                 title: "cargo-deny installed".to_owned(),
                 message: "`cargo-deny` is available on PATH.".to_owned(),
-                file: Some("Cargo.toml".to_owned()),
-                inventory: true,
-            },
-            Finding {
-                id: "g3rs-deps/cargo-machete-installed".to_owned(),
-                severity: G3Severity::Info,
-                title: "cargo-machete installed".to_owned(),
-                message: "`cargo-machete` is available on PATH.".to_owned(),
                 file: Some("Cargo.toml".to_owned()),
                 inventory: true,
             },
@@ -141,6 +196,14 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
+                id: "g3rs-deps/cargo-machete-installed".to_owned(),
+                severity: G3Severity::Info,
+                title: "cargo-machete installed".to_owned(),
+                message: "`cargo-machete` is available on PATH.".to_owned(),
+                file: Some("Cargo.toml".to_owned()),
+                inventory: true,
+            },
+            Finding {
                 id: "g3rs-deps/gitleaks-installed".to_owned(),
                 severity: G3Severity::Info,
                 title: "gitleaks installed".to_owned(),
@@ -152,6 +215,11 @@ pub fn assert_pipeline_workspace_tool_presence(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_pipeline_workspace_tool_absence` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -165,18 +233,18 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
                 inventory: false,
             },
             Finding {
-                id: "g3rs-deps/cargo-machete-installed".to_owned(),
-                severity: G3Severity::Error,
-                title: "cargo-machete missing".to_owned(),
-                message: "`cargo-machete` was not found on PATH. Install with `cargo install cargo-machete`.".to_owned(),
-                file: Some("Cargo.toml".to_owned()),
-                inventory: false,
-            },
-            Finding {
                 id: "g3rs-deps/cargo-dupes-installed".to_owned(),
                 severity: G3Severity::Warn,
                 title: "cargo-dupes missing".to_owned(),
                 message: "`cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`.".to_owned(),
+                file: Some("Cargo.toml".to_owned()),
+                inventory: false,
+            },
+            Finding {
+                id: "g3rs-deps/cargo-machete-installed".to_owned(),
+                severity: G3Severity::Error,
+                title: "cargo-machete missing".to_owned(),
+                message: "`cargo-machete` was not found on PATH. Install with `cargo install cargo-machete`.".to_owned(),
                 file: Some("Cargo.toml".to_owned()),
                 inventory: false,
             },
@@ -192,6 +260,11 @@ pub fn assert_pipeline_workspace_tool_absence(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_filetree_missing_lockfile_for_service` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_filetree_missing_lockfile_for_service(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -219,6 +292,11 @@ pub fn assert_filetree_missing_lockfile_for_service(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_filetree_missing_lockfile_for_library` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_filetree_missing_lockfile_for_library(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -244,6 +322,11 @@ pub fn assert_filetree_missing_lockfile_for_library(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_filetree_ignored_lockfile` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_filetree_ignored_lockfile(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -268,6 +351,11 @@ pub fn assert_filetree_ignored_lockfile(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_filetree_unignored_lockfile` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_filetree_unignored_lockfile(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),

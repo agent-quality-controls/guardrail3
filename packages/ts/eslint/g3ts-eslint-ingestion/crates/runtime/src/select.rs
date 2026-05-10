@@ -5,6 +5,7 @@ use g3_workspace_crawl::{
     G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState, root_file,
 };
 
+/// Internal constant `ROOT_ESLINT_CONFIGS`.
 const ROOT_ESLINT_CONFIGS: [&str; 6] = [
     "eslint.config.js",
     "eslint.config.mjs",
@@ -14,6 +15,7 @@ const ROOT_ESLINT_CONFIGS: [&str; 6] = [
     "eslint.config.cts",
 ];
 
+/// Internal function `select_active_root_eslint_config`.
 pub(crate) fn select_active_root_eslint_config(
     crawl: &G3WorkspaceCrawl,
 ) -> Option<&G3WorkspaceEntry> {
@@ -25,6 +27,7 @@ pub(crate) fn select_active_root_eslint_config(
     })
 }
 
+/// Internal function `probe_targets`.
 pub(crate) fn probe_targets(
     crawl: &G3WorkspaceCrawl,
     config_rel_path: &str,
@@ -43,7 +46,8 @@ pub(crate) fn probe_targets(
     probes.push(probe(
         EslintProbeKind::TsTest,
         first_matching_rel_path(crawl, config_scope, |rel_path| {
-            (rel_path.ends_with(".ts") || rel_path.ends_with(".tsx")) && is_test_rel_path(rel_path)
+            (has_extension(rel_path, "ts") || has_extension(rel_path, "tsx"))
+                && is_test_rel_path(rel_path)
         })
         .unwrap_or_else(|| scoped_default_rel_path(config_scope, "src/index.test.ts")),
     ));
@@ -61,6 +65,7 @@ pub(crate) fn probe_targets(
     probes
 }
 
+/// Internal function `first_ts_source_rel_path`.
 fn first_ts_source_rel_path(
     crawl: &G3WorkspaceCrawl,
     config_scope: Option<&str>,
@@ -70,6 +75,7 @@ fn first_ts_source_rel_path(
         .or_else(|| first_tsx_source_rel_path(crawl, config_scope))
 }
 
+/// Internal function `first_tsx_source_rel_path`.
 fn first_tsx_source_rel_path(
     crawl: &G3WorkspaceCrawl,
     config_scope: Option<&str>,
@@ -78,6 +84,7 @@ fn first_tsx_source_rel_path(
         .or_else(|| first_matching_rel_path(crawl, config_scope, is_fallback_tsx_source_rel_path))
 }
 
+/// Internal function `first_js_source_rel_path`.
 fn first_js_source_rel_path(
     crawl: &G3WorkspaceCrawl,
     config_scope: Option<&str>,
@@ -86,10 +93,12 @@ fn first_js_source_rel_path(
         .or_else(|| first_matching_rel_path(crawl, config_scope, is_fallback_js_source_rel_path))
 }
 
-fn probe(probe: EslintProbeKind, rel_path: String) -> EslintProbeTarget {
+/// Internal function `fn`.
+const fn probe(probe: EslintProbeKind, rel_path: String) -> EslintProbeTarget {
     EslintProbeTarget { probe, rel_path }
 }
 
+/// Internal function `first_matching_rel_path`.
 fn first_matching_rel_path(
     crawl: &G3WorkspaceCrawl,
     config_scope: Option<&str>,
@@ -106,6 +115,7 @@ fn first_matching_rel_path(
         .map(|entry| entry.path.rel_path.clone())
 }
 
+/// Internal function `config_scope_dir`.
 fn config_scope_dir(config_rel_path: &str) -> Option<&str> {
     let parent = std::path::Path::new(config_rel_path).parent()?;
     let parent = parent.to_str()?;
@@ -116,6 +126,7 @@ fn config_scope_dir(config_rel_path: &str) -> Option<&str> {
     }
 }
 
+/// Internal function `in_config_scope`.
 fn in_config_scope(rel_path: &str, config_scope: Option<&str>) -> bool {
     let Some(config_scope) = config_scope else {
         return true;
@@ -123,19 +134,22 @@ fn in_config_scope(rel_path: &str, config_scope: Option<&str>) -> bool {
     rel_path == config_scope || rel_path.starts_with(&format!("{config_scope}/"))
 }
 
+/// Internal function `scoped_default_rel_path`.
 fn scoped_default_rel_path(config_scope: Option<&str>, default_rel_path: &str) -> String {
-    match config_scope {
-        Some(config_scope) => format!("{config_scope}/{default_rel_path}"),
-        None => default_rel_path.to_owned(),
-    }
+    config_scope.map_or_else(
+        || default_rel_path.to_owned(),
+        |config_scope| format!("{config_scope}/{default_rel_path}"),
+    )
 }
 
+/// Internal function `is_probe_candidate`.
 fn is_probe_candidate(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
         && entry.readable
 }
 
+/// Internal function `is_test_rel_path`.
 fn is_test_rel_path(rel_path: &str) -> bool {
     rel_path.contains(".test.")
         || rel_path.contains(".spec.")
@@ -143,64 +157,85 @@ fn is_test_rel_path(rel_path: &str) -> bool {
         || rel_path.contains("/__tests__/")
 }
 
+/// Internal function `is_eslint_config`.
 fn is_eslint_config(rel_path: &str) -> bool {
     ROOT_ESLINT_CONFIGS.contains(&rel_path)
 }
 
+/// Returns `true` when `rel_path` ends with the given extension (case-insensitive).
+fn has_extension(rel_path: &str, extension: &str) -> bool {
+    std::path::Path::new(rel_path)
+        .extension()
+        .is_some_and(|value| value.eq_ignore_ascii_case(extension))
+}
+
+/// Returns `true` when `rel_path` ends with `.d.ts` (case-insensitive).
+fn is_declaration_ts(rel_path: &str) -> bool {
+    rel_path.to_ascii_lowercase().ends_with(".d.ts")
+}
+
+/// Internal function `is_primary_ts_source_rel_path`.
 fn is_primary_ts_source_rel_path(rel_path: &str) -> bool {
     rel_path.starts_with("src/")
-        && rel_path.ends_with(".ts")
-        && !rel_path.ends_with(".d.ts")
+        && has_extension(rel_path, "ts")
+        && !is_declaration_ts(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_primary_tsx_source_rel_path`.
 fn is_primary_tsx_source_rel_path(rel_path: &str) -> bool {
     rel_path.starts_with("src/")
-        && rel_path.ends_with(".tsx")
+        && has_extension(rel_path, "tsx")
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_fallback_ts_source_rel_path`.
 fn is_fallback_ts_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".ts")
-        && !rel_path.ends_with(".d.ts")
+    has_extension(rel_path, "ts")
+        && !is_declaration_ts(rel_path)
         && !is_script_rel_path(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_fallback_tsx_source_rel_path`.
 fn is_fallback_tsx_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".tsx")
+    has_extension(rel_path, "tsx")
         && !is_script_rel_path(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_primary_js_source_rel_path`.
 fn is_primary_js_source_rel_path(rel_path: &str) -> bool {
     rel_path.starts_with("src/")
-        && rel_path.ends_with(".js")
+        && has_extension(rel_path, "js")
         && !is_eslint_config(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_fallback_js_source_rel_path`.
 fn is_fallback_js_source_rel_path(rel_path: &str) -> bool {
-    rel_path.ends_with(".js")
+    has_extension(rel_path, "js")
         && !is_script_rel_path(rel_path)
         && !is_eslint_config(rel_path)
         && !is_test_rel_path(rel_path)
         && !is_config_like_rel_path(rel_path)
 }
 
+/// Internal function `is_script_rel_path`.
 fn is_script_rel_path(rel_path: &str) -> bool {
     rel_path.starts_with("scripts/") || rel_path.contains("/scripts/")
 }
 
+/// Internal function `is_config_like_rel_path`.
 fn is_config_like_rel_path(rel_path: &str) -> bool {
     std::path::Path::new(rel_path)
         .file_name()

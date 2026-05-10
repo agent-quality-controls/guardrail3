@@ -4,6 +4,35 @@ use guardrail3_reason_policy::validate_reason_text;
 
 const ID: &str = "g3rs-apparch/patch-replace-bypass";
 
+fn push_policy_unavailable(
+    patch: &g3rs_apparch_types::G3RsApparchPatchBypass,
+    rel_path: &str,
+    reason: &str,
+    kind_phrase: &str,
+    results: &mut Vec<G3CheckResult>,
+) {
+    results.push(G3CheckResult::new(
+        ID.to_owned(),
+        G3Severity::Error,
+        format!(
+            "cannot validate {} bypass `{}`",
+            patch.kind.label(),
+            patch.key
+        ),
+        format!(
+            "Internal {} entry `{}` resolves to `{}` inside apparch, but `{}` {}: {}.",
+            patch.kind.label(),
+            patch.key,
+            patch.target_rel_dir,
+            rel_path,
+            kind_phrase,
+            reason
+        ),
+        Some(patch.cargo_rel_path.clone()),
+        None,
+    ));
+}
+
 pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec<G3CheckResult>) {
     let patch = &input.patch;
     let selector = patch.key.as_str();
@@ -18,39 +47,11 @@ pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec
             .map(|waiver| waiver.reason.as_str()),
         G3RsApparchRustPolicyState::Missing => None,
         G3RsApparchRustPolicyState::Unreadable { rel_path, reason } => {
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                format!("cannot validate {} bypass `{}`", patch.kind.label(), patch.key),
-                format!(
-                    "Internal {} entry `{}` resolves to `{}` inside apparch, but `{}` is unreadable: {}.",
-                    patch.kind.label(),
-                    patch.key,
-                    patch.target_rel_dir,
-                    rel_path,
-                    reason
-                ),
-                Some(patch.cargo_rel_path.clone()),
-                None,
-            ));
+            push_policy_unavailable(patch, rel_path, reason, "is unreadable", results);
             return;
         }
         G3RsApparchRustPolicyState::ParseError { rel_path, reason } => {
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                format!("cannot validate {} bypass `{}`", patch.kind.label(), patch.key),
-                format!(
-                    "Internal {} entry `{}` resolves to `{}` inside apparch, but `{}` could not be parsed: {}.",
-                    patch.kind.label(),
-                    patch.key,
-                    patch.target_rel_dir,
-                    rel_path,
-                    reason
-                ),
-                Some(patch.cargo_rel_path.clone()),
-                None,
-            ));
+            push_policy_unavailable(patch, rel_path, reason, "could not be parsed", results);
             return;
         }
     };

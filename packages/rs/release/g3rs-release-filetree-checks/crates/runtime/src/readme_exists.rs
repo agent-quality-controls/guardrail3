@@ -1,8 +1,10 @@
 use g3rs_release_types::G3RsReleaseFileTreeReadme;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3rs-release/readme-exists";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(readme: &G3RsReleaseFileTreeReadme, results: &mut Vec<G3CheckResult>) {
     if !readme.publishable || readme.readme_declared_false {
         return;

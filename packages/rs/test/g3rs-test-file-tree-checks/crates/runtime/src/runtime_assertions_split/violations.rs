@@ -1,3 +1,11 @@
+#![expect(
+    clippy::shadow_unrelated,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::too_many_lines,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeSet;
 
 use g3rs_test_types::{
@@ -8,14 +16,20 @@ use g3rs_test_types::{
 use super::assertions_violations::collect_assertions_module_violations;
 use super::helpers;
 
+/// `RuntimeAssertionsViolation` struct.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct RuntimeAssertionsViolation {
+    /// `rel_path` item.
     pub(super) rel_path: String,
+    /// `line` item.
     pub(super) line: Option<usize>,
+    /// `title` item.
     pub(super) title: String,
+    /// `message` item.
     pub(super) message: String,
 }
 
+/// `collect_violations` function.
 pub(super) fn collect_violations(
     input: &G3RsTestFileTreeChecksInput,
 ) -> Vec<RuntimeAssertionsViolation> {
@@ -159,6 +173,7 @@ pub(super) fn collect_violations(
     violations
 }
 
+/// `component_package_rel_dir` function.
 fn component_package_rel_dir(component: &G3RsTestComponentFileTreeFacts) -> &str {
     if component.rel_dir.is_empty() {
         component.runtime_rel_dir.as_str()
@@ -167,6 +182,7 @@ fn component_package_rel_dir(component: &G3RsTestComponentFileTreeFacts) -> &str
     }
 }
 
+/// `collect_external_harness_violations` function.
 fn collect_external_harness_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
@@ -224,14 +240,14 @@ fn collect_external_harness_violations(
                 line: None,
                 title: "external harness calls disallowed local crate".to_owned(),
                 message: format!(
-                    "External runtime harnesses must stay black-box and must not call local crate `{}` directly.",
-                    local_root
+                    "External runtime harnesses must stay black-box and must not call local crate `{local_root}` directly."
                 ),
             });
         }
     }
 }
 
+/// `collect_sidecar_violations` function.
 fn collect_sidecar_violations(
     violations: &mut Vec<RuntimeAssertionsViolation>,
     component: &G3RsTestComponentFileTreeFacts,
@@ -254,7 +270,7 @@ fn collect_sidecar_violations(
                 &binding.path_segments,
                 &file.kind,
                 owner_module_name,
-                &local_module_names,
+                local_module_names,
             ) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.rel_path.clone(),
@@ -268,8 +284,7 @@ fn collect_sidecar_violations(
                     ),
                 });
             }
-            if helpers::import_hits_sibling_module(binding, owner_module_name, &local_module_names)
-            {
+            if helpers::import_hits_sibling_module(binding, owner_module_name, local_module_names) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.rel_path.clone(),
                     line: Some(binding.line),
@@ -280,7 +295,7 @@ fn collect_sidecar_violations(
                         helpers::sibling_module_target(
                             &binding.path_segments,
                             owner_module_name,
-                            &local_module_names,
+                            local_module_names,
                         )
                         .unwrap_or("<sibling-module>"),
                         owner_module_name,
@@ -322,7 +337,7 @@ fn collect_sidecar_violations(
                 path,
                 &file.kind,
                 owner_module_name,
-                &local_module_names,
+                local_module_names,
             )
         }) {
             violations.push(RuntimeAssertionsViolation {
@@ -335,7 +350,7 @@ fn collect_sidecar_violations(
             });
         }
         if let Some(target_module) = file.parsed.file_call_paths.iter().find_map(|path| {
-            helpers::sibling_module_target(path, owner_module_name, &local_module_names)
+            helpers::sibling_module_target(path, owner_module_name, local_module_names)
         }) {
             violations.push(RuntimeAssertionsViolation {
                 rel_path: file.rel_path.clone(),
@@ -362,8 +377,7 @@ fn collect_sidecar_violations(
                 line: None,
                 title: "sidecar calls disallowed local crate".to_owned(),
                 message: format!(
-                    "Internal sidecar harnesses must not call local crate `{}` directly.",
-                    local_root
+                    "Internal sidecar harnesses must not call local crate `{local_root}` directly."
                 ),
             });
         }
@@ -387,6 +401,7 @@ fn collect_sidecar_violations(
     }
 }
 
+/// `non_component_harness_violations` function.
 fn non_component_harness_violations(
     files: &[G3RsTestAnalyzedSourceFile],
 ) -> Vec<RuntimeAssertionsViolation> {

@@ -1,8 +1,14 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "test-helper file: writes temp eslint config + source fixtures with std::fs to drive ingestion; production code uses the centralized fs module"
+)]
+
 use tempfile::TempDir;
 
 use g3_workspace_crawl::{
-    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
-    G3WorkspacePath,
+    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntry as G3WorkspaceEntry,
+    G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
+    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState, G3RsWorkspacePath as G3WorkspacePath,
 };
 
 pub(super) fn fake_eslint_workspace() -> TempDir {

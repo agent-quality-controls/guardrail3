@@ -1,3 +1,6 @@
+//! Shared types for the g3rs clippy family.
+
+/// Concrete data structures shared across clippy family crates.
 #[cfg(feature = "api")]
 mod types;
 

@@ -77,7 +77,7 @@ commit_parsers = [
     );
     write(
         root.join(".github/workflows/release.yml"),
-        r#"
+        r"
 name: release
 on:
   push:
@@ -92,7 +92,7 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       - run: cargo publish --dry-run --manifest-path crates/demo/Cargo.toml
-"#,
+",
     );
 
     let crawl = crawl(root);
@@ -149,14 +149,14 @@ changelog_config = "cliff.toml"
     );
     write(
         root.join("cliff.toml"),
-        r#"
+        r"
 [git]
 conventional_commits = true
-"#,
+",
     );
     write(
         root.join(".github/workflows/release.yml"),
-        r#"
+        r"
 name: release
 on:
   push:
@@ -170,21 +170,19 @@ jobs:
       - uses: release-plz/action@v0
         with:
           command: release
-"#,
+",
     );
 
     let crawl = crawl(root);
     let input = super::super::config_input_with_path(&crawl, None);
 
-    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert_eq!(input.repos.len(), 1, "{input:#?}");
     assert!(
-        input.repo_checks[0].has_registry_token_workflow,
+        input.repos[0].workflow_flags.has_registry_token_workflow,
         "{input:#?}"
     );
     assert_eq!(
-        input.repo_checks[0]
-            .registry_token_workflow_rel_path
-            .as_deref(),
+        input.repos[0].registry_token_workflow_rel_path.as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -221,7 +219,7 @@ readme = "README.md"
     write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
     write(
         root.join(".github/workflows/release.yml"),
-        r#"
+        r"
 name: release
 on:
   push:
@@ -235,21 +233,19 @@ jobs:
       - uses: release-plz/action@v0
         with:
           command: release
-"#,
+",
     );
 
     let crawl = crawl(root);
     let input = super::super::config_input_with_path(&crawl, None);
 
-    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert_eq!(input.repos.len(), 1, "{input:#?}");
     assert!(
-        input.repo_checks[0].has_registry_token_workflow,
+        input.repos[0].workflow_flags.has_registry_token_workflow,
         "{input:#?}"
     );
     assert_eq!(
-        input.repo_checks[0]
-            .registry_token_workflow_rel_path
-            .as_deref(),
+        input.repos[0].registry_token_workflow_rel_path.as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -262,15 +258,13 @@ fn config_pipeline_detects_publish_dry_run_through_cd_wrapper() {
         ".github/workflows/release.yml",
     );
 
-    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert_eq!(input.repos.len(), 1, "{input:#?}");
     assert!(
-        input.repo_checks[0].has_publish_dry_run_workflow,
+        input.repos[0].workflow_flags.has_publish_dry_run_workflow,
         "{input:#?}"
     );
     assert_eq!(
-        input.repo_checks[0]
-            .publish_dry_run_workflow_rel_path
-            .as_deref(),
+        input.repos[0].publish_dry_run_workflow_rel_path.as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -283,15 +277,13 @@ fn config_pipeline_detects_publish_dry_run_through_env_wrapper() {
         ".github/workflows/release.yml",
     );
 
-    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert_eq!(input.repos.len(), 1, "{input:#?}");
     assert!(
-        input.repo_checks[0].has_publish_dry_run_workflow,
+        input.repos[0].workflow_flags.has_publish_dry_run_workflow,
         "{input:#?}"
     );
     assert_eq!(
-        input.repo_checks[0]
-            .publish_dry_run_workflow_rel_path
-            .as_deref(),
+        input.repos[0].publish_dry_run_workflow_rel_path.as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -304,15 +296,13 @@ fn config_pipeline_detects_publish_dry_run_through_shell_wrapper() {
         ".github/workflows/release.yml",
     );
 
-    assert_eq!(input.repo_checks.len(), 1, "{input:#?}");
+    assert_eq!(input.repos.len(), 1, "{input:#?}");
     assert!(
-        input.repo_checks[0].has_publish_dry_run_workflow,
+        input.repos[0].workflow_flags.has_publish_dry_run_workflow,
         "{input:#?}"
     );
     assert_eq!(
-        input.repo_checks[0]
-            .publish_dry_run_workflow_rel_path
-            .as_deref(),
+        input.repos[0].publish_dry_run_workflow_rel_path.as_deref(),
         Some(".github/workflows/release.yml"),
         "{input:#?}"
     );
@@ -350,7 +340,7 @@ readme = "README.md"
     );
     write(root.join("crates/demo/src/lib.rs"), "pub fn demo() {}\n");
     let workflow = format!(
-        r#"
+        r"
 name: release
 on:
   push:
@@ -360,7 +350,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: {run_line}
-"#
+"
     );
     write(root.join(workflow_rel_path), &workflow);
 

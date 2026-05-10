@@ -4,6 +4,7 @@ use g3_workspace_crawl::{
 };
 use g3ts_astro_mdx_types::{G3TsAstroMdxEslintDirectiveInput, G3TsAstroMdxPolicySurfaceState};
 
+/// `eslint_directives` helper.
 pub(crate) fn eslint_directives(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -15,6 +16,7 @@ pub(crate) fn eslint_directives(
         .collect()
 }
 
+/// `source_paths` helper.
 fn source_paths(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -39,6 +41,7 @@ fn source_paths(
         .collect()
 }
 
+/// `content_root` helper.
 fn content_root(astro_policy: &G3TsAstroMdxPolicySurfaceState) -> String {
     match astro_policy {
         G3TsAstroMdxPolicySurfaceState::Parsed { snapshot } => snapshot
@@ -47,10 +50,14 @@ fn content_root(astro_policy: &G3TsAstroMdxPolicySurfaceState) -> String {
             .unwrap_or("src/content")
             .trim_end_matches('/')
             .to_owned(),
-        _ => "src/content".to_owned(),
+        G3TsAstroMdxPolicySurfaceState::Missing { .. }
+        | G3TsAstroMdxPolicySurfaceState::Unreadable { .. }
+        | G3TsAstroMdxPolicySurfaceState::ParseError { .. }
+        | G3TsAstroMdxPolicySurfaceState::MissingAstroPolicy { .. } => "src/content".to_owned(),
     }
 }
 
+/// `mdx_component_map_roots` helper.
 fn mdx_component_map_roots(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroMdxPolicySurfaceState,
@@ -71,10 +78,15 @@ fn mdx_component_map_roots(
         .collect()
 }
 
+/// `is_mdx_content` helper.
 fn is_mdx_content(rel_path: &str, scoped_content_prefix: &str) -> bool {
-    rel_path.starts_with(scoped_content_prefix) && rel_path.ends_with(".mdx")
+    rel_path.starts_with(scoped_content_prefix)
+        && std::path::Path::new(rel_path)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("mdx"))
 }
 
+/// `is_component_map_source` helper.
 fn is_component_map_source(rel_path: &str, component_maps: &[String]) -> bool {
     component_maps.iter().any(|root| {
         let prefix = format!("{root}/");
@@ -85,6 +97,7 @@ fn is_component_map_source(rel_path: &str, component_maps: &[String]) -> bool {
     })
 }
 
+/// `file_directives` helper.
 fn file_directives(
     crawl: &G3WorkspaceCrawl,
     rel_path: &str,
@@ -123,6 +136,7 @@ fn file_directives(
         .collect()
 }
 
+/// `parse_error` helper.
 fn parse_error(rel_path: &str, reason: String) -> G3TsAstroMdxEslintDirectiveInput {
     G3TsAstroMdxEslintDirectiveInput {
         rel_path: rel_path.to_owned(),
@@ -135,6 +149,7 @@ fn parse_error(rel_path: &str, reason: String) -> G3TsAstroMdxEslintDirectiveInp
     }
 }
 
+/// `disabled_rules` helper.
 fn disabled_rules(rules: eslint_directive_parser::types::EslintDisabledRuleSet) -> Vec<String> {
     match rules {
         eslint_directive_parser::types::EslintDisabledRuleSet::AllRules => Vec::new(),

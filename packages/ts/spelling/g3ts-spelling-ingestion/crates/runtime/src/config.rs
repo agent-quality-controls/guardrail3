@@ -1,6 +1,8 @@
 use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
 use g3ts_spelling_types::G3TsSpellingConfigSurfaceState;
 
+/// Read and parse the cspell config under `app_root_rel_path` from `crawl`,
+/// returning a surface-state describing what was found.
 pub(crate) fn ingest_cspell_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -46,6 +48,8 @@ pub(crate) fn ingest_cspell_config(
     }
 }
 
+/// Return the parent directory of `rel_path` as a workspace-relative path,
+/// using `.` for the workspace root.
 fn parent_rel_path(rel_path: &str) -> String {
     std::path::Path::new(rel_path)
         .parent()

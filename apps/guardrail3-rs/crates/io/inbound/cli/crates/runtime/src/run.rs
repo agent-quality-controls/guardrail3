@@ -1,9 +1,9 @@
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_app_types::{
-    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRequest,
-    WorkspaceCrawler,
+    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily,
+    ValidateRepoRequest, ValidateRequest, WorkspaceCrawler,
 };
-use guardrail3_rs_validate_command::execute;
+use guardrail3_rs_validate_command::{execute, execute_repo, resolve_repo_root};
 
 use crate::Command;
 
@@ -61,13 +61,40 @@ pub fn run_command(
             path,
             family,
             inventory,
+            staged,
+            rules_only,
         } => {
             let request = ValidateRequest {
                 workspace_root: path,
                 families: family.into_iter().map(Into::into).collect(),
                 include_inventory: inventory,
+                staged,
+                rules_only,
             };
             match execute(&request, crawler, family_runner, renderer) {
+                Ok(outcome) => CliOutput {
+                    stdout: outcome.stdout().to_owned(),
+                    stderr: outcome.stderr().to_owned(),
+                    exit_code: outcome.exit_code(),
+                },
+                Err(error) => CliOutput {
+                    stdout: String::new(),
+                    stderr: format!("{error}\n"),
+                    exit_code: 1,
+                },
+            }
+        }
+        Command::ValidateRepo {
+            repo_root,
+            inventory,
+        } => {
+            let resolved_root =
+                repo_root.unwrap_or_else(|| resolve_repo_root(&std::path::PathBuf::from(".")));
+            let request = ValidateRepoRequest {
+                repo_root: resolved_root,
+                include_inventory: inventory,
+            };
+            match execute_repo(&request, crawler, family_runner, renderer) {
                 Ok(outcome) => CliOutput {
                     stdout: outcome.stdout().to_owned(),
                     stderr: outcome.stderr().to_owned(),

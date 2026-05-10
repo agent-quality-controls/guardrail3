@@ -1,3 +1,4 @@
+/// Shared cargo input contract types.
 #[cfg(feature = "api")]
 mod types;
 

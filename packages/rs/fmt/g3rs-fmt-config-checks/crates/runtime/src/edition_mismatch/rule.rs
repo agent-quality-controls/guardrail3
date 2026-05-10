@@ -3,8 +3,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::inputs::{cargo, cargo_edition, rustfmt, rustfmt_edition};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-fmt/edition-mismatch";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let Some(rustfmt) = rustfmt(input) else {
         return;

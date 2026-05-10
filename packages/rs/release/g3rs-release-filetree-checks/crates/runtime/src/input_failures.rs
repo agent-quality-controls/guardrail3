@@ -1,8 +1,10 @@
 use g3rs_release_types::G3RsReleaseInputFailure;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier.
 const ID: &str = "g3rs-release/filetree-input-failures";
 
+/// Run this rule and append findings to `results`.
 pub(crate) fn check(failure: &G3RsReleaseInputFailure, results: &mut Vec<G3CheckResult>) {
     results.push(G3CheckResult::new(
         ID.to_owned(),

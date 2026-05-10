@@ -6,10 +6,18 @@ use glob::Pattern;
 
 use crate::run::IngestionError;
 
+/// List of crawl entries whose `Cargo.toml` lives in a workspace-owned root directory.
+type OwnedConfigEntries<'a> = Vec<&'a G3RsWorkspaceEntry>;
+
+/// Set of workspace-root-relative directories considered owned by the workspace
+/// (the workspace root and every member dir).
+type OwnedRootDirs = BTreeSet<String>;
+
+/// Implements `select owned config entries`.
 pub(crate) fn select_owned_config_entries<'a>(
     crawl: &'a G3RsWorkspaceCrawl,
     file_names: &[&str],
-) -> Result<Vec<&'a G3RsWorkspaceEntry>, IngestionError> {
+) -> Result<OwnedConfigEntries<'a>, IngestionError> {
     let owned_roots = owned_root_dirs(crawl)?;
     let mut entries = crawl
         .entries
@@ -28,9 +36,8 @@ pub(crate) fn select_owned_config_entries<'a>(
     Ok(entries)
 }
 
-pub(crate) fn owned_root_dirs(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Result<BTreeSet<String>, IngestionError> {
+/// Implements `owned root dirs`.
+pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<OwnedRootDirs, IngestionError> {
     let mut roots = BTreeSet::from([String::new()]);
 
     let Some(root_cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
@@ -62,10 +69,11 @@ pub(crate) fn owned_root_dirs(
     Ok(roots)
 }
 
+/// Implements `select workspace member dirs`.
 fn select_workspace_member_dirs(
     crawl: &G3RsWorkspaceCrawl,
     workspace_cargo: &CargoToml,
-) -> Result<BTreeSet<String>, IngestionError> {
+) -> Result<OwnedRootDirs, IngestionError> {
     let workspace =
         workspace_cargo
             .workspace
@@ -130,6 +138,7 @@ fn select_workspace_member_dirs(
     Ok(member_dirs)
 }
 
+/// Implements `manifest dir from manifest path`.
 fn manifest_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     if rel_path == "Cargo.toml" {
         return Some("");
@@ -138,6 +147,7 @@ fn manifest_dir_from_manifest_path(rel_path: &str) -> Option<&str> {
     rel_path.strip_suffix("/Cargo.toml")
 }
 
+/// Implements `file is within owned root`.
 fn file_is_within_owned_root(rel_path: &str, owned_roots: &BTreeSet<String>) -> bool {
     let parent = rel_path.rsplit_once('/').map_or("", |(dir, _)| dir);
 

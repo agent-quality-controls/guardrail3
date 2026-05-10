@@ -1,11 +1,20 @@
+/// Rule implementation for `analysis helpers`.
 mod analysis_helpers;
+/// Rule implementation for `attrs`.
 pub(crate) mod attrs;
+/// Rule implementation for `comments`.
 pub(crate) mod comments;
+/// Rule implementation for `core`.
 mod core;
+/// Rule implementation for `fs visitors`.
 mod fs_visitors;
+/// Rule implementation for `garde skips`.
 mod garde_skips;
+/// Rule implementation for `helpers`.
 mod helpers;
+/// Rule implementation for `types`.
 pub(crate) mod types;
+/// Rule implementation for `visitors`.
 pub(crate) mod visitors;
 
 pub(crate) use core::count_top_level_use_imports;

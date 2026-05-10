@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::findings::warn;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/multiple-versions-floor";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(bans) = deny.bans.as_ref() else {
         results.push(warn(

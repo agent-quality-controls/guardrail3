@@ -1,8 +1,10 @@
 use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deps/gitignore-not-ignoring-cargo-lock";
 
+/// Emits a finding when a `.gitignore` ignores `Cargo.lock`.
 pub(crate) fn check(input: &G3RsDepsFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     if input.cargo_lock_ignored {
         results.push(G3CheckResult::new(

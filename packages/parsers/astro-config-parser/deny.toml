@@ -19,6 +19,7 @@ allow-wildcard-paths = true
 highlight = "all"
 
 skip = [
+    { crate = "siphasher", reason = "transitive duplicate: swc_common pins 0.3.11 while criterion (dev-tree) pulls 1.0.2" },
 ]
 
 deny = [
@@ -45,7 +46,7 @@ deny = [
     # --- Global state: use std lazy primitives instead of lazy_static ---
     { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
     # --- Error handling: standardize on thiserror ---
-    { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
+    { name = "anyhow", wrappers = ["swc_common"], reason = "Ban anyhow (standardize on thiserror); swc_common is whitelisted because the SWC parser used to parse Astro config files depends on it" },
     # --- Web framework: standardize on axum ---
     { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
     { name = "axum", wrappers = [], reason = "Ban framework dependencies in library profile (standardize on typed boundaries)" },
@@ -103,6 +104,12 @@ allow = [
     "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.8
+
+# Per-crate license exceptions (without polluting the workspace baseline).
+[[licenses.clarify]]
+crate = "ar_archive_writer"
+expression = "Apache-2.0"
+license-files = []
 
 # Workspace crates with `publish = false` don't need a license field
 [licenses.private]

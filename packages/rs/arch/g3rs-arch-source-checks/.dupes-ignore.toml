@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "6757aa0ef6a17e00"
+reason = "repeated-test-body for parallel test cases asserting identical positive-finding shape across distinct fixture inputs (path attribute on facade sidecar, generic sidecar, mismatched sidecar, non-test path attr); g3rs-test/runtime-assertions-split forbids extracting these tests into shared helpers"
+
+[[ignore]]
+fingerprint = "5630c14d104bbc5a"
+reason = "assertion-helper bodies share identical structure across rule families (path-attr finding, ungated exports finding, all-gated exports finding); collapsing would obscure rule-specific assertion intent"
+
+[[ignore]]
+fingerprint = "3e77dec3b233eab9"
+reason = "real-proof-site tests for distinct rule outputs (inventory facts vs source-rule emission for properly-gated facade exports); g3rs-test/real-proof-site forbids sharing test bodies across rule outputs"

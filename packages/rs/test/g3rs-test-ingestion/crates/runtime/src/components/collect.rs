@@ -1,3 +1,15 @@
+#![expect(
+    clippy::case_sensitive_file_extension_comparisons,
+    reason = "rust source filenames are conventionally lowercase; case-insensitive matching not needed"
+)]
+#![expect(
+    clippy::expect_used,
+    reason = "test ingestion uses expect() on internal invariants that hold by construction"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use g3rs_test_types::{
     G3RsTestFileTreeInputFailure, G3RsTestSourceFile, G3RsTestSourceInputFailure,
 };
@@ -10,6 +22,7 @@ use crate::components::support::{dedupe_failures, is_fixture_path, parse_manifes
 use crate::ingest::IngestionError;
 use crate::roots::OwnedTestRoot;
 
+/// `collect_components` function.
 pub(crate) fn collect_components(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
@@ -18,6 +31,7 @@ pub(crate) fn collect_components(
     Ok(vec![build_owned_component(crawl, root, layout)])
 }
 
+/// `collect_file_tree_components` function.
 pub(crate) fn collect_file_tree_components(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
@@ -36,6 +50,7 @@ pub(crate) fn collect_file_tree_components(
     )
 }
 
+/// `collect_ast_files` function.
 pub(crate) fn collect_ast_files(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
@@ -85,6 +100,7 @@ pub(crate) fn collect_ast_files(
     (files, input_failures)
 }
 
+/// `collect_file_tree_files` function.
 pub(crate) fn collect_file_tree_files(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,
@@ -130,6 +146,7 @@ pub(crate) fn collect_file_tree_files(
     (files, input_failures)
 }
 
+/// `collect_local_package_names` function.
 pub(crate) fn collect_local_package_names(
     crawl: &G3RsWorkspaceCrawl,
     root: &OwnedTestRoot,

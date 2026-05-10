@@ -5,6 +5,7 @@ use g3ts_astro_seo_types::{
     G3TsAstroStaticValue, G3TsAstroTrailingSlashPolicy,
 };
 
+/// `ingest_astro_config_surface`: ingest astro config surface.
 pub(crate) fn ingest_astro_config_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -64,14 +65,18 @@ pub(crate) fn ingest_astro_config_surface(
     }
 }
 
-fn astro_output_mode(value: astro_config_parser::types::AstroOutputMode) -> G3TsAstroOutputMode {
+/// `astro_output_mode`: astro output mode.
+const fn astro_output_mode(
+    value: astro_config_parser::types::AstroOutputMode,
+) -> G3TsAstroOutputMode {
     match value {
         astro_config_parser::types::AstroOutputMode::Static => G3TsAstroOutputMode::Static,
         astro_config_parser::types::AstroOutputMode::Server => G3TsAstroOutputMode::Server,
     }
 }
 
-fn astro_trailing_slash_policy(
+/// `astro_trailing_slash_policy`: astro trailing slash policy.
+const fn astro_trailing_slash_policy(
     value: astro_config_parser::types::AstroTrailingSlashPolicy,
 ) -> G3TsAstroTrailingSlashPolicy {
     match value {
@@ -87,6 +92,7 @@ fn astro_trailing_slash_policy(
     }
 }
 
+/// `astro_integration`: astro integration.
 fn astro_integration(
     value: &astro_config_parser::types::AstroIntegrationSnapshot,
 ) -> G3TsAstroIntegrationSnapshot {
@@ -98,6 +104,7 @@ fn astro_integration(
     }
 }
 
+/// `astro_adapter_as_integration`: astro adapter as integration.
 fn astro_adapter_as_integration(
     value: &astro_config_parser::types::AstroAdapterSnapshot,
 ) -> G3TsAstroIntegrationSnapshot {
@@ -109,12 +116,14 @@ fn astro_adapter_as_integration(
     }
 }
 
+/// `astro_call`: astro call.
 fn astro_call(value: &astro_config_parser::types::AstroCallSnapshot) -> G3TsAstroCallSnapshot {
     G3TsAstroCallSnapshot {
         first_arg: value.first_arg.as_ref().map(astro_static_value),
     }
 }
 
+/// `astro_static_value`: astro static value.
 fn astro_static_value(
     value: &astro_config_parser::types::AstroStaticValue,
 ) -> G3TsAstroStaticValue {

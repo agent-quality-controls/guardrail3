@@ -1,5 +1,6 @@
 use g3rs_hooks_config_checks_runtime as _;
 
+/// Shared helpers used by per-rule assertion modules in this crate.
 mod common;
 
 #[cfg(feature = "checks")]

@@ -115,6 +115,7 @@ name = "rust-toolchain-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rust-toolchain-toml-parser-runtime",
+ "rust-toolchain-toml-parser-types",
 ]
 
 [[package]]
@@ -138,6 +139,7 @@ name = "rustfmt-toml-parser"
 version = "0.1.0"
 dependencies = [
  "rustfmt-toml-parser-runtime",
+ "rustfmt-toml-parser-types",
 ]
 
 [[package]]

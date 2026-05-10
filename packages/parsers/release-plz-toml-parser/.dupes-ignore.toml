@@ -1,0 +1,7 @@
+[[ignore]]
+fingerprint = "034a954b409ab31d"
+reason = "From<toml::de::Error> and From<std::io::Error> are both single-statement variant constructors that always look structurally identical"
+
+[[ignore]]
+fingerprint = "8fa960ac7afabefc"
+reason = "release-plz.toml parser tests share parse_fixture + assertion shape; each #[test] proves a different toml shape"

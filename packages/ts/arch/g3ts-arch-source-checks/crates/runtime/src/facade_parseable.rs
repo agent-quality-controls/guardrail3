@@ -1,8 +1,10 @@
 use g3ts_arch_types::{G3TsArchFacadeFileState, G3TsArchSourceChecksInput};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Stable identifier for the facade-parseable rule.
 const ID: &str = "g3ts-arch/facade-parseable";
 
+/// Flags facade files that are unreadable or fail to parse.
 pub(crate) fn check(input: &G3TsArchSourceChecksInput, results: &mut Vec<G3CheckResult>) {
     for facade in &input.facades {
         match facade {
@@ -14,7 +16,7 @@ pub(crate) fn check(input: &G3TsArchSourceChecksInput, results: &mut Vec<G3Check
                     format!("Facade file `{rel_path}` is unreadable: {reason}."),
                     Some(rel_path.clone()),
                     None,
-                ))
+                ));
             }
             G3TsArchFacadeFileState::ParseError { rel_path, reason } => {
                 results.push(G3CheckResult::new(
@@ -24,7 +26,7 @@ pub(crate) fn check(input: &G3TsArchSourceChecksInput, results: &mut Vec<G3Check
                     format!("Facade file `{rel_path}` could not be parsed: {reason}."),
                     Some(rel_path.clone()),
                     None,
-                ))
+                ));
             }
             G3TsArchFacadeFileState::Parsed { surface } => results.push(
                 G3CheckResult::new(

@@ -11,7 +11,7 @@ fn inventories_when_garde_dependency_present() {
 
     assertions::assert_contains(
         &results,
-        assertions::info(
+        &assertions::info(
             "garde dependency found",
             "garde is present in `Cargo.toml` for this workspace root. Garde-specific boundary checks are active.",
             "Cargo.toml",

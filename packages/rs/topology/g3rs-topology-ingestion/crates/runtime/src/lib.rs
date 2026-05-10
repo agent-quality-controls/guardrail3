@@ -1,6 +1,10 @@
+/// `file_tree_facts` module.
 mod file_tree_facts;
+/// `fs` module.
 mod fs;
+/// `run` module.
 mod run;
+/// `view` module.
 mod view;
 
 #[cfg(feature = "ingest")]

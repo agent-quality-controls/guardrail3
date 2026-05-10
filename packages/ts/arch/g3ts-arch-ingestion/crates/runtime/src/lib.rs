@@ -1,7 +1,12 @@
+/// File-tree facts: presence of declared entrypoints on disk.
 mod file_tree;
+/// Centralized filesystem access boundary.
 mod fs;
+/// Manifest parsing for declared facade entrypoints.
 mod manifest;
+/// Public ingestion entry points.
 mod run;
+/// Source surface state collection.
 mod source;
 
 #[cfg(feature = "ingest")]

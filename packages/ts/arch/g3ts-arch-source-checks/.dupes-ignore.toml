@@ -1,0 +1,3 @@
+[[ignore]]
+fingerprint = "b464764d26cf61a6"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"

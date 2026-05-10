@@ -1,30 +1,9 @@
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 use g3rs_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
-/// Initialize a git repo at the given path so the ignore crate's WalkBuilder
-/// can find .gitignore files and compute ignore state.
-fn git_init(path: &Path) {
-    let _status = Command::new("git")
-        .args(["init", "--quiet"])
-        .current_dir(path)
-        .status()
-        .expect("git init should succeed");
-}
-
-fn write(path: impl AsRef<Path>, content: &str) {
-    if let Some(parent) = path.as_ref().parent() {
-        fs::create_dir_all(parent).expect("create parent directory for fixture");
-    }
-    fs::write(path, content).expect("write fixture file");
-}
-
-fn write_root_manifest(root: &Path) {
-    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
-}
+use super::fixtures::{git_init, write, write_root_manifest};
 
 #[test]
 fn marks_gitignored_files_as_included_via_recovery() {

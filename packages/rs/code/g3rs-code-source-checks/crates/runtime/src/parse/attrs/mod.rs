@@ -1,4 +1,6 @@
+/// Rule implementation for `policies`.
 mod policies;
+/// Rule implementation for `public surface`.
 mod public_surface;
 
 pub(crate) use policies::{

@@ -1,10 +1,20 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use crate::compat::{G3CheckResult, G3Severity};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::inputs::ExecutableCommandContextInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/shell-error-handling";
 
+/// `check` function.
 pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<G3CheckResult>) {
     let has_shell_error_handling =
         any_resolved_command(input.parsed, has_shell_error_handling_command);
@@ -25,7 +35,8 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     } else {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
-            G3Severity::Warn,
+            // Reason: without `set -e`, any fail-closed claim is a lie; missing must gate.
+            G3Severity::Error,
             "missing fail-closed shell options in `.githooks/pre-commit`".to_owned(),
             "Add `set -euo pipefail` near the top of `.githooks/pre-commit`, before any real checks run. Without `-e`, a failing command can be ignored and the hook can continue past a broken check.".to_owned(),
             Some(input.rel_path.to_owned()),
@@ -35,6 +46,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
     }
 }
 
+/// `has_shell_error_handling_command` function.
 fn has_shell_error_handling_command(command: &ResolvedCommand) -> bool {
     if command.command_name() != "set" {
         return false;
@@ -43,6 +55,11 @@ fn has_shell_error_handling_command(command: &ResolvedCommand) -> bool {
     set_command_enables_errexit(command.args())
 }
 
+#[expect(
+    clippy::excessive_nesting,
+    reason = "shell script parser is inherently iterative with byte-walking loops"
+)]
+/// `set_command_enables_errexit` function.
 fn set_command_enables_errexit(args: &[String]) -> bool {
     let mut errexit_enabled = false;
     let mut index = 0usize;
@@ -85,6 +102,7 @@ fn set_command_enables_errexit(args: &[String]) -> bool {
     errexit_enabled
 }
 
+/// `short_option_cluster` function.
 fn short_option_cluster(token: &str) -> Option<(bool, &str)> {
     let (prefix, rest) = token.split_at(1);
     match prefix {

@@ -1,3 +1,11 @@
+#![expect(
+    clippy::struct_excessive_bools,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
+)]
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 

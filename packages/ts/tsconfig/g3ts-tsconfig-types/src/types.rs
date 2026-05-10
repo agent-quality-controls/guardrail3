@@ -23,7 +23,7 @@ pub struct G3TsTsconfigInlineStrictFlags {
     pub allow_unused_labels: G3TsTsconfigBoolState,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsTsconfigExtendsState {
     External {
         specifier: String,
@@ -48,7 +48,7 @@ pub enum G3TsTsconfigExtendsState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum G3TsTsconfigState {
     Missing,
     Unreadable {
@@ -68,7 +68,7 @@ pub enum G3TsTsconfigState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsTsconfigChecksInput {
     pub config: G3TsTsconfigState,
 }

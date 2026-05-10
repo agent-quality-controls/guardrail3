@@ -1,7 +1,12 @@
 use g3ts_npmrc_types::{G3TsNpmrcChecksInput, G3TsNpmrcRootSnapshot, G3TsNpmrcRootState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
-const REQUIRED_SETTINGS: &[(&str, &str)] = &[
+/// `(key, expected_value)` pair describing one required `.npmrc` setting.
+type RequiredSetting = (&'static str, &'static str);
+
+/// Required `.npmrc` settings together with their canonical values, in the
+/// order rules report them.
+const REQUIRED_SETTINGS: &[RequiredSetting] = &[
     ("strict-peer-dependencies", "true"),
     ("disallow-workspace-cycles", "true"),
     ("engine-strict", "true"),
@@ -10,6 +15,8 @@ const REQUIRED_SETTINGS: &[(&str, &str)] = &[
     ("trust-policy", "warn"),
 ];
 
+/// Borrow the rel-path of the root `.npmrc` if any non-`Missing` state
+/// records it.
 #[must_use]
 pub(crate) fn root_rel_path(input: &G3TsNpmrcChecksInput) -> Option<&str> {
     match &input.root {
@@ -20,8 +27,10 @@ pub(crate) fn root_rel_path(input: &G3TsNpmrcChecksInput) -> Option<&str> {
     }
 }
 
+/// Borrow the parsed root snapshot when `input.root` is in the `Parsed`
+/// state, returning `None` otherwise.
 #[must_use]
-pub(crate) fn parsed_root(input: &G3TsNpmrcChecksInput) -> Option<&G3TsNpmrcRootSnapshot> {
+pub(crate) const fn parsed_root(input: &G3TsNpmrcChecksInput) -> Option<&G3TsNpmrcRootSnapshot> {
     match &input.root {
         G3TsNpmrcRootState::Parsed { snapshot } => Some(snapshot),
         G3TsNpmrcRootState::NotPackageManagerRoot
@@ -31,11 +40,13 @@ pub(crate) fn parsed_root(input: &G3TsNpmrcChecksInput) -> Option<&G3TsNpmrcRoot
     }
 }
 
+/// Return the duplicate setting keys reported by the parser.
 #[must_use]
 pub(crate) fn duplicate_keys(snapshot: &G3TsNpmrcRootSnapshot) -> &[String] {
     &snapshot.duplicate_keys
 }
 
+/// Return the [`REQUIRED_SETTINGS`] keys that are not declared in `snapshot`.
 #[must_use]
 pub(crate) fn missing_required_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec<&'static str> {
     REQUIRED_SETTINGS
@@ -44,10 +55,14 @@ pub(crate) fn missing_required_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec
         .collect()
 }
 
+/// `(key, actual_value, expected_value)` triple reporting one weakened
+/// `.npmrc` setting.
+pub(crate) type WeakenedSetting = (&'static str, String, &'static str);
+
+/// Return required settings whose effective value differs from the canonical
+/// value in [`REQUIRED_SETTINGS`].
 #[must_use]
-pub(crate) fn weakened_required_settings(
-    snapshot: &G3TsNpmrcRootSnapshot,
-) -> Vec<(&'static str, String, &'static str)> {
+pub(crate) fn weakened_required_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec<WeakenedSetting> {
     REQUIRED_SETTINGS
         .iter()
         .filter_map(|(key, expected)| {
@@ -57,8 +72,14 @@ pub(crate) fn weakened_required_settings(
         .collect()
 }
 
+/// `(key, value)` pair describing one extra (non-required) setting present in
+/// the `.npmrc`.
+pub(crate) type ExtraSetting = (String, String);
+
+/// Return setting `(key, value)` pairs that are not part of
+/// [`REQUIRED_SETTINGS`].
 #[must_use]
-pub(crate) fn extra_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec<(String, String)> {
+pub(crate) fn extra_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec<ExtraSetting> {
     snapshot
         .settings
         .iter()
@@ -67,6 +88,8 @@ pub(crate) fn extra_settings(snapshot: &G3TsNpmrcRootSnapshot) -> Vec<(String, S
         .collect()
 }
 
+/// Return the last-declared value for `key` in the `.npmrc`, honoring
+/// later-overrides-earlier semantics.
 fn effective_value<'a>(snapshot: &'a G3TsNpmrcRootSnapshot, key: &str) -> Option<&'a str> {
     snapshot
         .settings
@@ -76,6 +99,7 @@ fn effective_value<'a>(snapshot: &'a G3TsNpmrcRootSnapshot, key: &str) -> Option
         .map(|setting| setting.value.as_str())
 }
 
+/// Build an inventory-tagged `Info` check result for `file`.
 #[must_use]
 pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(
@@ -89,6 +113,7 @@ pub(crate) fn info(id: &str, title: &str, message: String, file: &str) -> G3Chec
     .into_inventory()
 }
 
+/// Build an `Error`-severity check result for `file`.
 #[must_use]
 pub(crate) fn error(id: &str, title: &str, message: String, file: &str) -> G3CheckResult {
     G3CheckResult::new(

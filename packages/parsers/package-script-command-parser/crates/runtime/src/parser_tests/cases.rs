@@ -1,3 +1,8 @@
+#![allow(
+    clippy::too_many_lines,
+    reason = "realistic-fixture parser tests enumerate every safe/fail-open invocation shape inline so the fixture-vs-fact diff stays in one place"
+)]
+
 use package_script_command_parser_runtime_assertions::parser::{
     ExpectedEslintInvocation, ExpectedToolInvocation, PackageScriptCommandSeparator,
     assert_command, assert_command_count, assert_eslint_invocation, assert_no_eslint_invocation,

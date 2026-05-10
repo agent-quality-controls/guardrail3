@@ -1,8 +1,10 @@
 use g3rs_test_types::G3RsTestConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/mutation-hook-present";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !input.mutation_hook_active {
         results.push(G3CheckResult::new(

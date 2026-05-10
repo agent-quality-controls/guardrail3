@@ -1,69 +1,13 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
-use guardrail3_ts_app_types::{
-    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRequest,
-    WorkspaceCrawler,
-};
-use guardrail3_ts_validate_command::execute;
+//! CLI command dispatch glue. The validate / validate-repo pipeline lives
+//! in dedicated sibling modules (`execute`, `marker_pairs`, `toolchain_gates`,
+//! `tool_presence`, `topology`); this file holds the top-level entry points
+//! and the shared `CliOutput` payload.
 
-use crate::{Command, FamilyArg};
+use guardrail3_ts_app_types::{FamilyRunner, ReportRenderer, WorkspaceCrawler};
 
-/// CLI-local adapter that dispatches families into the bounded runner groups.
-#[derive(Debug, Default)]
-pub struct CliFamilyRunner;
-
-impl FamilyRunner for CliFamilyRunner {
-    fn run_family(
-        &self,
-        family: SupportedFamily,
-        crawl: &G3WorkspaceCrawl,
-    ) -> Result<FamilyResults, FamilyRunError> {
-        match family {
-            SupportedFamily::Eslint
-            | SupportedFamily::AstroSetup
-            | SupportedFamily::AstroContent
-            | SupportedFamily::AstroMdx
-            | SupportedFamily::AstroI18n
-            | SupportedFamily::AstroMedia
-            | SupportedFamily::AstroSeo
-            | SupportedFamily::AstroState
-            | SupportedFamily::Arch
-            | SupportedFamily::Apparch
-            | SupportedFamily::Tsconfig
-            | SupportedFamily::Package
-            | SupportedFamily::Npmrc
-            | SupportedFamily::Jscpd
-            | SupportedFamily::Style
-            | SupportedFamily::Fmt
-            | SupportedFamily::Spelling
-            | SupportedFamily::Typecov
-            | SupportedFamily::Hooks => match family {
-                SupportedFamily::Hooks => guardrail3_ts_family_runner_hooks::run(family, crawl),
-                SupportedFamily::AstroSetup
-                | SupportedFamily::AstroContent
-                | SupportedFamily::AstroMdx
-                | SupportedFamily::AstroI18n
-                | SupportedFamily::AstroMedia
-                | SupportedFamily::AstroSeo
-                | SupportedFamily::AstroState
-                | SupportedFamily::Arch
-                | SupportedFamily::Apparch => {
-                    guardrail3_ts_family_runner_structure::run(family, crawl)
-                }
-                SupportedFamily::Eslint
-                | SupportedFamily::Tsconfig
-                | SupportedFamily::Package
-                | SupportedFamily::Npmrc
-                | SupportedFamily::Jscpd
-                | SupportedFamily::Style
-                | SupportedFamily::Fmt
-                | SupportedFamily::Spelling
-                | SupportedFamily::Typecov => {
-                    guardrail3_ts_family_runner_config::run(family, crawl)
-                }
-            },
-        }
-    }
-}
+pub(crate) use crate::cli::Command;
+use crate::execute;
+use crate::topology::CliFamilyRunner;
 
 /// Final stdout, stderr, and exit code returned by one CLI command.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -88,29 +32,26 @@ pub fn run_command(
             path,
             family,
             inventory,
-        } => {
-            let request = ValidateRequest {
-                workspace_root: path,
-                families: family.into_iter().flat_map(FamilyArg::expand).collect(),
-                include_inventory: inventory,
-            };
-            match execute(&request, crawler, family_runner, renderer) {
-                Ok(outcome) => CliOutput {
-                    stdout: outcome.stdout().to_owned(),
-                    stderr: outcome.stderr().to_owned(),
-                    exit_code: outcome.exit_code(),
-                },
-                Err(error) => CliOutput {
-                    stdout: String::new(),
-                    stderr: format!("{error}\n"),
-                    exit_code: 1,
-                },
-            }
+            staged,
+            rules_only,
+        } => execute::run_validate(
+            &path,
+            &family,
+            inventory,
+            staged,
+            rules_only,
+            crawler,
+            family_runner,
+            renderer,
+        ),
+        Command::ValidateRepo { path } => {
+            execute::run_validate_repo(path.as_deref(), crawler, family_runner, renderer)
         }
     }
 }
 
 /// Executes one parsed command through the app's default runtime wiring.
+#[must_use]
 pub fn run_command_with_defaults(command: Command) -> CliOutput {
     run_command(
         command,
@@ -121,5 +62,5 @@ pub fn run_command_with_defaults(command: Command) -> CliOutput {
 }
 
 #[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
+#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
 mod run_tests;

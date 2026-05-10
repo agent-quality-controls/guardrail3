@@ -5,10 +5,10 @@ use super::helpers::run_check;
 #[test]
 fn weaker_threshold_produces_warn() {
     let results = run_check(
-        r#"
+        r"
 [licenses]
 confidence-threshold = 0.6
-"#,
+",
     );
     assertions::assert_findings(
         &results,

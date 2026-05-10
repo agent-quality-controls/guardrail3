@@ -1,6 +1,8 @@
+/// Conversions from parser snapshot types into g3ts `ESLint` contract types.
 #[cfg(feature = "api")]
 mod convert;
 
+/// Public input contract types for g3ts `ESLint` config checks.
 #[cfg(feature = "api")]
 mod types;
 

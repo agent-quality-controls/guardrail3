@@ -1,3 +1,5 @@
+//! Assertions for code hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

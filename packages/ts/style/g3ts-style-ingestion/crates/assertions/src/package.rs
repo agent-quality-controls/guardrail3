@@ -1,3 +1,9 @@
+/// Assert that `invocation` has the expected executable and args.
+///
+/// # Panics
+///
+/// Panics when `invocation.executable` differs from `expected_executable`,
+/// or when `invocation.args` differs from `expected_args`.
 pub fn assert_tool_invocation(
     invocation: &g3ts_style_types::G3TsStylePackageScriptToolInvocation,
     expected_executable: &str,

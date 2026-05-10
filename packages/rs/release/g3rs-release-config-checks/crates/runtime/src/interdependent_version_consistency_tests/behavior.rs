@@ -6,18 +6,16 @@ use g3rs_release_types::G3RsReleaseConfigCrate;
 use g3rs_release_types::G3RsReleaseConfigEdge;
 
 fn publishable_crate(name: &str, version: &str) -> G3RsReleaseConfigCrate {
-    build_crate(
-        "Cargo.toml",
-        cargo_toml_parser::parse(&format!(
-            r#"
+    let cargo = cargo_toml_parser::parse(&format!(
+        r#"
 [package]
 name = "{name}"
 version = "{version}"
 publish = true
 "#
-        ))
-        .expect("publishable crate should parse"),
-    )
+    ))
+    .expect("publishable crate should parse");
+    build_crate("Cargo.toml", &cargo)
 }
 
 fn edge() -> G3RsReleaseConfigEdge {
@@ -37,18 +35,16 @@ fn edge() -> G3RsReleaseConfigEdge {
 #[test]
 fn skips_non_publishable_source_crate() {
     let mut edge = edge();
-    edge.source = build_crate(
-        "Cargo.toml",
-        cargo_toml_parser::parse(
-            r#"
+    let cargo = cargo_toml_parser::parse(
+        r#"
 [package]
 name = "crate-a"
 version = "0.1.0"
 publish = false
 "#,
-        )
-        .expect("crate should parse"),
-    );
+    )
+    .expect("crate should parse");
+    edge.source = build_crate("Cargo.toml", &cargo);
     let mut results = Vec::new();
 
     super::super::check(&edge, &mut results);
@@ -56,7 +52,7 @@ publish = false
     assertions::assert_no_findings(&results);
 }
 
-fn build_crate(cargo_rel_path: &str, cargo: CargoToml) -> G3RsReleaseConfigCrate {
+fn build_crate(cargo_rel_path: &str, cargo: &CargoToml) -> G3RsReleaseConfigCrate {
     let name = cargo
         .package
         .as_ref()

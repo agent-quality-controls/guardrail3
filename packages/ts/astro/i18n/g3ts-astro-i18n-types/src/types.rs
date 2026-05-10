@@ -1,5 +1,11 @@
 use std::collections::BTreeMap;
 
+/// Map of plugin specifier to the package names that resolve from it.
+///
+/// Keyed by the plugin string used in `eslint.config` and valued by the list
+/// of npm package names contributed by that plugin entry.
+pub type G3TsAstroI18nPluginPackageNames = BTreeMap<String, Vec<String>>;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsAstroPackageSurfaceSnapshot {
     pub rel_path: String,
@@ -43,6 +49,11 @@ pub struct G3TsAstroI18nPolicySnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Parsed snapshot is the dominant runtime variant; boxing would force \
+              construction-site changes across consumer crates outside this workspace"
+)]
 pub enum G3TsAstroI18nPolicySurfaceState {
     Missing {
         rel_path: String,
@@ -67,6 +78,12 @@ pub enum G3TsAstroI18nPolicySurfaceState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Each bool corresponds to a distinct named field in eslint config probe \
+              detection; merging into bitflags would obscure the field-level surface \
+              consumed by checks across multiple crates outside this workspace"
+)]
 pub struct G3TsAstroI18nEslintSurfaceSnapshot {
     pub rel_path: String,
     pub public_probe_present: bool,
@@ -74,7 +91,7 @@ pub struct G3TsAstroI18nEslintSurfaceSnapshot {
     pub helper_probe_present: bool,
     pub helper_probe_ignored: bool,
     pub public_plugins: Vec<String>,
-    pub public_plugin_package_names: BTreeMap<String, Vec<String>>,
+    pub public_plugin_package_names: G3TsAstroI18nPluginPackageNames,
     pub public_error_rules: Vec<String>,
     pub public_restricted_disable_patterns: Vec<String>,
     pub public_i18n_policy_rules: Vec<String>,

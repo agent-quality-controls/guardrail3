@@ -8,6 +8,10 @@ pub struct AstroConfigDocument {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "AstroConfigSnapshot is the parsed payload; boxing breaks downstream pattern matches in runtime/src/document.rs that return &AstroConfigSnapshot from &AstroConfigParseState"
+)]
 pub enum AstroConfigParseState {
     Parsed(AstroConfigSnapshot),
     Invalid(String),
@@ -80,7 +84,7 @@ pub enum AstroStaticValue {
     Number(f64),
     String(String),
     Null,
-    Array(Vec<AstroStaticValue>),
+    Array(Vec<Self>),
     Object(Vec<AstroStaticObjectProperty>),
     ImportedIdentifier {
         local_name: String,

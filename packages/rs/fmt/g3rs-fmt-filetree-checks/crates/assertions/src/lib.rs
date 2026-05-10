@@ -1,5 +1,8 @@
+//! Assertion helpers for the `g3rs-fmt-filetree-checks` family's rule tests.
+
 use g3rs_fmt_filetree_checks_runtime as _;
 
+/// Rule implementation for `common`.
 mod common;
 
 #[cfg(feature = "checks")]

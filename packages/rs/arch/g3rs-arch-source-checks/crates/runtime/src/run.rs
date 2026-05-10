@@ -2,6 +2,7 @@ use g3rs_arch_types::G3RsArchSourceChecksInput;
 use g3rs_arch_types::types::G3RsArchFacadeSurface;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
@@ -29,6 +30,7 @@ pub fn check(input: &G3RsArchSourceChecksInput) -> Vec<G3CheckResult> {
     results
 }
 
+/// broad reexports fn.
 pub(crate) fn broad_reexports(
     surface: &G3RsArchFacadeSurface,
 ) -> impl Iterator<Item = &g3rs_arch_types::types::G3RsArchFacadeItem> {

@@ -2,8 +2,10 @@ use cargo_toml_parser::types::CargoStringFieldState;
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoWorkspaceMember};
 use guardrail3_check_types::G3CheckResult;
 
+/// I D const.
 const ID: &str = "g3rs-cargo/member-edition-drift";
 
+/// check fn.
 pub(crate) fn check(
     root: &G3RsCargoPolicyRoot,
     member: &G3RsCargoWorkspaceMember,
@@ -84,6 +86,7 @@ pub(crate) fn check(
     }
 }
 
+/// edition rank fn.
 fn edition_rank(edition: &str) -> Option<usize> {
     match edition {
         "2015" => Some(0),

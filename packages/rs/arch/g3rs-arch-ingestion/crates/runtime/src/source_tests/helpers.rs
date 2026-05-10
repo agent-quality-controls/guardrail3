@@ -10,11 +10,22 @@ pub(super) fn temp_workspace_root() -> TempDir {
     tempdir().expect("create temporary workspace root for arch source ingestion test")
 }
 
+/// Write a fixture file. The centralized fs ban targets production code paths; these
+/// test-only helpers materialize real on-disk inputs to exercise the workspace crawl.
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk files to exercise the workspace crawl; the centralized fs bans target production code paths only"
+)]
 pub(super) fn write_file(root: &TempDir, rel: &str, content: &str) {
     fs::write(root.path().join(rel), content)
         .expect("write fixture file for arch source ingestion test");
 }
 
+/// Materialize a fixture directory. See [`write_file`].
+#[expect(
+    clippy::disallowed_methods,
+    reason = "test-only fixture helper materializes real on-disk directories to exercise the workspace crawl; the centralized fs bans target production code paths only"
+)]
 pub(super) fn make_dir(root: &TempDir, rel: &str) {
     fs::create_dir_all(root.path().join(rel))
         .expect("create fixture directory for arch source ingestion test");
@@ -31,5 +42,8 @@ pub(super) fn source_inputs(root: &TempDir) -> Vec<G3RsArchSourceChecksInput> {
 
 pub(super) fn source_results(root: &TempDir) -> Vec<G3CheckResult> {
     let inputs = source_inputs(root);
-    check_source(&inputs[0])
+    let first = inputs
+        .first()
+        .expect("source ingestion should produce at least one input");
+    check_source(first)
 }

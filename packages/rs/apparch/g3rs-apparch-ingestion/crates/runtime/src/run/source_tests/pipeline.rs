@@ -1,3 +1,8 @@
+#![allow(
+    clippy::indexing_slicing,
+    reason = "test assertions index into Vec fields that the same test just built; out-of-bounds would be a test-author bug, not a runtime panic surface"
+)]
+
 use g3rs_apparch_ingestion_assertions::run::source as assertions;
 use g3rs_apparch_source_checks::check as check_source;
 use guardrail3_check_types::G3Severity;
@@ -60,7 +65,7 @@ fn types_public_behavior_is_reported_even_without_public_traits() {
     );
     super::helpers::write(
         root.path().join("types/contracts/src/lib.rs"),
-        r#"
+        r"
 pub struct OrderDto;
 
 impl OrderDto {
@@ -68,7 +73,7 @@ impl OrderDto {
 }
 
 pub fn choose_retry_strategy() {}
-"#,
+",
     );
 
     let results = check_source(&super::helpers::source_input(root.path()));
@@ -98,13 +103,13 @@ fn private_child_module_behavior_does_not_reach_types_public_surface_inventory()
     );
     super::helpers::write(
         root.path().join("types/contracts/src/internal.rs"),
-        r#"
+        r"
 pub fn choose_retry_strategy() {}
 
 impl super::OrderDto {
     pub fn save_to_db(&self) {}
 }
-"#,
+",
     );
 
     let input = super::helpers::source_input(root.path());

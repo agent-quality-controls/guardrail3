@@ -3,7 +3,9 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, message_covers_prefix, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/cliff-baseline";
+/// `REQUIRED_PREFIXES` constant.
 const REQUIRED_PREFIXES: &[&str] = &[
     "^feat",
     "^fix",
@@ -15,6 +17,7 @@ const REQUIRED_PREFIXES: &[&str] = &[
     "^chore",
 ];
 
+/// `check` function.
 pub(crate) fn check(
     repo: &G3RsReleaseConfigRepo,
     crates: &[G3RsReleaseConfigCrate],
@@ -45,7 +48,7 @@ pub(crate) fn check(
     let mut issues = 0usize;
 
     if !git.conventional_commits.is_some_and(|value| value) {
-        issues += 1;
+        issues = issues.saturating_add(1);
         results.push(warn(
             ID,
             "cliff: conventional_commits should be true".to_owned(),
@@ -55,7 +58,7 @@ pub(crate) fn check(
     }
 
     if !git.filter_unconventional.is_some_and(|value| value) {
-        issues += 1;
+        issues = issues.saturating_add(1);
         results.push(warn(
             ID,
             "cliff: filter_unconventional should be true".to_owned(),
@@ -77,7 +80,7 @@ pub(crate) fn check(
             .iter()
             .any(|message| message_covers_prefix(message, prefix));
         if !covered {
-            issues += 1;
+            issues = issues.saturating_add(1);
             results.push(warn(
                 ID,
                 format!("cliff: missing commit parser for prefix \"{prefix}\""),
@@ -107,7 +110,14 @@ mod rule_tests;
 pub(crate) fn run_check(cliff_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
     let input = crate::test_support::config_input_for_repo(None, Some(cliff_toml));
     let mut results = Vec::new();
-    crate::cliff_baseline::check(&input.repo_checks[0], &input.crate_checks, &mut results);
+    crate::cliff_baseline::check(
+        input
+            .repos
+            .first()
+            .expect("test fixture must include a repo"),
+        &input.crates,
+        &mut results,
+    );
     results
 }
 

@@ -1,0 +1,15 @@
+[[ignore]]
+fingerprint = "034a954b409ab31d"
+reason = "From<toml::de::Error> and From<std::io::Error> are single-statement variant constructors that always look structurally identical"
+
+[[ignore]]
+fingerprint = "3077d59c93df5c55"
+reason = "assert_test_tool_name and assert_sharding_name are distinct proof sites for two different mutants.toml fields; assertion bodies share the field-equality shape per g3rs-test/runtime-assertions-split"
+
+[[ignore]]
+fingerprint = "32c33815dec3515f"
+reason = "mutants.toml rejection tests share parse_error_message shape; each #[test] proves a distinct invalid-input rejection path"
+
+[[ignore]]
+fingerprint = "33bc984b6498ef15"
+reason = "closures inside assert_test_tool_name / assert_sharding_name share field-extract shape because both extract the same Option<String> structure"

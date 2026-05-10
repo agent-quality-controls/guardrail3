@@ -3,8 +3,10 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/include-exclude-inventory";
 
+/// `check` function.
 pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckResult>) {
     if !crate::support::crate_publishable(krate) {
         return;

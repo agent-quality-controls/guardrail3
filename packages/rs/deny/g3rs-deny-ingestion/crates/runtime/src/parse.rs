@@ -6,6 +6,10 @@ use g3rs_deny_types::G3RsDenyRustPolicyState;
 
 use crate::run::IngestionError;
 
+/// Implements `read to string`.
+///
+/// # Errors
+/// Returns an error when the underlying operation fails.
 fn read_to_string(abs_path: &Path) -> Result<String, String> {
     crate::fs::read_to_string(abs_path).map_err(|_err| "file is not readable".to_owned())
 }
@@ -22,6 +26,7 @@ pub(crate) fn parse_deny_toml(abs_path: &Path) -> Result<DenyToml, IngestionErro
     })
 }
 
+/// Implements `parse rust policy state`.
 pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsDenyRustPolicyState {
     let content = match read_to_string(abs_path) {
         Ok(content) => content,

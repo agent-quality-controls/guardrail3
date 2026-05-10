@@ -6,34 +6,41 @@ use g3rs_workspace_crawl::{
     G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
 };
 
+/// Implements `select active rustfmt config`.
 pub(crate) fn select_active_rustfmt_config(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
     select_root_rustfmt_toml(crawl).or_else(|| select_root_dot_rustfmt_toml(crawl))
 }
 
+/// Implements `select root rustfmt toml`.
 pub(crate) fn select_root_rustfmt_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "rustfmt.toml")
 }
 
+/// Implements `select root dot rustfmt toml`.
 pub(crate) fn select_root_dot_rustfmt_toml(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, ".rustfmt.toml")
 }
 
+/// Implements `select cargo toml`.
 pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
+/// Implements `select toolchain toml`.
 pub(crate) fn select_toolchain_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "rust-toolchain.toml")
 }
 
+/// Implements `select rust policy toml`.
 pub(crate) fn select_rust_policy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
     g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
+/// Implements `collect nested config files`.
 pub(crate) fn collect_nested_config_files(
     crawl: &G3RsWorkspaceCrawl,
 ) -> Vec<G3RsFmtNestedConfigFile> {
@@ -56,6 +63,7 @@ pub(crate) fn collect_nested_config_files(
     files
 }
 
+/// Implements `collect dual conflict dirs`.
 pub(crate) fn collect_dual_conflict_dirs(crawl: &G3RsWorkspaceCrawl) -> Vec<String> {
     let mut dirs = BTreeMap::<String, (bool, bool)>::new();
     for entry in crawl
@@ -88,10 +96,12 @@ pub(crate) fn collect_dual_conflict_dirs(crawl: &G3RsWorkspaceCrawl) -> Vec<Stri
         .collect()
 }
 
+/// Implements `is root config path`.
 fn is_root_config_path(rel_path: &str) -> bool {
     matches!(rel_path, "rustfmt.toml" | ".rustfmt.toml")
 }
 
+/// Implements `is ignored tree path`.
 fn is_ignored_tree_path(rel_path: &str) -> bool {
     rel_path.starts_with("target/")
         || rel_path.starts_with("tests/fixtures/")
@@ -99,6 +109,7 @@ fn is_ignored_tree_path(rel_path: &str) -> bool {
         || rel_path.starts_with(".claude/worktrees/")
 }
 
+/// Implements `config file kind`.
 fn config_file_kind(rel_path: &str) -> Option<G3RsFmtConfigFileKind> {
     match Path::new(rel_path)
         .file_name()

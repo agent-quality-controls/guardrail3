@@ -8,6 +8,7 @@ pub(crate) use g3rs_garde_types::{
     G3RsGardeQueryAsMacroSite as QueryAsMacroSite,
 };
 
+/// Implements `error`.
 pub(crate) fn error(
     id: &str,
     title: impl Into<String>,
@@ -26,7 +27,7 @@ pub(crate) fn error(
 }
 
 #[cfg(test)]
-pub(crate) fn active_source_input() -> g3rs_garde_types::G3RsGardeSourceChecksInput {
+pub(crate) const fn active_source_input() -> g3rs_garde_types::G3RsGardeSourceChecksInput {
     g3rs_garde_types::G3RsGardeSourceChecksInput {
         applicability: g3rs_garde_types::G3RsGardeApplicability::Active,
         garde_dependency_present: true,
@@ -40,6 +41,7 @@ pub(crate) fn active_source_input() -> g3rs_garde_types::G3RsGardeSourceChecksIn
     }
 }
 
+/// Implements `warn`.
 pub(crate) fn warn(
     id: &str,
     title: impl Into<String>,

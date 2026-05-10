@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "1aa80475e5793c39"
+reason = "cargo config parser assert_parse_error and assert_include_path_error are distinct proof sites for different rejection paths (top-level parse vs nested include); each #[test] body shares structure because the error shape is uniform"
+
+[[ignore]]
+fingerprint = "c6d808b34c122ee3"
+reason = "assert_command_list and assert_target_selector_list assertions reuse the list-equality shape because the assertion contract is uniform across cargo config list-typed fields"
+
+[[ignore]]
+fingerprint = "e28bbdcf55b40fe8"
+reason = "From<toml::de::Error> and From<std::io::Error> are single-statement variant constructors that always look structurally identical"

@@ -2,13 +2,19 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// Internal item.
     severity: G3Severity,
+    /// Internal item.
     title: &'a str,
+    /// Internal item.
     message: &'a str,
+    /// Internal item.
     file: Option<&'a str>,
+    /// Internal item.
     inventory: bool,
 }
 
+/// findings fn.
 #[must_use]
 pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
@@ -41,6 +47,7 @@ pub(crate) fn findings<'a>(results: &'a [G3CheckResult], id: &str) -> Vec<Findin
     findings
 }
 
+/// assert findings fn.
 pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[Finding<'_>]) {
     let mut expected_vec = expected.to_vec();
     expected_vec.sort_by(|left, right| {
@@ -59,15 +66,22 @@ pub(crate) fn assert_findings(results: &[G3CheckResult], id: &str, expected: &[F
                 right.inventory,
             ))
     });
-    assert_eq!(findings(results, id), expected_vec);
+    let actual = findings(results, id);
+    assert_eq!(
+        actual, expected_vec,
+        "findings mismatch for {id}: {actual:#?}"
+    );
 }
 
+/// assert no findings fn.
 pub(crate) fn assert_no_findings(results: &[G3CheckResult], id: &str) {
-    assert!(findings(results, id).is_empty());
+    let found = findings(results, id);
+    assert!(found.is_empty(), "unexpected findings for {id}: {found:#?}");
 }
 
+/// finding fn.
 #[must_use]
-pub(crate) fn finding<'a>(
+pub(crate) const fn finding<'a>(
     severity: G3Severity,
     title: &'a str,
     message: &'a str,
@@ -86,27 +100,27 @@ pub(crate) fn finding<'a>(
 #[macro_export]
 macro_rules! define_result_assertions {
     ($id:literal) => {
-        pub use crate::common::Finding;
+        pub use $crate::common::Finding;
 
         pub fn assert_findings(
             results: &[guardrail3_check_types::G3CheckResult],
             expected: &[Finding<'_>],
         ) {
-            crate::common::assert_findings(results, $id, expected);
+            $crate::common::assert_findings(results, $id, expected);
         }
 
         pub fn assert_no_findings(results: &[guardrail3_check_types::G3CheckResult]) {
-            crate::common::assert_no_findings(results, $id);
+            $crate::common::assert_no_findings(results, $id);
         }
 
         #[must_use]
-        pub fn error<'a>(
+        pub const fn error<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Error,
                 title,
                 message,
@@ -116,13 +130,13 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn warn<'a>(
+        pub const fn warn<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Warn,
                 title,
                 message,
@@ -132,13 +146,13 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info<'a>(
+        pub const fn info<'a>(
             title: &'a str,
             message: &'a str,
             file: &'a str,
             inventory: bool,
         ) -> Finding<'a> {
-            crate::common::finding(
+            $crate::common::finding(
                 guardrail3_check_types::G3Severity::Info,
                 title,
                 message,

@@ -2,8 +2,10 @@ use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-fmt/ignore-escape-hatch";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     let g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) = &input.rustfmt_state else {
         return;

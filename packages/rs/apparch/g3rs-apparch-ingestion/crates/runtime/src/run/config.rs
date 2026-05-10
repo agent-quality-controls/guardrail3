@@ -1,3 +1,11 @@
+#![allow(
+    clippy::missing_errors_doc,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    clippy::needless_pass_by_value,
+    reason = "ingestion entry points return crate-defined Error enums whose variants are self-documenting; argument count reflects the apparch fact tuple that flows through ingestion stages, splitting it would obscure the pipeline; line count reflects the dependency-classification fanout per Cargo.toml shape; needless_pass_by_value applies to fixture builders that own the rust_policy so callers can pass owned variants inline"
+)]
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 

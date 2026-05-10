@@ -1,9 +1,13 @@
 use g3ts_astro_seo_types::{G3TsAstroConfigSurfaceState, G3TsAstroSeoIntegrationContractInput};
 use guardrail3_check_types::G3CheckResult;
 
+/// Static rule data.
 const ID: &str = "g3ts-astro-seo/broad-crawler-generator-absent";
+/// Static rule data.
 const PACKAGE_NAME: &str = "@agentmarkup/astro";
 
+/// Validates the rule and pushes findings into `results`.
+/// Internal helper exported within the runtime crate.
 pub(crate) fn check(
     contract: &G3TsAstroSeoIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -21,14 +25,12 @@ pub(crate) fn check(
     };
 
     if !has_dependency && !has_integration {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Broad crawler generator is absent",
-                format!("`{rel_path}` does not list `{PACKAGE_NAME}`."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Broad crawler generator is absent",
+            format!("`{rel_path}` does not list `{PACKAGE_NAME}`."),
+            rel_path,
+        ));
         return;
     }
 
@@ -36,6 +38,6 @@ pub(crate) fn check(
         ID,
         "Broad crawler generator is not allowed by default",
         format!("Use narrow sitemap, robots, and llms packages instead of `{PACKAGE_NAME}`."),
-        rel_path,
+        Some(rel_path),
     ));
 }

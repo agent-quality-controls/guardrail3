@@ -1,4 +1,6 @@
+/// `pipeline` module.
 mod pipeline;
+/// `proof_helpers` module.
 mod proof_helpers;
 
 pub(crate) use pipeline::{

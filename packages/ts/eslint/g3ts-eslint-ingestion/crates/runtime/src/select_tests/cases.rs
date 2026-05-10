@@ -1,5 +1,5 @@
 use eslint_config_parser::types::EslintProbeKind;
-use g3_workspace_crawl::G3WorkspaceIgnoreState;
+use g3_workspace_crawl::G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState;
 use g3ts_eslint_ingestion_assertions::select as assertions;
 
 #[test]

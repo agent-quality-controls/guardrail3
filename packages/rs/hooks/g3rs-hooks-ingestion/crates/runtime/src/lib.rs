@@ -1,5 +1,9 @@
+/// `fs` module.
 mod fs;
+/// `run` module.
 mod run;
+/// `upward` module.
+mod upward;
 
 #[cfg(test)]
 use g3rs_clippy_config_checks as _;

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::module_name_repetitions,
+    reason = "shell_script module exposes ParsedShellScript whose name encodes the parsed-vs-raw distinction in this domain"
+)]
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FailOpenWrapper {
     True,

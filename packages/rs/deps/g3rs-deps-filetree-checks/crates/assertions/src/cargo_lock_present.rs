@@ -1,5 +1,9 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Asserts that `results` contains the inventory entry emitted when `Cargo.lock` is committed.
+///
+/// # Panics
+/// Panics when no matching inventory entry is present in `results`.
 pub fn assert_committed_lockfile_inventory(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -13,6 +17,10 @@ pub fn assert_committed_lockfile_inventory(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts that `results` contains the info finding emitted when a library-profile workspace omits `Cargo.lock`.
+///
+/// # Panics
+/// Panics when no matching info finding is present in `results`.
 pub fn assert_missing_library_lockfile_info(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {

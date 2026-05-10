@@ -1,6 +1,7 @@
 use g3rs_code_types::G3RsCodeSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
     let rule_input = match crate::support::rule_input(input) {
         Ok(rule_input) => rule_input,

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::excessive_nesting,
+    reason = "view-builder loops fold workspace entries into a BTreeSet via direct match-on-kind; inherent two-level nesting matches the entry-kind/state product and flattening would split the fold across helpers"
+)]
+
 use std::collections::BTreeSet;
 
 use g3rs_workspace_crawl::{

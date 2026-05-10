@@ -7,6 +7,7 @@ use g3ts_astro_mdx_types::G3TsAstroPackageSurfaceState;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+/// `ROOT_ASTRO_CONFIGS` constant.
 const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.js",
     "astro.config.mjs",
@@ -16,6 +17,7 @@ const ROOT_ASTRO_CONFIGS: [&str; 6] = [
     "astro.config.cts",
 ];
 #[must_use]
+/// `astro_app_roots` helper.
 pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     let mut roots = BTreeSet::new();
 
@@ -36,11 +38,13 @@ pub(crate) fn astro_app_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
     roots.into_iter().collect()
 }
 
+/// `is_included_file` helper.
 fn is_included_file(entry: &G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
+/// `root_astro_config_file` helper.
 fn root_astro_config_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -48,6 +52,7 @@ fn root_astro_config_file(rel_path: &str) -> bool {
         .is_some_and(|file_name| ROOT_ASTRO_CONFIGS.contains(&file_name))
 }
 
+/// `package_json_file` helper.
 fn package_json_file(rel_path: &str) -> bool {
     Path::new(rel_path)
         .file_name()
@@ -55,6 +60,7 @@ fn package_json_file(rel_path: &str) -> bool {
         == Some("package.json")
 }
 
+/// `parent_rel_path` helper.
 fn parent_rel_path(rel_path: &str) -> String {
     Path::new(rel_path)
         .parent()
@@ -64,6 +70,7 @@ fn parent_rel_path(rel_path: &str) -> String {
         .to_owned()
 }
 
+/// `package_has_astro_dependency` helper.
 fn package_has_astro_dependency(package: &G3TsAstroPackageSurfaceState) -> bool {
     match package {
         G3TsAstroPackageSurfaceState::Parsed { snapshot } => snapshot

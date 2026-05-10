@@ -1,3 +1,9 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::too_many_arguments,
+    reason = "command_query::api is the public DSL surface for hook rules; each helper exposes the exact knobs callers need to ask a structured question about a script"
+)]
+
 use super::engine;
 
 use crate::types::ParsedShellScript;
@@ -19,7 +25,7 @@ pub struct ResolvedCommand {
 }
 
 impl ResolvedCommand {
-    pub(super) fn new(
+    pub(super) const fn new(
         line_no: usize,
         command_text: String,
         command_path: String,
@@ -36,7 +42,7 @@ impl ResolvedCommand {
     }
 
     #[must_use]
-    pub fn line_no(&self) -> usize {
+    pub const fn line_no(&self) -> usize {
         self.line_no
     }
 
@@ -79,24 +85,24 @@ pub struct CommandQueryOptions {
 
 impl CommandQueryOptions {
     #[must_use]
-    pub fn with_detached_commands(mut self) -> Self {
+    pub const fn with_detached_commands(mut self) -> Self {
         self.allow_detached = true;
         self
     }
 
     #[must_use]
-    pub fn with_forward_functions(mut self) -> Self {
+    pub const fn with_forward_functions(mut self) -> Self {
         self.allow_forward_functions = true;
         self
     }
 
     #[must_use]
-    pub(super) fn allow_detached(self) -> bool {
+    pub(super) const fn allow_detached(self) -> bool {
         self.allow_detached
     }
 
     #[must_use]
-    pub(super) fn allow_forward_functions(self) -> bool {
+    pub(super) const fn allow_forward_functions(self) -> bool {
         self.allow_forward_functions
     }
 }

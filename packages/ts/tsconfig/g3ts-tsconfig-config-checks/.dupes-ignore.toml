@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "81f82385d7f197f3"
+reason = "Parallel test cases for distinct scenarios sharing assertion structure (test architecture: one test per scenario)"
+
+[[ignore]]
+fingerprint = "98ab662ef1102f3d"
+reason = "Parallel error()/info() severity-band finding builders"
+
+[[ignore]]
+fingerprint = "b9e3bc222f963cfb"
+reason = "Parallel closures for assert_contains and assert_exact result projections"

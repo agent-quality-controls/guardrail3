@@ -12,12 +12,13 @@ use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
 use crate::workspace::{collect_crate_nodes, is_inside, normalize_path, parent_of};
 
+/// ingest for config checks fn.
 pub(crate) fn ingest_for_config_checks(
     crawl: &G3RsWorkspaceCrawl,
-) -> Result<Vec<G3RsArchConfigChecksInput>, G3RsArchIngestionError> {
+) -> crate::run::IngestResult<Vec<G3RsArchConfigChecksInput>> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
-    let facade_surfaces = crate::source::collect_facade_surfaces(&view, &crate_nodes);
+    let facade_surfaces = crate::source_facade::collect_facade_surfaces(&view, &crate_nodes);
     let dependency_edges = collect_dependency_edges(&view, &crate_nodes)?;
 
     Ok(vec![G3RsArchConfigChecksInput {
@@ -27,6 +28,7 @@ pub(crate) fn ingest_for_config_checks(
     }])
 }
 
+/// collect config crates fn.
 fn collect_config_crates(
     crate_nodes: &[G3RsArchCrateNode],
     facade_surfaces: &[G3RsArchFacadeSurface],
@@ -57,10 +59,11 @@ fn collect_config_crates(
         .collect()
 }
 
+/// collect dependency edges fn.
 fn collect_dependency_edges(
     view: &CrawlView<'_>,
     crate_nodes: &[G3RsArchCrateNode],
-) -> Result<Vec<G3RsArchDependencyEdge>, G3RsArchIngestionError> {
+) -> crate::run::IngestResult<Vec<G3RsArchDependencyEdge>> {
     let mut edges = Vec::new();
     let node_map = crate_nodes
         .iter()
@@ -97,31 +100,53 @@ fn collect_dependency_edges(
             }
         }
 
-        if let Some(targets) = parsed.get("target").and_then(Value::as_table) {
-            for target_cfg in targets.values() {
-                let Some(target_table) = target_cfg.as_table() else {
-                    continue;
-                };
-                for section in ["dependencies", "dev-dependencies", "build-dependencies"] {
-                    if let Some(deps) = target_table.get(section).and_then(Value::as_table) {
-                        collect_section_edges(
-                            &node.rel_dir,
-                            &node.cargo_rel_path,
-                            section,
-                            deps,
-                            crate_nodes,
-                            &node_map,
-                            &mut edges,
-                        );
-                    }
-                }
-            }
-        }
+        collect_target_dependency_edges(
+            &parsed,
+            &node.rel_dir,
+            &node.cargo_rel_path,
+            crate_nodes,
+            &node_map,
+            &mut edges,
+        );
     }
 
     Ok(edges)
 }
 
+/// Collect dependency edges from `[target.<cfg>.dependencies]` style tables.
+fn collect_target_dependency_edges(
+    parsed: &Value,
+    source_rel_dir: &str,
+    source_cargo_rel: &str,
+    crate_nodes: &[G3RsArchCrateNode],
+    node_map: &BTreeMap<&str, &G3RsArchCrateNode>,
+    edges: &mut Vec<G3RsArchDependencyEdge>,
+) {
+    let Some(targets) = parsed.get("target").and_then(Value::as_table) else {
+        return;
+    };
+    for target_cfg in targets.values() {
+        let Some(target_table) = target_cfg.as_table() else {
+            continue;
+        };
+        for section in ["dependencies", "dev-dependencies", "build-dependencies"] {
+            let Some(deps) = target_table.get(section).and_then(Value::as_table) else {
+                continue;
+            };
+            collect_section_edges(
+                source_rel_dir,
+                source_cargo_rel,
+                section,
+                deps,
+                crate_nodes,
+                node_map,
+                edges,
+            );
+        }
+    }
+}
+
+/// collect section edges fn.
 fn collect_section_edges(
     source_rel_dir: &str,
     source_cargo_rel: &str,
@@ -168,13 +193,20 @@ fn collect_section_edges(
     }
 }
 
+/// extract path fn.
 fn extract_path(value: &Value) -> Option<String> {
     match value {
         Value::Table(table) => table.get("path").and_then(Value::as_str).map(str::to_owned),
-        _ => None,
+        Value::String(_)
+        | Value::Integer(_)
+        | Value::Float(_)
+        | Value::Boolean(_)
+        | Value::Datetime(_)
+        | Value::Array(_) => None,
     }
 }
 
+/// boundary violation fn.
 fn boundary_violation(
     crate_nodes: &[G3RsArchCrateNode],
     source_rel_dir: &str,
@@ -200,6 +232,7 @@ fn boundary_violation(
     }
 }
 
+/// is direct child fn.
 fn is_direct_child(crate_nodes: &[G3RsArchCrateNode], parent_rel: &str, child_rel: &str) -> bool {
     if !is_inside(child_rel, parent_rel) {
         return false;

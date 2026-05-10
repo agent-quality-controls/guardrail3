@@ -1,5 +1,6 @@
 use g3ts_astro_i18n_types::G3TsAstroI18nPolicySurfaceState;
 
+/// Returns the union of public and helper probe targets for an Astro app.
 pub(crate) fn probe_targets(
     app_root_rel_path: &str,
     astro_policy: &G3TsAstroI18nPolicySurfaceState,
@@ -9,6 +10,7 @@ pub(crate) fn probe_targets(
     dedupe_targets(targets)
 }
 
+/// Returns probe targets covering the public source globs configured in the i18n policy.
 pub(crate) fn public_probe_targets(
     app_root_rel_path: &str,
     policy: &G3TsAstroI18nPolicySurfaceState,
@@ -29,6 +31,7 @@ pub(crate) fn public_probe_targets(
     }
 }
 
+/// Returns probe targets covering the helper source globs configured in the i18n policy.
 pub(crate) fn helper_probe_targets(
     app_root_rel_path: &str,
     policy: &G3TsAstroI18nPolicySurfaceState,
@@ -49,6 +52,7 @@ pub(crate) fn helper_probe_targets(
     }
 }
 
+/// Returns the default public probe targets used when policy globs are absent.
 fn fallback_public_probe_targets(
     app_root_rel_path: &str,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
@@ -71,6 +75,7 @@ fn fallback_public_probe_targets(
     ]
 }
 
+/// Returns the default helper probe targets used when policy globs are absent.
 fn fallback_helper_probe_targets(
     app_root_rel_path: &str,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {
@@ -81,6 +86,7 @@ fn fallback_helper_probe_targets(
     )]
 }
 
+/// Returns probe targets derived from a single source glob.
 fn probe_targets_from_glob(
     app_root_rel_path: &str,
     glob: &str,
@@ -98,6 +104,7 @@ fn probe_targets_from_glob(
         .collect()
 }
 
+/// Returns the source file extensions a glob can match.
 fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
     let mut extensions = Vec::new();
     if glob.contains(".astro") || glob.contains("{astro") || glob.contains(",astro") {
@@ -120,6 +127,7 @@ fn extensions_from_glob(glob: &str) -> Vec<&'static str> {
     extensions
 }
 
+/// Returns the `ESLint` probe kind associated with a known source file extension.
 fn probe_kind_for_extension(
     extension: &str,
 ) -> Option<eslint_config_parser::types::EslintProbeKind> {
@@ -132,6 +140,7 @@ fn probe_kind_for_extension(
     }
 }
 
+/// Builds a probe target rooted at `app_root_rel_path` for the given local relative path.
 fn target(
     app_root_rel_path: &str,
     local_rel_path: &str,
@@ -146,6 +155,7 @@ fn target(
     }
 }
 
+/// Returns a probe rel path derived from a glob's static prefix and a target extension.
 fn probe_from_glob(glob: &str, extension: &str) -> Option<String> {
     let prefix = glob
         .split('*')
@@ -158,6 +168,7 @@ fn probe_from_glob(glob: &str, extension: &str) -> Option<String> {
     Some(format!("{prefix}/__g3ts_i18n_probe__.{extension}"))
 }
 
+/// Deduplicates probe targets by `(probe_kind, rel_path)`.
 fn dedupe_targets(
     targets: Vec<eslint_config_parser::types::EslintProbeTarget>,
 ) -> Vec<eslint_config_parser::types::EslintProbeTarget> {

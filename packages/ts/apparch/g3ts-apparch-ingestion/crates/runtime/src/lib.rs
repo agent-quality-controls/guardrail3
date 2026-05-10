@@ -1,5 +1,8 @@
+/// Centralized filesystem access boundary.
 mod fs;
+/// Public ingestion entry points.
 mod run;
+/// Source surface state collection from a TS workspace crawl.
 mod source;
 
 #[cfg(feature = "ingest")]

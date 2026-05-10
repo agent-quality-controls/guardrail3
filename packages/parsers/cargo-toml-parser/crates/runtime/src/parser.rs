@@ -14,6 +14,10 @@ pub fn parse(input: &str) -> Result<CargoToml, crate::error::Error> {
     Ok(toml::from_str(input)?)
 }
 
+/// Parses `input` into a `CargoTomlDocument`, capturing typed-parse failures as `Invalid`.
+///
+/// # Errors
+/// Returns [`crate::error::Error::Toml`] when the raw TOML structure cannot be parsed.
 #[allow(
     clippy::disallowed_methods,
     reason = "parser.rs IS the centralized Cargo.toml parser"
@@ -21,7 +25,7 @@ pub fn parse(input: &str) -> Result<CargoToml, crate::error::Error> {
 pub fn parse_document(input: &str) -> Result<CargoTomlDocument, crate::error::Error> {
     let raw = toml::from_str(input)?;
     let typed = match parse(input) {
-        Ok(cargo) => CargoTomlParseState::Parsed(cargo),
+        Ok(cargo) => CargoTomlParseState::Parsed(Box::new(cargo)),
         Err(err) => CargoTomlParseState::Invalid(err.to_string()),
     };
     Ok(CargoTomlDocument { raw, typed })

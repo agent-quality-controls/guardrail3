@@ -1,0 +1,35 @@
+[[ignore]]
+fingerprint = "5ca1d567e398a6cd"
+reason = "allow_* test functions across no_boundary_crossing and shared_flag_required prove distinct edge-permission cases per g3rs-test/real-proof-site; each #[test] is a separate proof site for a different boundary scenario"
+
+[[ignore]]
+fingerprint = "5630c14d104bbc5a"
+reason = "rule-specific assert_*_violation helpers each verify a distinct rule's violation result; they share the result-equals shape because g3rs-test/runtime-assertions-split requires one helper per rule"
+
+[[ignore]]
+fingerprint = "70bd420f45d719d6"
+reason = "assert_no_findings per rule are isolated per g3rs-test/runtime-assertions-split; the empty-results assertion is uniform across rules"
+
+[[ignore]]
+fingerprint = "80c6a11079a37a43"
+reason = "run_rule helpers per-rule are isolated per g3rs-test/real-proof-site; they share the run-collect shape because all rules use Vec<G3CheckResult>"
+
+[[ignore]]
+fingerprint = "26d9fa587644035a"
+reason = "is_allowed_test_edge helpers in no_boundary_crossing vs shared_flag_required encode the same dev-edge predicate because both rules must classify dev-only edges identically"
+
+[[ignore]]
+fingerprint = "3011b48d3eb7ecab"
+reason = "allows_runtime_dependency_on_shared_types_crate and allows_assertions_dependency_on_shared_types_crate prove the shared-types-crate exception for two different consumer roles; bodies share the allow-shape"
+
+[[ignore]]
+fingerprint = "4b01f029b3cfdc85"
+reason = "still_rejects_normal_runtime_dependency_on_assertions and still_requires_shared_flag_for_other_non_child_edges prove that exceptions don't broaden beyond their scope; bodies share the rejects-shape across two different rules"
+
+[[ignore]]
+fingerprint = "79d0780a756844ed"
+reason = "config_crate helpers in dependency_count_split_tests vs feature_contract_tests each build a fresh G3RsArchConfigCrate fixture per g3rs-test/real-proof-site; the constructor shape is uniform across rules"
+
+[[ignore]]
+fingerprint = "b6ed402e65c38cb3"
+reason = "dependency_edge helpers in no_boundary_crossing_tests vs shared_flag_required_tests each build a fresh dep-edge fixture per g3rs-test/real-proof-site; the constructor shape is uniform across rules"

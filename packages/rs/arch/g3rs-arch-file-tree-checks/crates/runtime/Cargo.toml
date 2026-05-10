@@ -28,4 +28,3 @@ guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types"
 
 [dev-dependencies]
 g3rs-arch-file-tree-checks-assertions = { path = "../assertions" }
-guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0", default-features = false, features = ["api"] }

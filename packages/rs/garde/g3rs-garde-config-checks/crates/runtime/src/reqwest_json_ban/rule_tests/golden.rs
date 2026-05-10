@@ -11,7 +11,7 @@ fn inventories_when_reqwest_json_ban_present() {
 
     assertions::assert_contains(
         &results,
-        assertions::info(
+        &assertions::info(
             "reqwest garde ban present",
             "`reqwest::Response::json` is banned in the covering clippy configuration.",
             "clippy.toml",

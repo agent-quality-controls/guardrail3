@@ -6,8 +6,10 @@ use guardrail3_check_types::G3CheckResult;
 use crate::support::expectations::expected_licenses;
 use crate::support::findings::error;
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/license-allow-baseline";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     let Some(licenses) = deny.licenses.as_ref() else {
         results.push(error(

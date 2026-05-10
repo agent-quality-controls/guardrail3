@@ -18,6 +18,11 @@ pub fn parse(input: &str) -> Result<ClippyToml, crate::error::Error> {
     Ok(toml::from_str(input)?)
 }
 
+/// Parses `clippy.toml` content into a [`ClippyTomlDocument`] capturing both raw and typed views.
+///
+/// # Errors
+///
+/// Returns [`crate::error::Error::Toml`] when the raw TOML cannot be parsed.
 #[allow(
     clippy::disallowed_methods,
     reason = "parser.rs IS the centralized clippy.toml parser"

@@ -1,3 +1,21 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Test fixtures write into tempdirs via std::fs; routing through the production fs \
+              port would require the test sidecar to call a sibling module, which is forbidden \
+              by the runtime-assertions-split rule"
+)]
+#![expect(
+    clippy::panic,
+    reason = "Test fallback arms panic to surface unexpected state variants; this is the \
+              standard pattern for variant assertions inside #[test] functions"
+)]
+#![expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Tests intentionally pattern-match the single expected variant and treat all \
+              others as failures via a wildcard arm; adding named arms per future variant \
+              would duplicate the failure-arm logic"
+)]
+
 #[test]
 fn empty_crawl_has_no_spelling_contracts() {
     let crawl = g3_workspace_crawl::G3RsWorkspaceCrawl {

@@ -1,0 +1,7 @@
+[[ignore]]
+fingerprint = "10f98a57701dcaa1"
+reason = "repeated-test-body: per-rule single-violation tests share input shape and assertion call by design, conflicts with runtime-assertions-split contract"
+
+[[ignore]]
+fingerprint = "9f2d339e26dfaa2a"
+reason = "repeated-closure: matches! filter against G3TsApparchLayer variants is correct per-rule; deduping would couple unrelated rules, conflicts with real-proof-site contract"

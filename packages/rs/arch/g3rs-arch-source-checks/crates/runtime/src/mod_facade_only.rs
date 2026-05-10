@@ -1,8 +1,10 @@
 use g3rs_arch_types::types::G3RsArchFacadeSurface;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// I D const.
 const ID: &str = "g3rs-arch/mod-facade-only";
 
+/// check fn.
 pub(crate) fn check(surface: &G3RsArchFacadeSurface, results: &mut Vec<G3CheckResult>) {
     for item in &surface.body_items {
         results.push(G3CheckResult::new(

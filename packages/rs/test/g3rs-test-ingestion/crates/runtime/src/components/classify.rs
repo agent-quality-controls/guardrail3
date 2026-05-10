@@ -1,3 +1,7 @@
+#![expect(
+    clippy::case_sensitive_file_extension_comparisons,
+    reason = "rust source filenames are conventionally lowercase; case-insensitive matching not needed"
+)]
 use g3rs_test_types::{G3RsTestFileKind, G3RsTestSourceFile};
 
 use crate::components::OwnedTestComponent;
@@ -6,6 +10,7 @@ use crate::components::support::{
 };
 use crate::roots::{OwnedTestRoot, join_under_root};
 
+/// `classify_file_for_source` function.
 pub(crate) fn classify_file_for_source(
     rel_path: &str,
     root: &OwnedTestRoot,
@@ -36,6 +41,7 @@ pub(crate) fn classify_file_for_source(
     None
 }
 
+/// `classify_file_for_file_tree` function.
 pub(crate) fn classify_file_for_file_tree(
     rel_path: &str,
     root: &OwnedTestRoot,
@@ -87,6 +93,7 @@ pub(crate) fn classify_file_for_file_tree(
     })
 }
 
+/// `root_rel_prefix` function.
 pub(crate) fn root_rel_prefix<'a>(rel_path: &'a str, root_rel_dir: &str) -> Option<&'a str> {
     if root_rel_dir.is_empty() {
         Some(rel_path)
@@ -97,6 +104,7 @@ pub(crate) fn root_rel_prefix<'a>(rel_path: &'a str, root_rel_dir: &str) -> Opti
     }
 }
 
+/// `classify_component_file` function.
 fn classify_component_file(
     rel_path: &str,
     component: &OwnedTestComponent,
@@ -142,6 +150,7 @@ fn classify_component_file(
     None
 }
 
+/// `source_file_from_rel_after_src` function.
 fn source_file_from_rel_after_src(
     rel_path: &str,
     rel_after_src: &str,
@@ -184,6 +193,7 @@ fn source_file_from_rel_after_src(
     }
 }
 
+/// `rel_after_named_dir` function.
 fn rel_after_named_dir<'a>(root_relative: &'a str, dir_name: &str) -> Option<&'a str> {
     let prefix = format!("{dir_name}/");
     if let Some(rest) = root_relative.strip_prefix(&prefix) {
@@ -193,6 +203,7 @@ fn rel_after_named_dir<'a>(root_relative: &'a str, dir_name: &str) -> Option<&'a
     root_relative.rsplit_once(&marker).map(|(_, rest)| rest)
 }
 
+/// `is_test_support_path` function.
 fn is_test_support_path(root: &OwnedTestRoot, rel_path: &str) -> bool {
     [
         join_under_root(&root.root_rel_dir, "test_support/src"),

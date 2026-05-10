@@ -3,12 +3,14 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use super::violations::collect_violations;
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/runtime-assertions-split";
 
 #[cfg(test)]
 #[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
 mod rule_tests;
 
+/// `collect` function.
 pub(crate) fn collect(input: &G3RsTestFileTreeChecksInput, results: &mut Vec<G3CheckResult>) {
     let violations = collect_violations(input);
     if violations.is_empty() {

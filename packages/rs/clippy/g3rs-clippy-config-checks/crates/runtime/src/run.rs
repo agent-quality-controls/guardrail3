@@ -1,6 +1,7 @@
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsClippyConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     crate::max_struct_bools::check(input, &mut results);

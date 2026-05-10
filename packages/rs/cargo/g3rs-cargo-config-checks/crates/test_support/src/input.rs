@@ -5,6 +5,16 @@ use g3rs_cargo_types::{
 };
 use guardrail3_rs_toml_parser::types::RustProfile;
 
+/// Internal.
+///
+/// # Panics
+///
+/// See body for assertions.
+#[must_use]
+#[expect(
+    clippy::expect_used,
+    reason = "test-support fixture builder: malformed `cargo_toml` is a fixture bug, not a runtime error; surfacing it via panic gives a clear test failure"
+)]
 pub fn root(cargo_toml: &str, rust_policy: G3RsCargoRustPolicyState) -> G3RsCargoPolicyRoot {
     let cargo = parse_cargo_toml(cargo_toml).expect("cargo fixture should parse");
     let kind = match cargo_toml_parser::document::kind(&cargo) {
@@ -26,6 +36,16 @@ pub fn root(cargo_toml: &str, rust_policy: G3RsCargoRustPolicyState) -> G3RsCarg
     }
 }
 
+/// Internal.
+///
+/// # Panics
+///
+/// See body for assertions.
+#[must_use]
+#[expect(
+    clippy::expect_used,
+    reason = "test-support fixture builder: malformed `cargo_toml` is a fixture bug, not a runtime error; surfacing it via panic gives a clear test failure"
+)]
 pub fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMember {
     G3RsCargoWorkspaceMember {
         workspace_root_rel: String::new(),
@@ -35,6 +55,7 @@ pub fn member(member_rel: &str, cargo_toml: &str) -> G3RsCargoWorkspaceMember {
     }
 }
 
+#[must_use]
 pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsCargoWaiver {
     G3RsCargoWaiver {
         rule: rule.to_owned(),
@@ -44,6 +65,7 @@ pub fn waiver(rule: &str, file: &str, selector: &str, reason: &str) -> G3RsCargo
     }
 }
 
+#[must_use]
 pub fn parsed_rust_policy(
     profile: Option<RustProfile>,
     waivers: Vec<G3RsCargoWaiver>,
@@ -55,6 +77,7 @@ pub fn parsed_rust_policy(
     }
 }
 
+#[must_use]
 pub fn parse_error_rust_policy(reason: &str) -> G3RsCargoRustPolicyState {
     G3RsCargoRustPolicyState::ParseError {
         rel_path: "guardrail3-rs.toml".to_owned(),

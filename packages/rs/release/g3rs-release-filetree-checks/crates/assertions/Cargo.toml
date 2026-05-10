@@ -21,8 +21,8 @@ checks = []
 workspace = true
 
 [dependencies]
+g3rs-release-filetree-checks-runtime = { path = "../runtime", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
-g3rs-release-filetree-checks-runtime = { path = "../runtime", version = "0.1.0", optional = true }
 
 [package.metadata.docs.rs]
 all-features = true

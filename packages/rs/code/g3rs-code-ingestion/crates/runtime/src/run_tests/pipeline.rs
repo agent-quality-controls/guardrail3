@@ -1,3 +1,10 @@
+#![expect(
+    clippy::disallowed_methods,
+    clippy::too_many_lines,
+    clippy::format_collect,
+    reason = "test fixtures need direct filesystem and process access to build temp workspaces; long pipeline assertions enumerate every emitted finding for a given fixture; format!-from-iterator is the simplest fixture-content builder for synthetic large source files"
+)]
+
 use std::fs;
 use std::path::Path;
 use std::process::Command;

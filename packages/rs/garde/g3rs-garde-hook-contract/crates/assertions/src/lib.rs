@@ -1,3 +1,5 @@
+//! Garde-family hook contract assertions used by hook-contract regression tests.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

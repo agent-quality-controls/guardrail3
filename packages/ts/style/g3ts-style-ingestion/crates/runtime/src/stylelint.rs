@@ -3,6 +3,7 @@ use g3ts_style_types::{
     G3TsStylePolicySurfaceState, G3TsStylelintConfigSnapshot, G3TsStylelintConfigSurfaceState,
 };
 
+/// Recognized Stylelint config file names, ordered by preference.
 const CONFIG_CANDIDATES: [&str; 6] = [
     ".stylelintrc.mjs",
     ".stylelintrc.js",
@@ -12,6 +13,8 @@ const CONFIG_CANDIDATES: [&str; 6] = [
     "stylelint.config.cjs",
 ];
 
+/// Read and parse the nearest Stylelint config under `app_root_rel_path`
+/// from `crawl`, using `policy` to derive probe targets.
 pub(crate) fn ingest_stylelint_config(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -81,6 +84,8 @@ pub(crate) fn ingest_stylelint_config(
     }
 }
 
+/// Derive Stylelint probe targets from `policy.stylelint_css_globs` (or a
+/// fallback when policy is unavailable).
 fn probe_targets(
     app_root_rel_path: &str,
     policy: &G3TsStylePolicySurfaceState,
@@ -107,6 +112,7 @@ fn probe_targets(
     }
 }
 
+/// Default probe target list used when the policy declares no CSS globs.
 fn fallback_probe_targets(
     app_root_rel_path: &str,
 ) -> Vec<stylelint_config_parser::types::StylelintProbeTarget> {
@@ -115,9 +121,11 @@ fn fallback_probe_targets(
     }]
 }
 
+/// Extract the static directory prefix of `glob` (the portion preceding
+/// the first glob metacharacter), returning None when the prefix is empty.
 fn glob_prefix_directory(glob: &str) -> Option<String> {
     let prefix = glob
-        .split(|character| matches!(character, '*' | '?' | '[' | '{'))
+        .split(['*', '?', '[', '{'])
         .next()?
         .trim_end_matches('/');
     if prefix.is_empty() {
@@ -133,6 +141,8 @@ fn glob_prefix_directory(glob: &str) -> Option<String> {
     Some(prefix.to_owned())
 }
 
+/// Find the nearest Stylelint config rel-path by walking up from
+/// `app_root_rel_path` and matching each ancestor against `CONFIG_CANDIDATES`.
 fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<String> {
     ancestors(app_root_rel_path).into_iter().find_map(|scope| {
         CONFIG_CANDIDATES
@@ -147,6 +157,8 @@ fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<S
     })
 }
 
+/// Enumerate `app_root_rel_path` and each of its ancestor directories, in
+/// nearest-first order, using `"."` for the workspace root.
 fn ancestors(app_root_rel_path: &str) -> Vec<String> {
     let mut ancestors = Vec::new();
     let mut current = std::path::Path::new(app_root_rel_path);

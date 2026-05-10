@@ -155,7 +155,7 @@ impl Fixture {
         seed_off_rules(&mut ts_test_rules, TEST_RULE_RELAXATIONS);
 
         let js_rules = BTreeMap::new();
-        let tsx_rules = ts_rules.clone();
+        let tsx_source_rules = ts_rules.clone();
 
         Self {
             ts_plugins: TS_PLUGINS
@@ -168,7 +168,7 @@ impl Fixture {
                 .iter()
                 .map(|plugin| (*plugin).to_owned())
                 .collect(),
-            tsx_rules,
+            tsx_rules: tsx_source_rules,
             tsx_project_service: Some(true),
             ts_test_rules,
             ts_test_project_service: Some(true),

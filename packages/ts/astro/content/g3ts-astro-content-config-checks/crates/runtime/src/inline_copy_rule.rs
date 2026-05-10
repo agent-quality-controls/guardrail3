@@ -4,11 +4,16 @@ use g3ts_astro_content_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `ID`.
 const ID: &str = "g3ts-astro-content/inline-copy-rule";
+/// Internal constant `DEPENDENCY_NAME`.
 const DEPENDENCY_NAME: &str = "eslint-plugin-i18next";
+/// Internal constant `PLUGIN_NAME`.
 const PLUGIN_NAME: &str = "i18next";
+/// Internal constant `RULE_NAME`.
 const RULE_NAME: &str = "i18next/no-literal-string";
 
+/// Internal function `check_package`.
 pub(crate) fn check_package(
     contract: &G3TsAstroContentIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -19,28 +24,26 @@ pub(crate) fn check_package(
             ID,
             "Inline public-copy ESLint plugin package is missing",
             format!(
-                "`{}` must list `{DEPENDENCY_NAME}` in dependencies or devDependencies. The Astro family delegates hardcoded public-copy detection to `{RULE_NAME}`.",
-                rel_path.unwrap_or("package.json")
+                "`{rel_path}` must list `{DEPENDENCY_NAME}` in dependencies or devDependencies. The Astro family delegates hardcoded public-copy detection to `{RULE_NAME}`."
             ),
-            rel_path,
+            Some(rel_path),
         ));
     }
 }
 
+/// Internal function `check_eslint`.
 pub(crate) fn check_eslint(
     contract: &G3TsAstroContentEslintPluginContractInput,
     results: &mut Vec<G3CheckResult>,
 ) {
     let rel_path = eslint_rel_path(contract);
     if required_lanes_have_inline_public_content_rule(contract) {
-        if let Some(rel_path) = rel_path {
-            results.push(crate::support::info(
-                ID,
-                "Inline public-copy ESLint rule is effective",
-                format!("`{rel_path}` enforces `{RULE_NAME}` with the exact strict Astro public-copy options on Astro, TS, and TSX source probes."),
-                rel_path,
-            ));
-        }
+        results.push(crate::support::info(
+            ID,
+            "Inline public-copy ESLint rule is effective",
+            format!("`{rel_path}` enforces `{RULE_NAME}` with the exact strict Astro public-copy options on Astro, TS, and TSX source probes."),
+            rel_path,
+        ));
         return;
     }
 
@@ -48,22 +51,23 @@ pub(crate) fn check_eslint(
         ID,
         "Inline public-copy ESLint rule is not effective",
         format!(
-            "`{}` must activate plugin `{PLUGIN_NAME}` and rule `{RULE_NAME}` at `error` on Astro, TS, and TSX source probes with the exact strict options from the Astro delegation plan. Missing probes, ignored probes, broad allowlists, or changed messages fail this contract.",
-            rel_path.unwrap_or("eslint.config.*")
+            "`{rel_path}` must activate plugin `{PLUGIN_NAME}` and rule `{RULE_NAME}` at `error` on Astro, TS, and TSX source probes with the exact strict options from the Astro delegation plan. Missing probes, ignored probes, broad allowlists, or changed messages fail this contract."
         ),
-        rel_path,
+        Some(rel_path),
     ));
 }
 
-fn eslint_rel_path(contract: &G3TsAstroContentEslintPluginContractInput) -> Option<&str> {
+/// Returns the relative path of the eslint config across all parse states.
+fn eslint_rel_path(contract: &G3TsAstroContentEslintPluginContractInput) -> &str {
     match &contract.config {
         G3TsAstroContentEslintSurfaceState::Missing { rel_path }
         | G3TsAstroContentEslintSurfaceState::Unreadable { rel_path, .. }
-        | G3TsAstroContentEslintSurfaceState::ParseError { rel_path, .. } => Some(rel_path),
-        G3TsAstroContentEslintSurfaceState::Parsed { snapshot } => Some(&snapshot.rel_path),
+        | G3TsAstroContentEslintSurfaceState::ParseError { rel_path, .. } => rel_path,
+        G3TsAstroContentEslintSurfaceState::Parsed { snapshot } => &snapshot.rel_path,
     }
 }
 
+/// Internal function `required_lanes_have_inline_public_content_rule`.
 fn required_lanes_have_inline_public_content_rule(
     contract: &G3TsAstroContentEslintPluginContractInput,
 ) -> bool {
@@ -92,6 +96,7 @@ fn required_lanes_have_inline_public_content_rule(
     )
 }
 
+/// Internal function `lane_has_inline_public_content_rule`.
 fn lane_has_inline_public_content_rule(
     probe_present: bool,
     probe_ignored: bool,

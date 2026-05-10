@@ -8,7 +8,7 @@ fn warns_when_set_e_only_appears_in_comment() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("missing fail-closed shell options in `.githooks/pre-commit`"),
             message_contains: Some("set -euo pipefail"),
             inventory: Some(false),
@@ -23,7 +23,7 @@ fn warns_when_set_e_only_appears_in_echo() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::G3Severity::Warn),
+            severity: Some(assertions::G3Severity::Error),
             title: Some("missing fail-closed shell options in `.githooks/pre-commit`"),
             inventory: Some(false),
             ..Default::default()

@@ -2,6 +2,7 @@ use g3rs_apparch_types::G3RsApparchCrate;
 use g3rs_apparch_types::G3RsApparchSourceChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsApparchSourceChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
 
@@ -15,6 +16,7 @@ pub fn check(input: &G3RsApparchSourceChecksInput) -> Vec<G3CheckResult> {
     results
 }
 
+/// Returns the human-readable identifier for `krate`, falling back to its manifest path when unnamed.
 pub(crate) fn display_crate(krate: &G3RsApparchCrate) -> &str {
     if krate.crate_name.is_empty() {
         &krate.cargo_rel_path

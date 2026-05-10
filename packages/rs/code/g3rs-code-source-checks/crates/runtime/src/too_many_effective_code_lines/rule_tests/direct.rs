@@ -1,3 +1,9 @@
+#![allow(
+    clippy::format_collect,
+    clippy::format_in_format_args,
+    reason = "test fixtures synthesize large source bodies via format! over an iterator; the simpler iterator-collect form is intentional"
+)]
+
 use g3rs_code_source_checks_assertions::too_many_effective_code_lines::rule::{
     ExpectedRuleResult, G3Severity, assert_rule_results,
 };

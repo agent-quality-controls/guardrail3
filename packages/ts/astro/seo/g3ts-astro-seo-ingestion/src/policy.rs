@@ -4,8 +4,10 @@ use g3_workspace_crawl::{
 };
 use g3ts_astro_seo_types::{G3TsAstroSeoPolicySnapshot, G3TsAstroSeoPolicySurfaceState};
 
+/// `GUARDRAIL_CONFIG_REL_PATH` constant.
 const GUARDRAIL_CONFIG_REL_PATH: &str = "guardrail3-ts.toml";
 
+/// `ingest_seo_policy_surface`: ingest seo policy surface.
 pub(crate) fn ingest_seo_policy_surface(
     crawl: &G3WorkspaceCrawl,
     app_root_rel_path: &str,
@@ -58,6 +60,7 @@ pub(crate) fn ingest_seo_policy_surface(
     }
 }
 
+/// `exact_included_file`: exact included file.
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,

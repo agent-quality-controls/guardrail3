@@ -7,11 +7,17 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
+    /// `severity` item.
     severity: G3Severity,
+    /// `title` item.
     title: &'a str,
+    /// `message` item.
     message: &'a str,
+    /// `file` item.
     file: Option<&'a str>,
+    /// `line` item.
     line: Option<usize>,
+    /// `inventory` item.
     inventory: bool,
 }
 
@@ -48,6 +54,11 @@ pub fn count(results: &[G3CheckResult], id: &str) -> usize {
     findings(results, id).len()
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_present(
     results: &[G3CheckResult],
     id: &str,
@@ -64,6 +75,11 @@ pub fn assert_present(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_message_contains(
     results: &[G3CheckResult],
     id: &str,
@@ -84,10 +100,20 @@ pub fn assert_message_contains(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_empty(results: &[G3CheckResult]) {
     assert!(results.is_empty(), "{results:#?}");
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_no_input_failures(input: &G3RsTopologyFileTreeChecksInput) {
     assert!(
         input.input_failures.is_empty(),
@@ -96,6 +122,11 @@ pub fn assert_no_input_failures(input: &G3RsTopologyFileTreeChecksInput) {
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_input_failure_contains(
     input: &G3RsTopologyFileTreeChecksInput,
     rel_path: &str,
@@ -111,6 +142,11 @@ pub fn assert_input_failure_contains(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_descendant_root(
     input: &G3RsTopologyFileTreeChecksInput,
     rel_dir: &str,
@@ -128,6 +164,11 @@ pub fn assert_descendant_root(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_family_file(
     input: &G3RsTopologyFileTreeChecksInput,
     family: G3RsTopologyWorkspaceFamily,
@@ -143,6 +184,15 @@ pub fn assert_family_file(
     );
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "assertion helper takes attachment by value to match production input shape"
+)]
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_family_file_attachment(
     input: &G3RsTopologyFileTreeChecksInput,
     family: G3RsTopologyWorkspaceFamily,
@@ -162,6 +212,11 @@ pub fn assert_family_file_attachment(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_exact_family_file_count(
     input: &G3RsTopologyFileTreeChecksInput,
     rel_path: &str,
@@ -178,6 +233,11 @@ pub fn assert_exact_family_file_count(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_nested_workspace(
     input: &G3RsTopologyFileTreeChecksInput,
     rel_dir: &str,
@@ -195,6 +255,46 @@ pub fn assert_nested_workspace(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
+pub fn assert_nested_guardrail3_rs_toml(
+    input: &G3RsTopologyFileTreeChecksInput,
+    rel_dir: &str,
+    guardrail3_rs_toml_rel_path: &str,
+    outer_adopted_unit_rel: &str,
+) {
+    assert!(
+        input.nested_guardrail3_rs_tomls.iter().any(|nested| {
+            nested.rel_dir == rel_dir
+                && nested.guardrail3_rs_toml_rel_path == guardrail3_rs_toml_rel_path
+                && nested.outer_adopted_unit_rel == outer_adopted_unit_rel
+        }),
+        "{:#?}",
+        input.nested_guardrail3_rs_tomls
+    );
+}
+
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
+pub fn assert_no_nested_guardrail3_rs_tomls(input: &G3RsTopologyFileTreeChecksInput) {
+    assert!(
+        input.nested_guardrail3_rs_tomls.is_empty(),
+        "{:#?}",
+        input.nested_guardrail3_rs_tomls
+    );
+}
+
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_escaping_member_path(
     input: &G3RsTopologyFileTreeChecksInput,
     cargo_rel_path: &str,
@@ -212,6 +312,11 @@ pub fn assert_escaping_member_path(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_undeclared_member_issue(
     input: &G3RsTopologyFileTreeChecksInput,
     rel_dir: &str,
@@ -232,6 +337,11 @@ pub fn assert_undeclared_member_issue(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_extra_member_issue(
     input: &G3RsTopologyFileTreeChecksInput,
     cargo_rel_path: &str,
@@ -252,6 +362,11 @@ pub fn assert_extra_member_issue(
     );
 }
 
+/// Panics if the expected finding shape is absent.
+///
+/// # Panics
+///
+/// Panics if results do not satisfy the assertion.
 pub fn assert_illegal_family_file(
     input: &G3RsTopologyFileTreeChecksInput,
     family: G3RsTopologyWorkspaceFamily,
@@ -270,6 +385,7 @@ pub fn assert_illegal_family_file(
 }
 
 impl<'a> Finding<'a> {
+    /// `from_result` function.
     fn from_result(result: &'a G3CheckResult) -> Self {
         Self {
             severity: result.severity(),

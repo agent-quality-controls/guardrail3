@@ -1,3 +1,8 @@
+#![allow(
+    clippy::disallowed_methods,
+    reason = "fixture-driven filesystem tests need direct std::fs calls in test bodies"
+)]
+
 use std::fs;
 
 use g3rs_toolchain_ingestion_assertions::run as assertions;

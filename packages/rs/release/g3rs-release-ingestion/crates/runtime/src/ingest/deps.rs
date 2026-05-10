@@ -6,16 +6,25 @@ use g3rs_release_types::G3RsReleasePathTargetKind;
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 #[derive(Debug, Clone)]
+/// `DependencyEdge` value.
 pub(super) struct DependencyEdge {
+    /// `dep_name` field.
     pub(super) dep_name: String,
+    /// `dep_package_name` field.
     pub(super) dep_package_name: String,
+    /// `section_label` field.
     pub(super) section_label: String,
+    /// `target_label` field.
     pub(super) target_label: Option<String>,
+    /// `has_path` field.
     pub(super) has_path: bool,
+    /// `path_target_kind` field.
     pub(super) path_target_kind: Option<G3RsReleasePathTargetKind>,
+    /// `version_req` field.
     pub(super) version_req: Option<String>,
 }
 
+/// `dependency_edges` function.
 pub(super) fn dependency_edges(
     crawl: &G3RsWorkspaceCrawl,
     source_manifest_abs_path: &Path,
@@ -60,6 +69,7 @@ pub(super) fn dependency_edges(
     edges
 }
 
+/// `collect_target_dependency_edges` function.
 fn collect_target_dependency_edges(
     crawl: &G3RsWorkspaceCrawl,
     source_manifest_dir: &Path,
@@ -88,6 +98,7 @@ fn collect_target_dependency_edges(
     );
 }
 
+/// `collect_dependency_edges` function.
 fn collect_dependency_edges(
     crawl: &G3RsWorkspaceCrawl,
     source_manifest_dir: &Path,
@@ -106,22 +117,7 @@ fn collect_dependency_edges(
         let path_target_kind = dependency_path(dep)
             .as_deref()
             .map(|path| super::paths::classify_dependency_path(crawl, source_manifest_dir, path))
-            .or_else(|| {
-                if workspace_inherited {
-                    workspace_detail
-                        .and_then(dependency_path)
-                        .as_deref()
-                        .map(|path| {
-                            super::paths::classify_dependency_path(
-                                crawl,
-                                &crawl.root_abs_path,
-                                path,
-                            )
-                        })
-                } else {
-                    None
-                }
-            });
+            .or_else(|| inherited_path_target_kind(crawl, workspace_inherited, workspace_detail));
         let has_path = dependency_path(dep).is_some()
             || (workspace_inherited && workspace_detail.and_then(dependency_path).is_some());
         let dep_package_name = dependency_package(dep)
@@ -153,6 +149,22 @@ fn collect_dependency_edges(
     }
 }
 
+/// Classify the workspace-inherited dependency path, if any.
+fn inherited_path_target_kind(
+    crawl: &G3RsWorkspaceCrawl,
+    workspace_inherited: bool,
+    workspace_detail: Option<&Dependency>,
+) -> Option<G3RsReleasePathTargetKind> {
+    if !workspace_inherited {
+        return None;
+    }
+    workspace_detail
+        .and_then(dependency_path)
+        .as_deref()
+        .map(|path| super::paths::classify_dependency_path(crawl, &crawl.root_abs_path, path))
+}
+
+/// `dependency_path` function.
 fn dependency_path(dependency: &Dependency) -> Option<String> {
     match dependency {
         Dependency::Simple(_) => None,
@@ -160,6 +172,7 @@ fn dependency_path(dependency: &Dependency) -> Option<String> {
     }
 }
 
+/// `dependency_package` function.
 fn dependency_package(dependency: &Dependency) -> Option<String> {
     match dependency {
         Dependency::Simple(_) => None,
@@ -167,6 +180,7 @@ fn dependency_package(dependency: &Dependency) -> Option<String> {
     }
 }
 
+/// `dependency_version` function.
 fn dependency_version(dependency: &Dependency) -> Option<String> {
     match dependency {
         Dependency::Simple(version) => Some(version.clone()),

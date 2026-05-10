@@ -22,18 +22,43 @@ pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Spelling => "spelling",
         SupportedFamily::Typecov => "typecov",
         SupportedFamily::Hooks => "hooks",
+        SupportedFamily::Topology => "topology",
     }
 }
 
 #[must_use]
 pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
     if request.families.is_empty() {
-        return SUPPORTED_FAMILIES.to_vec();
+        // reason: per-package validate excludes repo-only families like Hooks
+        // and Topology; those run from validate-repo.
+        return SUPPORTED_FAMILIES
+            .into_iter()
+            .filter(|family| !is_repo_only_family(*family))
+            .collect();
     }
 
     SUPPORTED_FAMILIES
         .into_iter()
         .filter(|family| request.families.contains(family))
+        .collect()
+}
+
+/// Returns true when `family` only runs from `validate-repo` and is excluded
+/// from per-package `validate --path` defaults.
+const fn is_repo_only_family(family: SupportedFamily) -> bool {
+    matches!(family, SupportedFamily::Hooks | SupportedFamily::Topology,)
+}
+
+/// Returns the families to run for a per-package validate, after applying the
+/// package's `guardrail3-ts.toml` opt-out for disabled families.
+#[must_use]
+pub fn selected_families_with_opt_out(
+    request: &ValidateRequest,
+    disabled: &[SupportedFamily],
+) -> Vec<SupportedFamily> {
+    selected_families(request)
+        .into_iter()
+        .filter(|family| !disabled.contains(family))
         .collect()
 }
 

@@ -1,5 +1,10 @@
 crate::define_result_assertions!("g3rs-clippy/missing-type-ban");
 
+/// Asserts the count of "missing type ban" findings equals `expected`.
+///
+/// # Panics
+///
+/// Panics if the count differs.
 pub fn assert_missing_type_ban_count(
     results: &[guardrail3_check_types::G3CheckResult],
     expected: usize,
@@ -13,10 +18,12 @@ pub fn assert_missing_type_ban_count(
     assert_eq!(actual, expected, "{:#?}", findings(results));
 }
 
-pub fn assert_contains_missing_type_ban(
-    results: &[guardrail3_check_types::G3CheckResult],
-    path: &str,
-) {
+/// Asserts at least one "missing type ban" finding's message contains `path`.
+///
+/// # Panics
+///
+/// Panics if no matching finding is present.
+pub fn assert_contains_for_path(results: &[guardrail3_check_types::G3CheckResult], path: &str) {
     assert!(
         results.iter().any(|result| {
             result.id() == "g3rs-clippy/missing-type-ban"

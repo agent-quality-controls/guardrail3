@@ -1,3 +1,8 @@
+#![expect(
+    clippy::multiple_crate_versions,
+    reason = "transitive dep `siphasher` resolves to 0.3.11 (via swc_common in g3ts-arch-ingestion's SWC-based parser) and 1.0.2 (via other dependents); both versions are pinned by upstream crates this app does not own"
+)]
+
 use std::io::Write;
 
 use clap::Parser;
@@ -7,6 +12,9 @@ use g3ts::{Cli, run_command_with_defaults};
 mod deps {
     use g3_workspace_crawl as _;
     use g3ts as _;
+    use g3ts_topology_file_tree_checks as _;
+    use g3ts_topology_ingestion as _;
+    use guardrail3_check_types as _;
     use guardrail3_ts_app_types as _;
     use guardrail3_ts_family_runner_config as _;
     use guardrail3_ts_family_runner_hooks as _;

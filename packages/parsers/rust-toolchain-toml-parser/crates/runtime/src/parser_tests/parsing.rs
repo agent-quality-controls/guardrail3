@@ -91,13 +91,18 @@ custom-key = "kept"
 
 #[test]
 fn from_path_reads_and_parses_file() {
-    let cfg = assertions::parse_from_tempfile(
-        r#"
+    use std::io::Write as _;
+
+    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
+    file.write_all(
+        br#"
 [toolchain]
 channel = "stable"
 components = ["clippy"]
 "#,
-    );
+    )
+    .expect("toolchain file should be written");
+    let cfg = crate::parser::from_path(file.path()).expect("file should parse");
 
     assertions::assert_toolchain_fields(&cfg, Some("stable"), None, &["clippy"], &[], None);
     assertions::assert_toolchain_extra_empty(&cfg);

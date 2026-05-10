@@ -1,3 +1,8 @@
+/// Assert an internal edge `from_rel_path -> to_rel_path` is present in `input`.
+///
+/// # Panics
+///
+/// Panics if no matching internal edge is present.
 pub fn assert_has_internal_edge(
     input: &g3ts_apparch_types::G3TsApparchConfigChecksInput,
     from_rel_path: &str,

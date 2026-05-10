@@ -4,6 +4,7 @@ use g3rs_cargo_types::{
     G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWorkspaceMember,
 };
 
+/// build root fn.
 pub(crate) fn build_root(
     cargo_rel_path: String,
     cargo: CargoTomlDocument,
@@ -28,7 +29,8 @@ pub(crate) fn build_root(
     }
 }
 
-pub(crate) fn build_member(
+/// fn const.
+pub(crate) const fn build_member(
     member_rel: String,
     cargo_rel_path: String,
     cargo: CargoTomlDocument,
@@ -41,6 +43,7 @@ pub(crate) fn build_member(
     }
 }
 
+/// filetree root fn.
 pub(crate) fn filetree_root(
     kind: Option<G3RsCargoPolicyRootKind>,
     rust_policy_rel_path: Option<String>,
@@ -55,6 +58,7 @@ pub(crate) fn filetree_root(
     }
 }
 
+/// input failure fn.
 pub(crate) fn input_failure(
     rel_path: impl Into<String>,
     message: impl Into<String>,
@@ -65,6 +69,7 @@ pub(crate) fn input_failure(
     }
 }
 
+/// missing member fn.
 pub(crate) fn missing_member(member_rel: String) -> G3RsCargoMissingMember {
     G3RsCargoMissingMember {
         workspace_root_rel: String::new(),

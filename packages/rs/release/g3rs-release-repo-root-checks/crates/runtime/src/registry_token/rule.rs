@@ -3,15 +3,18 @@ use guardrail3_check_types::G3CheckResult;
 
 use crate::support::{info, warn};
 
+/// `ID` constant.
 const ID: &str = "g3rs-release/registry-token";
 
+/// `check` function.
 pub(crate) fn check(input: &G3RsReleaseConfigRepo, results: &mut Vec<G3CheckResult>) {
-    if input.has_registry_token_workflow {
+    if input.workflow_flags.has_registry_token_workflow {
         results.push(info(
             ID,
             "CARGO_REGISTRY_TOKEN wired in workflow",
             String::new(),
-            input.registry_token_workflow_rel_path
+            input
+                .registry_token_workflow_rel_path
                 .as_deref()
                 .unwrap_or(input.cargo_rel_path.as_str()),
         ));

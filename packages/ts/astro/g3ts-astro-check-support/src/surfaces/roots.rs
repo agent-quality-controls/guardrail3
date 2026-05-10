@@ -1,3 +1,4 @@
+#[must_use]
 pub fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     if app_root_rel_path == "." {
         rel_path.to_owned()
@@ -6,6 +7,7 @@ pub fn scoped_rel_path(app_root_rel_path: &str, rel_path: &str) -> String {
     }
 }
 
+#[must_use]
 pub fn app_relative_path(rel_path: &str, app_root_rel_path: &str) -> String {
     if app_root_rel_path == "." {
         rel_path.to_owned()
@@ -17,6 +19,7 @@ pub fn app_relative_path(rel_path: &str, app_root_rel_path: &str) -> String {
     }
 }
 
+#[must_use]
 pub fn is_under_app_root(rel_path: &str, app_root_rel_path: &str) -> bool {
     app_root_rel_path == "."
         || rel_path == app_root_rel_path

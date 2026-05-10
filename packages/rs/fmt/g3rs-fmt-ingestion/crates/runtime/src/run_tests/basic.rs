@@ -1,3 +1,12 @@
+#![expect(
+    clippy::panic,
+    clippy::match_same_arms,
+    clippy::wildcard_enum_match_arm,
+    clippy::disallowed_methods,
+    clippy::too_many_lines,
+    reason = "test fixtures intentionally panic to fail-fast on unexpected ingestion outcomes; match arms list every state explicitly even when several map to the same panic; long realistic-config tests assert on every single field the checks read"
+)]
+
 use std::fs;
 
 use tempfile::tempdir;
@@ -114,7 +123,7 @@ fn dot_rustfmt_toml_is_accepted_when_root_rustfmt_toml_is_absent() {
     assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
@@ -162,7 +171,7 @@ fn ignores_dot_rustfmt_toml_when_rustfmt_toml_exists() {
     // Verify the correct file was parsed (2024 from rustfmt.toml, not 2021 from .rustfmt.toml).
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => None,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::ParseError => None,
         },
@@ -456,7 +465,7 @@ fn empty_rustfmt_toml_is_valid() {
 
     assert_eq!(
         match &input.rustfmt_state {
-            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition.clone(),
+            g3rs_fmt_types::G3RsFmtRustfmtConfigState::Parsed(rustfmt) => rustfmt.edition,
             g3rs_fmt_types::G3RsFmtRustfmtConfigState::Unreadable => {
                 panic!("empty rustfmt.toml should parse")
             }
@@ -505,25 +514,25 @@ fn malformed_rustfmt_plus_missing_cargo_preserves_both_states() {
 
 #[test]
 fn error_display_includes_file_name() {
-    let err = crate::IngestionError::RustfmtTomlNotFound;
-    let msg = err.to_string();
+    let rustfmt_err = crate::IngestionError::RustfmtTomlNotFound;
+    let rustfmt_msg = rustfmt_err.to_string();
     assert!(
-        msg.contains("rustfmt.toml"),
-        "RustfmtTomlNotFound display should mention rustfmt.toml, got: {msg}"
+        rustfmt_msg.contains("rustfmt.toml"),
+        "RustfmtTomlNotFound display should mention rustfmt.toml, got: {rustfmt_msg}"
     );
 
-    let err = crate::IngestionError::CargoTomlNotFound;
-    let msg = err.to_string();
+    let cargo_err = crate::IngestionError::CargoTomlNotFound;
+    let cargo_msg = cargo_err.to_string();
     assert!(
-        msg.contains("Cargo.toml"),
-        "CargoTomlNotFound display should mention Cargo.toml, got: {msg}"
+        cargo_msg.contains("Cargo.toml"),
+        "CargoTomlNotFound display should mention Cargo.toml, got: {cargo_msg}"
     );
 
-    let err = crate::IngestionError::ToolchainTomlNotFound;
-    let msg = err.to_string();
+    let toolchain_err = crate::IngestionError::ToolchainTomlNotFound;
+    let toolchain_msg = toolchain_err.to_string();
     assert!(
-        msg.contains("rust-toolchain.toml"),
-        "ToolchainTomlNotFound display should mention rust-toolchain.toml, got: {msg}"
+        toolchain_msg.contains("rust-toolchain.toml"),
+        "ToolchainTomlNotFound display should mention rust-toolchain.toml, got: {toolchain_msg}"
     );
 }
 

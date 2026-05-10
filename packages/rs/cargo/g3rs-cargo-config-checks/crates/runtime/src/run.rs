@@ -1,6 +1,7 @@
 use g3rs_cargo_types::G3RsCargoConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsCargoConfigChecksInput) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     if let Some(cargo) = cargo_toml_parser::document::typed(&input.root.cargo) {

@@ -1,3 +1,11 @@
+#![allow(
+    clippy::missing_panics_doc,
+    clippy::missing_docs_in_private_items,
+    clippy::too_many_lines,
+    clippy::indexing_slicing,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses; ExpectedExecutableLine fields mirror ExecutableLine's public surface so docs would duplicate the runtime crate's contract; fixture-controlled indexed access panics on the same line that proves the missing entry"
+)]
+
 use hook_shell_parser_runtime::types::{FailOpenWrapper, ParsedShellScript};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

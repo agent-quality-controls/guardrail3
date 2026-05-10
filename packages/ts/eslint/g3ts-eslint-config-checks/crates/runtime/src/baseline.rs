@@ -1,11 +1,18 @@
-pub(crate) const THRESHOLD_RULES: &[(&str, i64, &[&str])] = &[
+/// Per-threshold rule entry: `(rule_name, expected_value, allowed_option_keys)`.
+pub(crate) type ThresholdRule = (&'static str, i64, &'static [&'static str]);
+
+/// Internal constant `THRESHOLD_RULES`.
+pub(crate) const THRESHOLD_RULES: &[ThresholdRule] = &[
     ("max-lines", 400, &["max"]),
     ("max-lines-per-function", 100, &["max"]),
     ("complexity", 25, &["max"]),
 ];
 
+/// Internal constant `REQUIRED_THRESHOLD_PRESENCE_RULES`.
 pub(crate) const REQUIRED_THRESHOLD_PRESENCE_RULES: &[&str] = &["no-restricted-imports"];
+/// Internal constant `REQUIRED_TS_SOURCE_PLUGINS`.
 pub(crate) const REQUIRED_TS_SOURCE_PLUGINS: &[&str] = &["unicorn", "regexp", "sonarjs"];
+/// Internal constant `JS_CARVEOUT_TYPED_RULES`.
 pub(crate) const JS_CARVEOUT_TYPED_RULES: &[&str] = &[
     "@typescript-eslint/no-unsafe-assignment",
     "@typescript-eslint/no-unsafe-member-access",
@@ -14,6 +21,7 @@ pub(crate) const JS_CARVEOUT_TYPED_RULES: &[&str] = &[
     "@typescript-eslint/no-unsafe-argument",
 ];
 
+/// Internal constant `CORE_BASELINE_RULES`.
 pub(crate) const CORE_BASELINE_RULES: &[&str] = &[
     "@typescript-eslint/no-floating-promises",
     "eqeqeq",
@@ -24,6 +32,7 @@ pub(crate) const CORE_BASELINE_RULES: &[&str] = &[
     "@typescript-eslint/strict-boolean-expressions",
 ];
 
+/// Internal constant `TYPE_SAFETY_RULES`.
 pub(crate) const TYPE_SAFETY_RULES: &[&str] = &[
     "@typescript-eslint/no-misused-promises",
     "@typescript-eslint/await-thenable",
@@ -40,6 +49,7 @@ pub(crate) const TYPE_SAFETY_RULES: &[&str] = &[
     "@typescript-eslint/no-unsafe-argument",
 ];
 
+/// Internal constant `HYGIENE_RULES`.
 pub(crate) const HYGIENE_RULES: &[&str] = &[
     "@typescript-eslint/explicit-module-boundary-types",
     "@typescript-eslint/promise-function-async",
@@ -54,6 +64,7 @@ pub(crate) const HYGIENE_RULES: &[&str] = &[
     "no-empty",
 ];
 
+/// Internal constant `UNICORN_RULES`.
 pub(crate) const UNICORN_RULES: &[&str] = &[
     "unicorn/no-keyword-prefix",
     "unicorn/no-unused-properties",
@@ -61,6 +72,7 @@ pub(crate) const UNICORN_RULES: &[&str] = &[
     "unicorn/no-anonymous-default-export",
 ];
 
+/// Internal constant `REGEXP_RULES`.
 pub(crate) const REGEXP_RULES: &[&str] = &[
     "regexp/require-unicode-regexp",
     "regexp/require-unicode-sets-regexp",
@@ -70,6 +82,7 @@ pub(crate) const REGEXP_RULES: &[&str] = &[
     "regexp/no-misleading-capturing-group",
 ];
 
+/// Internal constant `SONARJS_RULES`.
 pub(crate) const SONARJS_RULES: &[&str] = &[
     "sonarjs/cognitive-complexity",
     "sonarjs/no-identical-functions",

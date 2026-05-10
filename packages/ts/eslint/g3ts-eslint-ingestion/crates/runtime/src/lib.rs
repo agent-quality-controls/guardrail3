@@ -1,4 +1,6 @@
+/// Internal module `run`.
 mod run;
+/// Internal module `select`.
 mod select;
 
 #[cfg(feature = "ingest")]

@@ -5,22 +5,14 @@
     reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
 )]
 
-use std::io::Write;
-
 use rust_toolchain_toml_parser_runtime::Value;
 use rust_toolchain_toml_parser_runtime::types::RustToolchainToml;
 use rust_toolchain_toml_parser_runtime::types::rust_toolchain_toml::ToolchainSection;
 
+#[must_use]
 pub fn parse_fixture(input: &str) -> RustToolchainToml {
     rust_toolchain_toml_parser_runtime::parse(input)
         .expect("should parse valid rust-toolchain.toml")
-}
-
-pub fn parse_from_tempfile(input: &str) -> RustToolchainToml {
-    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
-    file.write_all(input.as_bytes())
-        .expect("toolchain file should be written");
-    rust_toolchain_toml_parser_runtime::from_path(file.path()).expect("file should parse")
 }
 
 #[must_use]

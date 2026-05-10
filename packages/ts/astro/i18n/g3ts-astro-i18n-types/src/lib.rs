@@ -1,3 +1,4 @@
+/// Public type definitions exported by the astro-i18n-types crate.
 #[cfg(feature = "api")]
 mod types;
 
@@ -5,6 +6,7 @@ mod types;
 pub use types::{
     G3TsAstroI18nConfigChecksInput, G3TsAstroI18nEslintPluginContractInput,
     G3TsAstroI18nEslintSurfaceSnapshot, G3TsAstroI18nEslintSurfaceState,
-    G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPolicySnapshot,
-    G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
+    G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPluginPackageNames,
+    G3TsAstroI18nPolicySnapshot, G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot,
+    G3TsAstroPackageSurfaceState,
 };

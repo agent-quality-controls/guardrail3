@@ -1,0 +1,25 @@
+[rs]
+profile = "library"
+
+allowed_deps = [
+  "g3rs-apparch-hook-contract",
+  "g3rs-arch-hook-contract",
+  "g3rs-cargo-hook-contract",
+  "g3rs-clippy-hook-contract",
+  "g3rs-code-hook-contract",
+  "g3rs-deny-hook-contract",
+  "g3rs-deps-hook-contract",
+  "g3rs-fmt-hook-contract",
+  "g3rs-garde-hook-contract",
+  "g3rs-hooks-contract-types",
+  "g3rs-release-hook-contract",
+  "g3rs-rust-family-contracts-architecture",
+  "g3rs-rust-family-contracts-runtime",
+  "g3rs-rust-family-contracts-tooling",
+  "g3rs-test-hook-contract",
+  "g3rs-toolchain-hook-contract",
+  "g3rs-topology-hook-contract",
+]
+
+[checks]
+hooks = false

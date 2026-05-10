@@ -20,7 +20,6 @@ checks = []
 
 [dependencies]
 release-plz-toml-parser-runtime = { path = "../runtime" }
-tempfile = "3"
 
 [package.metadata.docs.rs]
 all-features = true

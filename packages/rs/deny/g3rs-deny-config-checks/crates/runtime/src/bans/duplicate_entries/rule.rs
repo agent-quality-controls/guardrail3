@@ -8,14 +8,17 @@ use crate::support::identities::{
     advisory_ignore_identity, deny_entry_name, feature_entry_name, normalized_skip_identity,
 };
 
+/// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/duplicate-entries";
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     if let Some(bans) = deny.bans.as_ref() {
         let mut deny_counts = BTreeMap::<String, usize>::new();
         for entry in &bans.deny {
             if let Some(name) = deny_entry_name(entry) {
-                *deny_counts.entry(name).or_default() += 1;
+                let counter = deny_counts.entry(name).or_default();
+                *counter = counter.saturating_add(1);
             }
         }
         for (name, count) in deny_counts {
@@ -32,7 +35,8 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         let mut skip_counts = BTreeMap::<String, usize>::new();
         for entry in &bans.skip {
             if let Some(name) = normalized_skip_identity(entry) {
-                *skip_counts.entry(name).or_default() += 1;
+                let counter = skip_counts.entry(name).or_default();
+                *counter = counter.saturating_add(1);
             }
         }
         for (name, count) in skip_counts {
@@ -49,7 +53,8 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         let mut feature_counts = BTreeMap::<String, usize>::new();
         for entry in &bans.features {
             if let Some(name) = feature_entry_name(entry) {
-                *feature_counts.entry(name).or_default() += 1;
+                let counter = feature_counts.entry(name).or_default();
+                *counter = counter.saturating_add(1);
             }
         }
         for (name, count) in feature_counts {
@@ -68,7 +73,8 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         let mut ignore_counts = BTreeMap::<String, usize>::new();
         for entry in &advisories.ignore {
             if let Some(identity) = advisory_ignore_identity(entry) {
-                *ignore_counts.entry(identity).or_default() += 1;
+                let counter = ignore_counts.entry(identity).or_default();
+                *counter = counter.saturating_add(1);
             }
         }
         for (identity, count) in ignore_counts {

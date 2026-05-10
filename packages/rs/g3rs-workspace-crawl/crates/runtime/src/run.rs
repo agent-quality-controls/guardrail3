@@ -1,3 +1,5 @@
+//! Public crawl entry points and error type.
+
 use std::path::Path;
 
 use g3rs_workspace_crawl_types::G3RsWorkspaceCrawl;
@@ -29,11 +31,20 @@ impl std::fmt::Display for G3RsWorkspaceCrawlError {
 impl std::error::Error for G3RsWorkspaceCrawlError {}
 
 /// Crawl one explicit workspace root into a neutral filesystem snapshot.
+///
+/// # Errors
+///
+/// Returns an error when the path is not a directory or when no
+/// `Cargo.toml` is found at the workspace root.
 pub fn crawl(workspace_root: &Path) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {
     crate::crawl::crawl_workspace(workspace_root)
 }
 
 /// Crawl one explicit non-Rust project root into a neutral filesystem snapshot.
+///
+/// # Errors
+///
+/// Returns an error when the path is not a directory.
 pub fn crawl_any_root(
     workspace_root: &Path,
 ) -> Result<G3RsWorkspaceCrawl, G3RsWorkspaceCrawlError> {

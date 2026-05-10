@@ -1,3 +1,5 @@
+//! Assertion helpers for the `g3rs-arch` hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

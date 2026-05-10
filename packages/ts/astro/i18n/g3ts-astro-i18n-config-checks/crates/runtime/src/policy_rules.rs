@@ -1,9 +1,12 @@
 use g3ts_astro_i18n_types::{G3TsAstroI18nIntegrationContractInput, G3TsAstroI18nPolicySnapshot};
 use guardrail3_check_types::G3CheckResult;
 
+/// Internal constant `STRICT_ID`.
 const STRICT_ID: &str = "g3ts-astro-i18n/strict-policy-configured";
+/// Internal constant `PATHS_ID`.
 const PATHS_ID: &str = "g3ts-astro-i18n/policy-paths-valid";
 
+/// Internal function `check`.
 pub(crate) fn check(
     contract: &G3TsAstroI18nIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
@@ -14,10 +17,9 @@ pub(crate) fn check(
             STRICT_ID,
             "Astro i18n strict policy is missing",
             format!(
-                "`{}` must define `[ts.astro.i18n]` with explicit `locales`, `default_locale` when needed, `require_locale_prefix_for_content_routes`, `allowed_unprefixed_routes`, `content_route_prefixes`, `checked_internal_link_helpers`, `approved_internal_link_helpers`, `approved_localized_link_components`, `approved_date_format_helpers`, `approved_number_format_helpers`, `public_source_globs`, and `helper_source_globs`. G3TS does not invent i18n defaults.",
-                rel_path.unwrap_or("guardrail3-ts.toml")
+                "`{rel_path}` must define `[ts.astro.i18n]` with explicit `locales`, `default_locale` when needed, `require_locale_prefix_for_content_routes`, `allowed_unprefixed_routes`, `content_route_prefixes`, `checked_internal_link_helpers`, `approved_internal_link_helpers`, `approved_localized_link_components`, `approved_date_format_helpers`, `approved_number_format_helpers`, `public_source_globs`, and `helper_source_globs`. G3TS does not invent i18n defaults."
             ),
-            rel_path,
+            Some(rel_path),
         ));
         return;
     };
@@ -26,6 +28,7 @@ pub(crate) fn check(
     check_paths(policy, results);
 }
 
+/// Internal function `check_required_fields`.
 fn check_required_fields(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let missing = missing_fields(policy);
     if missing.is_empty() {
@@ -53,6 +56,7 @@ fn check_required_fields(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec
     ));
 }
 
+/// Internal function `missing_fields`.
 fn missing_fields(policy: &G3TsAstroI18nPolicySnapshot) -> Vec<&'static str> {
     let mut missing = Vec::new();
     if policy.locales.is_empty() {
@@ -76,6 +80,7 @@ fn missing_fields(policy: &G3TsAstroI18nPolicySnapshot) -> Vec<&'static str> {
     missing
 }
 
+/// Internal function `check_paths`.
 fn check_paths(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec<G3CheckResult>) {
     let invalid = policy
         .approved_date_format_helpers
@@ -112,6 +117,7 @@ fn check_paths(policy: &G3TsAstroI18nPolicySnapshot, results: &mut Vec<G3CheckRe
     ));
 }
 
+/// Internal function `invalid_path`.
 fn invalid_path(path: &str) -> bool {
     path.trim().is_empty() || path.starts_with('/') || path.split('/').any(|part| part == "..")
 }

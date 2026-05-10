@@ -1,5 +1,6 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// `warn` function.
 pub(crate) fn warn(
     id: &str,
     title: impl Into<String>,
@@ -16,6 +17,7 @@ pub(crate) fn warn(
     )
 }
 
+/// `info` function.
 pub(crate) fn info(
     id: &str,
     title: impl Into<String>,

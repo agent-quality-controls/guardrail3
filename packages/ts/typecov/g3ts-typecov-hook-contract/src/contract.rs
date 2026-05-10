@@ -18,6 +18,7 @@ pub fn hook_contract() -> Vec<G3TsHookRequirement> {
         vec![
             G3TsHookCommandRequirement::G3TsValidatePath,
             G3TsHookCommandRequirement::AppValidateScript,
+            G3TsHookCommandRequirement::TypeCoverage,
         ],
         Vec::new(),
     )]

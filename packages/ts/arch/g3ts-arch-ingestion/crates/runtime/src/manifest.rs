@@ -6,6 +6,7 @@ use g3ts_arch_types::{
 use package_json_parser::{from_path_document, parse_error_reason};
 use serde_json::Value;
 
+/// `ingest_manifest_state` helper.
 pub(crate) fn ingest_manifest_state(crawl: &G3WorkspaceCrawl) -> G3TsArchManifestState {
     let Some(entry) = root_file(crawl, "package.json") else {
         return G3TsArchManifestState::Missing;
@@ -45,6 +46,7 @@ pub(crate) fn ingest_manifest_state(crawl: &G3WorkspaceCrawl) -> G3TsArchManifes
     }
 }
 
+/// `declared_entrypoints` helper.
 fn declared_entrypoints(raw: &Value) -> Vec<G3TsArchDeclaredEntryPoint> {
     let mut entrypoints = Vec::new();
 
@@ -70,6 +72,7 @@ fn declared_entrypoints(raw: &Value) -> Vec<G3TsArchDeclaredEntryPoint> {
     entrypoints
 }
 
+/// `collect_export_paths` helper.
 fn collect_export_paths(value: &Value, entrypoints: &mut Vec<G3TsArchDeclaredEntryPoint>) {
     match value {
         Value::String(path) => {
@@ -94,6 +97,7 @@ fn collect_export_paths(value: &Value, entrypoints: &mut Vec<G3TsArchDeclaredEnt
     }
 }
 
+/// `normalize_source_entrypoint` helper.
 fn normalize_source_entrypoint(path: &str) -> Option<String> {
     let trimmed = path.strip_prefix("./").unwrap_or(path);
     let valid = matches!(
@@ -104,6 +108,7 @@ fn normalize_source_entrypoint(path: &str) -> Option<String> {
     valid.then(|| trimmed.to_owned())
 }
 
+/// `matches_noncanonical_source_entrypoint` helper.
 fn matches_noncanonical_source_entrypoint(path: &str) -> bool {
     let file_name = std::path::Path::new(path)
         .file_name()

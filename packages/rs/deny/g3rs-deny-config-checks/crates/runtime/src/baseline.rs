@@ -1,19 +1,24 @@
+/// Struct `Module` used by this module.
 pub(crate) struct Module {
+    /// Field `content`.
     content: &'static str,
 }
 
 impl Module {
+    /// Implements `content`.
     pub(crate) const fn content(&self) -> &'static str {
         self.content
     }
 }
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_GRAPH: Module = Module {
     content: r"[graph]
 all-features = true
 no-default-features = false",
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_BASE: Module = Module {
     content: r#"[bans]
 multiple-versions = "deny"
@@ -22,23 +27,27 @@ allow-wildcard-paths = true
 highlight = "all""#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_JSON: Module = Module {
     content: r#"    { name = "simd-json", wrappers = [] },
     { name = "json5", wrappers = [] },
     { name = "sonic-rs", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_TLS: Module = Module {
     content: r#"    { name = "openssl", wrappers = [] },
     { name = "openssl-sys", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_HTTP: Module = Module {
     content: r#"    { name = "ureq", wrappers = [] },
     { name = "surf", wrappers = [] },
     { name = "isahc", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_LOGGING: Module = Module {
     content: r#"    { name = "log4rs", wrappers = [] },
     { name = "env_logger", wrappers = [] },
@@ -46,19 +55,23 @@ pub(crate) const DENY_BANS_LOGGING: Module = Module {
     { name = "fern", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_ASYNC: Module = Module {
     content: r#"    { name = "async-std", wrappers = [] },
     { name = "smol", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_GLOBAL_STATE: Module = Module {
     content: r#"    { name = "lazy_static", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_ERROR: Module = Module {
     content: r#"    { name = "anyhow", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_WEB: Module = Module {
     content: r#"    { name = "actix-web", wrappers = [] },
     { name = "rocket", wrappers = [] },
@@ -66,15 +79,18 @@ pub(crate) const DENY_BANS_WEB: Module = Module {
     { name = "poem", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_DATETIME: Module = Module {
     content: r#"    { name = "chrono", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_ORM: Module = Module {
     content: r#"    { name = "diesel", wrappers = [] },
     { name = "sea-orm", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_SERIALIZATION: Module = Module {
     content: r#"    { name = "bincode", wrappers = [] },
     { name = "rmp-serde", wrappers = [] },
@@ -82,6 +98,7 @@ pub(crate) const DENY_BANS_SERIALIZATION: Module = Module {
     { name = "flatbuffers", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_REGEX: Module = Module {
     content: r#"    { name = "regex", wrappers = [] },
     { name = "fancy-regex", wrappers = [] },
@@ -92,6 +109,7 @@ pub(crate) const DENY_BANS_REGEX: Module = Module {
     { name = "grep-matcher", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_BANS_LIBRARY_IO: Module = Module {
     content: r#"    { name = "axum", wrappers = [] },
     { name = "tokio", wrappers = [] },
@@ -108,6 +126,7 @@ pub(crate) const DENY_BANS_LIBRARY_IO: Module = Module {
     { name = "isahc", wrappers = [] },"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_FEATURE_BANS_TOKIO: Module = Module {
     content: r#"[[bans.features]]
 name = "tokio"
@@ -115,6 +134,7 @@ deny = ["full"]
 allow = ["rt-multi-thread", "macros", "net", "sync", "signal", "bytes", "default", "io-util", "time"]"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_LICENSES: Module = Module {
     content: r#"[licenses]
 allow = [
@@ -138,6 +158,7 @@ confidence-threshold = 0.8
 ignore = true"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_ADVISORIES: Module = Module {
     content: r#"[advisories]
 unmaintained = "workspace"
@@ -145,6 +166,7 @@ yanked = "deny"
 ignore = []"#,
 };
 
+/// Constant value used by the surrounding module.
 pub(crate) const DENY_SOURCES: Module = Module {
     content: r#"[sources]
 unknown-registry = "deny"
@@ -153,6 +175,7 @@ allow-registry = ["sparse+https://index.crates.io/"]
 allow-git = []"#,
 };
 
+/// Implements `service profile ban entries`.
 pub(crate) fn service_profile_ban_entries() -> Vec<&'static Module> {
     vec![
         &DENY_BANS_JSON,
@@ -170,6 +193,7 @@ pub(crate) fn service_profile_ban_entries() -> Vec<&'static Module> {
     ]
 }
 
+/// Implements `library profile ban entries`.
 pub(crate) fn library_profile_ban_entries() -> Vec<&'static Module> {
     let mut entries = service_profile_ban_entries();
     entries.push(&DENY_BANS_LIBRARY_IO);

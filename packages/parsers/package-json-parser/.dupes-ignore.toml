@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "dee9fd50a6bcb320"
+reason = "package.json rejection tests share parse_error_message shape; each #[test] proves a distinct invalid-input rejection path (non-object root / non-object scripts / non-string versions)"
+
+[[ignore]]
+fingerprint = "d6eda12bbd9602c7"
+reason = "closures in parse_str map_err io::Error/serde_json::Error to crate Error; one-line .map_err(Error::from) closures necessarily look identical"
+
+[[ignore]]
+fingerprint = "ebe9cdcd68088843"
+reason = "from_path and from_path_document are the canonical ingress functions; both must read the file then delegate to in-memory parser, so their bodies converge"

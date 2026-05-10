@@ -2,8 +2,10 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 
 use crate::support::TestFunctionInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-test/should-panic-expected";
 
+/// `check` function.
 pub(crate) fn check(input: &TestFunctionInput<'_>, results: &mut Vec<G3CheckResult>) {
     let Some(line) = input.function.harness.should_panic_line else {
         return;

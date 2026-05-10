@@ -1,6 +1,8 @@
+/// Conversion helpers from raw npmrc parser output into family snapshots.
 #[cfg(feature = "api")]
 mod convert;
 
+/// Public type definitions for the npmrc family contract.
 #[cfg(feature = "api")]
 mod types;
 

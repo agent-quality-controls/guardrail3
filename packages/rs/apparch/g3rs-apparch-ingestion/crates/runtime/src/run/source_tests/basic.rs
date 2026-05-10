@@ -1,3 +1,8 @@
+#![allow(
+    clippy::indexing_slicing,
+    reason = "test assertions index into Vec fields that the same test just built; out-of-bounds would be a test-author bug, not a runtime panic surface"
+)]
+
 #[test]
 fn root_without_workspace_fails() {
     let root = super::helpers::temp_workspace();

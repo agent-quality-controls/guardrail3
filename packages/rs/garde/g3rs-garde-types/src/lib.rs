@@ -9,6 +9,10 @@ pub enum G3RsGardeApplicability {
 }
 
 #[derive(Debug, Clone)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "ClippyToml carries the parsed payload; downstream consumers (g3rs-garde-ingestion) construct and pattern-match this variant by field name, so boxing here would force breaking out-of-scope callers"
+)]
 pub enum G3RsGardeClippyInput {
     Missing,
     Parsed {
@@ -77,6 +81,10 @@ pub struct G3RsGardeQueryAsMacroSite {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each bool encodes an independent observable attribute of a garde boundary field site (validation requirement, nested validation, presence of `#[garde(skip)]`, `#[garde(dive)]`, meaningful garde rule, context use, and parent boundary context); a state machine cannot collapse independent presence flags without losing information"
+)]
 pub struct G3RsGardeBoundaryFieldSite {
     pub rel_path: String,
     pub line: usize,

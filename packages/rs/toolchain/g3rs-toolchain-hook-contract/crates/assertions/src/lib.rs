@@ -1,3 +1,5 @@
+//! Reusable assertion helpers for the toolchain hook contract.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

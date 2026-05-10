@@ -2,13 +2,18 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use cargo_toml_parser::types::{
-    CargoToml, InheritableValue, PackageSection, StringOrBool, WorkspacePackageSection,
+    CargoToml, InheritableValue, PackageSection, StringOrBool, VecStringOrBool,
+    WorkspacePackageSection,
 };
 
 use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::collect::{CrateBase, CrateReadmeFacts, ParsedCrate};
 
+/// `(readme path field, inherited from workspace)`.
+type ReadmePathField<'a> = (Option<&'a str>, bool);
+
+/// `build_crate_base` function.
 pub(super) fn build_crate_base(
     crawl: &G3RsWorkspaceCrawl,
     krate: &ParsedCrate,
@@ -52,6 +57,7 @@ pub(super) fn build_crate_base(
     }
 }
 
+/// `publishable` function.
 fn publishable(
     package: Option<&PackageSection>,
     workspace_package: Option<&WorkspacePackageSection>,
@@ -62,28 +68,22 @@ fn publishable(
 
     match package.publish.as_ref() {
         None => false,
-        Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::Bool(false))) => {
-            false
-        }
-        Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::VecString(
-            values,
-        ))) => !values.is_empty(),
-        Some(InheritableValue::Value(cargo_toml_parser::types::VecStringOrBool::Bool(true))) => {
-            true
-        }
-        Some(InheritableValue::Inherit(_)) => {
-            match workspace_package.and_then(|workspace| workspace.publish.as_ref()) {
-                None => false,
-                Some(cargo_toml_parser::types::VecStringOrBool::Bool(false)) => false,
-                Some(cargo_toml_parser::types::VecStringOrBool::VecString(values)) => {
-                    !values.is_empty()
-                }
-                Some(cargo_toml_parser::types::VecStringOrBool::Bool(true)) => true,
-            }
-        }
+        Some(InheritableValue::Value(value)) => publish_value_is_publishable(value),
+        Some(InheritableValue::Inherit(_)) => workspace_package
+            .and_then(|workspace| workspace.publish.as_ref())
+            .is_some_and(publish_value_is_publishable),
     }
 }
 
+/// True when a `publish` value renders the crate publishable.
+fn publish_value_is_publishable(value: &VecStringOrBool) -> bool {
+    match value {
+        VecStringOrBool::Bool(flag) => *flag,
+        VecStringOrBool::VecString(values) => !values.is_empty(),
+    }
+}
+
+/// `readme_declared_false` function.
 fn readme_declared_false(
     package: Option<&PackageSection>,
     workspace_package: Option<&WorkspacePackageSection>,
@@ -94,14 +94,16 @@ fn readme_declared_false(
             workspace_package.and_then(|workspace| workspace.readme.as_ref()),
             Some(StringOrBool::Bool(false))
         ),
-        _ => false,
+        Some(InheritableValue::Value(StringOrBool::Bool(true) | StringOrBool::String(_)))
+        | None => false,
     }
 }
 
+/// `readme_path_field` function.
 fn readme_path_field<'a>(
     package: Option<&'a PackageSection>,
     workspace_package: Option<&'a WorkspacePackageSection>,
-) -> (Option<&'a str>, bool) {
+) -> ReadmePathField<'a> {
     match package.and_then(|package| package.readme.as_ref()) {
         Some(InheritableValue::Value(StringOrBool::String(path))) => (Some(path.as_str()), false),
         Some(InheritableValue::Inherit(_)) => (
@@ -113,15 +115,17 @@ fn readme_path_field<'a>(
                 }),
             true,
         ),
-        _ => (None, false),
+        Some(InheritableValue::Value(StringOrBool::Bool(_))) | None => (None, false),
     }
 }
 
+/// `is_library_crate` function.
 fn is_library_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
     cargo.lib.is_some()
         || super::paths::file_exists(crawl, &super::paths::join_under_root(rel_dir, "src/lib.rs"))
 }
 
+/// `is_binary_crate` function.
 fn is_binary_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
     if !cargo.bin.is_empty() {
         return true;
@@ -138,6 +142,7 @@ fn is_binary_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml)
         ) || autodiscovered_bin_exists(crawl, rel_dir))
 }
 
+/// `binary_target_names` function.
 fn binary_target_names(
     crawl: &G3RsWorkspaceCrawl,
     rel_dir: &str,
@@ -195,11 +200,12 @@ fn binary_target_names(
     names
 }
 
+/// `autodiscovered_bin_exists` function.
 fn autodiscovered_bin_exists(crawl: &G3RsWorkspaceCrawl, rel_dir: &str) -> bool {
     let src_bin_rel = super::paths::join_under_root(rel_dir, "src/bin");
     super::paths::direct_child_files(crawl, &src_bin_rel)
         .iter()
-        .any(|file| file.ends_with(".rs"))
+        .any(|file| has_rs_extension(file))
         || super::paths::direct_child_dirs(crawl, &src_bin_rel)
             .iter()
             .any(|dir| {
@@ -210,6 +216,14 @@ fn autodiscovered_bin_exists(crawl: &G3RsWorkspaceCrawl, rel_dir: &str) -> bool 
             })
 }
 
+/// True when `path`'s extension is `rs` (case-insensitive).
+fn has_rs_extension(path: &str) -> bool {
+    Path::new(path)
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
+}
+
+/// `binary_name_from_path` function.
 fn binary_name_from_path(path: &str) -> Option<String> {
     let path = Path::new(path);
 

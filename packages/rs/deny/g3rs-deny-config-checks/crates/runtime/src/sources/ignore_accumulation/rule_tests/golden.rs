@@ -22,10 +22,10 @@ ignore = [
 #[test]
 fn empty_ignore_produces_no_findings() {
     let results = run_check(
-        r#"
+        r"
 [advisories]
 ignore = []
-"#,
+",
     );
     assertions::assert_no_findings(&results);
 }

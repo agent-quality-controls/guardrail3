@@ -1,3 +1,4 @@
+/// Hook contract definition for the fmt hook.
 #[cfg(feature = "api")]
 mod contract;
 

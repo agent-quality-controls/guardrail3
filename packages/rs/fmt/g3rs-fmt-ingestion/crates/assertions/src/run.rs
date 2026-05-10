@@ -1,16 +1,25 @@
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
+/// Snapshot of the publicly observable fields of a `G3CheckResult` used to compare
+/// expected vs actual ingestion-pipeline outcomes in tests.
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Finding<'a> {
+    /// Rule identifier emitted by the check that produced this finding.
     id: &'a str,
+    /// Severity emitted by the check rule.
     severity: G3Severity,
+    /// Human-readable title emitted by the check rule.
     title: &'a str,
+    /// Human-readable message emitted by the check rule.
     message: &'a str,
+    /// File path the finding refers to, when set.
     file: Option<&'a str>,
+    /// Whether the finding is an inventory record rather than a violation.
     inventory: bool,
 }
 
-fn finding<'a>(
+/// Constructs a `Finding` using the canonical field order used by per-rule assertions.
+const fn finding<'a>(
     id: &'a str,
     severity: G3Severity,
     title: &'a str,
@@ -28,7 +37,8 @@ fn finding<'a>(
     }
 }
 
-fn findings<'a>(results: &'a [G3CheckResult]) -> Vec<Finding<'a>> {
+/// Returns the deterministic, sorted list of `Finding`s extracted from `results`.
+fn findings(results: &[G3CheckResult]) -> Vec<Finding<'_>> {
     let mut findings = results
         .iter()
         .map(|result| Finding {
@@ -61,6 +71,11 @@ fn findings<'a>(results: &'a [G3CheckResult]) -> Vec<Finding<'a>> {
     findings
 }
 
+/// Asserts the expected `assert_missing_root` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_missing_root(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
@@ -72,13 +87,27 @@ pub fn assert_missing_root(results: &[G3CheckResult]) {
             "rustfmt.toml",
             false,
         )],
+        "expected the missing-root finding to be the only emitted result",
     );
 }
 
+/// Asserts the expected `assert_nested_override_and_dual_conflict` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
     assert_eq!(
         findings(results),
         vec![
+            finding(
+                "g3rs-fmt/dual-file-conflict",
+                G3Severity::Warn,
+                "Conflicting rustfmt config files",
+                "Both `rustfmt.toml` and `.rustfmt.toml` exist in `crates/api`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.",
+                "crates/api/rustfmt.toml",
+                false,
+            ),
             finding(
                 "g3rs-fmt/per-crate-override",
                 G3Severity::Error,
@@ -95,18 +124,16 @@ pub fn assert_nested_override_and_dual_conflict(results: &[G3CheckResult]) {
                 "crates/api/rustfmt.toml",
                 false,
             ),
-            finding(
-                "g3rs-fmt/dual-file-conflict",
-                G3Severity::Warn,
-                "Conflicting rustfmt config files",
-                "Both `rustfmt.toml` and `.rustfmt.toml` exist in `crates/api`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.",
-                "crates/api/rustfmt.toml",
-                false,
-            ),
         ],
+        "expected exactly the nested-override and dual-conflict findings",
     );
 }
 
+/// Asserts the expected `assert_nightly_rustfmt_keys_on_stable` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_nightly_rustfmt_keys_on_stable(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -118,6 +145,11 @@ pub fn assert_nightly_rustfmt_keys_on_stable(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_nightly_key_blocker_when_toolchain_is_missing` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_nightly_key_blocker_when_toolchain_is_missing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -129,6 +161,11 @@ pub fn assert_nightly_key_blocker_when_toolchain_is_missing(results: &[G3CheckRe
     );
 }
 
+/// Asserts the expected `assert_edition_blocker_when_cargo_is_missing` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_edition_blocker_when_cargo_is_missing(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -140,6 +177,11 @@ pub fn assert_edition_blocker_when_cargo_is_missing(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_rustfmt_parse_error` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_rustfmt_parse_error(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -151,6 +193,11 @@ pub fn assert_rustfmt_parse_error(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_rustfmt_ignore_waiver` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_rustfmt_ignore_waiver(results: &[G3CheckResult]) {
     assert!(
         results.iter().any(|result| {
@@ -162,6 +209,11 @@ pub fn assert_rustfmt_ignore_waiver(results: &[G3CheckResult]) {
     );
 }
 
+/// Asserts the expected `assert_root_dot_rustfmt_toml_for_config_checks` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_root_dot_rustfmt_toml_for_config_checks(results: &[G3CheckResult]) {
     assert_eq!(
         results
@@ -177,6 +229,11 @@ pub fn assert_root_dot_rustfmt_toml_for_config_checks(results: &[G3CheckResult])
     );
 }
 
+/// Asserts the expected `assert_keeps_config_01_active_when_cargo_is_parse_error` outcome on `results`.
+///
+/// # Panics
+///
+/// Panics when `results` does not match the expected outcome.
 pub fn assert_keeps_config_01_active_when_cargo_is_parse_error(results: &[G3CheckResult]) {
     assert_eq!(
         results

@@ -1,0 +1,55 @@
+[[ignore]]
+fingerprint = "274f88540212328a"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "f73ba53abfaa5150"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "04bf9003e3d23103"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "87a0969c7d054e54"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "d4ae34922231f156"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "e02ba349e5b5f8bd"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "1b8ed7b28cb90fbf"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "6a0a198fb67296b5"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "050a9589773687a9"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "1314763612f006c5"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "2a2b5391dcc64605"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "5f2bae98c8c01aa8"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "726a0a6fc255e696"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"
+
+[[ignore]]
+fingerprint = "e70169f0989c09ad"
+reason = "per-rule presence-of-tool assertion modules share identical macro-emission shape; each rule proves a different required tool"

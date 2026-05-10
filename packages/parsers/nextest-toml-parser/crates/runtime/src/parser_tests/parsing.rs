@@ -301,13 +301,18 @@ command = "bin/seed-db"
 
 #[test]
 fn from_path_reads_and_parses_file() {
-    let cfg = assertions::parse_from_tempfile(
-        r#"
+    use std::io::Write as _;
+
+    let mut file = tempfile::NamedTempFile::new().expect("tempfile should be created");
+    file.write_all(
+        br#"
 [profile.default]
 slow-timeout = { period = "99s", terminate-after = 2 }
 leak-timeout = "250ms"
 "#,
-    );
+    )
+    .expect("nextest config should be written");
+    let cfg = crate::parser::from_path(file.path()).expect("file should parse");
 
     let default = cfg
         .profile

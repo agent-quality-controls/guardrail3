@@ -3,22 +3,22 @@ use g3ts_astro_setup_types::{
 };
 use guardrail3_check_types::G3CheckResult;
 
+/// Stable rule identifier surfaced in findings.
 const ID: &str = "g3ts-astro-setup/syncpack-stack-pins";
 
+/// Validates the rule and pushes findings into `results`.
 pub(crate) fn check(
     contract: &G3TsAstroSetupIntegrationContractInput,
     results: &mut Vec<G3CheckResult>,
 ) {
     match &contract.syncpack_config {
         G3TsAstroSyncpackConfigState::Parsed { snapshot } => {
-            let package_path =
-                crate::support::package_rel_path(&contract.package).unwrap_or("package.json");
+            let package_path = crate::support::package_rel_path(&contract.package);
             if !snapshot.source_covers_package_manifest {
                 let expected_source = crate::support::expected_syncpack_source_entry(
                     &snapshot.rel_path,
                     package_path,
-                )
-                .unwrap_or_else(|| package_path.to_owned());
+                );
                 results.push(crate::support::error(
                         ID,
                         "Syncpack does not pin the required Astro stack",
@@ -76,14 +76,14 @@ pub(crate) fn check(
     }
 }
 
+/// Internal helper used by the rule.
 fn push_unavailable_error(
     contract: &G3TsAstroSetupIntegrationContractInput,
     rel_path: &str,
     reason: &str,
     results: &mut Vec<G3CheckResult>,
 ) {
-    let package_path =
-        crate::support::package_rel_path(&contract.package).unwrap_or("package.json");
+    let package_path = crate::support::package_rel_path(&contract.package);
     results.push(crate::support::error(
         ID,
         "Syncpack does not pin the required Astro stack",

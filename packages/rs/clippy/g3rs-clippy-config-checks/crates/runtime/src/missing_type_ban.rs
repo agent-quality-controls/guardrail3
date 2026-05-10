@@ -8,8 +8,10 @@ use crate::support::{
     rust_policy_valid,
 };
 
+/// I D const.
 const ID: &str = "g3rs-clippy/missing-type-ban";
 
+/// check fn.
 pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3CheckResult>) {
     if !rust_policy_valid(input) {
         return;

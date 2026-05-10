@@ -1,0 +1,35 @@
+[[ignore]]
+fingerprint = "6f5eb25baeec5cd3"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "527cae12e3754431"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "4d7b20970717205f"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "5b5dcaa5532254af"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "10e9b40a0c8209af"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "309401c22a3e503f"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "8d389b8220587b3e"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "9b4a7d5847d55dc4"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"
+
+[[ignore]]
+fingerprint = "e28bbdcf55b40fe8"
+reason = "guardrail3-rs.toml schema mirror tests and assertion helpers share field-access shape; each helper proves a different schema field"

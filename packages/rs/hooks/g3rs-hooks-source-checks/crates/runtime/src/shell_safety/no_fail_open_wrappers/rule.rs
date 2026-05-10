@@ -1,11 +1,21 @@
+#![expect(
+    clippy::arithmetic_side_effects,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
+#![expect(
+    clippy::type_complexity,
+    reason = "shell script parser requires byte indexing and arithmetic for tokenization"
+)]
 use crate::compat::{G3CheckResult, G3Severity};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command_on_line_in_context};
 use hook_shell_parser::types::{ParsedShellScript, ShellFunction};
 
 use crate::inputs::FailOpenWrapperInput;
 
+/// `ID` constant.
 const ID: &str = "g3rs-hooks/no-fail-open-wrappers";
 
+/// `check` function.
 pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckResult>) {
     if let Some((line_no, command_text)) =
         first_fail_open_critical_command(input.parsed, input.parsed, 1, 0, &mut Vec::new())
@@ -15,8 +25,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
             G3Severity::Error,
             "critical hook command is fail-open".to_owned(),
             format!(
-                "Critical hook command `{}` is softened by a fail-open wrapper. Remove the wrapper so the hook fails closed.",
-                command_text
+                "Critical hook command `{command_text}` is softened by a fail-open wrapper. Remove the wrapper so the hook fails closed."
             ),
             Some(input.rel_path.to_owned()),
             Some(line_no),
@@ -25,6 +34,7 @@ pub(crate) fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<G3CheckR
     }
 }
 
+/// `first_fail_open_critical_command` function.
 fn first_fail_open_critical_command(
     local: &ParsedShellScript,
     root: &ParsedShellScript,
@@ -50,7 +60,7 @@ fn first_fail_open_critical_command(
                 is_guardrail_critical_command,
             )
         {
-            return Some((absolute_line_no, line.command_text.to_owned()));
+            return Some((absolute_line_no, line.command_text.clone()));
         }
         if let Some(found) = called_function_fail_open(
             local,
@@ -68,6 +78,7 @@ fn first_fail_open_critical_command(
     None
 }
 
+/// `called_function_fail_open` function.
 fn called_function_fail_open(
     local: &ParsedShellScript,
     root: &ParsedShellScript,
@@ -89,7 +100,7 @@ fn called_function_fail_open(
         return None;
     }
 
-    visiting.push(function.name.to_owned());
+    visiting.push(function.name.clone());
     let found = first_fail_open_critical_command(
         &function.parsed_body,
         root,
@@ -101,6 +112,7 @@ fn called_function_fail_open(
     found
 }
 
+/// `is_guardrail_critical_command` function.
 fn is_guardrail_critical_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "g3rs"
         || command.command_name() == "gitleaks"
@@ -110,6 +122,7 @@ fn is_guardrail_critical_command(command: &ResolvedCommand) -> bool {
         || (command.command_name() == "cargo" && cargo_subcommand_is_guardrail_critical(command))
 }
 
+/// `cargo_subcommand_is_guardrail_critical` function.
 fn cargo_subcommand_is_guardrail_critical(command: &ResolvedCommand) -> bool {
     let args = command.args();
     let mut index = 0usize;
@@ -146,6 +159,7 @@ fn cargo_subcommand_is_guardrail_critical(command: &ResolvedCommand) -> bool {
     )
 }
 
+/// `cargo_global_flag_takes_value` function.
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
@@ -161,11 +175,13 @@ fn cargo_global_flag_takes_value(flag: &str) -> bool {
     )
 }
 
-fn absolute_line_no(absolute_base: usize, local_line_no: usize) -> usize {
+/// `absolute_line_no` function.
+const fn absolute_line_no(absolute_base: usize, local_line_no: usize) -> usize {
     absolute_base + local_line_no.saturating_sub(1)
 }
 
-fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
+/// `function_body_absolute_base` function.
+const fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -> usize {
     absolute_base
         + if function.body_starts_on_definition_line {
             function.line_no.saturating_sub(1)
@@ -174,6 +190,7 @@ fn function_body_absolute_base(absolute_base: usize, function: &ShellFunction) -
         }
 }
 
+/// `resolve_visible_function` function.
 fn resolve_visible_function<'a>(
     local: &'a ParsedShellScript,
     root: &'a ParsedShellScript,

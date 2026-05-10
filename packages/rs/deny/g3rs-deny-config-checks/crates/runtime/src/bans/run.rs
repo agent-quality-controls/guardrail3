@@ -1,6 +1,7 @@
 use deny_toml_parser::types::DenyToml;
 use guardrail3_check_types::G3CheckResult;
 
+/// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3CheckResult>) {
     super::multiple_versions_floor::check(deny_rel_path, deny, results);
     super::highlight_inventory::check(deny_rel_path, deny, results);

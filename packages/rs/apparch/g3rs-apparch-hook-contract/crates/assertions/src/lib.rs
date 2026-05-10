@@ -1,3 +1,5 @@
+//! Assertion helpers that verify the apparch hook contract matches its expected policy.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

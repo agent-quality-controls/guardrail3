@@ -101,10 +101,10 @@ fn changelog_section_parses() {
 #[test]
 fn from_path_reads_and_parses_file() {
     let cfg = parse_from_tempfile(
-        r#"
+        r"
 [git]
 conventional_commits = true
-"#,
+",
     );
 
     let git = cfg.git.as_ref().expect("git section should be present");

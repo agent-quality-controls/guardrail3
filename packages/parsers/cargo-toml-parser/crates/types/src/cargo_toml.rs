@@ -115,6 +115,27 @@ pub enum TomlTrimPaths {
     All,
 }
 
+/// Decodes the boolean form of Cargo's `trim-paths` setting (`true`/`false`).
+const fn trim_paths_from_bool(value: bool) -> TomlTrimPaths {
+    if value {
+        TomlTrimPaths::All
+    } else {
+        TomlTrimPaths::Values(Vec::new())
+    }
+}
+
+/// Decodes the string form of Cargo's `trim-paths` setting; returns `None` for unknown tokens.
+fn trim_paths_from_str(value: &str) -> Option<TomlTrimPaths> {
+    match value {
+        "none" => Some(TomlTrimPaths::Values(Vec::new())),
+        "all" => Some(TomlTrimPaths::All),
+        "diagnostics" => Some(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Diagnostics])),
+        "macro" => Some(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Macro])),
+        "object" => Some(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Object])),
+        _ => None,
+    }
+}
+
 impl<'de> Deserialize<'de> for TomlTrimPaths {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -137,27 +158,15 @@ impl<'de> Deserialize<'de> for TomlTrimPaths {
             where
                 E: de::Error,
             {
-                Ok(if value {
-                    TomlTrimPaths::All
-                } else {
-                    TomlTrimPaths::Values(Vec::new())
-                })
+                Ok(trim_paths_from_bool(value))
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
                 E: de::Error,
             {
-                match value {
-                    "none" => Ok(TomlTrimPaths::Values(Vec::new())),
-                    "all" => Ok(TomlTrimPaths::All),
-                    "diagnostics" => {
-                        Ok(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Diagnostics]))
-                    }
-                    "macro" => Ok(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Macro])),
-                    "object" => Ok(TomlTrimPaths::Values(vec![TomlTrimPathsValue::Object])),
-                    other => Err(E::invalid_value(de::Unexpected::Str(other), &self)),
-                }
+                trim_paths_from_str(value)
+                    .ok_or_else(|| E::invalid_value(de::Unexpected::Str(value), &self))
             }
 
             fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>

@@ -1,3 +1,13 @@
+#![allow(
+    clippy::missing_docs_in_private_items,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    clippy::indexing_slicing,
+    clippy::string_slice,
+    clippy::type_complexity,
+    reason = "wrappers.rs unwraps real shell wrappers (xargs, env, sudo, ...) around tools; each detector exposes the exact wrapper-specific knobs callers need and the per-wrapper helper signatures intentionally surface the wrapper's CLI surface"
+)]
+
 use crate::types::ParsedShellScript;
 
 use super::{CommandQueryOptions, CommandVisit, ResolvedCommand, ShellEnvState};

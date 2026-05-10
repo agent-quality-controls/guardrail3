@@ -1,3 +1,5 @@
+//! Assertions that pin the g3rs deps family hook contract shape.
+
 #[cfg(feature = "api")]
 pub mod contract;
 

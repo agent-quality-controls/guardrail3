@@ -1,3 +1,6 @@
+//! Shared types for the g3rs deps family.
+
+/// Concrete data structures shared across deps family crates.
 #[cfg(feature = "api")]
 mod types;
 

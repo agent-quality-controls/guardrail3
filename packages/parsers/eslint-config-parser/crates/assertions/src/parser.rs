@@ -1,3 +1,9 @@
+#![allow(
+    clippy::expect_used,
+    clippy::missing_panics_doc,
+    reason = "assertion helpers are reusable panic-based proof sites for test harnesses"
+)]
+
 use eslint_config_parser_runtime::types::{
     EslintConfigFileKind, EslintConfigSnapshot, EslintProbeKind, EslintReportUnusedSetting,
     EslintRuleSeverity,
@@ -18,17 +24,28 @@ pub fn assert_selected_config(
     );
 }
 
+/// Returns the probe entry whose kind matches `probe_kind`, panicking when the snapshot has no such probe.
+fn find_probe(
+    snapshot: &EslintConfigSnapshot,
+    probe_kind: EslintProbeKind,
+) -> &eslint_config_parser_runtime::types::EslintEffectiveConfigProbe {
+    snapshot
+        .probes
+        .iter()
+        .find(|probe| probe.probe == probe_kind)
+        .expect("probe should exist")
+}
+
 pub fn assert_project_service(
     snapshot: &EslintConfigSnapshot,
     probe_kind: EslintProbeKind,
     expected: Option<bool>,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
-    assert_eq!(probe.project_service, expected, "project_service mismatch");
+    assert_eq!(
+        find_probe(snapshot, probe_kind).project_service,
+        expected,
+        "project_service mismatch"
+    );
 }
 
 pub fn assert_probe_ignored(snapshot: &EslintConfigSnapshot, rel_path: &str, expected: bool) {
@@ -45,13 +62,8 @@ pub fn assert_plugins(
     probe_kind: EslintProbeKind,
     expected: &[&str],
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert_eq!(
-        probe.plugins,
+        find_probe(snapshot, probe_kind).plugins,
         expected
             .iter()
             .map(|plugin| (*plugin).to_owned())
@@ -66,13 +78,11 @@ pub fn assert_plugin_meta_name(
     namespace: &str,
     expected: &str,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert_eq!(
-        probe.plugin_meta_names.get(namespace).map(String::as_str),
+        find_probe(snapshot, probe_kind)
+            .plugin_meta_names
+            .get(namespace)
+            .map(String::as_str),
         Some(expected),
         "plugin metadata name mismatch"
     );
@@ -84,13 +94,8 @@ pub fn assert_plugin_package_name(
     namespace: &str,
     expected: &str,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert!(
-        probe
+        find_probe(snapshot, probe_kind)
             .plugin_package_names
             .get(namespace)
             .is_some_and(|package_names| package_names.iter().any(|name| name == expected)),
@@ -103,13 +108,9 @@ pub fn assert_no_inline_config(
     probe_kind: EslintProbeKind,
     expected: Option<bool>,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert_eq!(
-        probe.linter_options_no_inline_config, expected,
+        find_probe(snapshot, probe_kind).linter_options_no_inline_config,
+        expected,
         "noInlineConfig mismatch"
     );
 }
@@ -119,13 +120,9 @@ pub fn assert_report_unused_disable_directives(
     probe_kind: EslintProbeKind,
     expected: Option<EslintReportUnusedSetting>,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert_eq!(
-        probe.linter_options_report_unused_disable_directives, expected,
+        find_probe(snapshot, probe_kind).linter_options_report_unused_disable_directives,
+        expected,
         "reportUnusedDisableDirectives mismatch"
     );
 }
@@ -135,13 +132,9 @@ pub fn assert_report_unused_inline_configs(
     probe_kind: EslintProbeKind,
     expected: Option<EslintReportUnusedSetting>,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
     assert_eq!(
-        probe.linter_options_report_unused_inline_configs, expected,
+        find_probe(snapshot, probe_kind).linter_options_report_unused_inline_configs,
+        expected,
         "reportUnusedInlineConfigs mismatch"
     );
 }
@@ -152,12 +145,10 @@ pub fn assert_rule_severity(
     rule_name: &str,
     expected: EslintRuleSeverity,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
-    let rule = probe.rules.get(rule_name).expect("rule should exist");
+    let rule = find_probe(snapshot, probe_kind)
+        .rules
+        .get(rule_name)
+        .expect("rule should exist");
     assert_eq!(rule.severity, expected, "rule severity mismatch");
 }
 
@@ -167,12 +158,10 @@ pub fn assert_rule_options_len(
     rule_name: &str,
     expected: usize,
 ) {
-    let probe = snapshot
-        .probes
-        .iter()
-        .find(|probe| probe.probe == probe_kind)
-        .expect("probe should exist");
-    let rule = probe.rules.get(rule_name).expect("rule should exist");
+    let rule = find_probe(snapshot, probe_kind)
+        .rules
+        .get(rule_name)
+        .expect("rule should exist");
     assert_eq!(rule.options.len(), expected, "rule options length mismatch");
 }
 

@@ -1,0 +1,19 @@
+[[ignore]]
+fingerprint = "5630c14d104bbc5a"
+reason = "arch file-tree assertion helpers each verify a distinct rule (foo-rs-convention / missing-mod-rs / missing-facade); they share the result-equals shape because g3rs-test/runtime-assertions-split requires one helper per rule"
+
+[[ignore]]
+fingerprint = "4f2d728ed33208c8"
+reason = "inventory tests share the inventory-detected shape because each test proves inventory for a distinct file-tree shape (lib.rs / main.rs / mod.rs)"
+
+[[ignore]]
+fingerprint = "80c6a11079a37a43"
+reason = "run_rule helpers per-rule are isolated per g3rs-test/real-proof-site; they share the run-collect shape because all rules use Vec<G3CheckResult>"
+
+[[ignore]]
+fingerprint = "d6eb664033038697"
+reason = "crate_without_lib_or_main_fires and path_wired_directory_without_mod_declaration_fires_on_directory are distinct violation proofs for two different rules; assertion bodies share the fires-once shape"
+
+[[ignore]]
+fingerprint = "d87bc18eec5beed3"
+reason = "assert_mod_rs_inventory and assert_facade_inventory each prove inventory for a distinct rule's input shape per g3rs-test/runtime-assertions-split"

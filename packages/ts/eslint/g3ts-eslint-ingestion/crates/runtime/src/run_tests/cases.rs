@@ -31,15 +31,15 @@ fn returns_parsed_document_for_selected_root_config() {
 fn returns_unreadable_when_selected_root_config_is_unreadable() {
     let root = super::helpers::fake_eslint_workspace();
     let crawl = super::helpers::crawl_with_entries(&root, &["src/index.ts"]);
-    let unreadable = g3_workspace_crawl::G3WorkspaceCrawl {
-        root_abs_path: crawl.root_abs_path.clone(),
-        entries: vec![g3_workspace_crawl::G3WorkspaceEntry {
-            path: g3_workspace_crawl::G3WorkspacePath {
+    let unreadable = g3_workspace_crawl::G3RsWorkspaceCrawl {
+        root_abs_path: crawl.root_abs_path,
+        entries: vec![g3_workspace_crawl::G3RsWorkspaceEntry {
+            path: g3_workspace_crawl::G3RsWorkspacePath {
                 rel_path: "eslint.config.mjs".to_owned(),
                 abs_path: root.path().join("eslint.config.mjs"),
             },
-            kind: g3_workspace_crawl::G3WorkspaceEntryKind::File,
-            ignore_state: g3_workspace_crawl::G3WorkspaceIgnoreState::Included,
+            kind: g3_workspace_crawl::G3RsWorkspaceEntryKind::File,
+            ignore_state: g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included,
             readable: false,
         }],
     };

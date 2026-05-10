@@ -1,3 +1,8 @@
+/// Run the runtime check for `input` and assert the exact ordered list of finding ids.
+///
+/// # Panics
+///
+/// Panics when the produced finding id sequence does not match `expected`.
 pub fn assert_runtime_check_exact_ids(
     input: &g3ts_astro_content_types::G3TsAstroContentFileTreeChecksInput,
     expected: &[&str],
@@ -6,6 +11,11 @@ pub fn assert_runtime_check_exact_ids(
     assert_exact_ids(&results, expected);
 }
 
+/// Assert the exact ordered list of finding ids in `results`.
+///
+/// # Panics
+///
+/// Panics when the finding id sequence does not match `expected`.
 pub fn assert_exact_ids(results: &[guardrail3_check_types::G3CheckResult], expected: &[&str]) {
     let actual = results
         .iter()

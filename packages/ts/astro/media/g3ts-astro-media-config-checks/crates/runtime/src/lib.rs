@@ -1,9 +1,16 @@
+/// Internal module `media_assets_integration`.
 mod media_assets_integration;
+/// Internal module `media_build_validation`.
 mod media_build_validation;
+/// Internal module `package_rules`.
 mod package_rules;
+/// Internal module `policy_rules`.
 mod policy_rules;
+/// Internal module `rule_wiring`.
 mod rule_wiring;
+/// Internal module `run`.
 mod run;
+/// Internal module `support`.
 mod support;
 
 #[cfg(feature = "checks")]

@@ -1,6 +1,7 @@
 use g3rs_garde_types::{G3RsGardeApplicability, G3RsGardeSourceChecksInput};
 use guardrail3_check_types::G3CheckResult;
 
+#[must_use]
 pub fn check(input: &G3RsGardeSourceChecksInput) -> Vec<G3CheckResult> {
     if input.applicability == G3RsGardeApplicability::Inactive {
         return Vec::new();

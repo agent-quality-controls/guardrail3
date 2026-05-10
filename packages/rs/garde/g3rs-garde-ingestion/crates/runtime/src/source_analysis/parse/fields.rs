@@ -1,3 +1,12 @@
+#![expect(
+    clippy::wildcard_enum_match_arm,
+    clippy::excessive_nesting,
+    clippy::struct_excessive_bools,
+    clippy::needless_pass_by_value,
+    clippy::expect_used,
+    reason = "field analysis walks every variant of `syn::Type` to decide primitive-vs-validated; the boundary-field summary captures four orthogonal facts (has_skip, has_dive, has_validation_rules, uses_context) and merging them would lose information; named-field fixtures always have an identifier so the expect is the documented invariant; nested generic-argument inspection (`args.args.len() == 1` then `args.args.first()`) reflects the syn API shape"
+)]
+
 use quote::ToTokens;
 use syn::spanned::Spanned;
 
@@ -5,13 +14,19 @@ use super::aliases::{path_to_string, token_stream_uses_ctx_variable};
 use super::analysis::BoundaryField;
 
 #[derive(Default)]
+/// Struct `GardeAttrSummary` used by this module.
 struct GardeAttrSummary {
+    /// Field `has_skip`.
     has_skip: bool,
+    /// Field `has_dive`.
     has_dive: bool,
+    /// Field `has_meaningful_rule`.
     has_meaningful_rule: bool,
+    /// Field `uses_context`.
     uses_context: bool,
 }
 
+/// Implements `has garde context`.
 pub(crate) fn has_garde_context(attrs: &[syn::Attribute]) -> bool {
     attrs
         .iter()
@@ -28,6 +43,10 @@ pub(crate) fn has_garde_context(attrs: &[syn::Attribute]) -> bool {
         })
 }
 
+/// Implements `summarize garde attrs`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 fn summarize_garde_attrs(attrs: &[syn::Attribute]) -> GardeAttrSummary {
     let mut summary = GardeAttrSummary::default();
     for attr in attrs.iter().filter(|attr| attr.path().is_ident("garde")) {
@@ -55,6 +74,10 @@ fn summarize_garde_attrs(attrs: &[syn::Attribute]) -> GardeAttrSummary {
     summary
 }
 
+/// Implements `collect struct boundary fields`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub(crate) fn collect_struct_boundary_fields(
     item: &syn::ItemStruct,
     boundary_name: &str,
@@ -70,6 +93,10 @@ pub(crate) fn collect_struct_boundary_fields(
     )
 }
 
+/// Implements `collect enum boundary fields`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 pub(crate) fn collect_enum_boundary_fields(
     item: &syn::ItemEnum,
     boundary_name: &str,
@@ -90,6 +117,10 @@ pub(crate) fn collect_enum_boundary_fields(
         .collect()
 }
 
+/// Implements `collect fields`.
+///
+/// # Panics
+/// Panics on assertion failure or unexpected input.
 fn collect_fields(
     fields: &syn::Fields,
     boundary_name: &str,
@@ -136,6 +167,7 @@ fn collect_fields(
     }
 }
 
+/// Implements `boundary field`.
 fn boundary_field(
     field: &syn::Field,
     boundary_name: &str,
@@ -164,6 +196,7 @@ fn boundary_field(
     }
 }
 
+/// Implements `struct has non primitive fields`.
 pub(crate) fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
     match &item.fields {
         syn::Fields::Named(fields) => fields
@@ -178,6 +211,7 @@ pub(crate) fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
     }
 }
 
+/// Implements `enum has non primitive fields`.
 pub(crate) fn enum_has_non_primitive_fields(item: &syn::ItemEnum) -> bool {
     item.variants.iter().any(|variant| match &variant.fields {
         syn::Fields::Named(fields) => fields
@@ -192,14 +226,17 @@ pub(crate) fn enum_has_non_primitive_fields(item: &syn::ItemEnum) -> bool {
     })
 }
 
+/// Implements `type needs validation`.
 fn type_needs_validation(ty: &syn::Type) -> bool {
     !type_is_primitive_safe(ty)
 }
 
+/// Implements `type requires field validation`.
 pub(crate) fn type_requires_field_validation(ty: &syn::Type) -> bool {
     !type_is_primitive_safe(ty) && !type_is_unvalidatable(ty)
 }
 
+/// Implements `type is primitive safe`.
 fn type_is_primitive_safe(ty: &syn::Type) -> bool {
     match ty {
         syn::Type::Array(array) => type_is_primitive_safe(&array.elem),
@@ -245,6 +282,7 @@ fn type_is_primitive_safe(ty: &syn::Type) -> bool {
     }
 }
 
+/// Implements `type is unvalidatable`.
 fn type_is_unvalidatable(ty: &syn::Type) -> bool {
     match ty {
         syn::Type::Path(type_path) => {
@@ -280,12 +318,14 @@ fn type_is_unvalidatable(ty: &syn::Type) -> bool {
     }
 }
 
+/// Implements `collect candidate type names`.
 pub(crate) fn collect_candidate_type_names(ty: &syn::Type) -> Vec<String> {
     let mut out = Vec::new();
     collect_candidate_type_names_inner(ty, &mut out);
     out
 }
 
+/// Implements `collect candidate type names inner`.
 fn collect_candidate_type_names_inner(ty: &syn::Type, out: &mut Vec<String>) {
     match ty {
         syn::Type::Array(array) => collect_candidate_type_names_inner(&array.elem, out),
@@ -330,10 +370,12 @@ fn collect_candidate_type_names_inner(ty: &syn::Type, out: &mut Vec<String>) {
     }
 }
 
+/// Implements `type to string`.
 pub(crate) fn type_to_string(ty: &syn::Type) -> String {
     ty.to_token_stream().to_string().replace(' ', "")
 }
 
+/// Implements `span line`.
 pub(crate) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }

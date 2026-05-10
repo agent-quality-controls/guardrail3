@@ -1,12 +1,14 @@
 use jscpd_json_parser_types::document::{JscpdDocument, JscpdParseState, JscpdSnapshot};
 
-pub fn typed(document: &JscpdDocument) -> Option<&JscpdSnapshot> {
+#[must_use]
+pub const fn typed(document: &JscpdDocument) -> Option<&JscpdSnapshot> {
     match &document.typed {
         JscpdParseState::Parsed(snapshot) => Some(snapshot),
         JscpdParseState::Invalid(_) => None,
     }
 }
 
+#[must_use]
 pub fn parse_error_reason(document: &JscpdDocument) -> Option<&str> {
     match &document.typed {
         JscpdParseState::Parsed(_) => None,

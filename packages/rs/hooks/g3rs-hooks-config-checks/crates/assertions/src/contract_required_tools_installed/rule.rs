@@ -1,5 +1,11 @@
 crate::define_result_assertions!("g3rs-hooks/contract-required-tools-installed");
 
+/// Asserts that the rule emitted at least one finding and that every finding it emitted is an
+/// inventory record rather than a violation.
+///
+/// # Panics
+///
+/// Panics when the rule emitted no findings, or when any finding is non-inventory.
 pub fn assert_all_inventory(results: &[guardrail3_check_types::G3CheckResult]) {
     let findings = findings(results);
     assert!(!findings.is_empty(), "expected contract tool findings");

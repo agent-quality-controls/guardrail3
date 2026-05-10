@@ -7,6 +7,58 @@ use g3ts_astro_i18n_types::{
     G3TsAstroI18nPolicySurfaceState, G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState,
 };
 
+/// Returns a mutable reference to the parsed eslint snapshot of the first eslint contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first eslint contract must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn eslint_snapshot_mut(
+    input: &mut G3TsAstroI18nConfigChecksInput,
+) -> &mut G3TsAstroI18nEslintSurfaceSnapshot {
+    let config = &mut input.eslint_contracts[0].config;
+    let G3TsAstroI18nEslintSurfaceState::Parsed { snapshot } = config else {
+        panic!("golden astro-i18n eslint config should be parsed");
+    };
+    snapshot
+}
+
+/// Returns a mutable reference to the parsed package snapshot of the first integration contract.
+///
+/// Panics when the golden fixture state has been altered to a non-parsed variant, which the
+/// surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    clippy::panic,
+    reason = "golden fixture invariant: first integration contract package must be Parsed; mismatch is a test setup failure"
+)]
+pub(super) fn package_snapshot_mut(
+    input: &mut G3TsAstroI18nConfigChecksInput,
+) -> &mut G3TsAstroPackageSurfaceSnapshot {
+    let package = &mut input.integration_contracts[0].package;
+    let G3TsAstroPackageSurfaceState::Parsed { snapshot } = package else {
+        panic!("golden astro-i18n package should be parsed");
+    };
+    snapshot
+}
+
+/// Sets the policy of the first integration contract.
+///
+/// Panics when the input has no integration contract, which the surrounding test treats as a setup failure. Test-only helper.
+#[expect(
+    clippy::indexing_slicing,
+    reason = "golden fixture invariant: first integration contract must exist; mismatch is a test setup failure"
+)]
+pub(super) fn set_first_integration_policy(
+    input: &mut G3TsAstroI18nConfigChecksInput,
+    policy: G3TsAstroI18nPolicySurfaceState,
+) {
+    input.integration_contracts[0].astro_policy = policy;
+}
+
 pub(super) fn golden() -> G3TsAstroI18nConfigChecksInput {
     G3TsAstroI18nConfigChecksInput {
         integration_contracts: vec![G3TsAstroI18nIntegrationContractInput {

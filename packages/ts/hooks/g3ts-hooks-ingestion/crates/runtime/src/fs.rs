@@ -1,12 +1,19 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "centralized fs module: this is the single approved boundary for std::fs calls in this crate, per the workspace fs-module contract"
+)]
+
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 #[must_use]
+/// Internal function `read_to_string`.
 pub(crate) fn read_to_string(path: &Path) -> String {
     std::fs::read_to_string(path).unwrap_or_default()
 }
 
 #[must_use]
+/// Internal function `executable`.
 pub(crate) fn executable(path: &Path) -> Option<bool> {
     #[cfg(unix)]
     {
@@ -22,6 +29,7 @@ pub(crate) fn executable(path: &Path) -> Option<bool> {
 }
 
 #[must_use]
+/// Internal function `direct_files`.
 pub(crate) fn direct_files(root: &Path) -> Vec<PathBuf> {
     let Ok(read_dir) = std::fs::read_dir(root) else {
         return Vec::new();

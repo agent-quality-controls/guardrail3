@@ -1,0 +1,11 @@
+[[ignore]]
+fingerprint = "dee9fd50a6bcb320"
+reason = "tsconfig validation tests prove rejection of structurally distinct invalid roots; each test must remain a separate proof site"
+
+[[ignore]]
+fingerprint = "d6eda12bbd9602c7"
+reason = "parse and parse_document share the same Jsonc-error-to-crate-error closure; they intentionally pin the centralized error mapping at one source line each"
+
+[[ignore]]
+fingerprint = "ebe9cdcd68088843"
+reason = "from_path and from_path_document are minimal one-line wrappers around parse and parse_document; merging would obscure the snapshot-vs-document split"

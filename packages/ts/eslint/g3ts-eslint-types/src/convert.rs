@@ -9,6 +9,8 @@ use crate::types::{
     G3TsEslintSelectedConfig,
 };
 
+/// Converts a parser `ESLint` snapshot into the g3ts contract snapshot.
+#[must_use]
 pub fn snapshot(snapshot: &EslintConfigSnapshot) -> G3TsEslintConfigSnapshot {
     G3TsEslintConfigSnapshot {
         selected_config: G3TsEslintSelectedConfig {
@@ -19,6 +21,7 @@ pub fn snapshot(snapshot: &EslintConfigSnapshot) -> G3TsEslintConfigSnapshot {
     }
 }
 
+/// Converts a parser `ESLint` probe into the g3ts contract probe.
 fn probe(probe: &EslintEffectiveConfigProbe) -> G3TsEslintEffectiveConfigProbe {
     G3TsEslintEffectiveConfigProbe {
         probe: probe.probe,
@@ -34,6 +37,7 @@ fn probe(probe: &EslintEffectiveConfigProbe) -> G3TsEslintEffectiveConfigProbe {
     }
 }
 
+/// Converts a parser `ESLint` rule setting into the g3ts contract rule setting.
 fn rule_setting(setting: &EslintRuleSetting) -> G3TsEslintRuleSetting {
     G3TsEslintRuleSetting {
         severity: setting.severity,

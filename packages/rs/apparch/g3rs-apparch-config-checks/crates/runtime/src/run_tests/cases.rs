@@ -32,7 +32,7 @@ fn run_dispatches_prebound_dependency_and_purity_inputs() {
         crate_purity_checks: vec![G3RsApparchCratePurityChecksInput {
             krate: types.clone(),
             external_dependencies: vec![G3RsApparchExternalDependency {
-                cargo_rel_path: types.cargo_rel_path.clone(),
+                cargo_rel_path: types.cargo_rel_path,
                 dep_name: "sqlx".to_owned(),
                 kind: G3RsApparchDependencyKind::Dependency,
             }],
@@ -63,8 +63,8 @@ fn run_dispatches_prebound_same_layer_cycle_nodes() {
                     to: types_b.clone(),
                 },
                 g3rs_apparch_types::G3RsApparchSameLayerDependencyEdge {
-                    from: types_b.clone(),
-                    to: types_a.clone(),
+                    from: types_b,
+                    to: types_a,
                 },
             ],
         },
