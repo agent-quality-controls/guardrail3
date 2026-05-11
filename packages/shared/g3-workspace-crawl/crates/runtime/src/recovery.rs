@@ -6,7 +6,7 @@ use std::path::Path;
 ///
 /// These directories are excluded from the recovery phase to avoid
 /// descending into build artifacts, dependency trees, and git internals.
-const BANNED_DIR_NAMES: &[&str] = &[".git", "target", "node_modules"];
+const BANNED_DIR_NAMES: &[&str] = &[".git", "target", "node_modules", "dist"];
 
 /// Root-relative subtrees that are never walked during recovery.
 const BANNED_ROOTS: &[&str] = &[".claude/worktrees"];

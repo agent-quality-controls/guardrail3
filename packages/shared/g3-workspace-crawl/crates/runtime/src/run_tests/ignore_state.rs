@@ -412,3 +412,23 @@ fn banned_dirs_excluded_from_phase1_without_gitignore() {
     // Cargo.toml at root should still be included
     assertions::assert_crawl_entry_exists(&crawl, "Cargo.toml");
 }
+
+#[test]
+fn dist_is_excluded_from_phase1_without_gitignore() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    fs::create_dir_all(root.join("dist/assets")).expect("create dist dir");
+    write(root.join("dist/index.html"), "<html></html>");
+    write(root.join("dist/assets/app.js"), "console.log('built')");
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl =
+        crate::run::crawl(root).expect("crawl should succeed with un-gitignored dist directory");
+
+    assertions::assert_crawl_entry_absent(&crawl, "dist");
+    assertions::assert_crawl_entry_absent(&crawl, "dist/index.html");
+    assertions::assert_crawl_entry_absent(&crawl, "dist/assets/app.js");
+    assertions::assert_crawl_entry_exists(&crawl, "Cargo.toml");
+}
