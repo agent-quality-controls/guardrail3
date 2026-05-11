@@ -116,6 +116,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3-workspace-crawl"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
+]
+
+[[package]]
+name = "g3-workspace-crawl-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl-types",
+ "ignore",
+ "walkdir",
+]
+
+[[package]]
+name = "g3-workspace-crawl-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3rs-deny-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -137,9 +158,9 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-deny-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -190,13 +211,13 @@ name = "g3rs-deny-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-deny-config-checks",
  "g3rs-deny-filetree-checks",
  "g3rs-deny-ingestion-assertions",
  "g3rs-deny-ingestion-types",
  "g3rs-deny-types",
- "g3rs-workspace-crawl",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
  "tempfile",
 ]
 
@@ -209,29 +230,31 @@ name = "g3rs-deny-types"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3rs-toml-parser"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3rs-toml-parser-runtime",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3rs-toml-parser-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
- "ignore",
- "walkdir",
+ "g3rs-toml-parser-types",
+ "toml",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3rs-toml-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "getrandom"
@@ -275,29 +298,6 @@ name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
 
 [[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "hashbrown"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -308,9 +308,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "heck"
@@ -347,7 +347,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.0",
+ "hashbrown 0.17.1",
  "serde",
  "serde_core",
 ]
@@ -366,9 +366,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
-version = "0.2.185"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "linux-raw-sys"
@@ -614,11 +614,11 @@ dependencies = [
 
 [[package]]
 name = "wasip2"
-version = "1.0.2+wasi-0.2.9"
+version = "1.0.3+wasi-0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9517f9239f02c069db75e65f174b3da828fe5f5b945c4dd26bd25d89c03ebcf5"
+checksum = "20064672db26d7cdc89c7798c48a0fdfac8213434a1186e5ef29fd560ae223d6"
 dependencies = [
- "wit-bindgen",
+ "wit-bindgen 0.57.1",
 ]
 
 [[package]]
@@ -627,7 +627,7 @@ version = "0.4.0+wasi-0.3.0-rc-2026-01-06"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5"
 dependencies = [
- "wit-bindgen",
+ "wit-bindgen 0.51.0",
 ]
 
 [[package]]
@@ -705,6 +705,12 @@ checksum = "d7249219f66ced02969388cf2bb044a09756a083d0fab1e566056b04d9fbcaa5"
 dependencies = [
  "wit-bindgen-rust-macro",
 ]
+
+[[package]]
+name = "wit-bindgen"
+version = "0.57.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "wit-bindgen-core"

@@ -2,13 +2,13 @@ use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::path::Path;
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_deps_types::{
     G3RsDepsConfigChecksInput, G3RsDepsConfigInputScope, G3RsDepsFileTreeChecksInput,
     G3RsDepsSourceChecksInput,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3rs_toml_parser::types::RustProfile;
 use glob::Pattern;
-use guardrail3_rs_toml_parser::types::RustProfile;
 
 /// Re-export of `G3RsDepsIngestionError` so the facade can reach it.
 pub use g3rs_deps_ingestion_types::G3RsDepsIngestionError as IngestionError;
@@ -21,7 +21,7 @@ type ConfigChecksInputs = Vec<G3RsDepsConfigChecksInput>;
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<ConfigChecksInputs, IngestionError> {
     #[expect(
         clippy::disallowed_methods,
@@ -33,7 +33,7 @@ pub fn ingest_for_config_checks(
 
 /// Implements `ingest for config checks with path`.
 pub(crate) fn ingest_for_config_checks_with_path(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     path_env: Option<&OsStr>,
 ) -> Result<ConfigChecksInputs, IngestionError> {
     let workspace_cargo_entry = read_workspace_cargo_entry(crawl)?;
@@ -103,8 +103,8 @@ pub(crate) fn ingest_for_config_checks_with_path(
 
 /// Resolves the workspace-root `Cargo.toml` entry, returning a readability error if necessary.
 fn read_workspace_cargo_entry(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Result<&g3rs_workspace_crawl::G3RsWorkspaceEntry, IngestionError> {
+    crawl: &G3WorkspaceCrawl,
+) -> Result<&g3_workspace_crawl::G3WorkspaceEntry, IngestionError> {
     let workspace_cargo_entry = crate::select::select_workspace_cargo_toml(crawl)
         .ok_or(IngestionError::CargoTomlNotFound)?;
     if !workspace_cargo_entry.readable {
@@ -118,8 +118,8 @@ fn read_workspace_cargo_entry(
 
 /// Resolves the workspace-root `guardrail3-rs.toml` entry, returning a readability error if necessary.
 fn read_guardrail_entry(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Result<&g3rs_workspace_crawl::G3RsWorkspaceEntry, IngestionError> {
+    crawl: &G3WorkspaceCrawl,
+) -> Result<&g3_workspace_crawl::G3WorkspaceEntry, IngestionError> {
     let guardrail_entry = crate::select::select_workspace_guardrail3_rs_toml(crawl)
         .ok_or(IngestionError::Guardrail3RsTomlNotFound)?;
     if !guardrail_entry.readable {
@@ -155,7 +155,7 @@ fn validate_allowed_deps(
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub const fn ingest_for_source_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    _crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsDepsSourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
@@ -165,11 +165,11 @@ pub const fn ingest_for_source_checks(
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsDepsFileTreeChecksInput, IngestionError> {
     let cargo_lock_rel_path = "Cargo.lock".to_owned();
     let cargo_lock_exists =
-        g3rs_workspace_crawl::root_file(crawl, cargo_lock_rel_path.as_str()).is_some();
+        g3_workspace_crawl::root_file(crawl, cargo_lock_rel_path.as_str()).is_some();
     let profile = read_root_profile(crawl)?;
     let (cargo_lock_ignored, gitignore_rel_path) = read_lockfile_ignore_state(crawl)?;
 
@@ -194,7 +194,7 @@ type ReadRootProfile = Result<Option<RustProfile>, IngestionError>;
 ///
 /// # Errors
 /// Returns an error when the underlying operation fails.
-fn read_root_profile(crawl: &G3RsWorkspaceCrawl) -> ReadRootProfile {
+fn read_root_profile(crawl: &G3WorkspaceCrawl) -> ReadRootProfile {
     let Some(guardrail_entry) = crate::select::select_workspace_guardrail3_rs_toml(crawl) else {
         return Ok(None);
     };
@@ -211,9 +211,9 @@ fn read_root_profile(crawl: &G3RsWorkspaceCrawl) -> ReadRootProfile {
 
 /// Implements `read lockfile ignore state`.
 fn read_lockfile_ignore_state(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<LockfileIgnoreState, IngestionError> {
-    let Some(gitignore_entry) = g3rs_workspace_crawl::root_file(crawl, ".gitignore") else {
+    let Some(gitignore_entry) = g3_workspace_crawl::root_file(crawl, ".gitignore") else {
         return Ok((false, None));
     };
     if !gitignore_entry.readable {

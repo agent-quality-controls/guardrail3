@@ -2,9 +2,9 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use cargo_toml_parser::{types::CargoToml, types::Value};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use g3rs_code_types::G3RsCodeWaiver;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
-use guardrail3_rs_toml_parser::parse as parse_guardrail3_toml;
+use g3rs_toml_parser::parse as parse_guardrail3_toml;
 
 use crate::run::IngestionError;
 
@@ -71,7 +71,7 @@ impl CargoTargetClassifier {
     ///
     /// Returns an `IngestionError` when a relevant manifest cannot be read or parsed.
     pub(crate) fn build(
-        crawl: &G3RsWorkspaceCrawl,
+        crawl: &G3WorkspaceCrawl,
         selected_source_rels: &[String],
     ) -> Result<Self, IngestionError> {
         let relevant_manifest_rels = selected_source_rels
@@ -198,11 +198,11 @@ impl PackageTargets {
 
 /// Implements `load package targets`.
 fn load_package_targets(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     manifest_rel_path: &str,
 ) -> Result<PackageTargets, IngestionError> {
-    let manifest_entry = g3rs_workspace_crawl::entry(crawl, manifest_rel_path)
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+    let manifest_entry = g3_workspace_crawl::entry(crawl, manifest_rel_path)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .ok_or_else(|| IngestionError::Unreadable {
             path: crawl.root_abs_path.join(manifest_rel_path),
             reason: "manifest missing from crawl".to_owned(),
@@ -242,7 +242,7 @@ type ManifestWaivers = Vec<G3RsCodeWaiver>;
 
 /// Implements `manifest guardrail3 waivers`.
 fn manifest_guardrail3_waivers(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     manifest_rel_path: &str,
 ) -> Result<ManifestWaivers, IngestionError> {
     let Some(config_rel_path) =
@@ -250,7 +250,7 @@ fn manifest_guardrail3_waivers(
     else {
         return Ok(Vec::new());
     };
-    let Some(config_entry) = g3rs_workspace_crawl::entry(crawl, &config_rel_path) else {
+    let Some(config_entry) = g3_workspace_crawl::entry(crawl, &config_rel_path) else {
         return Ok(Vec::new());
     };
     if !config_entry.readable {
@@ -284,11 +284,11 @@ fn manifest_guardrail3_waivers(
 }
 
 /// Implements `nearest guardrail3 rel path`.
-fn nearest_guardrail3_rel_path(crawl: &G3RsWorkspaceCrawl, start_dir_rel: &str) -> Option<String> {
+fn nearest_guardrail3_rel_path(crawl: &G3WorkspaceCrawl, start_dir_rel: &str) -> Option<String> {
     let mut current = start_dir_rel.to_owned();
     loop {
         let candidate = join_rel(&current, "guardrail3-rs.toml");
-        if g3rs_workspace_crawl::entry(crawl, &candidate).is_some() {
+        if g3_workspace_crawl::entry(crawl, &candidate).is_some() {
             return Some(candidate);
         }
         if current.is_empty() {
@@ -320,7 +320,7 @@ fn manifest_shared_flag(manifest: &CargoToml) -> bool {
 
 /// Implements `resolve library root`.
 fn resolve_library_root(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     manifest_rel_path: &str,
     manifest: &CargoToml,
 ) -> Option<String> {
@@ -334,7 +334,7 @@ fn resolve_library_root(
         }
         if autolib_enabled {
             let default_rel = join_rel(&package_dir_rel, "src/lib.rs");
-            if g3rs_workspace_crawl::entry(crawl, &default_rel).is_some() {
+            if g3_workspace_crawl::entry(crawl, &default_rel).is_some() {
                 return Some(default_rel);
             }
         }
@@ -346,12 +346,12 @@ fn resolve_library_root(
     }
 
     let default_rel = join_rel(&package_dir_rel, "src/lib.rs");
-    g3rs_workspace_crawl::entry(crawl, &default_rel).map(|_| default_rel)
+    g3_workspace_crawl::entry(crawl, &default_rel).map(|_| default_rel)
 }
 
 /// Implements `resolve binary roots`.
 fn resolve_binary_roots(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     manifest_rel_path: &str,
     manifest: &CargoToml,
 ) -> Vec<String> {
@@ -370,7 +370,7 @@ fn resolve_binary_roots(
 
     if autobins_enabled {
         let default_main_rel = join_rel(&package_dir_rel, "src/main.rs");
-        if g3rs_workspace_crawl::entry(crawl, &default_main_rel).is_some() {
+        if g3_workspace_crawl::entry(crawl, &default_main_rel).is_some() {
             roots.push(default_main_rel);
         }
 
@@ -379,7 +379,7 @@ fn resolve_binary_roots(
             crawl
                 .entries
                 .iter()
-                .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+                .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
                 .filter_map(|entry| {
                     let rel_path = entry.path.rel_path.as_str();
                     let rel_path_obj = Path::new(rel_path);
@@ -406,7 +406,7 @@ fn resolve_binary_roots(
 }
 
 /// Implements `nearest manifest rel path`.
-fn nearest_manifest_rel_path(crawl: &G3RsWorkspaceCrawl, source_rel_path: &str) -> Option<String> {
+fn nearest_manifest_rel_path(crawl: &G3WorkspaceCrawl, source_rel_path: &str) -> Option<String> {
     let mut current = Path::new(source_rel_path).parent().map(PathBuf::from)?;
 
     loop {
@@ -416,7 +416,7 @@ fn nearest_manifest_rel_path(crawl: &G3RsWorkspaceCrawl, source_rel_path: &str) 
             current.join("Cargo.toml").to_string_lossy().into_owned()
         };
 
-        if g3rs_workspace_crawl::entry(crawl, &manifest_rel).is_some() {
+        if g3_workspace_crawl::entry(crawl, &manifest_rel).is_some() {
             return Some(manifest_rel);
         }
 

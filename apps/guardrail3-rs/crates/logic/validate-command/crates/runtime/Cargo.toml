@@ -7,13 +7,13 @@ publish = false
 [dependencies]
 guardrail3-rs-app-types = { path = "../../../../types/app-types" }
 guardrail3-check-types.workspace = true
-guardrail3-rs-toml-parser-runtime = { path = "../../../../../../../packages/parsers/guardrail3-rs-toml-parser/crates/runtime", features = ["api"] }
-guardrail3-rs-toml-parser-types = { path = "../../../../../../../packages/parsers/guardrail3-rs-toml-parser/crates/types", features = ["api"] }
+g3rs-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3rs-toml-parser/crates/runtime", features = ["api"] }
+g3rs-toml-parser-types = { path = "../../../../../../../packages/parsers/g3rs-toml-parser/crates/types", features = ["api"] }
 g3rs-hooks-contract-types.workspace = true
 g3rs-rust-family-contracts.workspace = true
 
 [dev-dependencies]
-g3rs-workspace-crawl.workspace = true
+g3-workspace-crawl.workspace = true
 tempfile = "3.18.0"
 guardrail3-rs-validate-command-assertions = { path = "../assertions" }
 

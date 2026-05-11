@@ -12,12 +12,12 @@
 )]
 use std::fs;
 
+use g3_workspace_crawl::crawl;
 use g3rs_topology_ingestion_assertions::run as assertions;
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyWorkspaceFamily,
     G3RsTopologyWorkspaceFamilyFileAttachment, G3RsTopologyWorkspaceFamilyFileKind,
 };
-use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 #[test]

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_seo_types::{
     G3TsAstroSeoConfigChecksInput, G3TsAstroSeoEslintPluginContractInput,
     G3TsAstroSeoIntegrationContractInput, G3TsAstroSeoMissingJsonLdHelperInput,

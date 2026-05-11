@@ -1,14 +1,16 @@
+//! Internal entry-construction helpers.
+
 use std::path::Path;
 
 use g3_workspace_crawl_types::{
     G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState, G3WorkspacePath,
 };
 
-/// Builds one [`G3WorkspaceEntry`] for `path` rooted at `workspace_root`.
+/// Build a `G3WorkspaceEntry` from a walker-discovered path.
 ///
-/// Falls back to the absolute path's lossy string when `path` is not strictly
-/// under `workspace_root`; this keeps the caller from having to short-circuit
-/// during walks that may surface symlink-redirected entries.
+/// When `path` is not under `workspace_root` the relative path falls back to
+/// the file's lossy representation (this should not occur for entries
+/// produced by the configured walkers, which descend from `workspace_root`).
 pub(crate) fn build_entry(
     workspace_root: &Path,
     path: &Path,
@@ -17,7 +19,8 @@ pub(crate) fn build_entry(
 ) -> G3WorkspaceEntry {
     let rel_path = path
         .strip_prefix(workspace_root)
-        .map_or_else(|_| path.to_string_lossy(), Path::to_string_lossy)
+        .map_or_else(|_| path.to_path_buf(), Path::to_path_buf)
+        .to_string_lossy()
         .replace('\\', "/");
     let abs_path = path.to_path_buf();
 
@@ -29,7 +32,7 @@ pub(crate) fn build_entry(
     }
 }
 
-/// Returns `true` when `path` is readable as the indicated [`G3WorkspaceEntryKind`].
+/// Whether the entry at `path` can be read from disk.
 fn is_readable(path: &Path, kind: G3WorkspaceEntryKind) -> bool {
     match kind {
         G3WorkspaceEntryKind::File => crate::fs::is_readable_file(path),

@@ -13,7 +13,7 @@ pub(super) fn git_init(path: &Path) {
         .current_dir(path)
         .status()
         .expect("git init should succeed in test fixture setup");
-    // g3rs-workspace-crawl::crawl requires a Cargo.toml at the workspace root.
+    // g3-workspace-crawl::crawl requires a Cargo.toml at the workspace root.
     // Provide a minimal one so test fixtures need only write the deny-specific files
     // they care about. Tests that exercise Cargo.toml content can overwrite it.
     fs::write(path.join("Cargo.toml"), "[workspace]\nmembers = []\n")
@@ -38,6 +38,6 @@ pub(super) fn make_unreadable(path: &Path) {
     fs::set_permissions(path, permissions).expect("should chmod fixture file unreadable");
 }
 
-pub(super) fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+pub(super) fn crawl(root: &Path) -> g3_workspace_crawl::G3WorkspaceCrawl {
+    g3_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }

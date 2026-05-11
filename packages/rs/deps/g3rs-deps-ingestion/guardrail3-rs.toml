@@ -8,10 +8,10 @@ allowed_deps = [
   "g3rs-deps-ingestion-runtime",
   "g3rs-deps-ingestion-types",
   "g3rs-deps-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "glob",
   "guardrail3-check-types",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "tempfile",
   "toml",
 ]

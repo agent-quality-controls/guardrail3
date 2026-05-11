@@ -25,7 +25,7 @@ fn inventories_extra_deny_bans_beyond_the_managed_baseline() {
 
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::extra_deny_bans_inventory::check,
     );

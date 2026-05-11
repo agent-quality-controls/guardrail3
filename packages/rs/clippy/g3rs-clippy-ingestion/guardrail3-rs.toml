@@ -10,9 +10,9 @@ allowed_deps = [
   "g3rs-clippy-filetree-checks",
   "g3rs-clippy-types",
   "guardrail3-check-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "glob",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "tempfile",
   "toml",
 ]

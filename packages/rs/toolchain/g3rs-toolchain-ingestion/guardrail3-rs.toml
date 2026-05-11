@@ -10,7 +10,7 @@ allowed_deps = [
   "g3rs-toolchain-ingestion-runtime",
   "g3rs-toolchain-ingestion-types",
   "g3rs-toolchain-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "guardrail3-check-types",
   "rust-toolchain-toml-parser",
   "tempfile",

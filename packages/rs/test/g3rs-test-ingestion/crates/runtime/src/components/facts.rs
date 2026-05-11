@@ -6,8 +6,8 @@
     clippy::needless_pass_by_value,
     reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
 )]
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_test_types::{G3RsTestComponentFileTreeFacts, G3RsTestComponentSourceFacts};
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::components::OwnedTestComponent;
 use crate::components::support::{
@@ -18,7 +18,7 @@ use crate::roots::OwnedTestRoot;
 
 /// `build_owned_component` function.
 pub(crate) fn build_owned_component(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
     layout: AssertionsLayout,
 ) -> OwnedTestComponent {

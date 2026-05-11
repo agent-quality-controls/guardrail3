@@ -1,5 +1,5 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_hooks_contract_types::G3HookRequirement;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 
 /// Runs the hooks or release family group against the prepared crawl.
@@ -9,7 +9,7 @@ use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 /// Returns [`FamilyRunError`] when ingestion for the selected family fails.
 pub fn run(
     family: SupportedFamily,
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Hooks => {

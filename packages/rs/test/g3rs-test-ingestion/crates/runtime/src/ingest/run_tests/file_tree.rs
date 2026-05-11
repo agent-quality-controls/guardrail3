@@ -34,7 +34,7 @@ fn write(path: impl AsRef<Path>, content: &str) {
 }
 
 fn run_file_tree_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
     inputs
@@ -87,7 +87,7 @@ fn ingest_for_file_tree_checks_classifies_structural_file_roles() {
         "#[test]\nfn stray() { assert!(true); }\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 
@@ -152,7 +152,7 @@ fn ingest_for_file_tree_checks_records_nested_assertions_manifest_path() {
         "[package]\nname = \"wrong-demo-assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 
@@ -208,7 +208,7 @@ fn ingest_for_file_tree_checks_keeps_valid_analyzed_files_when_one_source_file_f
         "pub fn assert_runtime() {}\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 
@@ -284,7 +284,7 @@ fn ingest_for_file_tree_checks_preserves_calls_inside_macro_arguments() {
         "fn fixture_path() -> &'static str { \"fixtures/demo.json\" }\npub fn demo_fixture() -> Vec<&'static str> { vec![fixture_path()] }\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 

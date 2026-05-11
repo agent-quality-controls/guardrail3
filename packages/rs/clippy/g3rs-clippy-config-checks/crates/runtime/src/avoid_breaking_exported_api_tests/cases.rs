@@ -1,6 +1,6 @@
 use crate::avoid_breaking_exported_api::check;
 use g3rs_clippy_config_checks_assertions::avoid_breaking_exported_api as assertions;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::{
     cargo_member, cargo_root, input_with_raw, missing_cargo_root, parsed_rust_policy,
 };

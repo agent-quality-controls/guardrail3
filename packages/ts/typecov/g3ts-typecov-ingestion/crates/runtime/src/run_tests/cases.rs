@@ -1,6 +1,6 @@
 #[test]
 fn empty_crawl_has_no_typecov_contracts() {
-    let crawl = g3_workspace_crawl::G3RsWorkspaceCrawl {
+    let crawl = g3_workspace_crawl::G3WorkspaceCrawl {
         root_abs_path: ".".into(),
         entries: Vec::new(),
     };
@@ -9,16 +9,16 @@ fn empty_crawl_has_no_typecov_contracts() {
 
 #[test]
 fn package_json_suffix_file_does_not_create_root() {
-    let crawl = g3_workspace_crawl::G3RsWorkspaceCrawl {
+    let crawl = g3_workspace_crawl::G3WorkspaceCrawl {
         root_abs_path: ".".into(),
-        entries: vec![g3_workspace_crawl::G3RsWorkspaceEntry {
-            path: g3_workspace_crawl::G3RsWorkspacePath {
+        entries: vec![g3_workspace_crawl::G3WorkspaceEntry {
+            path: g3_workspace_crawl::G3WorkspacePath {
                 rel_path: "fixtures/my-package.json".to_owned(),
                 abs_path: std::path::PathBuf::from("/tmp/fixtures/my-package.json"),
             },
-            kind: g3_workspace_crawl::G3RsWorkspaceEntryKind::File,
+            kind: g3_workspace_crawl::G3WorkspaceEntryKind::File,
             readable: true,
-            ignore_state: g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included,
+            ignore_state: g3_workspace_crawl::G3WorkspaceIgnoreState::Included,
         }],
     };
 
@@ -45,7 +45,7 @@ fn ignored_syncpack_config_is_missing() {
         g3_workspace_crawl::crawl_any_root(tempdir.path()).expect("crawl temporary workspace");
     for entry in &mut crawl.entries {
         if entry.path.rel_path == ".syncpackrc" {
-            entry.ignore_state = g3_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored;
+            entry.ignore_state = g3_workspace_crawl::G3WorkspaceIgnoreState::Ignored;
         }
     }
     let input = super::super::ingest_for_config_checks(&crawl);

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_setup_types::{
     G3TsAstroSetupAppRootInput, G3TsAstroSetupConfigChecksInput,
     G3TsAstroSetupEslintPluginContractInput, G3TsAstroSetupFileTreeChecksInput,

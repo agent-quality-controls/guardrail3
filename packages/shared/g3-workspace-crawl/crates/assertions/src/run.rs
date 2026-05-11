@@ -1,46 +1,60 @@
+//! Crawl-shape assertions used by integration tests.
+
 use g3_workspace_crawl_runtime::{
     G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState, entry,
     root_file,
 };
 
-/// Asserts that `entries` contains an entry with the given workspace-relative path.
+/// Assert the entry list contains an entry whose workspace-relative path
+/// matches `rel_path`.
 ///
 /// # Panics
-/// Panics when no entry has `path.rel_path == rel_path`.
+///
+/// Panics if no matching entry is found.
 pub fn assert_has_rel_path(entries: &[G3WorkspaceEntry], rel_path: &str) {
+    let mut iter = entries.iter();
+    let matched = iter.any(|entry| entry.path.rel_path == rel_path);
     assert!(
-        entries.iter().any(|entry| entry.path.rel_path == rel_path),
-        "missing crawl entry for {rel_path}; entries: {entries:#?}"
+        matched,
+        "run side: missing crawl entry rel_path={rel_path}; entries: {entries:#?}"
     );
 }
 
-/// Asserts that `crawl` contains an entry at `rel_path`.
+/// Assert the crawl contains an entry at `rel_path`.
 ///
 /// # Panics
-/// Panics when no entry has `path.rel_path == rel_path`.
+///
+/// Panics if no matching entry is found.
 pub fn assert_crawl_entry_exists(crawl: &G3WorkspaceCrawl, rel_path: &str) {
-    assert!(
-        entry(crawl, rel_path).is_some(),
-        "missing crawl entry for {rel_path}; crawl: {crawl:#?}"
-    );
+    assert_crawl_entry_presence(crawl, rel_path, true);
 }
 
-/// Asserts that `crawl` does not contain an entry at `rel_path`.
+/// Assert the crawl does not contain an entry at `rel_path`.
 ///
 /// # Panics
-/// Panics when an entry with `path.rel_path == rel_path` is present.
+///
+/// Panics if a matching entry is found.
 pub fn assert_crawl_entry_absent(crawl: &G3WorkspaceCrawl, rel_path: &str) {
-    assert!(
-        entry(crawl, rel_path).is_none(),
-        "unexpected crawl entry for {rel_path}; crawl: {crawl:#?}"
+    assert_crawl_entry_presence(crawl, rel_path, false);
+}
+
+/// Assert whether the crawl contains an entry at `rel_path`.
+fn assert_crawl_entry_presence(crawl: &G3WorkspaceCrawl, rel_path: &str, should_exist: bool) {
+    let lookup = entry(crawl, rel_path);
+    assert_eq!(
+        lookup.is_some(),
+        should_exist,
+        "crawl entry presence mismatch for {rel_path}; expected {should_exist}; found {lookup:#?}; crawl: {crawl:#?}"
     );
 }
 
-/// Asserts that `crawl` contains a fully matching entry at `rel_path`.
+/// Assert the entry at `rel_path` matches the expected kind, ignore state,
+/// and readability.
 ///
 /// # Panics
-/// Panics when no entry matches `rel_path`, or when its kind, ignore state, or
-/// readability differ from the supplied expectations.
+///
+/// Panics if no entry exists at `rel_path` or if any of its observed fields
+/// differ from the expected values.
 pub fn assert_crawl_entry(
     crawl: &G3WorkspaceCrawl,
     rel_path: &str,
@@ -51,31 +65,30 @@ pub fn assert_crawl_entry(
     let found = entry(crawl, rel_path);
     assert!(
         found.is_some(),
-        "missing crawl entry for {rel_path}; crawl: {crawl:#?}",
+        "missing crawl entry for {rel_path}; crawl: {crawl:#?}"
     );
-    if let Some(found_entry) = found {
-        assert_eq!(
-            found_entry.kind, kind,
-            "unexpected entry kind: {found_entry:#?}",
-        );
-        assert_eq!(
-            found_entry.ignore_state, ignore_state,
-            "unexpected ignore state: {found_entry:#?}",
-        );
-        assert_eq!(
-            found_entry.readable, readable,
-            "unexpected readability: {found_entry:#?}",
-        );
-    }
+    let Some(found) = found else { return };
+    assert_eq!(found.kind, kind, "unexpected entry kind: {found:#?}");
+    assert_eq!(
+        found.ignore_state, ignore_state,
+        "unexpected ignore state: {found:#?}"
+    );
+    assert_eq!(
+        found.readable, readable,
+        "unexpected readability: {found:#?}"
+    );
 }
 
-/// Asserts that `crawl` contains a root-level file with the given filename.
+/// Assert the crawl contains a root-level file with the given filename.
 ///
 /// # Panics
-/// Panics when no root-level file entry has the given filename.
+///
+/// Panics if no matching root file is found.
 pub fn assert_root_file_exists(crawl: &G3WorkspaceCrawl, file_name: &str) {
+    let entry_opt = root_file(crawl, file_name);
+    let total = crawl.entries.len();
     assert!(
-        root_file(crawl, file_name).is_some(),
-        "missing root file {file_name}; crawl: {crawl:#?}"
+        entry_opt.is_some(),
+        "root-level file {file_name} not in crawl ({total} entries): {crawl:#?}"
     );
 }

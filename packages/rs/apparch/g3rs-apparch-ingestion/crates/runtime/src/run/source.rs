@@ -8,8 +8,8 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_apparch_types as apparch;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::error::G3RsApparchIngestionError;
 use super::model::CrateRecord;
@@ -25,7 +25,7 @@ use crate::view::CrawlView;
 mod source_tests;
 
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<apparch::G3RsApparchSourceChecksInput, G3RsApparchIngestionError> {
     let view = CrawlView::new(crawl);
     let workspace = load_workspace_root(&view)?;

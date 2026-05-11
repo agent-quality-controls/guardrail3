@@ -1,6 +1,6 @@
 #[cfg(feature = "api")]
 pub use g3_workspace_crawl_runtime::{
-    G3WorkspaceCrawlError, crawl, entry, files_with_extension, root_file,
+    G3WorkspaceCrawlError, crawl, crawl_any_root, entry, files_with_extension, root_file,
 };
 #[cfg(feature = "types")]
 pub use g3_workspace_crawl_types::{

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, root_file};
+use g3_workspace_crawl::{G3WorkspaceCrawl, root_file};
 use g3ts_arch_types::{
     G3TsArchDeclaredEntryPoint, G3TsArchEntryPointSource, G3TsArchManifestSnapshot,
     G3TsArchManifestState,

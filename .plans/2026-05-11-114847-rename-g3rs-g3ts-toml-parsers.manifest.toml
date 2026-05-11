@@ -1,0 +1,51 @@
+[[tree_present]]
+path = "packages/parsers/g3rs-toml-parser/Cargo.toml"
+
+[[tree_present]]
+path = "packages/parsers/g3ts-toml-parser/Cargo.toml"
+
+[[tree_absent]]
+path = "packages/parsers/guardrail3-rs-toml-parser"
+
+[[tree_absent]]
+path = "packages/parsers/guardrail3-ts-toml-parser"
+
+[[forbidden_active_text]]
+scope = "apps/**"
+text = "guardrail3-rs-toml-parser"
+
+[[forbidden_active_text]]
+scope = "packages/**"
+text = "guardrail3-rs-toml-parser"
+
+[[forbidden_active_text]]
+scope = "apps/**"
+text = "guardrail3-ts-toml-parser"
+
+[[forbidden_active_text]]
+scope = "packages/**"
+text = "guardrail3-ts-toml-parser"
+
+[[forbidden_active_text]]
+scope = "apps/**"
+text = "guardrail3_rs_toml_parser"
+
+[[forbidden_active_text]]
+scope = "packages/**"
+text = "guardrail3_rs_toml_parser"
+
+[[forbidden_active_text]]
+scope = "apps/**"
+text = "guardrail3_ts_toml_parser"
+
+[[forbidden_active_text]]
+scope = "packages/**"
+text = "guardrail3_ts_toml_parser"
+
+[[required_active_text]]
+file = "packages/parsers/g3rs-toml-parser/Cargo.toml"
+text = "name = \"g3rs-toml-parser\""
+
+[[required_active_text]]
+file = "packages/parsers/g3ts-toml-parser/Cargo.toml"
+text = "name = \"g3ts-toml-parser\""

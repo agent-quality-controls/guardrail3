@@ -11,7 +11,7 @@ fn pipeline_reports_missing_graph_section() {
 
     write(root.join("deny.toml"), "");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_deny_config_checks::check(&input);
     assertions::assert_missing_graph_section(&results);

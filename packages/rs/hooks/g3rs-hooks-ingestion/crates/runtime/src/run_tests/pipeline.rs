@@ -16,7 +16,7 @@ fn pipeline_reports_fmt_step_when_real_command_exists() {
 
     write_fixture(root.join(".githooks/pre-commit"), "cargo fmt --check\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -48,7 +48,7 @@ fn pipeline_keeps_hook_rs_10_quiet_for_single_crate_repo() {
     );
     write_fixture(root.join(".githooks/pre-commit"), "cargo test\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -79,7 +79,7 @@ fn pipeline_keeps_echoed_fmt_text_as_missing_step() {
         "echo \"cargo fmt --check\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -107,7 +107,7 @@ fn pipeline_works_through_hooks_pre_commit_fallback() {
 
     write_fixture(root.join("hooks/pre-commit"), "cargo fmt --check\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -139,7 +139,7 @@ fn pipeline_fallback_hook_stays_quiet_about_inactive_modular_layout() {
         "echo cargo test --workspace\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -167,7 +167,7 @@ fn pipeline_reports_rs_config_trigger_for_guardrail3_rs_toml() {
         "if echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -198,7 +198,7 @@ fn pipeline_reports_top_level_g3rs_validate_step_inventory() {
         "g3rs validate --path .\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -231,7 +231,7 @@ fn pipeline_stays_clean_for_valid_githooks_setup() {
         "#!/usr/bin/env bash\nset -e\nREPO_ROOT=$(git rev-parse --show-toplevel)\nexport CARGO_TARGET_DIR=\"$REPO_ROOT/.cargo-target\"\nrun-parts .githooks/pre-commit.d\ncargo metadata --locked\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ngitleaks protect --staged --no-banner\ncargo dupes check --exclude-tests\ng3rs validate --path .\npnpm install --frozen-lockfile\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -255,7 +255,7 @@ fn pipeline_reports_inventory_for_valid_rust_hook_steps() {
         "#!/usr/bin/env bash\nset -e\ncargo fmt --check\ncargo clippy -- -D warnings\ncargo deny check\ncargo test --workspace\ncargo machete\ncargo dupes check --exclude-tests\ngitleaks protect --staged --no-banner\ng3rs validate --path .\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\npnpm install --frozen-lockfile\nif echo \"$STAGED_FILES\" | grep -qE '(guardrail3-rs\\.toml|clippy\\.toml|\\.clippy\\.toml|deny\\.toml|\\.deny\\.toml|rustfmt\\.toml|\\.rustfmt\\.toml|rust-toolchain\\.toml)$'; then\n    g3rs validate --path .\nfi\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -313,7 +313,7 @@ fn pipeline_reports_inventory_for_command_substitution_and_binary_aliases() {
         "#!/usr/bin/env bash\nset -e\nOUT=\"$(g3rs validate --path .)\"\ncargo-deny check\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -349,7 +349,7 @@ fn pipeline_reports_inventory_for_called_function_commands() {
         "#!/usr/bin/env bash\nrun_guardrails() {\n    g3rs validate --path .\n}\nrun_guardrails\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -380,7 +380,7 @@ fn pipeline_reports_inventory_for_executed_subshell_commands() {
         "#!/usr/bin/env bash\n(g3rs validate --path .)\n(cargo-deny check)\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -416,7 +416,7 @@ fn pipeline_reports_inventory_for_valid_shell_hook_steps() {
         "#!/usr/bin/env bash\nset -e\nrg '^(<<<<<<<|=======|>>>>>>>)' .\nstat -c%s Cargo.toml >/dev/null\ncargo metadata --locked\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -457,7 +457,7 @@ fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
         "run-parts .githooks/pre-commit.d\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -501,7 +501,7 @@ fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_e
     );
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -544,7 +544,7 @@ fn pipeline_config_reports_missing_g3rs_binary_when_required() {
         make_executable(&bin_dir.join("cargo-machete"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let path_env = std::env::join_paths([bin_dir.as_path()])
         .expect("build PATH override for hook config check");
     let input =
@@ -588,7 +588,7 @@ fn pipeline_config_reports_tool_inventory_and_missing_cargo_dupes() {
         make_executable(&bin_dir.join("g3rs"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let path_env = std::env::join_paths([bin_dir.as_path()])
         .expect("build PATH override for hook config check");
     let input =
@@ -660,7 +660,7 @@ fn pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries() {
         make_executable(&bin_dir.join("cargo-machete"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let path_env = std::env::join_paths([bin_dir.as_path()])
         .expect("build PATH override for hook config check");
     let input =
@@ -713,7 +713,7 @@ fn pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements() {
         make_executable(&bin_dir.join("cargo-machete"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let path_env = std::env::join_paths([bin_dir.as_path()])
         .expect("build PATH override for hook config check");
     let input =
@@ -751,7 +751,7 @@ fn pipeline_config_treats_path_qualified_tools_as_installed() {
         "/opt/bin/gitleaks protect --staged --no-banner\n/opt/bin/cargo-deny check\n/opt/bin/cargo-machete\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = super::super::ingest_for_config_checks_with_path(&crawl, None)
         .expect("ingestion should succeed");
     let results = g3rs_hooks_config_checks::check(&input);
@@ -791,7 +791,7 @@ fn pipeline_file_tree_reports_existing_pre_commit_hook() {
 
     write_fixture(root.join(".githooks/pre-commit"), "#!/usr/bin/env bash\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -825,7 +825,7 @@ fn pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract() {
         "#!/usr/bin/env bash\ncargo test --workspace\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -865,7 +865,7 @@ fn pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path() {
         make_executable(&root.join(".githooks/pre-commit.d/10-rust.sh"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -899,7 +899,7 @@ fn pipeline_file_tree_reports_missing_pre_commit_hook() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -935,7 +935,7 @@ fn nested_package_workspace_is_out_of_scope_for_repo_global_hooks() {
     );
     git_config_hooks_path(repo_root, ".githooks");
 
-    let crawl = g3rs_workspace_crawl::crawl(&nested).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(&nested).expect("crawl should succeed");
 
     let file_tree_input = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
@@ -975,7 +975,7 @@ fn pipeline_file_tree_reports_trust_risk() {
         "#!/usr/bin/env bash\nexit 0\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -1010,7 +1010,7 @@ fn pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk(
         "#!/usr/bin/env bash\nexit 0\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -1051,7 +1051,7 @@ fn pipeline_file_tree_reports_layout_stats_permissions_and_overrides() {
         make_executable(&root.join(".githooks/pre-commit.d/10-rust.sh"));
     }
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         super::super::ingest_for_file_tree_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_hooks_file_tree_checks::check(&input);
@@ -1163,7 +1163,7 @@ fn pipeline_runs_shared_source_checks_on_modular_scripts() {
         "echo cargo fmt --check\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1189,7 +1189,7 @@ fn pipeline_source_reports_shell_safety_inventory_for_valid_hook() {
         "#!/usr/bin/env bash\nset -e\ncargo fmt --check\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1222,7 +1222,7 @@ fn pipeline_source_reports_inventory_for_normalized_wrapped_commands() {
         "#!/usr/bin/env bash\nset -e\nif true; then /opt/bin/g3rs validate --path .; fi\ncargo +nightly clippy -- -D warnings\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1256,7 +1256,7 @@ fn pipeline_source_reports_missing_rust_and_shell_steps() {
     write_fixture(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write_fixture(root.join(".githooks/pre-commit"), "echo nothing useful\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1349,7 +1349,7 @@ fn pipeline_source_reports_inert_text_false_pass_risk() {
         "STEP='g3rs validate --path .'\nprintf '%s\n' 'cargo fmt --check'\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1373,7 +1373,7 @@ fn pipeline_source_reports_missing_workspace_scope_for_workspace_project() {
     write_fixture(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
     write_fixture(root.join(".githooks/pre-commit"), "cargo test\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1400,7 +1400,7 @@ fn pipeline_source_reports_invalid_dispatcher_syntax() {
     );
     fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1426,7 +1426,7 @@ fn pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes() {
         "# g3rs validate --path .\nenv -i g3rs validate --path .\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -1450,7 +1450,7 @@ fn pipeline_reports_fail_open_wrapper_on_called_function() {
         "run_tests() {\n    cargo test --workspace\n}\nrun_tests || true\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()

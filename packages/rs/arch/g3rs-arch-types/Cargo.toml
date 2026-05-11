@@ -89,4 +89,4 @@ redundant_pub_crate = "allow"
 workspace = true
 
 [dependencies]
-guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3rs-toml-parser = { path = "../../../parsers/g3rs-toml-parser", version = "0.1.0" }

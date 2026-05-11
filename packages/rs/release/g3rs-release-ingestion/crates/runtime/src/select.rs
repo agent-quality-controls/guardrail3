@@ -1,42 +1,42 @@
 use cargo_toml_parser::types::CargoToml;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use glob::Pattern;
 
 /// Result type returned by member-rel and pattern-expansion helpers; `Err` carries a human-readable reason.
 type MemberRelsResult = Result<Vec<String>, String>;
 
 /// `select_cargo_toml` function.
-pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
+pub(crate) fn select_cargo_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// `select_release_plz_toml` function.
-pub(crate) fn select_release_plz_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "release-plz.toml")
+pub(crate) fn select_release_plz_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "release-plz.toml")
 }
 
 /// `select_cliff_toml` function.
-pub(crate) fn select_cliff_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "cliff.toml")
+pub(crate) fn select_cliff_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "cliff.toml")
 }
 
 /// `select_member_manifest` function.
 pub(crate) fn select_member_manifest<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     member_rel: &str,
-) -> Option<&'a G3RsWorkspaceEntry> {
+) -> Option<&'a G3WorkspaceEntry> {
     let rel_path = member_manifest_rel_path(member_rel);
-    g3rs_workspace_crawl::entry(crawl, &rel_path)
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+    g3_workspace_crawl::entry(crawl, &rel_path)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
 }
 
 /// `select_workflow_entries` function.
-pub(crate) fn select_workflow_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspaceEntry> {
+pub(crate) fn select_workflow_entries(crawl: &G3WorkspaceCrawl) -> Vec<&G3WorkspaceEntry> {
     let mut entries = crawl
         .entries
         .iter()
         .filter(|entry| {
-            entry.kind == G3RsWorkspaceEntryKind::File
+            entry.kind == G3WorkspaceEntryKind::File
                 && entry.path.rel_path.starts_with(".github/workflows/")
                 && std::path::Path::new(&entry.path.rel_path)
                     .extension()
@@ -52,7 +52,7 @@ pub(crate) fn select_workflow_entries(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWo
 
 /// `collect_member_rels` function.
 pub(crate) fn collect_member_rels(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root_cargo: &CargoToml,
 ) -> MemberRelsResult {
     let workspace = root_cargo
@@ -87,7 +87,7 @@ pub(crate) fn collect_member_rels(
 }
 
 /// `expand_member_pattern` function.
-fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> MemberRelsResult {
+fn expand_member_pattern(crawl: &G3WorkspaceCrawl, pattern: &str) -> MemberRelsResult {
     let normalized = normalize_member_rel(pattern);
     if looks_like_glob(&normalized) {
         let compiled = Pattern::new(&normalized)
@@ -95,7 +95,7 @@ fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> MemberRel
         Ok(crawl
             .entries
             .iter()
-            .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory)
+            .filter(|entry| entry.kind == G3WorkspaceEntryKind::Directory)
             .map(|entry| entry.path.rel_path.as_str())
             .filter(|rel| compiled.matches(rel))
             .map(normalize_member_rel)

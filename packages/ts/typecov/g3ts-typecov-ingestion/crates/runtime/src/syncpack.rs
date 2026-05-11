@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_typecov_types::{
     G3TsTypecovSyncpackSnapshot, G3TsTypecovSyncpackSurfaceState,
     G3TsTypecovSyncpackVersionGroupSnapshot,
@@ -59,9 +59,9 @@ pub(crate) fn ingest_syncpack_config(
 }
 
 /// `included_file`: included file.
-fn included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
 }
 
 /// `syncpack_version_group`: syncpack version group.

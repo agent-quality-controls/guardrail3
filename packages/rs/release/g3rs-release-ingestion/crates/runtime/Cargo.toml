@@ -31,7 +31,7 @@ cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version
 cliff-toml-parser = { path = "../../../../../parsers/cliff-toml-parser", version = "0.1.0" }
 g3rs-release-ingestion-types = { path = "../types", version = "0.1.0" }
 g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0" }
 glob = "0.3"
 release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser", version = "0.1.0" }
 serde_yaml = "0.9"

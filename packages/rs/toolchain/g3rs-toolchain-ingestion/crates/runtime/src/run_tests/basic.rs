@@ -373,20 +373,20 @@ fn error_implements_std_error() {
 
 #[test]
 fn unreadable_toolchain_toml_returns_error() {
-    use g3rs_workspace_crawl::{
-        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
-        G3RsWorkspacePath,
+    use g3_workspace_crawl::{
+        G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
+        G3WorkspacePath,
     };
 
-    let crawl = G3RsWorkspaceCrawl {
+    let crawl = G3WorkspaceCrawl {
         root_abs_path: std::path::PathBuf::from("/synthetic/workspace"),
-        entries: vec![G3RsWorkspaceEntry {
-            path: G3RsWorkspacePath {
+        entries: vec![G3WorkspaceEntry {
+            path: G3WorkspacePath {
                 rel_path: "rust-toolchain.toml".to_owned(),
                 abs_path: std::path::PathBuf::from("/synthetic/workspace/rust-toolchain.toml"),
             },
-            kind: G3RsWorkspaceEntryKind::File,
-            ignore_state: G3RsWorkspaceIgnoreState::Included,
+            kind: G3WorkspaceEntryKind::File,
+            ignore_state: G3WorkspaceIgnoreState::Included,
             readable: false,
         }],
     };
@@ -410,9 +410,9 @@ fn unreadable_toolchain_toml_returns_error() {
 
 #[test]
 fn unreadable_cargo_toml_returns_error() {
-    use g3rs_workspace_crawl::{
-        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
-        G3RsWorkspacePath,
+    use g3_workspace_crawl::{
+        G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
+        G3WorkspacePath,
     };
 
     let temp = tempdir().expect("should create temporary directory for test workspace");
@@ -423,25 +423,25 @@ fn unreadable_cargo_toml_returns_error() {
         "[toolchain]\nchannel = \"1.85.0\"\n",
     );
 
-    let crawl = G3RsWorkspaceCrawl {
+    let crawl = G3WorkspaceCrawl {
         root_abs_path: root.to_path_buf(),
         entries: vec![
-            G3RsWorkspaceEntry {
-                path: G3RsWorkspacePath {
+            G3WorkspaceEntry {
+                path: G3WorkspacePath {
                     rel_path: "rust-toolchain.toml".to_owned(),
                     abs_path: root.join("rust-toolchain.toml"),
                 },
-                kind: G3RsWorkspaceEntryKind::File,
-                ignore_state: G3RsWorkspaceIgnoreState::Included,
+                kind: G3WorkspaceEntryKind::File,
+                ignore_state: G3WorkspaceIgnoreState::Included,
                 readable: true,
             },
-            G3RsWorkspaceEntry {
-                path: G3RsWorkspacePath {
+            G3WorkspaceEntry {
+                path: G3WorkspacePath {
                     rel_path: "Cargo.toml".to_owned(),
                     abs_path: root.join("Cargo.toml"),
                 },
-                kind: G3RsWorkspaceEntryKind::File,
-                ignore_state: G3RsWorkspaceIgnoreState::Included,
+                kind: G3WorkspaceEntryKind::File,
+                ignore_state: G3WorkspaceIgnoreState::Included,
                 readable: false,
             },
         ],

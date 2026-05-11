@@ -16,7 +16,7 @@ fn pipeline_reports_missing_deny_config() {
     let root = temp.path();
     git_init(root);
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -31,7 +31,7 @@ fn pipeline_inventories_selected_root_deny_config() {
 
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -51,7 +51,7 @@ fn pipeline_reports_same_root_conflicts() {
         "[advisories]\nyanked = \"warn\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -66,7 +66,7 @@ fn pipeline_reports_selected_deny_parse_failures() {
 
     write(root.join("deny.toml"), "[advisories");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -82,7 +82,7 @@ fn pipeline_reports_rust_policy_parse_failures_without_hiding_selected_coverage(
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
     write(root.join("guardrail3-rs.toml"), "profile = \"invalid\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -100,7 +100,7 @@ fn pipeline_reports_unreadable_selected_deny_file() {
     let deny_path = root.join("deny.toml");
     write(&deny_path, "[advisories]\nyanked = \"warn\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let mut permissions = fs::metadata(&deny_path)
         .expect("fixture file should exist before chmod")
         .permissions();
@@ -125,7 +125,7 @@ fn pipeline_reports_unreadable_rust_policy() {
     let guardrail_path = root.join("guardrail3-rs.toml");
     write(&guardrail_path, "profile = \"service\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let mut permissions = fs::metadata(&guardrail_path)
         .expect("fixture file should exist before chmod")
         .permissions();
@@ -147,7 +147,7 @@ fn pipeline_reports_shadowed_root_parse_failures() {
     write(root.join("deny.toml"), "[advisories]\nyanked = \"warn\"\n");
     write(root.join(".deny.toml"), "[advisories");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_file_tree_checks(&crawl).expect("filetree ingestion should succeed");
     let results = g3rs_deny_filetree_checks::check(&input);
@@ -166,7 +166,7 @@ fn pipeline_reports_shadowed_root_unreadable_failures() {
     let dot_deny_path = root.join(".deny.toml");
     write(&dot_deny_path, "[advisories]\nyanked = \"warn\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let mut permissions = fs::metadata(&dot_deny_path)
         .expect("fixture file should exist before chmod")
         .permissions();

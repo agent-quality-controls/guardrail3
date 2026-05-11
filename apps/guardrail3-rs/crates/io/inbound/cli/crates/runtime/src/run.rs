@@ -1,4 +1,4 @@
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_rs_app_types::{
     FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily,
     ValidateRepoRequest, ValidateRequest, WorkspaceCrawler,
@@ -15,7 +15,7 @@ impl FamilyRunner for CliFamilyRunner {
     fn run_family(
         &self,
         family: SupportedFamily,
-        crawl: &G3RsWorkspaceCrawl,
+        crawl: &G3WorkspaceCrawl,
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
             SupportedFamily::Toolchain | SupportedFamily::Fmt | SupportedFamily::Cargo => {

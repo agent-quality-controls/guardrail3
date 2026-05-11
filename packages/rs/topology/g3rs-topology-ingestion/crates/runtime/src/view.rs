@@ -1,17 +1,17 @@
-use g3rs_workspace_crawl::{
-    G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
+use g3_workspace_crawl::{
+    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
 };
 
 /// `CrawlView` struct.
 #[derive(Debug)]
 pub(crate) struct CrawlView<'a> {
     /// `crawl` item.
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
 }
 
 impl<'a> CrawlView<'a> {
     /// `new` function.
-    pub(crate) const fn new(crawl: &'a G3RsWorkspaceCrawl) -> Self {
+    pub(crate) const fn new(crawl: &'a G3WorkspaceCrawl) -> Self {
         Self { crawl }
     }
 
@@ -21,21 +21,21 @@ impl<'a> CrawlView<'a> {
     }
 
     /// `entry` method.
-    pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
-        g3rs_workspace_crawl::entry(self.crawl, rel_path)
+    pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3WorkspaceEntry> {
+        g3_workspace_crawl::entry(self.crawl, rel_path)
     }
 
     /// `included_file_entries` method.
-    pub(crate) fn included_file_entries(&self) -> impl Iterator<Item = &'a G3RsWorkspaceEntry> {
+    pub(crate) fn included_file_entries(&self) -> impl Iterator<Item = &'a G3WorkspaceEntry> {
         self.crawl.entries.iter().filter(|entry| {
-            entry.kind == G3RsWorkspaceEntryKind::File
-                && entry.ignore_state == G3RsWorkspaceIgnoreState::Included
+            entry.kind == G3WorkspaceEntryKind::File
+                && entry.ignore_state == G3WorkspaceIgnoreState::Included
         })
     }
 
     /// `read_file` method.
     pub(crate) fn read_file(&self, rel_path: &str) -> Result<String, std::io::Error> {
-        let path = g3rs_workspace_crawl::entry(self.crawl, rel_path)
+        let path = g3_workspace_crawl::entry(self.crawl, rel_path)
             .map(|entry| entry.path.abs_path.clone())
             .ok_or_else(|| {
                 std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl")

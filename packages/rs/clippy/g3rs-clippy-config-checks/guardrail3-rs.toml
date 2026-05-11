@@ -6,7 +6,7 @@ allowed_deps = [
   "clippy-toml-parser",
   "g3rs-clippy-types",
   "guardrail3-check-types",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "toml",
 ]
 

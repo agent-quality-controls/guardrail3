@@ -1,6 +1,6 @@
 use g3rs_deps_types::G3RsDepsFileTreeChecksInput;
+use g3rs_toml_parser::types::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::types::RustProfile;
 
 /// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deps/cargo-lock-present";

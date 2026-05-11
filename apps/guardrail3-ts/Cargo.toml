@@ -22,7 +22,7 @@ version = "0.1.0"
 [workspace.dependencies]
 clap = { version = "4.5", features = ["derive"] }
 guardrail3-check-types = { path = "../../packages/shared/guardrail3-check-types" }
-g3-workspace-crawl = { path = "../../packages/rs/g3rs-workspace-crawl", package = "g3rs-workspace-crawl", features = ["api"] }
+g3-workspace-crawl = { path = "../../packages/shared/g3-workspace-crawl", features = ["api"] }
 g3ts-astro-content-config-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-config-checks" }
 g3ts-astro-content-file-tree-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-file-tree-checks" }
 g3ts-astro-content-hook-contract = { path = "../../packages/ts/astro/content/g3ts-astro-content-hook-contract" }

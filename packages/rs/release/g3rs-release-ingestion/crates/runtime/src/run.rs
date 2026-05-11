@@ -1,8 +1,8 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_release_types::G3RsReleaseConfigRepo;
 use g3rs_release_types::{
     G3RsReleaseConfigChecksInput, G3RsReleaseFileTreeChecksInput, G3RsReleaseSourceChecksInput,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use g3rs_release_ingestion_types::G3RsReleaseIngestionError as IngestionError;
 
@@ -12,7 +12,7 @@ pub use g3rs_release_ingestion_types::G3RsReleaseIngestionError as IngestionErro
 ///
 /// Returns `IngestionError` when the workspace root is missing, unreadable, or fails to parse.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigChecksInput, IngestionError> {
     crate::ingest::config_result(crawl)
 }
@@ -23,7 +23,7 @@ pub fn ingest_for_config_checks(
 ///
 /// Returns `IngestionError` when the workspace root is missing, unreadable, or fails to parse.
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsReleaseSourceChecksInput, IngestionError> {
     crate::ingest::source_result(crawl)
 }
@@ -34,7 +34,7 @@ pub fn ingest_for_source_checks(
 ///
 /// Returns `IngestionError` when the workspace root is missing, unreadable, or fails to parse.
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsReleaseFileTreeChecksInput, IngestionError> {
     crate::ingest::filetree_result(crawl)
 }
@@ -45,7 +45,7 @@ pub fn ingest_for_file_tree_checks(
 ///
 /// Returns `IngestionError` when the workspace root is missing or the repo-root checks input is not yet implemented.
 pub fn ingest_for_repo_root_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigRepo, IngestionError> {
     crate::ingest::repo_root_result(crawl)
 }

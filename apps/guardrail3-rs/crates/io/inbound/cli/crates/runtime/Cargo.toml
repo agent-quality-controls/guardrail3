@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 clap.workspace = true
-g3rs-workspace-crawl.workspace = true
+g3-workspace-crawl.workspace = true
 guardrail3-rs-app-types = { path = "../../../../../types/app-types" }
 guardrail3-rs-family-runner-style = { path = "../../../../../logic/family-runner-style" }
 guardrail3-rs-family-runner-policy = { path = "../../../../../logic/family-runner-policy" }
@@ -19,7 +19,7 @@ guardrail3-rs-packages = { path = "../../../../outbound/packages" }
 guardrail3-rs-report = { path = "../../../../outbound/report/crates/runtime" }
 
 [dev-dependencies]
-g3rs-workspace-crawl.workspace = true
+g3-workspace-crawl.workspace = true
 guardrail3-rs-assertions = { path = "../assertions" }
 
 [features]

@@ -29,7 +29,7 @@ fn errors_on_non_empty_allow_list_and_deny_overrides() {
 
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::allow_override_channel::check,
     );

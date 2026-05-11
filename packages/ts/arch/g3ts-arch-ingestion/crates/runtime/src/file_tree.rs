@@ -1,4 +1,4 @@
-use g3_workspace_crawl::{G3RsWorkspaceCrawl as G3WorkspaceCrawl, entry};
+use g3_workspace_crawl::{G3WorkspaceCrawl, entry};
 use g3ts_arch_types::G3TsArchManifestState;
 
 /// Return rel-paths of declared facade entrypoints that exist as readable files in the crawl.

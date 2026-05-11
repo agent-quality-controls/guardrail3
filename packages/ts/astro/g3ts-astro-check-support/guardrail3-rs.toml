@@ -3,7 +3,6 @@ profile = "library"
 allowed_deps = [
   "eslint-config-parser",
   "g3-workspace-crawl",
-  "g3rs-workspace-crawl",
 ]
 
 [checks]

@@ -1,11 +1,11 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_release_types::G3RsReleaseInputFailure;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::collect::{ParsedCrate, RootCargo, push_all_failures};
 
 /// `parse_root_cargo` function.
 pub(super) fn parse_root_cargo(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     config_failures: &mut Vec<G3RsReleaseInputFailure>,
     filetree_failures: &mut Vec<G3RsReleaseInputFailure>,
     source_failures: &mut Vec<G3RsReleaseInputFailure>,
@@ -67,7 +67,7 @@ pub(super) fn parse_root_cargo(
 
 /// `collect_parsed_crates` function.
 pub(super) fn collect_parsed_crates(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: Option<&RootCargo>,
     config_failures: &mut Vec<G3RsReleaseInputFailure>,
     filetree_failures: &mut Vec<G3RsReleaseInputFailure>,
@@ -113,7 +113,7 @@ pub(super) fn collect_parsed_crates(
 
 /// Resolve workspace member rel paths, pushing failures if normalization fails.
 fn resolve_member_rels(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &RootCargo,
     config_failures: &mut Vec<G3RsReleaseInputFailure>,
     filetree_failures: &mut Vec<G3RsReleaseInputFailure>,
@@ -139,7 +139,7 @@ fn resolve_member_rels(
 
 /// Parse a single member manifest into a `ParsedCrate`, recording failures on the way.
 fn parse_member_crate(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     member_rel: String,
     config_failures: &mut Vec<G3RsReleaseInputFailure>,
     filetree_failures: &mut Vec<G3RsReleaseInputFailure>,

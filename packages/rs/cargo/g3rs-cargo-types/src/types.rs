@@ -1,5 +1,5 @@
 use cargo_toml_parser::types::CargoTomlDocument;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum G3RsCargoPolicyRootKind {

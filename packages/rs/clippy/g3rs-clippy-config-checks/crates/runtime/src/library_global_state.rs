@@ -1,4 +1,4 @@
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use std::collections::BTreeSet;
 
 use g3rs_clippy_types::G3RsClippyConfigChecksInput;

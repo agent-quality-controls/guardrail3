@@ -258,6 +258,34 @@ fn inventories_owned_assertions_proof_via_alias_import() {
 }
 
 #[test]
+fn inventories_owned_assertions_proof_when_package_name_uses_hyphens() {
+    let results = assertions::check(&assertions::input(
+        vec![
+            assertions::file(
+                "crates/assertions/src/run.rs",
+                G3RsTestFileKind::AssertionsModule,
+                Some("demo-assertions"),
+                "pub fn assert_demo() { assert_eq!(1, 1); }\n",
+            ),
+            assertions::file(
+                "crates/runtime/src/run_tests/cases.rs",
+                G3RsTestFileKind::InternalSidecarSupport,
+                Some("demo-assertions"),
+                "use demo_assertions::run as assertions;\n#[test]\nfn hyphenated() { assertions::assert_demo(); }\n",
+            ),
+        ],
+        Some("demo-assertions"),
+    ));
+
+    assertions::assert_has_inventory(
+        &results,
+        "g3rs-test/real-proof-site",
+        "test uses shared proof",
+        "crates/runtime/src/run_tests/cases.rs",
+    );
+}
+
+#[test]
 fn inventories_owned_assertions_proof_via_public_facade_reexport() {
     let results = assertions::check(&assertions::input(
         vec![

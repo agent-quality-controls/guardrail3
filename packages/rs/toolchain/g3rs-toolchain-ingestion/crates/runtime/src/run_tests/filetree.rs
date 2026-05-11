@@ -115,30 +115,30 @@ fn pipeline_reports_root_files_even_when_contents_are_malformed() {
 
 #[test]
 fn filetree_uses_unreadable_root_entries_without_reading_them() {
-    use g3rs_workspace_crawl::{
-        G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
-        G3RsWorkspacePath,
+    use g3_workspace_crawl::{
+        G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
+        G3WorkspacePath,
     };
 
-    let crawl = G3RsWorkspaceCrawl {
+    let crawl = G3WorkspaceCrawl {
         root_abs_path: std::path::PathBuf::from("/synthetic/workspace"),
         entries: vec![
-            G3RsWorkspaceEntry {
-                path: G3RsWorkspacePath {
+            G3WorkspaceEntry {
+                path: G3WorkspacePath {
                     rel_path: "rust-toolchain.toml".to_owned(),
                     abs_path: std::path::PathBuf::from("/synthetic/workspace/rust-toolchain.toml"),
                 },
-                kind: G3RsWorkspaceEntryKind::File,
-                ignore_state: G3RsWorkspaceIgnoreState::Included,
+                kind: G3WorkspaceEntryKind::File,
+                ignore_state: G3WorkspaceIgnoreState::Included,
                 readable: false,
             },
-            G3RsWorkspaceEntry {
-                path: G3RsWorkspacePath {
+            G3WorkspaceEntry {
+                path: G3WorkspacePath {
                     rel_path: "rust-toolchain".to_owned(),
                     abs_path: std::path::PathBuf::from("/synthetic/workspace/rust-toolchain"),
                 },
-                kind: G3RsWorkspaceEntryKind::File,
-                ignore_state: G3RsWorkspaceIgnoreState::Included,
+                kind: G3WorkspaceEntryKind::File,
+                ignore_state: G3WorkspaceIgnoreState::Included,
                 readable: false,
             },
         ],

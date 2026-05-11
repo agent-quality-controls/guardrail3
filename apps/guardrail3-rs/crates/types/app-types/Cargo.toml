@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 guardrail3-check-types.workspace = true
-g3rs-workspace-crawl.workspace = true
+g3-workspace-crawl.workspace = true
 
 [features]
 default = ["api"]

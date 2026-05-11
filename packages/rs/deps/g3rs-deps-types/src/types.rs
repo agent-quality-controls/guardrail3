@@ -1,4 +1,4 @@
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 /// Scope of one deps config input.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

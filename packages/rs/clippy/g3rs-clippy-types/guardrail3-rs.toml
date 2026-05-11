@@ -4,7 +4,7 @@ allowed_deps = [
   "cargo-config-toml-parser",
   "cargo-toml-parser",
   "clippy-toml-parser",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
 ]
 
 [checks]

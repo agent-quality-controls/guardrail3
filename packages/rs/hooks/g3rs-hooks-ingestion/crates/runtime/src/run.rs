@@ -15,11 +15,11 @@ use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::path::Path;
 
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use g3rs_hooks_config_checks_types::{G3RsHooksConfigChecksInput, G3RsHooksSelectedHookConfigFact};
 use g3rs_hooks_file_tree_checks_types::{G3RsHooksFileTreeChecksInput, G3RsHooksScriptFileFact};
 use g3rs_hooks_ingestion_types::G3RsHooksIngestionError as IngestionError;
 use g3rs_hooks_types::{G3RsHookScriptKind, G3RsHooksSourceChecksInput};
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 use hook_shell_parser::parse_script;
 
 use crate::upward;
@@ -27,7 +27,7 @@ use crate::upward;
 /// `SelectedHookSurface` struct.
 struct SelectedHookSurface<'a> {
     /// `entry` item.
-    entry: Cow<'a, G3RsWorkspaceEntry>,
+    entry: Cow<'a, G3WorkspaceEntry>,
 }
 
 /// Ingest hooks config-checks input by reading the host PATH from the environment.
@@ -40,13 +40,13 @@ struct SelectedHookSurface<'a> {
     reason = "this is the single sanctioned site that reads the host PATH for hook-existence resolution; downstream callers go through this entry point."
 )]
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsHooksConfigChecksInput, IngestionError> {
     ingest_for_config_checks_with_path(crawl, std::env::var_os("PATH").as_deref())
 }
 
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<Vec<G3RsHooksSourceChecksInput>, IngestionError> {
     let mut inputs = Vec::new();
     if !hooks_scope_is_active(crawl.root_abs_path.as_path())? {
@@ -110,7 +110,7 @@ pub fn ingest_for_source_checks(
 }
 
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsHooksFileTreeChecksInput, IngestionError> {
     let active = hooks_scope_is_active(crawl.root_abs_path.as_path())?;
     if !active {
@@ -153,7 +153,7 @@ pub fn ingest_for_file_tree_checks(
 
 /// `ingest_for_config_checks_with_path` function.
 pub(crate) fn ingest_for_config_checks_with_path(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     path_env: Option<&OsStr>,
 ) -> Result<G3RsHooksConfigChecksInput, IngestionError> {
     let active = hooks_scope_is_active(crawl.root_abs_path.as_path())?;
@@ -179,7 +179,7 @@ pub(crate) fn ingest_for_config_checks_with_path(
 
 /// `select_pre_commit_surface` function.
 fn select_pre_commit_surface<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     hooks_path: Option<&str>,
 ) -> Option<SelectedHookSurface<'a>> {
     let entry = match normalized_hooks_path(hooks_path) {
@@ -202,13 +202,13 @@ fn normalized_hooks_path(hooks_path: Option<&str>) -> Option<&str> {
 
 /// `collect_direct_script_facts` function.
 fn collect_direct_script_facts(
-    crawl: &G3RsWorkspaceCrawl,
-    dir_entry: &G3RsWorkspaceEntry,
+    crawl: &G3WorkspaceCrawl,
+    dir_entry: &G3WorkspaceEntry,
     rel_path_prefix: &str,
 ) -> Result<Vec<G3RsHooksScriptFileFact>, IngestionError> {
-    let from_workspace = g3rs_workspace_crawl::entry(crawl, dir_entry.path.rel_path.as_str())
+    let from_workspace = g3_workspace_crawl::entry(crawl, dir_entry.path.rel_path.as_str())
         .is_some_and(|entry| {
-            entry.kind == G3RsWorkspaceEntryKind::Directory
+            entry.kind == G3WorkspaceEntryKind::Directory
                 && entry.path.abs_path == dir_entry.path.abs_path
         });
 
@@ -216,7 +216,7 @@ fn collect_direct_script_facts(
         crawl
             .entries
             .iter()
-            .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+            .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
             .filter(|entry| {
                 let Some(suffix) = entry.path.rel_path.strip_prefix(rel_path_prefix) else {
                     return false;
@@ -236,10 +236,10 @@ fn collect_direct_script_facts(
                 continue;
             }
             let rel_path = format!("{rel_path_prefix}{file_name}");
-            let synth = G3RsWorkspaceEntry {
-                path: g3rs_workspace_crawl::G3RsWorkspacePath { rel_path, abs_path },
-                kind: G3RsWorkspaceEntryKind::File,
-                ignore_state: g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Included,
+            let synth = G3WorkspaceEntry {
+                path: g3_workspace_crawl::G3WorkspacePath { rel_path, abs_path },
+                kind: G3WorkspaceEntryKind::File,
+                ignore_state: g3_workspace_crawl::G3WorkspaceIgnoreState::Included,
                 readable: true,
             };
             facts.push(read_script_file_fact(&synth)?);
@@ -251,11 +251,11 @@ fn collect_direct_script_facts(
 }
 
 /// `collect_direct_file_names` function.
-fn collect_direct_file_names(crawl: &G3RsWorkspaceCrawl, prefix: &str) -> Vec<String> {
+fn collect_direct_file_names(crawl: &G3WorkspaceCrawl, prefix: &str) -> Vec<String> {
     let mut paths = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter_map(|entry| {
             let suffix = entry.path.rel_path.strip_prefix(prefix)?;
             (!suffix.is_empty() && !suffix.contains('/')).then(|| suffix.to_owned())
@@ -266,8 +266,8 @@ fn collect_direct_file_names(crawl: &G3RsWorkspaceCrawl, prefix: &str) -> Vec<St
 }
 
 /// `root_is_workspace_project` function.
-fn root_is_workspace_project(crawl: &G3RsWorkspaceCrawl) -> Result<bool, IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, "Cargo.toml") else {
+fn root_is_workspace_project(crawl: &G3WorkspaceCrawl) -> Result<bool, IngestionError> {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, "Cargo.toml") else {
         return Ok(false);
     };
     if !entry.readable {
@@ -295,7 +295,7 @@ fn read_entry(path: &std::path::Path) -> Result<String, IngestionError> {
 
 /// `read_selected_hook_config_fact` function.
 fn read_selected_hook_config_fact(
-    entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    entry: &g3_workspace_crawl::G3WorkspaceEntry,
 ) -> Result<G3RsHooksSelectedHookConfigFact, IngestionError> {
     if !entry.readable {
         return Err(IngestionError::Unreadable {
@@ -312,7 +312,7 @@ fn read_selected_hook_config_fact(
 
 /// `read_script_file_fact` function.
 fn read_script_file_fact(
-    entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    entry: &g3_workspace_crawl::G3WorkspaceEntry,
 ) -> Result<G3RsHooksScriptFileFact, IngestionError> {
     if !entry.readable {
         return Err(IngestionError::Unreadable {
@@ -446,10 +446,10 @@ fn hooks_scope_is_active(root: &Path) -> Result<bool, IngestionError> {
 }
 
 /// `collect_trust_risks` function.
-fn collect_trust_risks(crawl: &G3RsWorkspaceCrawl, hooks_path: Option<&str>) -> Vec<String> {
+fn collect_trust_risks(crawl: &G3WorkspaceCrawl, hooks_path: Option<&str>) -> Vec<String> {
     let mut risks = Vec::new();
 
-    if g3rs_workspace_crawl::entry(crawl, ".husky/pre-commit").is_some() {
+    if g3_workspace_crawl::entry(crawl, ".husky/pre-commit").is_some() {
         risks.push(".husky/pre-commit".to_owned());
     }
     for rel_path in [
@@ -458,7 +458,7 @@ fn collect_trust_risks(crawl: &G3RsWorkspaceCrawl, hooks_path: Option<&str>) -> 
         ".lefthook.yml",
         ".lefthook.yaml",
     ] {
-        if g3rs_workspace_crawl::entry(crawl, rel_path).is_some() {
+        if g3_workspace_crawl::entry(crawl, rel_path).is_some() {
             risks.push(rel_path.to_owned());
         }
     }

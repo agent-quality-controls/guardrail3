@@ -1,0 +1,185 @@
+[[tree_present]]
+path = "packages/shared/g3-workspace-crawl/Cargo.toml"
+
+[[tree_present]]
+path = "packages/parsers/g3rs-toml-parser/Cargo.toml"
+
+[[tree_present]]
+path = "packages/parsers/g3ts-toml-parser/Cargo.toml"
+
+[[tree_absent]]
+path = "packages/rs/g3rs-workspace-crawl"
+
+[[cargo_dependency]]
+manifest = "apps/guardrail3-rs/Cargo.toml"
+package = "g3-workspace-crawl"
+path = "../../packages/shared/g3-workspace-crawl"
+features = ["api"]
+
+[[cargo_dependency]]
+manifest = "apps/guardrail3-ts/Cargo.toml"
+package = "g3-workspace-crawl"
+path = "../../packages/shared/g3-workspace-crawl"
+features = ["api"]
+
+[[forbidden_cargo_text]]
+scope = "apps/**/Cargo.toml"
+text = "packages/rs/g3rs-workspace-crawl"
+
+[[forbidden_cargo_text]]
+scope = "packages/**/Cargo.toml"
+text = "packages/rs/g3rs-workspace-crawl"
+
+[[forbidden_cargo_text]]
+scope = "apps/**/Cargo.toml"
+text = "package = \"g3rs-workspace-crawl\""
+
+[[forbidden_cargo_text]]
+scope = "packages/**/Cargo.toml"
+text = "package = \"g3rs-workspace-crawl\""
+
+[[forbidden_source_text]]
+scope = "apps/**/*.rs"
+text = "g3rs_workspace_crawl"
+
+[[forbidden_source_text]]
+scope = "packages/**/*.rs"
+text = "g3rs_workspace_crawl"
+
+[[forbidden_source_text]]
+scope = "apps/**/*.rs"
+text = "G3RsWorkspace"
+
+[[forbidden_source_text]]
+scope = "packages/**/*.rs"
+text = "G3RsWorkspace"
+
+[[forbidden_source_text]]
+scope = "apps/**/guardrail3-rs.toml"
+text = "g3rs-workspace-crawl"
+
+[[forbidden_source_text]]
+scope = "packages/**/guardrail3-rs.toml"
+text = "g3rs-workspace-crawl"
+
+[[forbidden_ts_dependency]]
+scope = "packages/ts/**/Cargo.toml"
+package = "g3rs-toml-parser"
+
+[[forbidden_ts_dependency]]
+scope = "packages/ts/**/Cargo.toml"
+package = "g3rs-toml-parser-runtime"
+
+[[forbidden_ts_dependency]]
+scope = "packages/ts/**/Cargo.toml"
+package = "g3rs-toml-parser-types"
+
+[[forbidden_source_text]]
+scope = "packages/ts/**/*.rs"
+text = "g3rs_toml_parser"
+
+[[forbidden_rs_dependency]]
+scope = "packages/rs/**/Cargo.toml"
+package = "g3ts-toml-parser"
+
+[[forbidden_rs_dependency]]
+scope = "packages/rs/**/Cargo.toml"
+package = "g3ts-toml-parser-runtime"
+
+[[forbidden_rs_dependency]]
+scope = "packages/rs/**/Cargo.toml"
+package = "g3ts-toml-parser-types"
+
+[[forbidden_source_text]]
+scope = "packages/rs/**/*.rs"
+text = "g3ts_toml_parser"
+
+[[parser_schema_forbidden]]
+file = "packages/parsers/g3rs-toml-parser/crates/types/src/guardrail3_rs_toml.rs"
+text = "pub ts:"
+
+[[parser_schema_forbidden]]
+file = "packages/parsers/g3rs-toml-parser/crates/types/src/guardrail3_rs_toml.rs"
+text = "pub struct TsPolicyConfig"
+
+[[parser_schema_forbidden]]
+file = "packages/parsers/g3rs-toml-parser/crates/types/src/guardrail3_rs_toml.rs"
+text = "pub struct TsAstroPolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub style: Option<TsStylePolicyConfig>"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub astro: Option<TsAstroPolicyConfig>"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsStylePolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsAstroPolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsAstroContentPolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsAstroI18nPolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsAstroMediaPolicyConfig"
+
+[[parser_schema_required]]
+file = "packages/parsers/g3ts-toml-parser/crates/types/src/guardrail3_ts_toml.rs"
+text = "pub struct TsAstroSeoPolicyConfig"
+
+[[ts_policy_reader]]
+file = "packages/ts/style/g3ts-style-ingestion/crates/runtime/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/content/g3ts-astro-content-ingestion/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/i18n/g3ts-astro-i18n-ingestion/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/mdx/g3ts-astro-mdx-ingestion/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/media/g3ts-astro-media-ingestion/crates/runtime/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/seo/g3ts-astro-seo-ingestion/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[ts_policy_reader]]
+file = "packages/ts/astro/state/g3ts-astro-state-ingestion/src/policy.rs"
+parser = "g3ts_toml_parser"
+
+[[verify_command]]
+cmd = "python3 scripts/verify-shared-infra-boundaries.py"
+
+[[verify_command]]
+cmd = "cargo test --manifest-path packages/shared/g3-workspace-crawl/Cargo.toml --workspace"
+
+[[verify_command]]
+cmd = "cargo test --manifest-path packages/parsers/g3rs-toml-parser/Cargo.toml --workspace"
+
+[[verify_command]]
+cmd = "cargo test --manifest-path packages/parsers/g3ts-toml-parser/Cargo.toml --workspace"
+
+[[verify_command]]
+cmd = "cargo test --manifest-path apps/guardrail3-rs/Cargo.toml --workspace"
+
+[[verify_command]]
+cmd = "cargo test --manifest-path apps/guardrail3-ts/Cargo.toml --workspace"

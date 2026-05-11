@@ -165,7 +165,11 @@ fn function_calls_owned_assertion_proof(
     if proof_bearing_assertion_functions.is_empty() {
         return false;
     }
-    let mut root_prefixes = BTreeMap::from([(assertions_package_name.to_owned(), Vec::new())]);
+    let package_root = assertions_package_name.replace('-', "_");
+    let mut root_prefixes = BTreeMap::from([
+        (assertions_package_name.to_owned(), Vec::new()),
+        (package_root, Vec::new()),
+    ]);
     let mut bare_imports = BTreeMap::new();
     let mut glob_prefixes = Vec::new();
 
@@ -173,9 +177,16 @@ fn function_calls_owned_assertion_proof(
         if binding
             .path_segments
             .first()
-            .is_some_and(|segment| segment == assertions_package_name)
+            .is_some_and(|segment| root_prefixes.contains_key(segment))
         {
-            let relative_segments = binding.path_segments[1..].to_vec();
+            let Some(first) = binding.path_segments.first() else {
+                continue;
+            };
+            let Some(base_prefix) = root_prefixes.get(first).cloned() else {
+                continue;
+            };
+            let mut relative_segments = base_prefix;
+            relative_segments.extend(binding.path_segments.iter().skip(1).cloned());
             if let Some(local_name) = binding.local_name.as_ref() {
                 let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
                 let _ = bare_imports.insert(local_name.clone(), relative_segments.join("::"));

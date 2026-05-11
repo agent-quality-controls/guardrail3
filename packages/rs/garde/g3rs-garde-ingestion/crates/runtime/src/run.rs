@@ -1,12 +1,12 @@
 use cargo_toml_parser::types::CargoToml;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 /// Public ingestion entry point.
 use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
 use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
     G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver, G3RsSourceFile,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
-use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
+use g3rs_toml_parser::types::Guardrail3RsToml;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.
 pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
@@ -21,7 +21,7 @@ pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
 ///
 /// Returns an error if Cargo.toml is missing, unreadable, or unparseable.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsGardeConfigChecksInput, IngestionError> {
     let cargo_entry =
         crate::select::select_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
@@ -92,7 +92,7 @@ pub fn ingest_for_config_checks(
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsGardeSourceChecksInput, IngestionError> {
     let cargo_entry =
         crate::select::select_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
@@ -142,7 +142,7 @@ fn has_garde_dependency(cargo: &CargoToml) -> bool {
 }
 
 /// Implements `parse rust policy`.
-fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
+fn parse_rust_policy(crawl: &G3WorkspaceCrawl) -> G3RsGardeRustPolicyInput {
     let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
         return G3RsGardeRustPolicyInput::Missing;
     };
@@ -158,7 +158,7 @@ fn parse_rust_policy(crawl: &G3RsWorkspaceCrawl) -> G3RsGardeRustPolicyInput {
     }
 
     match crate::fs::read_to_string(&entry.path.abs_path) {
-        Ok(content) => match guardrail3_rs_toml_parser::parse(&content) {
+        Ok(content) => match g3rs_toml_parser::parse(&content) {
             Ok(parsed) => G3RsGardeRustPolicyInput::Parsed {
                 rel_path: entry.path.rel_path.clone(),
                 garde_enabled: parsed
@@ -213,7 +213,7 @@ fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<G3RsGardeWaiver> {
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub const fn ingest_for_file_tree_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    _crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)
 }

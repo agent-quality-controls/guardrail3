@@ -1,6 +1,6 @@
 use crate::missing_type_ban::check;
 use g3rs_clippy_config_checks_assertions::missing_type_ban as assertions;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::{input_from_raw, input_with_raw, missing_cargo_root, parsed_rust_policy};
 
 #[test]

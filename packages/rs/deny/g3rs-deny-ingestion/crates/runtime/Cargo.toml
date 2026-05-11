@@ -26,8 +26,8 @@ shared = true
 deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser", version = "0.1.0" }
 g3rs-deny-types = { path = "../../../g3rs-deny-types", version = "0.1.0" }
 g3rs-deny-ingestion-types = { path = "../types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
-guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0" }
+g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 
 [dev-dependencies]
 g3rs-deny-config-checks = { path = "../../../g3rs-deny-config-checks" }

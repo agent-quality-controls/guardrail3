@@ -1,9 +1,9 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 /// Public ingestion entry point.
 use g3rs_deny_types::{
     G3RsDenyConfigChecksInput, G3RsDenyFileTreeChecksInput, G3RsDenyRustPolicyState,
     G3RsDenySourceChecksInput,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsDenyIngestionError` so the facade can reach it.
 pub use g3rs_deny_ingestion_types::G3RsDenyIngestionError as IngestionError;
@@ -17,7 +17,7 @@ pub use g3rs_deny_ingestion_types::G3RsDenyIngestionError as IngestionError;
 ///
 /// Returns an error if the deny config is missing, unreadable, or unparseable.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsDenyConfigChecksInput, IngestionError> {
     let entry = crate::select::select_deny_toml(crawl).ok_or(IngestionError::DenyTomlNotFound)?;
 
@@ -39,7 +39,7 @@ pub fn ingest_for_config_checks(
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub const fn ingest_for_source_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    _crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsDenySourceChecksInput, IngestionError> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
@@ -49,7 +49,7 @@ pub const fn ingest_for_source_checks(
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsDenyFileTreeChecksInput, IngestionError> {
     let root_deny_entries = crate::select::root_deny_entries(crawl);
     let candidate_deny_rel_paths = root_deny_entries
@@ -124,7 +124,7 @@ pub fn ingest_for_file_tree_checks(
 }
 
 /// Implements `read rust policy state`.
-fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsDenyRustPolicyState {
+fn read_rust_policy_state(crawl: &G3WorkspaceCrawl) -> G3RsDenyRustPolicyState {
     let Some(entry) = crate::select::select_guardrail3_rs_toml(crawl) else {
         return G3RsDenyRustPolicyState::Missing;
     };

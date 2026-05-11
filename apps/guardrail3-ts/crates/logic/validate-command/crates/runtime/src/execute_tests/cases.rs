@@ -5,7 +5,7 @@
 
 use std::path::Path;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_ts_app_types::{
     FamilyRun, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,

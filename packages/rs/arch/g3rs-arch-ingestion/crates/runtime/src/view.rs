@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use g3rs_workspace_crawl::{
-    G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
+use g3_workspace_crawl::{
+    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
 };
 
 use crate::fs;
@@ -32,19 +32,19 @@ impl DirContents {
 #[derive(Debug)]
 pub(crate) struct CrawlView<'a> {
     /// crawl.
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     /// dirs.
     dirs: BTreeMap<String, DirContents>,
 }
 
 impl<'a> CrawlView<'a> {
     /// new.
-    pub(crate) fn new(crawl: &'a G3RsWorkspaceCrawl) -> Self {
+    pub(crate) fn new(crawl: &'a G3WorkspaceCrawl) -> Self {
         let mut dirs = BTreeMap::<String, DirContents>::new();
         let _ = dirs.insert(String::new(), DirContents::default());
 
         for entry in &crawl.entries {
-            if entry.ignore_state == G3RsWorkspaceIgnoreState::Ignored {
+            if entry.ignore_state == G3WorkspaceIgnoreState::Ignored {
                 continue;
             }
 
@@ -52,7 +52,7 @@ impl<'a> CrawlView<'a> {
             let (parent, name) = rel_path.rsplit_once('/').unwrap_or(("", rel_path.as_str()));
             let parent_entry = dirs.entry(parent.to_owned()).or_default();
             insert_entry_into(parent_entry, entry.kind, name);
-            if entry.kind == G3RsWorkspaceEntryKind::Directory {
+            if entry.kind == G3WorkspaceEntryKind::Directory {
                 let _ = dirs.entry(rel_path.clone()).or_default();
             }
         }
@@ -74,19 +74,19 @@ impl<'a> CrawlView<'a> {
     pub(crate) fn file_exists(&self, rel_path: &str) -> bool {
         self.crawl.entries.iter().any(|entry| {
             entry.path.rel_path == rel_path
-                && entry.kind == G3RsWorkspaceEntryKind::File
-                && entry.ignore_state == G3RsWorkspaceIgnoreState::Included
+                && entry.kind == G3WorkspaceEntryKind::File
+                && entry.ignore_state == G3WorkspaceIgnoreState::Included
         })
     }
 
     /// entry.
-    pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3RsWorkspaceEntry> {
-        g3rs_workspace_crawl::entry(self.crawl, rel_path)
+    pub(crate) fn entry(&self, rel_path: &str) -> Option<&G3WorkspaceEntry> {
+        g3_workspace_crawl::entry(self.crawl, rel_path)
     }
 
     /// abs path.
     pub(crate) fn abs_path(&self, rel_path: &str) -> Option<PathBuf> {
-        g3rs_workspace_crawl::entry(self.crawl, rel_path).map(|entry| entry.path.abs_path.clone())
+        g3_workspace_crawl::entry(self.crawl, rel_path).map(|entry| entry.path.abs_path.clone())
     }
 
     /// all dir rels.
@@ -96,7 +96,7 @@ impl<'a> CrawlView<'a> {
 
     /// read file.
     pub(crate) fn read_file(&self, rel_path: &str) -> Result<String, std::io::Error> {
-        let path = g3rs_workspace_crawl::entry(self.crawl, rel_path)
+        let path = g3_workspace_crawl::entry(self.crawl, rel_path)
             .map(|entry| entry.path.abs_path.clone())
             .ok_or_else(|| {
                 std::io::Error::new(std::io::ErrorKind::NotFound, "entry missing from crawl")
@@ -121,14 +121,14 @@ impl<'a> CrawlView<'a> {
 
 /// Insert a single entry's name into the parent's files or dirs vec, deduping
 /// against any existing entry with the same name.
-fn insert_entry_into(parent_entry: &mut DirContents, kind: G3RsWorkspaceEntryKind, name: &str) {
+fn insert_entry_into(parent_entry: &mut DirContents, kind: G3WorkspaceEntryKind, name: &str) {
     match kind {
-        G3RsWorkspaceEntryKind::File => {
+        G3WorkspaceEntryKind::File => {
             if !parent_entry.files.iter().any(|existing| existing == name) {
                 parent_entry.files.push(name.to_owned());
             }
         }
-        G3RsWorkspaceEntryKind::Directory => {
+        G3WorkspaceEntryKind::Directory => {
             if !parent_entry.dirs.iter().any(|existing| existing == name) {
                 parent_entry.dirs.push(name.to_owned());
             }

@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 #[must_use]
 /// `typecov_roots`: typecov roots.
@@ -27,9 +27,9 @@ pub(crate) fn scoped_rel_path(scope: &str, local: &str) -> String {
 }
 
 /// `package_manifest`: package manifest.
-fn package_manifest(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn package_manifest(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
         && entry.path.rel_path.rsplit('/').next() == Some("package.json")
 }
 

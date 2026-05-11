@@ -28,7 +28,7 @@ fn run_config_pipeline(
     root: &Path,
     cargo_mutants_installed: bool,
 ) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         super::super::ingest_for_config_checks_with_tool_state(&crawl, cargo_mutants_installed)
             .expect("config ingestion should succeed");

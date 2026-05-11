@@ -1,7 +1,7 @@
 use super::settings;
 use super::targets;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_check_support::surfaces::{
     G3TsAstroRawEslintConfigState, read_eslint_config_surface,
 };

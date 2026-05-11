@@ -93,24 +93,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -132,7 +132,7 @@ dependencies = [
 name = "g3ts-npmrc-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-npmrc-ingestion-assertions",
  "g3ts-npmrc-types",
  "npmrc-parser",

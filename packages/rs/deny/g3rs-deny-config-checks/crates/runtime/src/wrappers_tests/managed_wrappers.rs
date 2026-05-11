@@ -12,7 +12,7 @@ fn errors_when_canonical_non_empty_wrapper_policy_changes() {
     );
     let results = run(
         &deny_toml,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::wrappers::check,
     );

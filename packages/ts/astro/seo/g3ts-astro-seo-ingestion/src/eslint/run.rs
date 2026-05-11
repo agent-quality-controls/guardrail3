@@ -3,7 +3,7 @@ use super::rule_helpers::{
     rule_setting_is_error, rule_setting_option_globs_are_valid,
     rule_setting_option_globs_match_any_path,
 };
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_check_support::surfaces::{
     G3TsAstroRawEslintConfigState, read_eslint_config_surface,
 };
@@ -200,8 +200,8 @@ fn first_matching_app_rel_path(
         .entries
         .iter()
         .find(|entry| {
-            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+            entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
                 && g3ts_astro_check_support::surfaces::is_under_app_root(
                     &entry.path.rel_path,
                     app_root_rel_path,
@@ -379,9 +379,9 @@ fn endpoint_paths(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Vec<Stri
 }
 
 /// `is_included_file`: is included file.
-fn is_included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn is_included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
 }
 
 /// Returns `true` when `rel_path` ends with the given extension (case-insensitive).

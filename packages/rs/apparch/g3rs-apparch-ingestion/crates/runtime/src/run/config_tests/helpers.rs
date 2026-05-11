@@ -5,15 +5,15 @@
 
 use std::path::Path;
 
+use g3_workspace_crawl::{G3WorkspaceCrawl, crawl};
 use g3rs_apparch_types::G3RsApparchConfigChecksInput;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, crawl};
 use tempfile::{TempDir, tempdir};
 
 pub(super) fn temp_workspace() -> TempDir {
     tempdir().expect("create temporary workspace root for config ingestion test")
 }
 
-pub(super) fn crawl_workspace(root: &Path) -> G3RsWorkspaceCrawl {
+pub(super) fn crawl_workspace(root: &Path) -> G3WorkspaceCrawl {
     crawl(root).expect("crawl test workspace for config ingestion")
 }
 

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_fmt_types::G3TsFmtConfigSurfaceState;
 
 /// Ingests the Prettier config under `app_root_rel_path` into a surface state.
@@ -7,8 +7,8 @@ pub(crate) fn ingest_prettier_config(
     app_root_rel_path: &str,
 ) -> G3TsFmtConfigSurfaceState {
     let Some(entry) = crawl.entries.iter().find(|entry| {
-        entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-            && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+        entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+            && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
             && crate::roots::prettier_config_name(&entry.path.rel_path).is_some()
             && parent_rel_path(&entry.path.rel_path) == app_root_rel_path
     }) else {

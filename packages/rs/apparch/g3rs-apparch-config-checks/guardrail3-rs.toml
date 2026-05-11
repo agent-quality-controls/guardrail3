@@ -6,7 +6,7 @@ allowed_deps = [
   "g3rs-apparch-types",
   "guardrail3-check-types",
   "guardrail3-reason-policy",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
 ]
 
 [checks]

@@ -15,6 +15,7 @@
     reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
 )]
 use cargo_toml_parser::types::CargoToml;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_topology_ingestion_types::G3RsTopologyIngestionError as IngestionError;
 use g3rs_topology_types::{
     G3RsTopologyCargoManifestKind, G3RsTopologyDescendantCargoRoot,
@@ -22,12 +23,11 @@ use g3rs_topology_types::{
     G3RsTopologyWorkspaceFamilyFile, G3RsTopologyWorkspaceFamilyFileAttachment,
     G3RsTopologyWorkspaceFamilyFileKind,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::view::CrawlView;
 
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsTopologyFileTreeChecksInput, IngestionError> {
     let view = CrawlView::new(crawl);
     let workspace_manifest = parse_required_root_manifest(&view)?;

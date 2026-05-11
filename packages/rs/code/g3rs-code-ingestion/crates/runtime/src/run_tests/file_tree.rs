@@ -51,7 +51,7 @@ resolver = \"2\"\n",
     );
     write(root.join("crates/skip/src/lib.rs"), "");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 
@@ -73,7 +73,7 @@ fn file_tree_input_supports_owned_roots_with_no_rust_files() {
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 

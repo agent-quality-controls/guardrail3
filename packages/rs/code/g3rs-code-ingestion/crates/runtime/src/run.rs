@@ -1,9 +1,9 @@
 use cargo_toml_parser::parse;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_code_types::{
     G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeParsedSourceState,
     G3RsCodeSourceChecksInput, G3RsCodeStructuralCapRoot,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 /// Re-export of `G3RsCodeIngestionError` so the facade can reach it.
 pub use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
@@ -13,7 +13,7 @@ pub use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsCodeConfigChecksInput, IngestionError> {
     crate::config_files::collect_config_files(crawl)
 }
@@ -26,7 +26,7 @@ type SourceChecksInputs = Vec<G3RsCodeSourceChecksInput>;
 /// # Errors
 /// Returns an error when the underlying operation fails.
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<SourceChecksInputs, IngestionError> {
     crate::select::select_source_files(crawl)?
         .into_iter()
@@ -77,7 +77,7 @@ fn parse_rust_file(content: &str) -> G3RsCodeParsedSourceState {
 /// Returns an error when the underlying operation fails.
 /// Ingest `code` file-tree checks input from a workspace crawl.
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsCodeFileTreeChecksInput, IngestionError> {
     Ok(G3RsCodeFileTreeChecksInput {
         roots: selected_package_roots(crawl)?,
@@ -88,8 +88,8 @@ pub fn ingest_for_file_tree_checks(
 type PackageRoots = Vec<G3RsCodeStructuralCapRoot>;
 
 /// Implements `selected package roots`.
-fn selected_package_roots(crawl: &G3RsWorkspaceCrawl) -> Result<PackageRoots, IngestionError> {
-    let Some(root_cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
+fn selected_package_roots(crawl: &G3WorkspaceCrawl) -> Result<PackageRoots, IngestionError> {
+    let Some(root_cargo_entry) = g3_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Err(IngestionError::ParseFailed {
             path: crawl.root_abs_path.join("Cargo.toml"),
             reason: "root Cargo.toml missing from crawl".to_owned(),

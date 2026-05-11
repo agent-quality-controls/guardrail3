@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_spelling_types::{
     G3TsSpellingSyncpackSnapshot, G3TsSpellingSyncpackSurfaceState,
     G3TsSpellingSyncpackVersionGroupSnapshot,
@@ -61,9 +61,9 @@ pub(crate) fn ingest_syncpack_config(
 
 /// Whether `entry` is an included file (used to skip directories and
 /// ignored entries when matching `.syncpackrc`).
-fn included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
 }
 
 /// Project a parsed Syncpack version-group into the spelling-specific

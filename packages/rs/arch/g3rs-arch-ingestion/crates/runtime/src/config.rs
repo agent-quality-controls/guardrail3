@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 
 use toml::Value;
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_arch_types::types::{
     G3RsArchBoundaryRef, G3RsArchConfigChecksInput, G3RsArchConfigCrate, G3RsArchCrateNode,
     G3RsArchDependencyEdge, G3RsArchFacadeSurface,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
@@ -14,7 +14,7 @@ use crate::workspace::{collect_crate_nodes, is_inside, normalize_path, parent_of
 
 /// ingest for config checks fn.
 pub(crate) fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> crate::run::IngestResult<Vec<G3RsArchConfigChecksInput>> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;

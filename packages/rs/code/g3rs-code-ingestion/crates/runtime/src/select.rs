@@ -1,10 +1,10 @@
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
 
 /// Selected Rust source file metadata ready to be read and mapped.
 pub(crate) struct SelectedCodeSourceFile<'a> {
     /// Underlying crawl entry.
-    pub(crate) entry: &'a G3RsWorkspaceEntry,
+    pub(crate) entry: &'a G3WorkspaceEntry,
     /// Whether the file belongs to test-owned code.
     pub(crate) is_test: bool,
     /// Optional pre-resolved policy profile.
@@ -22,12 +22,12 @@ pub(crate) type SelectedCodeSourceFiles<'a> = Vec<SelectedCodeSourceFile<'a>>;
 
 /// Select all owned Rust source files for the `code` source lane.
 pub(crate) fn select_source_files(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<SelectedCodeSourceFiles<'_>, IngestionError> {
     let source_entries = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| {
             std::path::Path::new(entry.path.rel_path.as_str())
                 .extension()

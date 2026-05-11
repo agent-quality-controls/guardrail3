@@ -7,7 +7,7 @@ allowed_deps = [
   "g3rs-deny-types",
   "guardrail3-check-types",
   "guardrail3-reason-policy",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "test_support",
   "toml",
 ]

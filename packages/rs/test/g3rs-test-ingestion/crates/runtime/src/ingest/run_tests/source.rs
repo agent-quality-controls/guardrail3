@@ -30,7 +30,7 @@ fn write(path: impl AsRef<Path>, content: &str) {
 }
 
 fn run_ast_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
     inputs
@@ -231,7 +231,7 @@ fn ingest_for_source_checks_classifies_root_files_by_role() {
         "pub fn fixture() {}\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 
@@ -302,7 +302,7 @@ fn ingest_for_source_checks_expects_package_style_assertions_after_nested_fix_at
         "pub fn assert_runtime() { assert_eq!(1, 1); }\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
 

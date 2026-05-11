@@ -6,8 +6,8 @@ use g3rs_clippy_types::{
     G3RsClippyCargoMemberState, G3RsClippyCargoRootState, G3RsClippyConfigChecksInput,
     G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
+use g3rs_toml_parser::types::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::types::RustProfile;
 
 /// Threshold Expectation struct.
 #[derive(Debug)]

@@ -1,14 +1,9 @@
-#![allow(
-    clippy::disallowed_methods,
-    reason = "fixture-driven filesystem tests need direct std::fs calls in test bodies"
-)]
-
 use std::fs;
 
 use g3_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
-use super::helpers::git_init;
+use super::fixtures::git_init;
 
 #[test]
 fn includes_hidden_config_files() {

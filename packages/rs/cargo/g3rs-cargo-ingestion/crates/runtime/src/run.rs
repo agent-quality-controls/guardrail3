@@ -1,9 +1,9 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_cargo_types::{
     G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput, G3RsCargoInputFailure,
     G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoSourceChecksInput,
     G3RsCargoWorkspaceMember,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use g3rs_cargo_ingestion_types::G3RsCargoIngestionError as IngestionError;
 
@@ -18,7 +18,7 @@ type IngestResult<T> = Result<T, IngestionError>;
 /// or fails strict parsing, or when workspace-member resolution surfaces a
 /// non-recoverable error.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> IngestResult<G3RsCargoConfigChecksInput> {
     let root_entry =
         crate::select::select_root_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
@@ -52,7 +52,7 @@ pub fn ingest_for_config_checks(
 ///
 /// Currently always returns [`IngestionError::SourceIngestionNotImplemented`].
 pub const fn ingest_for_source_checks(
-    _crawl: &G3RsWorkspaceCrawl,
+    _crawl: &G3WorkspaceCrawl,
 ) -> IngestResult<G3RsCargoSourceChecksInput> {
     Err(IngestionError::SourceIngestionNotImplemented)
 }
@@ -64,7 +64,7 @@ pub const fn ingest_for_source_checks(
 /// Returns an error only for non-recoverable ingestion failures; soft failures
 /// (parse error, unreadable) are converted into `input_failures` entries.
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> IngestResult<G3RsCargoFileTreeChecksInput> {
     let root_entry =
         crate::select::select_root_cargo_toml(crawl).ok_or(IngestionError::CargoTomlNotFound)?;
@@ -105,8 +105,8 @@ struct FileTreeIngestAccumulator {
 
 /// Ingest the workspace root Cargo.toml into the file-tree accumulator.
 fn ingest_root_for_file_tree(
-    crawl: &G3RsWorkspaceCrawl,
-    root_entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    crawl: &G3WorkspaceCrawl,
+    root_entry: &g3_workspace_crawl::G3WorkspaceEntry,
     acc: &mut FileTreeIngestAccumulator,
 ) -> IngestResult<()> {
     let raw_cargo = match crate::parse::parse_raw_toml(&root_entry.path.abs_path) {
@@ -178,9 +178,9 @@ fn push_root_typed_parse_failure(
 
 /// Ingest declared workspace members into the file-tree accumulator.
 fn ingest_workspace_members_for_file_tree(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     raw_cargo: &toml::Value,
-    root_entry: &g3rs_workspace_crawl::G3RsWorkspaceEntry,
+    root_entry: &g3_workspace_crawl::G3WorkspaceEntry,
     acc: &mut FileTreeIngestAccumulator,
 ) -> IngestResult<()> {
     let member_rels = match crate::select::collect_declared_member_rels(crawl, raw_cargo) {
@@ -248,7 +248,7 @@ fn push_member_parse_failure(
 
 /// Append rust-policy soft-failure entries to the `input_failures` vec.
 fn append_rust_policy_input_failures(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     input_failures: &mut Vec<G3RsCargoInputFailure>,
 ) {
     match read_rust_policy_state(crawl) {
@@ -267,7 +267,7 @@ fn append_rust_policy_input_failures(
 
 /// collect config members fn.
 fn collect_config_members(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     raw_cargo: &toml::Value,
 ) -> IngestResult<Vec<G3RsCargoWorkspaceMember>> {
     let member_rels =
@@ -303,7 +303,7 @@ fn collect_config_members(
 }
 
 /// Read the parsed rust-policy state for the workspace, if any.
-fn read_rust_policy_state(crawl: &G3RsWorkspaceCrawl) -> G3RsCargoRustPolicyState {
+fn read_rust_policy_state(crawl: &G3WorkspaceCrawl) -> G3RsCargoRustPolicyState {
     let Some(entry) = crate::select::select_root_rust_policy_toml(crawl) else {
         return G3RsCargoRustPolicyState::Missing;
     };

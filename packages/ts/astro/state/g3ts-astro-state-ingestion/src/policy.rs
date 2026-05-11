@@ -1,7 +1,4 @@
-use g3_workspace_crawl::{
-    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
-    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState,
-};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind, G3WorkspaceIgnoreState};
 use g3ts_astro_state_types::{G3TsAstroStatePolicySnapshot, G3TsAstroStatePolicySurfaceState};
 use std::path::Path;
 
@@ -55,7 +52,7 @@ pub(crate) fn ingest_state_policy_surface(
         };
     }
 
-    let config = match guardrail3_rs_toml_parser::from_path(&entry.path.abs_path) {
+    let config = match g3ts_toml_parser::from_path(&entry.path.abs_path) {
         Ok(config) => config,
         Err(error) => {
             return G3TsAstroStatePolicySurfaceState::ParseError {
@@ -65,12 +62,7 @@ pub(crate) fn ingest_state_policy_surface(
         }
     };
 
-    let Some(ts) = config.ts else {
-        return G3TsAstroStatePolicySurfaceState::MissingAstroPolicy {
-            rel_path: entry.path.rel_path.clone(),
-        };
-    };
-    let Some(astro) = ts.astro else {
+    let Some(astro) = config.astro else {
         return G3TsAstroStatePolicySurfaceState::MissingAstroPolicy {
             rel_path: entry.path.rel_path.clone(),
         };
@@ -125,7 +117,7 @@ fn select_first_existing<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
     candidates: &[&str],
-) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'a g3_workspace_crawl::G3WorkspaceEntry> {
     candidates.iter().find_map(|rel_path| {
         exact_included_file(
             crawl,
@@ -138,7 +130,7 @@ fn select_first_existing<'a>(
 fn select_content_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
-) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'a g3_workspace_crawl::G3WorkspaceEntry> {
     select_first_existing(crawl, app_root_rel_path, &CONTENT_CONFIGS)
 }
 
@@ -146,7 +138,7 @@ fn select_content_config<'a>(
 fn select_live_config<'a>(
     crawl: &'a G3WorkspaceCrawl,
     app_root_rel_path: &str,
-) -> Option<&'a g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'a g3_workspace_crawl::G3WorkspaceEntry> {
     select_first_existing(crawl, app_root_rel_path, &LIVE_CONFIGS)
 }
 
@@ -166,7 +158,7 @@ fn has_content_files(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> bool 
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,
-) -> Option<&'crawl g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'crawl g3_workspace_crawl::G3WorkspaceEntry> {
     crawl.entries.iter().find(|entry| {
         entry.kind == G3WorkspaceEntryKind::File
             && entry.ignore_state == G3WorkspaceIgnoreState::Included
@@ -175,13 +167,13 @@ fn exact_included_file<'crawl>(
 }
 
 /// Returns true when `entry` is an included file (not directory, not ignored).
-fn is_included_file(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
+fn is_included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
     entry.kind == G3WorkspaceEntryKind::File
         && entry.ignore_state == G3WorkspaceIgnoreState::Included
 }
 
 /// Returns true when `entry` is a readable file or directory.
-const fn is_app_visible(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
+const fn is_app_visible(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
     entry.readable
         && matches!(
             entry.kind,

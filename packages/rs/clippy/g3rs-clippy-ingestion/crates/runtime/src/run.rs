@@ -1,8 +1,8 @@
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_clippy_types::{
     G3RsClippyCargoRootState, G3RsClippyConfigChecksInput, G3RsClippyFileTreeChecksInput,
     G3RsClippyRustPolicyState, G3RsClippyShadowedConfig,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use crate::error::G3RsClippyIngestionError as IngestionError;
 
@@ -13,7 +13,7 @@ pub use crate::error::G3RsClippyIngestionError as IngestionError;
 /// Returns an error when the preferred `clippy.toml` is missing, or when the
 /// guardrail3-rs policy waivers fail to parse on a parsed policy state.
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsClippyConfigChecksInput, IngestionError> {
     let clippy_entry = crate::select::select_preferred_root_clippy_toml(crawl)
         .ok_or(IngestionError::ClippyTomlNotFound)?;
@@ -79,7 +79,7 @@ pub fn ingest_for_config_checks(
     reason = "uniform ingestion entry-point signature across the family; downstream callers consume `Result` from every ingest_for_* fn so collapsing to plain `T` here would diverge from the cross-package contract"
 )]
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsClippyFileTreeChecksInput, IngestionError> {
     let root_configs = crate::select::collect_root_clippy_tomls(crawl);
     let preferred = root_configs
@@ -107,7 +107,7 @@ pub fn ingest_for_file_tree_checks(
 
 /// Resolve workspace-member Cargo state entries for the parsed cargo root.
 fn collect_workspace_member_states(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     cargo_root: &G3RsClippyCargoRootState,
 ) -> Vec<g3rs_clippy_types::G3RsClippyCargoMemberState> {
     let G3RsClippyCargoRootState::Parsed { cargo, .. } = cargo_root else {
@@ -127,7 +127,7 @@ fn collect_workspace_member_states(
             } else {
                 format!("{member_rel}/Cargo.toml")
             };
-            let member_entry = g3rs_workspace_crawl::entry(crawl, &rel_path)?;
+            let member_entry = g3_workspace_crawl::entry(crawl, &rel_path)?;
             Some(crate::parse::parse_cargo_member_state(
                 &member_rel,
                 &member_entry.path.rel_path,

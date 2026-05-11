@@ -94,8 +94,11 @@ pub(crate) fn normalized_owned_assertion_relative_segments(
     assertions_package_name: &str,
     root_prefixes: &BTreeMap<String, Vec<String>>,
 ) -> Option<Vec<String>> {
+    let package_root = assertions_package_name.replace('-', "_");
     let mut relative_segments = match binding.path_segments.first()?.as_str() {
-        first if first == assertions_package_name => binding.path_segments[1..].to_vec(),
+        first if first == assertions_package_name || first == package_root => {
+            binding.path_segments[1..].to_vec()
+        }
         "crate" | "self" | "super" => {
             let target = binding.path_segments.get(1)?;
             let mut relative = root_prefixes.get(target)?.clone();

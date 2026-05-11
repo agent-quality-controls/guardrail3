@@ -8,7 +8,7 @@
 #[cfg(test)]
 use g3rs_apparch_config_checks_assertions as _;
 #[cfg(test)]
-use guardrail3_rs_toml_parser as _;
+use g3rs_toml_parser as _;
 
 /// Rule: dev-dependency direction policy.
 mod dev_dependency_direction;

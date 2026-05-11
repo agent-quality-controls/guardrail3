@@ -76,24 +76,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -101,24 +101,47 @@ name = "g3ts-astro-check-support"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
 ]
 
 [[package]]
 name = "g3ts-astro-state-ingestion"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-state-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
 ]
 
 [[package]]
 name = "g3ts-astro-state-types"
 version = "0.1.0"
+
+[[package]]
+name = "g3ts-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-runtime",
+]
+
+[[package]]
+name = "g3ts-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "g3ts-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "globset"
@@ -134,33 +157,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "hashbrown"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "ignore"

@@ -1,16 +1,17 @@
-//! Runtime crate that crawls one workspace root and produces inventory entries.
+//! Workspace crawl runtime: discovers files in a Cargo workspace honouring
+//! gitignore semantics with targeted recovery for ignored-but-relevant files.
 
-/// Filesystem traversal entry point invoked by the crawl driver.
+/// Two-phase crawl implementation.
 mod crawl;
-/// Centralized filesystem boundary for crawl primitives.
+/// Centralized filesystem boundary.
 mod fs;
-/// Read-only query helpers over a completed crawl.
+/// Query helpers over a `G3WorkspaceCrawl`.
 mod query;
-/// Best-effort recovery rules for partially readable workspaces.
+/// Recovery list (banned dirs and ignored-but-relevant files).
 mod recovery;
-/// Public crawl entry-point and error surface.
+/// Public crawl entry points and error type.
 mod run;
-/// Support utilities shared between crawl and recovery.
+/// Internal entry construction helpers.
 mod support;
 
 #[cfg(feature = "crawl")]
@@ -21,4 +22,4 @@ pub use g3_workspace_crawl_types::{
 #[cfg(feature = "crawl")]
 pub use query::{entry, files_with_extension, root_file};
 #[cfg(feature = "crawl")]
-pub use run::{G3WorkspaceCrawlError, crawl};
+pub use run::{G3WorkspaceCrawlError, crawl, crawl_any_root};

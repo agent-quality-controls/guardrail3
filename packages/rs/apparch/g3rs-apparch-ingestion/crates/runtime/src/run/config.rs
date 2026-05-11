@@ -10,8 +10,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
 use cargo_toml_parser::{types::CargoToml, types::Dependency};
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_apparch_types as apparch;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::error::G3RsApparchIngestionError;
 use super::model::{CrateRecord, DependencyCollections};
@@ -23,7 +23,7 @@ use crate::view::CrawlView;
 mod config_tests;
 
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<apparch::G3RsApparchConfigChecksInput, G3RsApparchIngestionError> {
     let view = CrawlView::new(crawl);
     let workspace = load_workspace_root(&view)?;

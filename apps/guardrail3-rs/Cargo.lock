@@ -69,9 +69,9 @@ checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
 name = "bitflags"
-version = "2.11.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
 
 [[package]]
 name = "bstr"
@@ -131,9 +131,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.61"
+version = "1.2.62"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d16d90359e986641506914ba71350897565610e87ce0ad9e6f28569db3dd5c6d"
+checksum = "a1dce859f0832a7d088c4f1119888ab94ef4b5d6795d1ce05afb7fe159d79f98"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -147,9 +147,9 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "clap"
-version = "4.6.0"
+version = "4.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b193af5b67834b676abd72466a96c1024e6a6ad978a1f484bd90b85c94041351"
+checksum = "1ddb117e43bbf7dacf0a4190fef4d345b9bad68dfc649cb349e7d17d28428e51"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -169,9 +169,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.6.0"
+version = "4.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1110bd8a634a1ab8cb04345d8d878267d57c3cf1b38d91b71af6686408bbca6a"
+checksum = "f2ce8604710f6733aa641a2b3731eaa1e8b3d9973d5e3565da11800813f997a9"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -320,6 +320,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2"
 
 [[package]]
+name = "g3-workspace-crawl"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
+]
+
+[[package]]
+name = "g3-workspace-crawl-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3-workspace-crawl-types",
+ "ignore",
+ "walkdir",
+]
+
+[[package]]
+name = "g3-workspace-crawl-types"
+version = "0.1.0"
+
+[[package]]
 name = "g3rs-apparch-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -362,10 +383,10 @@ name = "g3rs-apparch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-apparch-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "syn",
 ]
 
@@ -389,7 +410,7 @@ dependencies = [
 name = "g3rs-apparch-types"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -449,10 +470,10 @@ dependencies = [
 name = "g3rs-arch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-arch-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "proc-macro2",
  "syn",
  "toml",
@@ -479,7 +500,7 @@ dependencies = [
 name = "g3rs-arch-types"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -496,9 +517,9 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-cargo-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -544,11 +565,11 @@ name = "g3rs-cargo-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-cargo-ingestion-types",
  "g3rs-cargo-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -561,7 +582,7 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -579,8 +600,8 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -635,10 +656,10 @@ dependencies = [
  "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-clippy-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -649,7 +670,7 @@ dependencies = [
  "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -714,11 +735,11 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "deny-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-code-ingestion-types",
  "g3rs-code-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "syn",
@@ -755,7 +776,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "deny-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "syn",
@@ -775,9 +796,9 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-deny-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -824,10 +845,10 @@ name = "g3rs-deny-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-deny-ingestion-types",
  "g3rs-deny-types",
- "g3rs-workspace-crawl",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -839,7 +860,7 @@ name = "g3rs-deny-types"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -855,8 +876,8 @@ name = "g3rs-deps-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-deps-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -872,8 +893,8 @@ name = "g3rs-deps-filetree-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "g3rs-deps-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-rs-toml-parser",
 ]
 
 [[package]]
@@ -903,11 +924,11 @@ name = "g3rs-deps-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-deps-ingestion-types",
  "g3rs-deps-types",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser",
  "glob",
- "guardrail3-rs-toml-parser",
  "toml",
 ]
 
@@ -919,7 +940,7 @@ version = "0.1.0"
 name = "g3rs-deps-types"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
@@ -992,10 +1013,10 @@ name = "g3rs-fmt-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-fmt-ingestion-types",
  "g3rs-fmt-types",
- "g3rs-workspace-crawl",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "toml",
@@ -1067,11 +1088,11 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-garde-ingestion-types",
  "g3rs-garde-source-checks-types",
  "g3rs-garde-types",
- "g3rs-workspace-crawl",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
  "proc-macro2",
  "quote",
  "syn",
@@ -1178,11 +1199,11 @@ name = "g3rs-hooks-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-hooks-config-checks-types",
  "g3rs-hooks-file-tree-checks-types",
  "g3rs-hooks-ingestion-types",
  "g3rs-hooks-types",
- "g3rs-workspace-crawl",
  "hook-shell-parser",
 ]
 
@@ -1302,9 +1323,9 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-release-ingestion-types",
  "g3rs-release-types",
- "g3rs-workspace-crawl",
  "glob",
  "release-plz-toml-parser",
  "serde_yaml",
@@ -1462,9 +1483,9 @@ name = "g3rs-test-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-test-ingestion-types",
  "g3rs-test-types",
- "g3rs-workspace-crawl",
  "glob",
  "hook-shell-parser",
  "mutants-toml-parser",
@@ -1511,6 +1532,29 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+]
+
+[[package]]
+name = "g3rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "g3rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "g3rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]
@@ -1574,9 +1618,9 @@ name = "g3rs-toolchain-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-toolchain-ingestion-types",
  "g3rs-toolchain-types",
- "g3rs-workspace-crawl",
  "rust-toolchain-toml-parser",
 ]
 
@@ -1642,9 +1686,9 @@ name = "g3rs-topology-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "g3-workspace-crawl",
  "g3rs-topology-ingestion-types",
  "g3rs-topology-types",
- "g3rs-workspace-crawl",
  "glob",
 ]
 
@@ -1658,27 +1702,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
 ]
-
-[[package]]
-name = "g3rs-workspace-crawl"
-version = "0.1.0"
-dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
-]
-
-[[package]]
-name = "g3rs-workspace-crawl-runtime"
-version = "0.1.0"
-dependencies = [
- "g3rs-workspace-crawl-types",
- "ignore",
- "walkdir",
-]
-
-[[package]]
-name = "g3rs-workspace-crawl-types"
-version = "0.1.0"
 
 [[package]]
 name = "getrandom"
@@ -1732,7 +1755,7 @@ name = "guardrail3-rs"
 version = "0.1.0"
 dependencies = [
  "clap",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "guardrail3-rs-app-types",
  "guardrail3-rs-assertions",
  "guardrail3-rs-family-runner-policy",
@@ -1750,7 +1773,7 @@ dependencies = [
 name = "guardrail3-rs-app-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "guardrail3-check-types",
 ]
 
@@ -1766,13 +1789,13 @@ dependencies = [
 name = "guardrail3-rs-family-runner-policy"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-clippy-config-checks",
  "g3rs-clippy-filetree-checks",
  "g3rs-clippy-ingestion",
  "g3rs-deny-config-checks",
  "g3rs-deny-filetree-checks",
  "g3rs-deny-ingestion",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1780,6 +1803,7 @@ dependencies = [
 name = "guardrail3-rs-family-runner-process"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-apparch-hook-contract",
  "g3rs-arch-hook-contract",
  "g3rs-cargo-hook-contract",
@@ -1802,7 +1826,6 @@ dependencies = [
  "g3rs-test-hook-contract",
  "g3rs-toolchain-hook-contract",
  "g3rs-topology-hook-contract",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
  "guardrail3-rs-family-runner-process-assertions",
 ]
@@ -1820,6 +1843,7 @@ dependencies = [
 name = "guardrail3-rs-family-runner-quality"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-code-config-checks",
  "g3rs-code-file-tree-checks",
  "g3rs-code-ingestion",
@@ -1830,7 +1854,6 @@ dependencies = [
  "g3rs-garde-config-checks",
  "g3rs-garde-ingestion",
  "g3rs-garde-source-checks",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1838,6 +1861,7 @@ dependencies = [
 name = "guardrail3-rs-family-runner-structure"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-apparch-config-checks",
  "g3rs-apparch-ingestion",
  "g3rs-apparch-source-checks",
@@ -1847,7 +1871,6 @@ dependencies = [
  "g3rs-arch-source-checks",
  "g3rs-topology-file-tree-checks",
  "g3rs-topology-ingestion",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1855,6 +1878,7 @@ dependencies = [
 name = "guardrail3-rs-family-runner-style"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-cargo-config-checks",
  "g3rs-cargo-filetree-checks",
  "g3rs-cargo-ingestion",
@@ -1864,7 +1888,6 @@ dependencies = [
  "g3rs-toolchain-config-checks",
  "g3rs-toolchain-filetree-checks",
  "g3rs-toolchain-ingestion",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1872,11 +1895,11 @@ dependencies = [
 name = "guardrail3-rs-family-runner-test"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-test-config-checks",
  "g3rs-test-file-tree-checks",
  "g3rs-test-ingestion",
  "g3rs-test-source-checks",
- "g3rs-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1884,7 +1907,7 @@ dependencies = [
 name = "guardrail3-rs-packages"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "guardrail3-rs-app-types",
 ]
 
@@ -1905,39 +1928,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "guardrail3-rs-validate-command"
 version = "0.1.0"
 dependencies = [
+ "g3-workspace-crawl",
  "g3rs-hooks-contract-types",
  "g3rs-rust-family-contracts",
- "g3rs-workspace-crawl",
+ "g3rs-toml-parser-runtime",
+ "g3rs-toml-parser-types",
  "guardrail3-check-types",
  "guardrail3-rs-app-types",
- "guardrail3-rs-toml-parser-runtime",
- "guardrail3-rs-toml-parser-types",
  "guardrail3-rs-validate-command-assertions",
  "tempfile",
 ]
@@ -1961,9 +1961,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "heck"
@@ -2020,7 +2020,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.0",
+ "hashbrown 0.17.1",
  "serde",
  "serde_core",
 ]
@@ -2045,9 +2045,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
-version = "0.2.185"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "linux-raw-sys"
@@ -2510,11 +2510,11 @@ dependencies = [
 
 [[package]]
 name = "wasip2"
-version = "1.0.2+wasi-0.2.9"
+version = "1.0.3+wasi-0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9517f9239f02c069db75e65f174b3da828fe5f5b945c4dd26bd25d89c03ebcf5"
+checksum = "20064672db26d7cdc89c7798c48a0fdfac8213434a1186e5ef29fd560ae223d6"
 dependencies = [
- "wit-bindgen",
+ "wit-bindgen 0.57.1",
 ]
 
 [[package]]
@@ -2523,7 +2523,7 @@ version = "0.4.0+wasi-0.3.0-rc-2026-01-06"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5"
 dependencies = [
- "wit-bindgen",
+ "wit-bindgen 0.51.0",
 ]
 
 [[package]]
@@ -2601,6 +2601,12 @@ checksum = "d7249219f66ced02969388cf2bb044a09756a083d0fab1e566056b04d9fbcaa5"
 dependencies = [
  "wit-bindgen-rust-macro",
 ]
+
+[[package]]
+name = "wit-bindgen"
+version = "0.57.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "wit-bindgen-core"

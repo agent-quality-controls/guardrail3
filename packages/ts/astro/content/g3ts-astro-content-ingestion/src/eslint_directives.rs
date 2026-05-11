@@ -1,7 +1,4 @@
-use g3_workspace_crawl::{
-    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
-    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState,
-};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind, G3WorkspaceIgnoreState};
 use g3ts_astro_content_types::G3TsAstroContentEslintDirectiveInput;
 
 /// Constant `SOURCE_EXTENSIONS`.

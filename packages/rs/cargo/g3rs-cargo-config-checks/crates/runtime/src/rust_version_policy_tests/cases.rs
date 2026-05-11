@@ -1,5 +1,5 @@
 use g3rs_cargo_config_checks_assertions::rust_version_policy as assertions;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::{parsed_rust_policy, root};
 
 #[test]

@@ -10,7 +10,7 @@ fn errors_when_allow_entries_have_no_matchable_name() {
 deny = ["json5"]
 allow = [{ reason = "Temporary local carveout while removal lands." }]
 "#,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::allow_override_channel::check,
     );
@@ -34,7 +34,7 @@ fn errors_when_allow_entry_name_is_blank() {
 deny = ["json5"]
 allow = ["   "]
 "#,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::allow_override_channel::check,
     );
@@ -58,7 +58,7 @@ fn errors_when_detailed_allow_entry_name_is_blank() {
 deny = ["json5"]
 allow = [{ name = "   ", reason = "Temporary local carveout while removal lands." }]
 "#,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+        Some(g3rs_toml_parser::types::RustProfile::Service),
         true,
         crate::allow_override_channel::check,
     );

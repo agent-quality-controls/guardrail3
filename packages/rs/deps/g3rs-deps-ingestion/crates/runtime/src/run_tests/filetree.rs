@@ -1,5 +1,5 @@
+use g3_workspace_crawl::crawl;
 use g3rs_deps_ingestion_assertions::run as assertions;
-use g3rs_workspace_crawl::crawl;
 
 use crate::run::ingest_for_file_tree_checks;
 

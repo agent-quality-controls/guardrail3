@@ -58,7 +58,7 @@ fn write(path: impl AsRef<Path>, content: &str) {
 }
 
 fn run_pipeline(root: &Path) -> Vec<G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = crate::run::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
     flatten_results(&inputs)
 }
@@ -71,7 +71,7 @@ fn flatten_results(inputs: &[G3RsCodeSourceChecksInput]) -> Vec<G3CheckResult> {
 }
 
 fn run_config_pipeline(root: &Path) -> Vec<G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input =
         crate::run::ingest_for_config_checks(&crawl).expect("config ingestion should succeed");
     g3rs_code_config_checks::check(&input)
@@ -269,7 +269,7 @@ fn config_ingestion_fails_closed_for_malformed_owned_root_cargo() {
 
     write(root.join("Cargo.toml"), "[workspace\nbroken = true");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let error = crate::run::ingest_for_config_checks(&crawl)
         .expect_err("malformed owned root cargo should fail config ingestion");
 
@@ -298,7 +298,7 @@ fn config_ingestion_fails_closed_for_unreadable_owned_config_file() {
     permissions.set_mode(0o000);
     fs::set_permissions(&deny_toml, permissions).expect("chmod should succeed");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let error = crate::run::ingest_for_config_checks(&crawl)
         .expect_err("unreadable owned config should fail config ingestion");
 

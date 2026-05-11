@@ -54,9 +54,9 @@ dependencies = [
  "deny-toml-parser",
  "g3rs-deny-config-checks-assertions",
  "g3rs-deny-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
- "guardrail3-rs-toml-parser",
  "test_support",
  "toml",
 ]
@@ -66,7 +66,30 @@ name = "g3rs-deny-types"
 version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
+]
+
+[[package]]
+name = "g3rs-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toml-parser-runtime",
+]
+
+[[package]]
+name = "g3rs-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "g3rs-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]
@@ -83,29 +106,6 @@ dependencies = [
 [[package]]
 name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
-
-[[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
 
 [[package]]
 name = "hashbrown"
@@ -203,8 +203,8 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-deny-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-rs-toml-parser",
 ]
 
 [[package]]

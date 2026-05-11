@@ -1,8 +1,8 @@
 //! Source-tier ingestion: builds the facade-surface and path-attribute inputs
 //! consumed by the architecture source checks.
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_arch_types::types as arch_types;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
 use crate::source_facade::collect_facade_surfaces;
@@ -18,7 +18,7 @@ type SourceChecksInputs = Vec<arch_types::G3RsArchSourceChecksInput>;
 
 /// Builds the source-tier ingestion inputs for the architecture checks.
 pub(crate) fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> IngestResult<SourceChecksInputs> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;

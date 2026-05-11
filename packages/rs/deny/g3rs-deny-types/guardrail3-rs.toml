@@ -2,7 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "deny-toml-parser",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
 ]
 
 [checks]

@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
+use g3rs_toml_parser_runtime::{Error, from_path};
+use g3rs_toml_parser_types::guardrail3_rs_toml::{Guardrail3RsToml, RustChecksConfig};
 use guardrail3_rs_app_types::SupportedFamily;
-use guardrail3_rs_toml_parser_runtime::{Error, from_path};
-use guardrail3_rs_toml_parser_types::guardrail3_rs_toml::{Guardrail3RsToml, RustChecksConfig};
 
 /// Returns the list of disabled families based on a workspace's `guardrail3-rs.toml`.
 ///

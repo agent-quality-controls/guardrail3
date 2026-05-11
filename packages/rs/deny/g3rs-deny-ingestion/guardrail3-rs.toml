@@ -10,9 +10,9 @@ allowed_deps = [
   "g3rs-deny-ingestion-runtime",
   "g3rs-deny-ingestion-types",
   "g3rs-deny-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "guardrail3-check-types",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "tempfile",
 ]
 

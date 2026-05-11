@@ -4,7 +4,6 @@ allowed_deps = [
   "astro-config-parser",
   "eslint-config-parser",
   "g3-workspace-crawl",
-  "g3rs-workspace-crawl",
   "g3ts-astro-check-support",
   "g3ts-astro-setup-types",
   "package-json-parser",

@@ -12,26 +12,26 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 name = "g3rs-deps-types"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser"
+name = "g3rs-toml-parser"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser-runtime",
+ "g3rs-toml-parser-runtime",
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser-runtime"
+name = "g3rs-toml-parser-runtime"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser-types",
+ "g3rs-toml-parser-types",
  "toml",
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser-types"
+name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",

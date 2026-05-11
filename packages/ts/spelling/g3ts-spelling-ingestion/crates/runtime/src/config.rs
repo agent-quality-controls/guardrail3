@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_spelling_types::G3TsSpellingConfigSurfaceState;
 
 /// Read and parse the cspell config under `app_root_rel_path` from `crawl`,
@@ -8,8 +8,8 @@ pub(crate) fn ingest_cspell_config(
     app_root_rel_path: &str,
 ) -> G3TsSpellingConfigSurfaceState {
     let Some(entry) = crawl.entries.iter().find(|entry| {
-        entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-            && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+        entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+            && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
             && crate::roots::cspell_config_name(&entry.path.rel_path).is_some()
             && parent_rel_path(&entry.path.rel_path) == app_root_rel_path
     }) else {

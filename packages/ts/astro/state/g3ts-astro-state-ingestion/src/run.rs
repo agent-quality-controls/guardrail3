@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_state_types::{
     G3TsAstroStateAppRootInput, G3TsAstroStateFileTreeChecksInput,
     G3TsAstroStateForbiddenPathInput, G3TsAstroStateLegacyGeneratedPathInput,
@@ -95,8 +95,8 @@ fn forbidden_state_paths(
             entry.readable
                 && matches!(
                     entry.kind,
-                    g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-                        | g3_workspace_crawl::G3RsWorkspaceEntryKind::Directory
+                    g3_workspace_crawl::G3WorkspaceEntryKind::File
+                        | g3_workspace_crawl::G3WorkspaceEntryKind::Directory
                 )
                 && g3ts_astro_check_support::surfaces::is_under_app_root(
                     &entry.path.rel_path,

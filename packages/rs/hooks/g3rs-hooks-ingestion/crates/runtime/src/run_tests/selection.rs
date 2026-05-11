@@ -24,7 +24,7 @@ fn ingests_pre_commit_and_g3rs_verifier_only_for_source_checks() {
     );
     write_fixture(root.join("hooks/pre-commit"), "cargo test\n");
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let rel_paths = inputs
@@ -51,7 +51,7 @@ fn emits_missing_g3rs_verifier_fact_without_ingesting_g3ts() {
         "g3ts validate --path \"$SCOPE\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(inputs.len(), 2);

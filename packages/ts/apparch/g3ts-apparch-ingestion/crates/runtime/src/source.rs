@@ -22,7 +22,7 @@ pub(crate) struct AppFacts {
 
 /// Walk the workspace crawl and produce `AppFacts`.
 pub(crate) fn collect_app_facts(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
 ) -> Result<AppFacts, G3TsApparchIngestionError> {
     let files = source_files(crawl);
     let mut internal_edges = BTreeSet::new();
@@ -80,13 +80,13 @@ pub(crate) fn collect_app_facts(
 
 /// Collect the readable, classified source files from `crawl`, sorted by rel-path.
 fn source_files(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
 ) -> Vec<apparch_types::G3TsApparchSourceFile> {
     let mut files = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
-        .filter(|entry| entry.ignore_state == workspace_crawl::G3RsWorkspaceIgnoreState::Included)
+        .filter(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
+        .filter(|entry| entry.ignore_state == workspace_crawl::G3WorkspaceIgnoreState::Included)
         .filter(|entry| entry.readable)
         .filter_map(|entry| {
             classify_layer(&entry.path.rel_path).map(|layer| apparch_types::G3TsApparchSourceFile {
@@ -145,7 +145,7 @@ fn line_one_based(node: Node<'_>) -> usize {
 
 /// Read the source bytes of `rel_path` from the crawl, returning a structured ingestion error on failure.
 fn read_source_file(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<String, G3TsApparchIngestionError> {
     let Some(workspace_entry) = workspace_crawl::entry(crawl, rel_path) else {
@@ -477,7 +477,7 @@ enum ResolvedImport {
 
 /// Resolve `specifier` from `from_rel_path` to either an internal or external import.
 fn resolve_import(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     from_rel_path: &str,
     specifier: &str,
 ) -> Option<ResolvedImport> {
@@ -495,7 +495,7 @@ fn resolve_import(
 
 /// Resolve `base_rel_path` to an existing readable internal source file.
 fn resolve_internal_target(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     base_rel_path: &str,
 ) -> Option<ResolvedImport> {
     for candidate in candidate_source_paths(base_rel_path) {

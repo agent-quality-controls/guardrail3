@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 /// Returns the sorted set of fmt scope roots discovered in `crawl`.
 #[must_use]
@@ -44,9 +44,9 @@ pub(crate) fn prettier_config_name(rel_path: &str) -> Option<&str> {
 }
 
 /// Returns true when `entry` is an included `package.json` file.
-fn package_manifest(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn package_manifest(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
         && entry.path.rel_path.ends_with("package.json")
 }
 

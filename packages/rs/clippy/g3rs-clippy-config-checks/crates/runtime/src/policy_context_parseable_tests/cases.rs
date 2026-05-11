@@ -1,6 +1,6 @@
 use crate::policy_context_parseable::check;
 use g3rs_clippy_config_checks_assertions::policy_context_parseable as assertions;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::{
     input_with_raw, missing_cargo_root, parse_error_rust_policy, parsed_rust_policy,
 };
