@@ -130,7 +130,7 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
 
 /// `cspell_invocation`: cspell invocation.
 fn cspell_invocation(invocation: &G3TsSpellingPackageScriptToolInvocation) -> bool {
-    cspell_args(invocation).is_some()
+    cspell_args(invocation).is_some_and(cspell_args_have_target)
 }
 
 /// `script_has_no_or_separator`: script has no or separator.
@@ -157,12 +157,64 @@ fn cspell_args(invocation: &G3TsSpellingPackageScriptToolInvocation) -> Option<&
         invocation.executable.as_str(),
         "pnpm" | "npm" | "yarn" | "bun" | "npx" | "bunx"
     ) {
-        let (tool, args) = invocation.args.split_first()?;
-        if tool == "cspell" {
-            return Some(args);
-        }
+        return invocation
+            .args
+            .iter()
+            .position(|arg| arg == "cspell")
+            .and_then(|idx| invocation.args.get(idx.saturating_add(1)..));
     }
     None
+}
+
+/// Returns true when cspell args include a positional file, directory, or glob target.
+fn cspell_args_have_target(args: &[String]) -> bool {
+    let mut idx = 0;
+    while idx < args.len() {
+        let Some(arg) = args.get(idx) else {
+            break;
+        };
+        if arg == "--" {
+            return args
+                .get(idx.saturating_add(1)..)
+                .is_some_and(|rest| rest.iter().any(|candidate| !candidate.trim().is_empty()));
+        }
+        if arg.starts_with("--") {
+            if !arg.contains('=') && cspell_option_takes_value(arg) {
+                idx = idx.saturating_add(2);
+            } else {
+                idx = idx.saturating_add(1);
+            }
+            continue;
+        }
+        if arg.starts_with('-') {
+            if cspell_option_takes_value(arg) {
+                idx = idx.saturating_add(2);
+            } else {
+                idx = idx.saturating_add(1);
+            }
+            continue;
+        }
+        return !arg.trim().is_empty();
+    }
+    false
+}
+
+/// `CSpell` flags whose value is the next argv token rather than a checked target.
+fn cspell_option_takes_value(arg: &str) -> bool {
+    matches!(
+        arg,
+        "-c" | "--config"
+            | "--locale"
+            | "--language-id"
+            | "--dictionary"
+            | "--dictionaries"
+            | "--exclude"
+            | "--file-list"
+            | "--cache-location"
+            | "--cache-strategy"
+            | "--reporter"
+            | "--issue-template"
+    )
 }
 
 /// `reachable_script_names`: reachable script names.

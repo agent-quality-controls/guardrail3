@@ -87,6 +87,36 @@ fn direct_validate_cspell_is_accepted() {
     );
 }
 
+#[test]
+fn direct_validate_bare_cspell_reports_validate_rule() {
+    let input = input(
+        vec!["validate"],
+        vec![invocation("validate", "cspell", &[])],
+    );
+
+    g3ts_spelling_config_checks_assertions::validate_runs_spellcheck::assert_error(
+        &input,
+        Some("package.json"),
+    );
+}
+
+#[test]
+fn direct_validate_cspell_with_flags_but_no_target_reports_validate_rule() {
+    let input = input(
+        vec!["validate"],
+        vec![invocation(
+            "validate",
+            "cspell",
+            &["--no-progress", "--no-summary"],
+        )],
+    );
+
+    g3ts_spelling_config_checks_assertions::validate_runs_spellcheck::assert_error(
+        &input,
+        Some("package.json"),
+    );
+}
+
 fn input(
     script_names: Vec<&str>,
     script_tool_invocations: Vec<G3TsSpellingPackageScriptToolInvocation>,
