@@ -3,6 +3,8 @@ target/
 mutants.out/
 mutants.out.old/
 node_modules/
+__pycache__/
+*.py[cod]
 /legacy/
 .claude/
 .mcp.json
