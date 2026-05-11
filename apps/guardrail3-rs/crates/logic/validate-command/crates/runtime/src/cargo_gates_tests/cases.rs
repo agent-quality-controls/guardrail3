@@ -4,7 +4,7 @@ use guardrail3_rs_validate_command_assertions::cargo_gates as assertions;
 
 use super::super::{
     any_rust_relevant, any_rust_source, cargo_gate_commands, is_rust_relevant_path,
-    paths_under_workspace,
+    paths_under_workspace, suppress_gate_stdout,
 };
 
 /// Helper that resolves a requirement to its concrete argv. Tests assert against
@@ -96,6 +96,14 @@ fn cargo_gate_commands_dedups_repeated_argv_across_families() {
     let commands = cargo_gate_commands(&enabled, false, true);
     let expected: Vec<&[&str]> = vec![argv_of(G3HookCommandRequirement::ConcreteLockfileCommand)];
     assertions::assert_command_sequence(&commands, &expected);
+}
+
+#[test]
+fn cargo_metadata_gate_stdout_is_suppressed() {
+    assert!(
+        suppress_gate_stdout(argv_of(G3HookCommandRequirement::ConcreteLockfileCommand)),
+        "cargo metadata emits machine JSON on stdout and must not leak into g3rs output"
+    );
 }
 
 /// One `is_rust_relevant_path` test case: input path and expected relevance.
