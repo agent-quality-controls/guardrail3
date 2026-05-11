@@ -129,7 +129,9 @@ impl CargoGateOutcome {
 }
 
 /// Runs the cargo gate sequence with the given working directory and target dir.
-/// Stdout and stderr are inherited from the parent process.
+///
+/// Stderr is inherited from the parent process. Stdout is inherited only for
+/// commands whose successful stdout is human-readable.
 ///
 /// Returns the per-gate outcomes in execution order. Stops at the first failure.
 #[allow(
@@ -148,11 +150,16 @@ pub fn run_cargo_gates(
             continue;
         };
         let mut command = Command::new(program);
+        let stdout = if suppress_gate_stdout(cmd) {
+            Stdio::null()
+        } else {
+            Stdio::inherit()
+        };
         let _ = command
             .args(args.iter().copied())
             .current_dir(cwd)
             .env("CARGO_TARGET_DIR", cargo_target_dir)
-            .stdout(Stdio::inherit())
+            .stdout(stdout)
             .stderr(Stdio::inherit());
         let exit_code = command
             .status()
@@ -168,6 +175,15 @@ pub fn run_cargo_gates(
         }
     }
     outcomes
+}
+
+/// Returns true when a successful cargo gate writes machine output that should
+/// not be shown in normal validator output.
+#[must_use]
+pub(crate) fn suppress_gate_stdout(cmd: &[&str]) -> bool {
+    cmd == G3HookCommandRequirement::ConcreteLockfileCommand
+        .concrete_command()
+        .unwrap_or(&[])
 }
 
 /// Returns true if at least one of the staged paths is Rust-relevant (would be
