@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_spelling_types::{
     G3TsSpellingPackageScriptCommandSeparator, G3TsSpellingPackageScriptParseBlocker,
     G3TsSpellingPackageScriptToolInvocation, G3TsSpellingPackageSurfaceSnapshot,

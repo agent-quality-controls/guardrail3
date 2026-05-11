@@ -39,10 +39,10 @@ pub(super) fn write(path: impl AsRef<Path>, content: &str) {
 /// Materializes a minimal `Cargo.toml` if one is absent so the crawler's
 /// workspace-manifest anchor requirement is satisfied for ingestion fixtures
 /// that focus on clippy/policy/cargo-config files only.
-pub(super) fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
+pub(super) fn crawl(root: &Path) -> g3_workspace_crawl::G3WorkspaceCrawl {
     let cargo_toml = root.join("Cargo.toml");
     if !cargo_toml.exists() {
         write(&cargo_toml, "[workspace]\nmembers = []\nresolver = \"2\"\n");
     }
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+    g3_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }

@@ -1,34 +1,32 @@
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use glob::Pattern;
 
 /// Alias for fallible normalization helpers returning member-rel strings.
 type StringVecResult = Result<Vec<String>, String>;
 
 /// select root cargo toml fn.
-pub(crate) fn select_root_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
+pub(crate) fn select_root_cargo_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// select root rust policy toml fn.
-pub(crate) fn select_root_rust_policy_toml(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
+pub(crate) fn select_root_rust_policy_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 /// select member manifest fn.
 pub(crate) fn select_member_manifest<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     member_rel: &str,
-) -> Option<&'a G3RsWorkspaceEntry> {
+) -> Option<&'a G3WorkspaceEntry> {
     let rel_path = member_manifest_rel_path(member_rel);
-    g3rs_workspace_crawl::entry(crawl, &rel_path)
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+    g3_workspace_crawl::entry(crawl, &rel_path)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
 }
 
 /// collect declared member rels fn.
 pub(crate) fn collect_declared_member_rels(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root_raw: &toml::Value,
 ) -> StringVecResult {
     let member_patterns = parse_string_array(
@@ -100,7 +98,7 @@ fn parse_string_array(value: Option<&toml::Value>, label: &str) -> StringVecResu
 }
 
 /// expand member pattern fn.
-fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> StringVecResult {
+fn expand_member_pattern(crawl: &G3WorkspaceCrawl, pattern: &str) -> StringVecResult {
     let normalized = normalize_member_rel(pattern);
     if looks_like_glob(&normalized) {
         let compiled = Pattern::new(&normalized)
@@ -108,7 +106,7 @@ fn expand_member_pattern(crawl: &G3RsWorkspaceCrawl, pattern: &str) -> StringVec
         Ok(crawl
             .entries
             .iter()
-            .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::Directory)
+            .filter(|entry| entry.kind == G3WorkspaceEntryKind::Directory)
             .map(|entry| entry.path.rel_path.as_str())
             .filter(|rel| compiled.matches(rel))
             .map(normalize_member_rel)

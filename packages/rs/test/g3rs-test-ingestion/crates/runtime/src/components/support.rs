@@ -9,8 +9,8 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{parse, types::CargoToml};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use g3rs_test_types::{G3RsTestFileTreeInputFailure, G3RsTestOwnedSidecarFacts};
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 use crate::ingest::IngestionError;
 use crate::roots::{OwnedTestRoot, join_under_root, parent_dir};
@@ -29,11 +29,11 @@ pub(crate) struct AssertionsLayout {
 
 /// `parse_manifest_lenient` function.
 pub(crate) fn parse_manifest_lenient(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
     input_failures: &mut Vec<G3RsTestFileTreeInputFailure>,
 ) -> Option<CargoToml> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) else {
         input_failures.push(G3RsTestFileTreeInputFailure {
             rel_path: rel_path.to_owned(),
             message: "Failed to parse Cargo.toml for test-family boundaries: required Cargo.toml entry is missing from crawl".to_owned(),
@@ -91,15 +91,15 @@ pub(crate) fn manifest_dev_dependencies(manifest: &CargoToml) -> BTreeSet<String
 
 /// `resolve_assertions_layout` function.
 pub(crate) fn resolve_assertions_layout(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
     input_failures: Option<&mut Vec<G3RsTestFileTreeInputFailure>>,
 ) -> Result<AssertionsLayout, IngestionError> {
-    let nested_assertions_cargo_rel_path = g3rs_workspace_crawl::entry(
+    let nested_assertions_cargo_rel_path = g3_workspace_crawl::entry(
         crawl,
         &join_under_root(&root.root_rel_dir, "assertions/Cargo.toml"),
     )
-    .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+    .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
     .map(|_| join_under_root(&root.root_rel_dir, "assertions/Cargo.toml"));
     let assertions_rel_dir = if root.runtime_rel_dir == root.root_rel_dir
         && nested_assertions_cargo_rel_path.is_some()
@@ -133,7 +133,7 @@ pub(crate) fn rust_crate_name(package_name: &str) -> String {
 
 /// `collect_sidecars` function.
 pub(crate) fn collect_sidecars(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     runtime_rel_dir: &str,
     assertions_rel_dir: &str,
 ) -> Vec<G3RsTestOwnedSidecarFacts> {
@@ -142,7 +142,7 @@ pub(crate) fn collect_sidecars(
     for entry in crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.starts_with(src_rel_dir.as_str()))
         .filter(|entry| entry.path.rel_path.ends_with("_tests/mod.rs"))
     {
@@ -179,14 +179,14 @@ pub(crate) fn collect_sidecars(
 
 /// `collect_external_harnesses` function.
 pub(crate) fn collect_external_harnesses(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     runtime_rel_dir: &str,
 ) -> Vec<String> {
     let tests_rel_dir = join_under_root(runtime_rel_dir, "tests");
     let mut files = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
         .filter_map(|entry| {
             let rel_path = entry.path.rel_path.as_str();
@@ -241,10 +241,10 @@ pub(crate) fn is_fixture_path(rel_path: &str) -> bool {
 
 /// `parse_optional_manifest` function.
 fn parse_optional_manifest(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<Option<CargoToml>, IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(None);
     };
     if !entry.readable {
@@ -269,10 +269,10 @@ fn parse_optional_manifest(
 
 /// `parse_optional_manifest_lenient` function.
 fn parse_optional_manifest_lenient(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
     input_failures: &mut Vec<G3RsTestFileTreeInputFailure>,
 ) -> Option<CargoToml> {
-    let _entry = g3rs_workspace_crawl::entry(crawl, rel_path)?;
+    let _entry = g3_workspace_crawl::entry(crawl, rel_path)?;
     parse_manifest_lenient(crawl, rel_path, input_failures)
 }

@@ -7,7 +7,7 @@ use tempfile::tempdir;
 use super::helpers::{repo_root, write_fixture};
 
 fn hook_results(root: &Path) -> Vec<G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         super::super::ingest_for_source_checks(&crawl).expect("hook ingestion should succeed");
     inputs
@@ -17,7 +17,7 @@ fn hook_results(root: &Path) -> Vec<G3CheckResult> {
 }
 
 fn code_results(root: &Path) -> Vec<G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = g3rs_code_ingestion::ingest_for_source_checks(&crawl)
         .expect("code ingestion should succeed");
     inputs
@@ -27,7 +27,7 @@ fn code_results(root: &Path) -> Vec<G3CheckResult> {
 }
 
 fn clippy_results(root: &Path) -> Vec<G3CheckResult> {
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let input = g3rs_clippy_ingestion::ingest_for_config_checks(&crawl)
         .expect("clippy ingestion should succeed");
     g3rs_clippy_config_checks::check(&input)

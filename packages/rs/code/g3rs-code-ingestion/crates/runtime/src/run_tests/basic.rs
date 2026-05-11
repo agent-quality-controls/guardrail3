@@ -7,8 +7,8 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+use g3_workspace_crawl::crawl;
 use g3rs_code_ingestion_assertions::run as assertions;
-use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {

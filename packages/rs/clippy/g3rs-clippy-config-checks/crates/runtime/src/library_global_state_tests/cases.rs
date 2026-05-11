@@ -1,6 +1,6 @@
 use crate::library_global_state::check;
 use g3rs_clippy_config_checks_assertions::library_global_state as assertions;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::{input_with_raw, missing_cargo_root, parsed_rust_policy};
 
 fn library_global_state_baseline() -> &'static str {

@@ -6,7 +6,7 @@ allowed_deps = [
   "g3rs-release-config-checks",
   "g3rs-release-filetree-checks",
   "g3rs-release-source-checks",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "guardrail3-check-types",
   "cargo-toml-parser",
   "cliff-toml-parser",

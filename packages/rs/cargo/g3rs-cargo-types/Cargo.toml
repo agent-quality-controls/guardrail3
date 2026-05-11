@@ -90,4 +90,4 @@ workspace = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
-guardrail3-rs-toml-parser = { path = "../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3rs-toml-parser = { path = "../../../parsers/g3rs-toml-parser", version = "0.1.0" }

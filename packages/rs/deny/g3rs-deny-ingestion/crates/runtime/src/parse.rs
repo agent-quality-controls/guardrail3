@@ -38,7 +38,7 @@ pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsDe
         }
     };
 
-    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+    let parsed = match g3rs_toml_parser::parse(&content) {
         Ok(parsed) => parsed,
         Err(err) => {
             return G3RsDenyRustPolicyState::ParseError {

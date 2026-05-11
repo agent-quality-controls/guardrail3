@@ -1,8 +1,8 @@
-//! Shared types for the g3-workspace-crawl ingestion outputs.
+//! Shared types for the g3rs workspace crawl shared package.
 
-/// Crawl-result aggregate types for workspace tree traversal.
+/// Crawl-tree aggregate type definitions.
 mod crawl;
-/// Entry-level types describing one filesystem node visited by the crawler.
+/// Per-entry workspace path and metadata definitions.
 mod entry;
 
 #[cfg(feature = "api")]

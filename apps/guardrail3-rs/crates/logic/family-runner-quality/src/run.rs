@@ -1,4 +1,4 @@
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 
 /// Runs the code, deps, or garde family group against the prepared crawl.
@@ -8,7 +8,7 @@ use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 /// Returns [`FamilyRunError`] when ingestion for the selected family fails.
 pub fn run(
     family: SupportedFamily,
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Code => run_code(crawl),
@@ -35,7 +35,7 @@ pub fn run(
 /// # Errors
 ///
 /// Returns [`FamilyRunError`] when ingestion for the code family fails.
-fn run_code(crawl: &G3RsWorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
+fn run_code(crawl: &G3WorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
     let config_input =
         g3rs_code_ingestion::ingest_for_config_checks(crawl).map_err(|error| FamilyRunError {
             message: format!("{error:?}"),
@@ -66,7 +66,7 @@ fn run_code(crawl: &G3RsWorkspaceCrawl) -> Result<FamilyResults, FamilyRunError>
 /// # Errors
 ///
 /// Returns [`FamilyRunError`] when ingestion for the deps family fails.
-fn run_deps(crawl: &G3RsWorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
+fn run_deps(crawl: &G3WorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
     let config_inputs =
         g3rs_deps_ingestion::ingest_for_config_checks(crawl).map_err(|error| FamilyRunError {
             message: format!("{error:?}"),
@@ -93,7 +93,7 @@ fn run_deps(crawl: &G3RsWorkspaceCrawl) -> Result<FamilyResults, FamilyRunError>
 /// # Errors
 ///
 /// Returns [`FamilyRunError`] when ingestion for the garde family fails.
-fn run_garde(crawl: &G3RsWorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
+fn run_garde(crawl: &G3WorkspaceCrawl) -> Result<FamilyResults, FamilyRunError> {
     let config_input =
         g3rs_garde_ingestion::ingest_for_config_checks(crawl).map_err(|error| FamilyRunError {
             message: format!("{error:?}"),

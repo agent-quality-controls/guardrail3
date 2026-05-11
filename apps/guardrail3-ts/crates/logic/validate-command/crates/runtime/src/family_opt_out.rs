@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
+use g3ts_toml_parser_runtime::{Error, from_path};
+use g3ts_toml_parser_types::guardrail3_ts_toml::{Guardrail3TsToml, TsChecksConfig};
 use guardrail3_ts_app_types::SupportedFamily;
-use guardrail3_ts_toml_parser_runtime::{Error, from_path};
-use guardrail3_ts_toml_parser_types::guardrail3_ts_toml::{Guardrail3TsToml, TsChecksConfig};
 
 /// Returns the list of disabled families based on a per-package `guardrail3-ts.toml`.
 ///

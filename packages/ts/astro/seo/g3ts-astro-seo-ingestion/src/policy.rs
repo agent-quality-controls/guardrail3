@@ -1,7 +1,4 @@
-use g3_workspace_crawl::{
-    G3RsWorkspaceCrawl as G3WorkspaceCrawl, G3RsWorkspaceEntryKind as G3WorkspaceEntryKind,
-    G3RsWorkspaceIgnoreState as G3WorkspaceIgnoreState,
-};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind, G3WorkspaceIgnoreState};
 use g3ts_astro_seo_types::{G3TsAstroSeoPolicySnapshot, G3TsAstroSeoPolicySurfaceState};
 
 /// `GUARDRAIL_CONFIG_REL_PATH` constant.
@@ -27,7 +24,7 @@ pub(crate) fn ingest_seo_policy_surface(
         };
     }
 
-    let config = match guardrail3_rs_toml_parser::from_path(&entry.path.abs_path) {
+    let config = match g3ts_toml_parser::from_path(&entry.path.abs_path) {
         Ok(config) => config,
         Err(error) => {
             return G3TsAstroSeoPolicySurfaceState::ParseError {
@@ -37,12 +34,7 @@ pub(crate) fn ingest_seo_policy_surface(
         }
     };
 
-    let Some(ts) = config.ts else {
-        return G3TsAstroSeoPolicySurfaceState::MissingAstroPolicy {
-            rel_path: entry.path.rel_path.clone(),
-        };
-    };
-    let Some(astro) = ts.astro else {
+    let Some(astro) = config.astro else {
         return G3TsAstroSeoPolicySurfaceState::MissingAstroPolicy {
             rel_path: entry.path.rel_path.clone(),
         };
@@ -64,7 +56,7 @@ pub(crate) fn ingest_seo_policy_surface(
 fn exact_included_file<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     rel_path: &str,
-) -> Option<&'crawl g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'crawl g3_workspace_crawl::G3WorkspaceEntry> {
     crawl.entries.iter().find(|entry| {
         entry.kind == G3WorkspaceEntryKind::File
             && entry.ignore_state == G3WorkspaceIgnoreState::Included

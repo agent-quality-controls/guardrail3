@@ -152,11 +152,11 @@ fn ignored_but_recovered_cargo_toml_is_ingested() {
 
     let crawl = super::helpers::crawl(root);
 
-    let crawl_entry = g3rs_workspace_crawl::entry(&crawl, "Cargo.toml")
+    let crawl_entry = g3_workspace_crawl::entry(&crawl, "Cargo.toml")
         .expect("Cargo.toml should be present in crawl via recovery even when gitignored");
     assert_eq!(
         crawl_entry.ignore_state,
-        g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored,
+        g3_workspace_crawl::G3WorkspaceIgnoreState::Ignored,
         "Cargo.toml should have Ignored state when gitignored, proving recovery path was exercised"
     );
 

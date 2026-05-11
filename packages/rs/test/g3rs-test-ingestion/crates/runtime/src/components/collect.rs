@@ -10,10 +10,10 @@
     clippy::type_complexity,
     reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
 )]
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use g3rs_test_types::{
     G3RsTestFileTreeInputFailure, G3RsTestSourceFile, G3RsTestSourceInputFailure,
 };
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 use crate::components::OwnedTestComponent;
 use crate::components::classify::{classify_file_for_file_tree, classify_file_for_source};
@@ -24,7 +24,7 @@ use crate::roots::OwnedTestRoot;
 
 /// `collect_components` function.
 pub(crate) fn collect_components(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
 ) -> Result<Vec<OwnedTestComponent>, IngestionError> {
     let layout = crate::components::support::resolve_assertions_layout(crawl, root, None)?;
@@ -33,7 +33,7 @@ pub(crate) fn collect_components(
 
 /// `collect_file_tree_components` function.
 pub(crate) fn collect_file_tree_components(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
 ) -> (Vec<OwnedTestComponent>, Vec<G3RsTestFileTreeInputFailure>) {
     let mut input_failures = Vec::new();
@@ -52,7 +52,7 @@ pub(crate) fn collect_file_tree_components(
 
 /// `collect_ast_files` function.
 pub(crate) fn collect_ast_files(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
     components: &[OwnedTestComponent],
 ) -> (Vec<G3RsTestSourceFile>, Vec<G3RsTestSourceInputFailure>) {
@@ -62,7 +62,7 @@ pub(crate) fn collect_ast_files(
     for entry in crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
         .filter_map(|entry| {
             classify_file_for_source(&entry.path.rel_path, root, components)
@@ -102,7 +102,7 @@ pub(crate) fn collect_ast_files(
 
 /// `collect_file_tree_files` function.
 pub(crate) fn collect_file_tree_files(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
     components: &[OwnedTestComponent],
 ) -> (Vec<G3RsTestSourceFile>, Vec<G3RsTestFileTreeInputFailure>) {
@@ -112,7 +112,7 @@ pub(crate) fn collect_file_tree_files(
     for entry in crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with(".rs"))
     {
         let Some(mut file) = classify_file_for_file_tree(&entry.path.rel_path, root, components)
@@ -148,7 +148,7 @@ pub(crate) fn collect_file_tree_files(
 
 /// `collect_local_package_names` function.
 pub(crate) fn collect_local_package_names(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
 ) -> (
     std::collections::BTreeSet<String>,
@@ -160,7 +160,7 @@ pub(crate) fn collect_local_package_names(
     for entry in crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| entry.path.rel_path.ends_with("Cargo.toml"))
         .filter(|entry| {
             crate::components::classify::root_rel_prefix(&entry.path.rel_path, &root.root_rel_dir)

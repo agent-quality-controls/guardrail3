@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_check_support::surfaces::{
     G3TsAstroRawEslintConfigState, read_eslint_config_surface,
 };
@@ -169,8 +169,8 @@ fn first_matching_app_rel_path(
         .entries
         .iter()
         .find(|entry| {
-            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+            entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
                 && g3ts_astro_check_support::surfaces::is_under_app_root(
                     &entry.path.rel_path,
                     app_root_rel_path,

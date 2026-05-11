@@ -1,7 +1,7 @@
 use cargo_config_toml_parser::types::CargoConfigToml;
 use cargo_toml_parser::types::CargoTomlDocument;
 use clippy_toml_parser::types::ClippyTomlDocument;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 #[derive(Debug, Clone)]
 pub enum G3RsClippyConfigState {

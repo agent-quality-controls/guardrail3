@@ -9,8 +9,8 @@
 use std::path::Path;
 use std::process::Command;
 
+use g3_workspace_crawl::crawl;
 use g3rs_test_ingestion_assertions::ingest::run::find_root;
-use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {

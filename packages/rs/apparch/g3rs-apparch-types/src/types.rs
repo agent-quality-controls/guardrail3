@@ -1,6 +1,6 @@
 //! Shared apparch types: layers, dependencies, crates, and check inputs.
 
-use guardrail3_rs_toml_parser::types::{RustProfile, WaiverConfig};
+use g3rs_toml_parser::types::{RustProfile, WaiverConfig};
 
 /// Architectural layer assigned to a crate within an apparch workspace.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

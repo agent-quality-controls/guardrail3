@@ -35,8 +35,8 @@ fn write(path: impl AsRef<Path>, content: &str) {
     fs::write(path, content).expect("should write test fixture file to disk");
 }
 
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+fn crawl(root: &Path) -> g3_workspace_crawl::G3WorkspaceCrawl {
+    g3_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }
 
 #[cfg(unix)]
@@ -235,7 +235,7 @@ fn guardrail3_rs_toml_drives_profile_and_ignores_legacy_guardrail3_toml() {
     };
     assert_eq!(
         *profile,
-        Some(guardrail3_rs_toml_parser::types::RustProfile::Library)
+        Some(g3rs_toml_parser::types::RustProfile::Library)
     );
     assert_eq!(waivers.len(), 1, "{waivers:#?}");
     assert_eq!(waivers[0].rule, "g3rs-cargo/approved-allow-inventory");

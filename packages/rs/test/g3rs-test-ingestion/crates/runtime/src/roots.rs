@@ -5,7 +5,7 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{parse, types::CargoToml};
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use glob::Pattern;
 
 use crate::ingest::IngestionError;
@@ -37,8 +37,8 @@ pub(crate) struct TestRootDiscovery {
 }
 
 /// `discover` function.
-pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, IngestionError> {
-    let Some(root_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
+pub(crate) fn discover(crawl: &G3WorkspaceCrawl) -> Result<TestRootDiscovery, IngestionError> {
+    let Some(root_entry) = g3_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Ok(TestRootDiscovery {
             roots: Vec::new(),
             workspace_manifest: None,
@@ -81,10 +81,10 @@ pub(crate) fn discover(crawl: &G3RsWorkspaceCrawl) -> Result<TestRootDiscovery, 
 
 /// `build_owned_root` function.
 fn build_owned_root(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root_rel_dir: &str,
 ) -> Result<Option<OwnedTestRoot>, IngestionError> {
-    let runtime_cargo_rel_path = if g3rs_workspace_crawl::entry(
+    let runtime_cargo_rel_path = if g3_workspace_crawl::entry(
         crawl,
         &join_under_root(root_rel_dir, "crates/runtime/Cargo.toml"),
     )
@@ -93,7 +93,7 @@ fn build_owned_root(
         join_under_root(root_rel_dir, "crates/runtime/Cargo.toml")
     } else {
         let root_cargo_rel_path = join_under_root(root_rel_dir, "Cargo.toml");
-        let Some(root_entry) = g3rs_workspace_crawl::entry(crawl, &root_cargo_rel_path) else {
+        let Some(root_entry) = g3_workspace_crawl::entry(crawl, &root_cargo_rel_path) else {
             return Ok(None);
         };
         let root_manifest = parse_required_manifest(crawl, &root_cargo_rel_path)?;
@@ -109,7 +109,7 @@ fn build_owned_root(
     let root_cargo_rel_path = join_under_root(root_rel_dir, "Cargo.toml");
     let root_manifest = if root_cargo_rel_path == runtime_cargo_rel_path {
         Some(cargo.clone())
-    } else if g3rs_workspace_crawl::entry(crawl, &root_cargo_rel_path).is_some() {
+    } else if g3_workspace_crawl::entry(crawl, &root_cargo_rel_path).is_some() {
         Some(parse_required_manifest(crawl, &root_cargo_rel_path)?)
     } else {
         None
@@ -125,7 +125,7 @@ fn build_owned_root(
 }
 
 /// `component_container_root` function.
-fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String {
+fn component_container_root(rel_dir: &str, crawl: &G3WorkspaceCrawl) -> String {
     let candidate = if matches!(
         rel_dir,
         "crates/runtime"
@@ -151,8 +151,8 @@ fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String
         return rel_dir.to_owned();
     };
     let candidate_has_package =
-        g3rs_workspace_crawl::entry(crawl, &join_under_root(&candidate, "Cargo.toml")).is_some();
-    let candidate_has_runtime = g3rs_workspace_crawl::entry(
+        g3_workspace_crawl::entry(crawl, &join_under_root(&candidate, "Cargo.toml")).is_some();
+    let candidate_has_runtime = g3_workspace_crawl::entry(
         crawl,
         &join_under_root(&candidate, "crates/runtime/Cargo.toml"),
     )
@@ -166,15 +166,14 @@ fn component_container_root(rel_dir: &str, crawl: &G3RsWorkspaceCrawl) -> String
 
 /// `parse_required_manifest` function.
 fn parse_required_manifest(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<CargoToml, IngestionError> {
-    let entry = g3rs_workspace_crawl::entry(crawl, rel_path).ok_or_else(|| {
-        IngestionError::ParseFailed {
+    let entry =
+        g3_workspace_crawl::entry(crawl, rel_path).ok_or_else(|| IngestionError::ParseFailed {
             path: crawl.root_abs_path.join(rel_path),
             reason: "required Cargo.toml entry is missing from crawl".to_owned(),
-        }
-    })?;
+        })?;
     if !entry.readable {
         return Err(IngestionError::Unreadable {
             path: entry.path.abs_path.clone(),
@@ -195,7 +194,7 @@ fn parse_required_manifest(
 
 /// `select_workspace_member_dirs` function.
 fn select_workspace_member_dirs(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     members: &[String],
     exclude: &[String],
 ) -> Result<BTreeSet<String>, IngestionError> {
@@ -221,7 +220,7 @@ fn select_workspace_member_dirs(
     let member_dirs = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter_map(|entry| manifest_dir_from_manifest_path(entry.path.rel_path.as_str()))
         .filter(|member_dir| {
             !member_dir.is_empty()

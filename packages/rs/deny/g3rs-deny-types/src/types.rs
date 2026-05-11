@@ -1,5 +1,5 @@
 use deny_toml_parser::types::DenyToml;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 #[derive(Debug, Clone)]
 pub struct G3RsDenyConfigChecksInput {

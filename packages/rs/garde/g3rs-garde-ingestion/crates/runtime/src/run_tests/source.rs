@@ -2,7 +2,7 @@ use std::path::Path;
 
 use tempfile::TempDir;
 
-pub(super) fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
+pub(super) fn crawl(root: &Path) -> g3_workspace_crawl::G3WorkspaceCrawl {
     super::helpers::crawl(root)
 }
 
@@ -20,7 +20,7 @@ pub(super) fn make_unreadable(path: &Path) {
 }
 
 pub(super) fn ingest_for_source_checks(
-    crawl: &g3rs_workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &g3_workspace_crawl::G3WorkspaceCrawl,
 ) -> Result<g3rs_garde_types::G3RsGardeSourceChecksInput, super::IngestionError> {
     super::ingest_for_source_checks(crawl)
 }

@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 guardrail3-rs-app-types = { path = "../../types/app-types" }
-g3rs-workspace-crawl.workspace = true
+g3-workspace-crawl.workspace = true
 g3rs-toolchain-config-checks.workspace = true
 g3rs-toolchain-filetree-checks.workspace = true
 g3rs-toolchain-ingestion.workspace = true

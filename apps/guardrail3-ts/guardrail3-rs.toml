@@ -3,7 +3,6 @@ profile = "service"
 allowed_deps = [
   "clap",
   "g3-workspace-crawl",
-  "g3rs-workspace-crawl",
   "g3ts-astro-content-config-checks",
   "g3ts-astro-content-file-tree-checks",
   "g3ts-astro-content-hook-contract",
@@ -73,8 +72,8 @@ allowed_deps = [
   "guardrail3-ts-packages",
   "guardrail3-ts-report",
   "guardrail3-ts-report-assertions",
-  "guardrail3-ts-toml-parser-runtime",
-  "guardrail3-ts-toml-parser-types",
+  "g3ts-toml-parser-runtime",
+  "g3ts-toml-parser-types",
   "guardrail3-ts-validate-command",
   "guardrail3-ts-validate-command-assertions",
   "tempfile",

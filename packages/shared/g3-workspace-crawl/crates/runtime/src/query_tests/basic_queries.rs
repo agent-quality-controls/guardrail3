@@ -7,11 +7,11 @@ fn supports_basic_queries_over_the_crawl() {
     let crawl = crate::G3WorkspaceCrawl {
         root_abs_path: PathBuf::from("/tmp/demo"),
         entries: vec![
-            new_entry("Cargo.toml", crate::G3WorkspaceEntryKind::File),
-            new_entry("src", crate::G3WorkspaceEntryKind::Directory),
-            new_entry("src/lib.rs", crate::G3WorkspaceEntryKind::File),
-            new_entry("src/main.rs", crate::G3WorkspaceEntryKind::File),
-            new_entry("README.md", crate::G3WorkspaceEntryKind::File),
+            entry("Cargo.toml", crate::G3WorkspaceEntryKind::File),
+            entry("src", crate::G3WorkspaceEntryKind::Directory),
+            entry("src/lib.rs", crate::G3WorkspaceEntryKind::File),
+            entry("src/main.rs", crate::G3WorkspaceEntryKind::File),
+            entry("README.md", crate::G3WorkspaceEntryKind::File),
         ],
     };
 
@@ -21,7 +21,7 @@ fn supports_basic_queries_over_the_crawl() {
     assertions::assert_has_rel_path(&crawl.entries, "README.md");
 }
 
-fn new_entry(rel_path: &str, kind: crate::G3WorkspaceEntryKind) -> crate::G3WorkspaceEntry {
+fn entry(rel_path: &str, kind: crate::G3WorkspaceEntryKind) -> crate::G3WorkspaceEntry {
     crate::G3WorkspaceEntry {
         path: crate::G3WorkspacePath {
             rel_path: rel_path.to_owned(),

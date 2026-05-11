@@ -1,5 +1,5 @@
 use g3rs_deny_types::G3RsDenyRustPolicyState;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use tempfile::tempdir;
 
 use super::helpers::{crawl, git_init, make_unreadable, write};
@@ -181,11 +181,11 @@ fn ignored_but_recovered_deny_toml_is_ingested() {
     let crawl = crawl(root);
 
     // Verify the crawl actually marked this as Ignored (proving recovery path)
-    let crawl_entry = g3rs_workspace_crawl::entry(&crawl, "deny.toml")
+    let crawl_entry = g3_workspace_crawl::entry(&crawl, "deny.toml")
         .expect("deny.toml should be present in crawl via recovery even when gitignored");
     assert_eq!(
         crawl_entry.ignore_state,
-        g3rs_workspace_crawl::G3RsWorkspaceIgnoreState::Ignored,
+        g3_workspace_crawl::G3WorkspaceIgnoreState::Ignored,
         "deny.toml should have Ignored state when gitignored, proving the recovery path was exercised"
     );
 

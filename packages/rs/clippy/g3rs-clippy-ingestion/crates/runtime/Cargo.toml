@@ -30,9 +30,9 @@ all-features = true
 cargo-config-toml-parser = { path = "../../../../../parsers/cargo-config-toml-parser", version = "0.1.0" }
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
-guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
+g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 glob = "0.3"
 toml = "0.8"
 
@@ -40,5 +40,5 @@ toml = "0.8"
 g3rs-clippy-config-checks = { path = "../../../g3rs-clippy-config-checks" }
 g3rs-clippy-filetree-checks = { path = "../../../g3rs-clippy-filetree-checks" }
 g3rs-clippy-ingestion-assertions = { path = "../assertions" }
-g3rs-workspace-crawl = { path = "../../../../g3rs-workspace-crawl", version = "0.1.0" }
+g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0" }
 tempfile = "3"

@@ -4,7 +4,7 @@ allowed_deps = [
   "cargo-toml-parser",
   "g3rs-topology-file-tree-checks",
   "g3rs-topology-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "glob",
   "guardrail3-check-types",
   "tempfile",

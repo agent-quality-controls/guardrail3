@@ -1,6 +1,6 @@
 use g3rs_apparch_config_checks_assertions::patch_replace_bypass as assertions;
 use g3rs_apparch_types::{G3RsApparchPatchKind, G3RsApparchRustPolicyState};
-use guardrail3_rs_toml_parser::parse;
+use g3rs_toml_parser::parse;
 
 use super::helpers::{patch, run_rule};
 

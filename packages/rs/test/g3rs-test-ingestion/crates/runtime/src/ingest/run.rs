@@ -6,10 +6,10 @@
     clippy::type_complexity,
     reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
 )]
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_test_ingestion_types::{
     G3RsTestConfigChecksInput, G3RsTestFileTreeChecksInput, G3RsTestSourceChecksInput,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 pub use g3rs_test_ingestion_types::G3RsTestIngestionError as IngestionError;
 
@@ -18,14 +18,14 @@ pub use g3rs_test_ingestion_types::G3RsTestIngestionError as IngestionError;
 mod run_tests;
 
 pub fn ingest_for_config_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<Vec<G3RsTestConfigChecksInput>, IngestionError> {
     ingest_for_config_checks_with_tool_state(crawl, cargo_mutants_installed())
 }
 
 /// `ingest_for_config_checks_with_tool_state` function.
 pub(crate) fn ingest_for_config_checks_with_tool_state(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     cargo_mutants_installed: bool,
 ) -> Result<Vec<G3RsTestConfigChecksInput>, IngestionError> {
     let discovery = crate::roots::discover(crawl)?;
@@ -71,7 +71,7 @@ pub(crate) fn ingest_for_config_checks_with_tool_state(
 }
 
 pub fn ingest_for_source_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<Vec<G3RsTestSourceChecksInput>, IngestionError> {
     let discovery = crate::roots::discover(crawl)?;
 
@@ -101,7 +101,7 @@ pub fn ingest_for_source_checks(
 }
 
 pub fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<Vec<G3RsTestFileTreeChecksInput>, IngestionError> {
     let discovery = crate::roots::discover(crawl)?;
 
@@ -131,10 +131,10 @@ pub fn ingest_for_file_tree_checks(
 
 /// `parse_optional_nextest` function.
 fn parse_optional_nextest(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<Option<nextest_toml_parser::types::NextestToml>, IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(None);
     };
     if !entry.readable {
@@ -159,10 +159,10 @@ fn parse_optional_nextest(
 
 /// `parse_optional_mutants` function.
 fn parse_optional_mutants(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<(bool, Option<mutants_toml_parser::types::MutantsToml>), IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) else {
         return Ok((false, None));
     };
     if !entry.readable {

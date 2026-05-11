@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 /// Enumerate the relative directory paths within `crawl` that should be
 /// inspected for spelling configuration (each `package.json` or cspell
@@ -48,16 +48,16 @@ pub(crate) fn cspell_json_config_name(rel_path: &str) -> Option<&str> {
 }
 
 /// Whether `entry` is an included file named `package.json`.
-fn package_manifest(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn package_manifest(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
         && entry.path.rel_path.rsplit('/').next() == Some("package.json")
 }
 
 /// Whether `entry` is an included file whose name matches a cspell config.
-fn cspell_config(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
-    entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-        && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+fn cspell_config(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
+    entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+        && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
         && cspell_config_name(&entry.path.rel_path).is_some()
 }
 

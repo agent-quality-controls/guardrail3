@@ -46,7 +46,7 @@ pub(crate) fn parse_rust_policy_state(
         }
     };
 
-    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+    let parsed = match g3rs_toml_parser::parse(&content) {
         Ok(parsed) => parsed,
         Err(err) => {
             return G3RsClippyRustPolicyState::ParseError {
@@ -75,11 +75,10 @@ pub(crate) fn parse_waivers(abs_path: &Path) -> IngestResult<Vec<G3RsClippyWaive
         path: abs_path.to_path_buf(),
         reason,
     })?;
-    let parsed =
-        guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
-            path: abs_path.to_path_buf(),
-            reason: err.to_string(),
-        })?;
+    let parsed = g3rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })?;
 
     Ok(parsed
         .waivers

@@ -279,6 +279,7 @@ fn public_reexport_target_path(
     package_name: &str,
     module_prefix: &[String],
 ) -> String {
+    let package_root = package_name.replace('-', "_");
     let target_segments = match path_segments.first().map(String::as_str) {
         Some("crate") => path_segments[1..].to_vec(),
         Some("self") => {
@@ -292,6 +293,7 @@ fn public_reexport_target_path(
             segments
         }
         Some(first) if first == package_name => path_segments[1..].to_vec(),
+        Some(first) if first == package_root => path_segments[1..].to_vec(),
         Some(_) => path_segments.to_vec(),
         None => Vec::new(),
     };
@@ -308,11 +310,13 @@ fn exported_assertion_function_calls_proof(
     proof_bearing_names: &BTreeSet<String>,
     local_proof_functions: &BTreeSet<String>,
 ) -> bool {
+    let package_root = package_name.replace('-', "_");
     let mut root_prefixes = BTreeMap::from([
         ("crate".to_owned(), Vec::new()),
         ("self".to_owned(), module_prefix.to_vec()),
         ("super".to_owned(), parent_module_prefix(module_prefix)),
         (package_name.to_owned(), Vec::new()),
+        (package_root, Vec::new()),
     ]);
     let mut bare_imported_proofs = BTreeMap::new();
     let mut glob_prefixes = Vec::new();

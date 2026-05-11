@@ -1,7 +1,7 @@
 use g3rs_deps_config_checks_assertions::library_allowlist_present::rule as assertions;
 
 use super::helpers::run_check;
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 #[test]
 fn inventories_allowlist_when_present() {

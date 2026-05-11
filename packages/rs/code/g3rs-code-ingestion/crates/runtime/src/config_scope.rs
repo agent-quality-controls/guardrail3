@@ -1,13 +1,13 @@
 use std::collections::BTreeSet;
 
 use cargo_toml_parser::{parse, types::CargoToml};
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use glob::Pattern;
 
 use crate::run::IngestionError;
 
 /// List of crawl entries whose `Cargo.toml` lives in a workspace-owned root directory.
-type OwnedConfigEntries<'a> = Vec<&'a G3RsWorkspaceEntry>;
+type OwnedConfigEntries<'a> = Vec<&'a G3WorkspaceEntry>;
 
 /// Set of workspace-root-relative directories considered owned by the workspace
 /// (the workspace root and every member dir).
@@ -15,14 +15,14 @@ type OwnedRootDirs = BTreeSet<String>;
 
 /// Implements `select owned config entries`.
 pub(crate) fn select_owned_config_entries<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     file_names: &[&str],
 ) -> Result<OwnedConfigEntries<'a>, IngestionError> {
     let owned_roots = owned_root_dirs(crawl)?;
     let mut entries = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter(|entry| {
             std::path::Path::new(entry.path.rel_path.as_str())
                 .file_name()
@@ -37,10 +37,10 @@ pub(crate) fn select_owned_config_entries<'a>(
 }
 
 /// Implements `owned root dirs`.
-pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<OwnedRootDirs, IngestionError> {
+pub(crate) fn owned_root_dirs(crawl: &G3WorkspaceCrawl) -> Result<OwnedRootDirs, IngestionError> {
     let mut roots = BTreeSet::from([String::new()]);
 
-    let Some(root_cargo_entry) = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml") else {
+    let Some(root_cargo_entry) = g3_workspace_crawl::root_file(crawl, "Cargo.toml") else {
         return Ok(roots);
     };
 
@@ -71,7 +71,7 @@ pub(crate) fn owned_root_dirs(crawl: &G3RsWorkspaceCrawl) -> Result<OwnedRootDir
 
 /// Implements `select workspace member dirs`.
 fn select_workspace_member_dirs(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     workspace_cargo: &CargoToml,
 ) -> Result<OwnedRootDirs, IngestionError> {
     let workspace =
@@ -107,7 +107,7 @@ fn select_workspace_member_dirs(
     let member_dirs = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter_map(|entry| manifest_dir_from_manifest_path(entry.path.rel_path.as_str()))
         .filter(|member_dir| {
             !member_dir.is_empty()

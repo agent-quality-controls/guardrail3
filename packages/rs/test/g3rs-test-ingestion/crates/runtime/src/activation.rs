@@ -19,7 +19,7 @@
     reason = "structural code pattern (parser/assertion helper) where lint conflicts with module architecture"
 )]
 use cargo_toml_parser::{types::CargoToml, types::Dependency};
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use syn::visit::Visit;
 
 use crate::ingest::IngestionError;
@@ -36,7 +36,7 @@ pub(crate) struct ActivationSummary {
 
 /// `summarize_root` function.
 pub(crate) fn summarize_root(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root: &OwnedTestRoot,
     _workspace_manifest: Option<&CargoToml>,
 ) -> Result<ActivationSummary, IngestionError> {
@@ -218,8 +218,8 @@ fn is_fixture_path(rel_path: &str) -> bool {
 }
 
 /// `is_rust_file` function.
-fn is_rust_file(entry: &&G3RsWorkspaceEntry) -> bool {
-    entry.kind == G3RsWorkspaceEntryKind::File
+fn is_rust_file(entry: &&G3WorkspaceEntry) -> bool {
+    entry.kind == G3WorkspaceEntryKind::File
         && std::path::Path::new(entry.path.rel_path.as_str())
             .extension()
             .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))

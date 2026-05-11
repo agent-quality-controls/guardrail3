@@ -6,7 +6,7 @@ use g3rs_clippy_types::{
     G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyRustPolicyState,
     G3RsClippyWaiver,
 };
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 #[must_use]
 pub fn parsed_rust_policy(

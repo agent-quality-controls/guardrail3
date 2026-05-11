@@ -8,7 +8,7 @@
 )]
 use std::collections::BTreeSet;
 
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
 
 use crate::ingest::IngestionError;
@@ -25,7 +25,7 @@ pub(crate) struct MutationHookState {
 
 /// `collect_mutation_hook_state` function.
 pub(crate) fn collect_mutation_hook_state(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     discovery: &TestRootDiscovery,
     root: &OwnedTestRoot,
 ) -> Result<MutationHookState, IngestionError> {
@@ -48,7 +48,7 @@ pub(crate) fn collect_mutation_hook_state(
 
         let hook_dir_rel = join_under_root(hook_root_rel, ".githooks/pre-commit.d");
         for entry in crawl.entries.iter().filter(|entry| {
-            entry.kind == G3RsWorkspaceEntryKind::File
+            entry.kind == G3WorkspaceEntryKind::File
                 && entry
                     .path
                     .rel_path
@@ -97,10 +97,10 @@ fn active_hook_root_dirs(discovery: &TestRootDiscovery, root: &OwnedTestRoot) ->
 
 /// `script_contains_mutation_step` function.
 fn script_contains_mutation_step(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_path: &str,
 ) -> Result<bool, IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) else {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) else {
         return Ok(false);
     };
     if !entry.readable {

@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3rs-workspace-crawl",
   "g3-workspace-crawl",
   "g3ts-fmt-ingestion-runtime",
   "g3ts-fmt-ingestion-assertions",

@@ -1,12 +1,12 @@
 use std::collections::BTreeSet;
 use std::path::{Component, Path, PathBuf};
 
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
 use g3rs_release_types::G3RsReleasePathTargetKind;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntryKind};
 
 /// `resolve_manifest_relative_path` function.
 pub(super) fn resolve_manifest_relative_path(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     manifest_rel_dir: &str,
     relative: &str,
 ) -> (String, PathBuf) {
@@ -16,7 +16,7 @@ pub(super) fn resolve_manifest_relative_path(
         format!("{manifest_rel_dir}/{relative}")
     };
     let rel = normalize_relative_path(Path::new(&joined));
-    let abs = g3rs_workspace_crawl::entry(crawl, &rel).map_or_else(
+    let abs = g3_workspace_crawl::entry(crawl, &rel).map_or_else(
         || crawl.root_abs_path.join(&rel),
         |entry| entry.path.abs_path.clone(),
     );
@@ -40,7 +40,7 @@ fn normalize_relative_path(path: &Path) -> String {
 
 /// `classify_dependency_path` function.
 pub(super) fn classify_dependency_path(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     base_dir: &Path,
     relative: &str,
 ) -> G3RsReleasePathTargetKind {
@@ -80,13 +80,13 @@ pub(super) fn join_under_root(root_rel_dir: &str, child: &str) -> String {
 }
 
 /// `file_exists` function.
-pub(super) fn file_exists(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bool {
-    g3rs_workspace_crawl::entry(crawl, rel_path)
-        .is_some_and(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+pub(super) fn file_exists(crawl: &G3WorkspaceCrawl, rel_path: &str) -> bool {
+    g3_workspace_crawl::entry(crawl, rel_path)
+        .is_some_and(|entry| entry.kind == G3WorkspaceEntryKind::File)
 }
 
 /// `direct_child_files` function.
-pub(super) fn direct_child_files(crawl: &G3RsWorkspaceCrawl, dir_rel: &str) -> Vec<String> {
+pub(super) fn direct_child_files(crawl: &G3WorkspaceCrawl, dir_rel: &str) -> Vec<String> {
     let prefix = if dir_rel.is_empty() {
         String::new()
     } else {
@@ -96,7 +96,7 @@ pub(super) fn direct_child_files(crawl: &G3RsWorkspaceCrawl, dir_rel: &str) -> V
     crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == G3WorkspaceEntryKind::File)
         .filter_map(|entry| entry.path.rel_path.strip_prefix(&prefix))
         .filter(|rest| !rest.is_empty() && !rest.contains('/'))
         .map(str::to_owned)
@@ -104,7 +104,7 @@ pub(super) fn direct_child_files(crawl: &G3RsWorkspaceCrawl, dir_rel: &str) -> V
 }
 
 /// `direct_child_dirs` function.
-pub(super) fn direct_child_dirs(crawl: &G3RsWorkspaceCrawl, dir_rel: &str) -> Vec<String> {
+pub(super) fn direct_child_dirs(crawl: &G3WorkspaceCrawl, dir_rel: &str) -> Vec<String> {
     let prefix = if dir_rel.is_empty() {
         String::new()
     } else {

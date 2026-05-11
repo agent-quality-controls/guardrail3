@@ -5,7 +5,7 @@ use guardrail3_rs::{Cli, CliFamilyRunner, PackageRuntime, PlainTextReportRendere
 
 /// Keeps direct crate references visible to `unused_crate_dependencies`.
 mod deps {
-    use g3rs_workspace_crawl as _;
+    use g3_workspace_crawl as _;
     use guardrail3_rs_app_types as _;
     use guardrail3_rs_family_runner_policy as _;
     use guardrail3_rs_family_runner_process as _;

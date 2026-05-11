@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 /// Enumerate the relative directory paths within `crawl` that should be
 /// inspected for style configuration (each `guardrail3-ts.toml` or
@@ -20,7 +20,7 @@ pub(crate) fn style_roots(crawl: &G3WorkspaceCrawl) -> Vec<String> {
 
 /// Whether `entry` is a readable `package.json` that declares any
 /// style-related dependency or dev-dependency.
-fn package_manifest_has_style_surface(entry: &g3_workspace_crawl::G3RsWorkspaceEntry) -> bool {
+fn package_manifest_has_style_surface(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
     if !entry.path.rel_path.ends_with("package.json") || !entry.readable {
         return false;
     }

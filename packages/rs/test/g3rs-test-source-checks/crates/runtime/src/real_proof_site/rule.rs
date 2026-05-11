@@ -231,7 +231,11 @@ pub(crate) fn has_owned_assertion_proof(
     let Some(proof_bearing_assertion_functions) = proof_bearing_assertion_functions else {
         return false;
     };
-    let mut root_prefixes = BTreeMap::from([(assertions_package_name.to_owned(), Vec::new())]);
+    let package_root = assertions_package_name.replace('-', "_");
+    let mut root_prefixes = BTreeMap::from([
+        (assertions_package_name.to_owned(), Vec::new()),
+        (package_root, Vec::new()),
+    ]);
     let mut bare_imports = BTreeMap::new();
     let mut glob_prefixes = Vec::new();
 

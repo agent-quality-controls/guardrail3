@@ -4,9 +4,9 @@
 )]
 use std::fs;
 
+use g3_workspace_crawl::crawl;
 use g3rs_topology_file_tree_checks::check;
 use g3rs_topology_ingestion_assertions::run as assertions;
-use g3rs_workspace_crawl::crawl;
 use tempfile::tempdir;
 
 fn run_results(root: &std::path::Path) -> Vec<guardrail3_check_types::G3CheckResult> {

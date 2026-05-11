@@ -6,7 +6,7 @@ allowed_deps = [
   "g3rs-cargo-config-checks-assertions",
   "g3rs-cargo-types",
   "guardrail3-check-types",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
   "guardrail3-reason-policy",
 ]
 

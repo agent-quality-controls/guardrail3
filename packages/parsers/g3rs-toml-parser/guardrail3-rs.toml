@@ -1,0 +1,13 @@
+profile = "library"
+
+allowed_deps = [
+  "g3rs-toml-parser-runtime",
+  "g3rs-toml-parser-runtime-assertions",
+  "g3rs-toml-parser-types",
+  "serde",
+  "tempfile",
+  "toml",
+]
+
+[checks]
+garde = false

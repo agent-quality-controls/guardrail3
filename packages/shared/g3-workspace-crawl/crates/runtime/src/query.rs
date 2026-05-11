@@ -1,3 +1,5 @@
+//! Query helpers over a `G3WorkspaceCrawl`.
+
 use g3_workspace_crawl_types::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 
 /// Find an entry by exact workspace-relative path.

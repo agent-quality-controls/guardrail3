@@ -1,25 +1,25 @@
 /// Select config entries from a workspace crawl.
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry};
 
 /// Find the workspace-root `Cargo.toml` in the crawl result.
-pub(crate) fn select_cargo_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
+pub(crate) fn select_cargo_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// Find `clippy.toml` or `.clippy.toml` at the workspace root.
-pub(crate) fn select_clippy_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "clippy.toml")
-        .or_else(|| g3rs_workspace_crawl::root_file(crawl, ".clippy.toml"))
+pub(crate) fn select_clippy_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "clippy.toml")
+        .or_else(|| g3_workspace_crawl::root_file(crawl, ".clippy.toml"))
 }
 
 /// Find the root `guardrail3-rs.toml`.
-pub(crate) fn select_guardrail3_rs_toml(crawl: &G3RsWorkspaceCrawl) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
+pub(crate) fn select_guardrail3_rs_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 /// Select all non-test, non-fixture Rust source files under the crawled root.
-pub(crate) fn select_ast_source_files(crawl: &G3RsWorkspaceCrawl) -> Vec<&G3RsWorkspaceEntry> {
-    let mut files = g3rs_workspace_crawl::files_with_extension(crawl, "rs")
+pub(crate) fn select_ast_source_files(crawl: &G3WorkspaceCrawl) -> Vec<&G3WorkspaceEntry> {
+    let mut files = g3_workspace_crawl::files_with_extension(crawl, "rs")
         .into_iter()
         .filter(|entry| is_runtime_source_path(entry.path.rel_path.as_str()))
         .filter(|entry| !is_nested_cargo_root_member(crawl, entry.path.rel_path.as_str()))
@@ -63,12 +63,12 @@ fn is_test_path(rel_path: &str) -> bool {
 }
 
 /// Implements `is nested cargo root member`.
-fn is_nested_cargo_root_member(crawl: &G3RsWorkspaceCrawl, rel_path: &str) -> bool {
+fn is_nested_cargo_root_member(crawl: &G3WorkspaceCrawl, rel_path: &str) -> bool {
     let mut prefix = rel_path.rsplit_once('/').map(|(parent, _)| parent);
 
     while let Some(dir) = prefix {
         if !dir.is_empty()
-            && g3rs_workspace_crawl::entry(crawl, &format!("{dir}/Cargo.toml")).is_some()
+            && g3_workspace_crawl::entry(crawl, &format!("{dir}/Cargo.toml")).is_some()
         {
             return true;
         }

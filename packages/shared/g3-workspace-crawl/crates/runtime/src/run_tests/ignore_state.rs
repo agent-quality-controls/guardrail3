@@ -1,14 +1,9 @@
-#![allow(
-    clippy::disallowed_methods,
-    reason = "fixture-driven filesystem tests need direct std::fs calls in test bodies"
-)]
-
 use std::fs;
 
 use g3_workspace_crawl_assertions::run as assertions;
 use tempfile::tempdir;
 
-use super::helpers::{git_init, write_fixture as write};
+use super::fixtures::{git_init, write, write_root_manifest};
 
 #[test]
 fn marks_gitignored_files_as_included_via_recovery() {
@@ -48,6 +43,7 @@ fn ignored_non_recoverable_files_do_not_appear() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "*.log\n");
     write(root.join("debug.log"), "some log\n");
@@ -64,6 +60,7 @@ fn nested_gitignore_is_respected() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join("src/lib.rs"), "");
     write(root.join("src/.gitignore"), "*.tmp\n");
@@ -124,6 +121,7 @@ fn negation_pattern_unignores_file() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "*.log\n!important.log\n");
     write(root.join("debug.log"), "ignored log");
@@ -219,10 +217,52 @@ fn recovery_finds_ignored_config_in_non_banned_directory() {
 }
 
 #[test]
+fn recovery_finds_ignored_generated_state_directory_sentinels() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+    write_root_manifest(root);
+
+    write(
+        root.join(".gitignore"),
+        ".next/\n.velite/\n.contentlayer/\n",
+    );
+    fs::create_dir_all(root.join(".next/server/app")).expect("create .next output");
+    fs::create_dir_all(root.join(".velite")).expect("create .velite output");
+    fs::create_dir_all(root.join(".contentlayer/generated")).expect("create .contentlayer output");
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl = crate::run::crawl(root).expect("crawl should succeed");
+
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".next",
+        crate::G3WorkspaceEntryKind::Directory,
+        crate::G3WorkspaceIgnoreState::Ignored,
+        true,
+    );
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".velite",
+        crate::G3WorkspaceEntryKind::Directory,
+        crate::G3WorkspaceIgnoreState::Ignored,
+        true,
+    );
+    assertions::assert_crawl_entry(
+        &crawl,
+        ".contentlayer",
+        crate::G3WorkspaceEntryKind::Directory,
+        crate::G3WorkspaceIgnoreState::Ignored,
+        true,
+    );
+}
+
+#[test]
 fn recovery_uses_guardrail3_rs_toml_and_not_dead_guardrail3_toml() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(
         root.join(".gitignore"),
@@ -278,6 +318,7 @@ fn directory_only_gitignore_pattern() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
+    write_root_manifest(root);
 
     write(root.join(".gitignore"), "build/\n");
     write(root.join("build/output.txt"), "artifact");

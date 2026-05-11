@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_style_types::{G3TsStylePolicySnapshot, G3TsStylePolicySurfaceState};
 
 /// Workspace-relative file name of the g3ts policy config.
@@ -26,7 +26,7 @@ pub(crate) fn ingest_policy(
         };
     }
 
-    let config = match guardrail3_rs_toml_parser::from_path(&entry.path.abs_path) {
+    let config = match g3ts_toml_parser::from_path(&entry.path.abs_path) {
         Ok(config) => config,
         Err(error) => {
             return G3TsStylePolicySurfaceState::ParseError {
@@ -36,12 +36,7 @@ pub(crate) fn ingest_policy(
         }
     };
 
-    let Some(ts) = config.ts else {
-        return G3TsStylePolicySurfaceState::MissingTsPolicy {
-            rel_path: entry.path.rel_path.clone(),
-        };
-    };
-    let Some(style) = ts.style else {
+    let Some(style) = config.style else {
         return G3TsStylePolicySurfaceState::MissingStylePolicy {
             rel_path: entry.path.rel_path.clone(),
         };

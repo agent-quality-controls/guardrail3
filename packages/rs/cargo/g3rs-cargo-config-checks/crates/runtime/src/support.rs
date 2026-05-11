@@ -5,8 +5,8 @@ use cargo_toml_parser::types::{
 use g3rs_cargo_types::{
     G3RsCargoPolicyRoot, G3RsCargoRustPolicyState, G3RsCargoWaiver, G3RsCargoWorkspaceMember,
 };
+use g3rs_toml_parser::types::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_rs_toml_parser::types::RustProfile;
 
 /// Lint Expectation struct.
 pub(crate) struct LintExpectation {

@@ -22,7 +22,7 @@ NEW_LOCATIONS = {
     "release-plz-toml-parser": "packages/parsers/release-plz-toml-parser",
     "rust-toolchain-toml-parser": "packages/parsers/rust-toolchain-toml-parser",
     "rustfmt-toml-parser": "packages/parsers/rustfmt-toml-parser",
-    "guardrail3-rs-toml-parser": "packages/parsers/guardrail3-rs-toml-parser",
+    "g3rs-toml-parser": "packages/parsers/g3rs-toml-parser",
     "guardrail3-check-types": "packages/shared/guardrail3-check-types",
     "reason-policy": "packages/shared/reason-policy",
     "g3rs-workspace-crawl": "packages/rs/g3rs-workspace-crawl",

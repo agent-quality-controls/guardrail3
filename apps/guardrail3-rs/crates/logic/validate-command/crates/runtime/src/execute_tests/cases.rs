@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_app_types::{
     FamilyRunError, FamilyRunner, ReportRenderer, SUPPORTED_FAMILIES, SupportedFamily,
@@ -22,14 +22,14 @@ fn write_fixture(path: &Path, content: &str) {
 struct StubCrawler;
 
 impl WorkspaceCrawler for StubCrawler {
-    fn crawl(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
-        g3rs_workspace_crawl::crawl(root).map_err(|error| WorkspaceCrawlError {
+    fn crawl(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
+        g3_workspace_crawl::crawl(root).map_err(|error| WorkspaceCrawlError {
             message: error.to_string(),
         })
     }
 
-    fn crawl_any(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
-        g3rs_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
+    fn crawl_any(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
+        g3_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
             message: error.to_string(),
         })
     }
@@ -42,7 +42,7 @@ impl FamilyRunner for StubFamilyRunner {
     fn run_family(
         &self,
         family: SupportedFamily,
-        _crawl: &G3RsWorkspaceCrawl,
+        _crawl: &G3WorkspaceCrawl,
     ) -> Result<Vec<G3CheckResult>, FamilyRunError> {
         Ok(match family {
             SupportedFamily::Fmt => vec![
@@ -164,7 +164,7 @@ impl FamilyRunner for ErroringFamilyRunner {
     fn run_family(
         &self,
         family: SupportedFamily,
-        _crawl: &G3RsWorkspaceCrawl,
+        _crawl: &G3WorkspaceCrawl,
     ) -> Result<Vec<G3CheckResult>, FamilyRunError> {
         match family {
             SupportedFamily::Fmt => Ok(vec![G3CheckResult::new(

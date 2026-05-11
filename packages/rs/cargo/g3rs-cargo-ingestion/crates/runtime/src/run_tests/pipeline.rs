@@ -29,8 +29,8 @@ fn write(path: impl AsRef<Path>, content: &str) {
     fs::write(path, content).expect("should write test fixture file to disk");
 }
 
-fn crawl(root: &Path) -> g3rs_workspace_crawl::G3RsWorkspaceCrawl {
-    g3rs_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
+fn crawl(root: &Path) -> g3_workspace_crawl::G3WorkspaceCrawl {
+    g3_workspace_crawl::crawl(root).expect("crawl should succeed on valid test workspace")
 }
 
 #[test]

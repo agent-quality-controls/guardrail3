@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 use crate::{FamilyResults, FamilyRunError, SupportedFamily, ValidateReport, WorkspaceCrawlError};
 
@@ -11,7 +11,7 @@ pub trait WorkspaceCrawler {
     /// # Errors
     ///
     /// Returns [`WorkspaceCrawlError`] when the workspace cannot be crawled.
-    fn crawl(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError>;
+    fn crawl(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError>;
 
     /// Builds a snapshot for an arbitrary root (no Cargo.toml requirement).
     ///
@@ -21,7 +21,7 @@ pub trait WorkspaceCrawler {
     /// # Errors
     ///
     /// Returns [`WorkspaceCrawlError`] when the path is not a directory.
-    fn crawl_any(&self, root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError>;
+    fn crawl_any(&self, root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError>;
 }
 
 /// Runs one selected family against a prepared workspace crawl.
@@ -34,7 +34,7 @@ pub trait FamilyRunner {
     fn run_family(
         &self,
         family: SupportedFamily,
-        crawl: &G3RsWorkspaceCrawl,
+        crawl: &G3WorkspaceCrawl,
     ) -> Result<FamilyResults, FamilyRunError>;
 }
 

@@ -20,7 +20,7 @@ fn workspace_local_hook_is_ingested() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let pre_commit = inputs
@@ -48,7 +48,7 @@ fn ancestor_hook_is_ingested_via_upward_walk() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let pre_commit = inputs
@@ -73,7 +73,7 @@ fn missing_hook_anywhere_reports_no_pre_commit_input() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     assert!(
@@ -99,7 +99,7 @@ fn workspace_local_verifier_is_ingested() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let verifier = inputs
@@ -127,7 +127,7 @@ fn ancestor_verifier_is_ingested_via_upward_walk() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let verifier = inputs
@@ -152,7 +152,7 @@ fn missing_verifier_anywhere_reports_not_exists() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
 
     let verifier = inputs
@@ -182,7 +182,7 @@ fn ancestor_modular_dir_is_ingested_via_upward_walk() {
     write_fixture(workspace.join("Cargo.toml"), "[workspace]\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
+        g3_workspace_crawl::crawl_any_root(workspace.as_path()).expect("crawl should succeed");
     let input = super::super::ingest_for_file_tree_checks(&crawl)
         .expect("file-tree ingestion should succeed");
 

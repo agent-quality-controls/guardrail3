@@ -180,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.61"
+version = "1.2.62"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d16d90359e986641506914ba71350897565610e87ce0ad9e6f28569db3dd5c6d"
+checksum = "a1dce859f0832a7d088c4f1119888ab94ef4b5d6795d1ce05afb7fe159d79f98"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -399,24 +399,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -424,7 +424,7 @@ name = "g3ts"
 version = "0.1.0"
 dependencies = [
  "clap",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-topology-file-tree-checks",
  "g3ts-topology-ingestion",
  "guardrail3-check-types",
@@ -466,7 +466,7 @@ dependencies = [
 name = "g3ts-apparch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-apparch-types",
  "tree-sitter",
  "tree-sitter-typescript",
@@ -535,7 +535,7 @@ dependencies = [
 name = "g3ts-arch-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-arch-types",
  "package-json-parser",
  "serde_json",
@@ -568,7 +568,7 @@ name = "g3ts-astro-check-support"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
 ]
 
 [[package]]
@@ -618,10 +618,10 @@ dependencies = [
  "astro-config-parser",
  "eslint-config-parser",
  "eslint-directive-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-content-types",
- "guardrail3-rs-toml-parser",
+ "g3ts-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -659,10 +659,10 @@ name = "g3ts-astro-i18n-ingestion"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-i18n-types",
- "guardrail3-rs-toml-parser",
+ "g3ts-toml-parser",
  "package-json-parser",
  "serde_json",
 ]
@@ -700,11 +700,11 @@ version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
  "eslint-directive-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-mdx-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -750,10 +750,10 @@ version = "0.1.0"
 dependencies = [
  "astro-config-parser",
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-media-types",
- "guardrail3-rs-toml-parser",
+ "g3ts-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -794,11 +794,11 @@ dependencies = [
  "astro-config-parser",
  "eslint-config-parser",
  "eslint-directive-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-seo-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -854,7 +854,7 @@ version = "0.1.0"
 dependencies = [
  "astro-config-parser",
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-setup-types",
  "package-json-parser",
@@ -886,11 +886,11 @@ dependencies = [
 name = "g3ts-astro-state-ingestion"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-check-support",
  "g3ts-astro-state-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
 ]
 
@@ -935,7 +935,7 @@ name = "g3ts-eslint-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-eslint-types",
 ]
 
@@ -980,7 +980,7 @@ dependencies = [
 name = "g3ts-fmt-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-fmt-types",
  "package-json-parser",
  "package-script-command-parser",
@@ -1023,7 +1023,7 @@ dependencies = [
 name = "g3ts-hooks-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-hooks-types",
  "hook-shell-parser",
 ]
@@ -1087,7 +1087,7 @@ dependencies = [
 name = "g3ts-jscpd-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-jscpd-types",
  "jscpd-json-parser",
 ]
@@ -1133,7 +1133,7 @@ dependencies = [
 name = "g3ts-npmrc-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-npmrc-types",
  "npmrc-parser",
 ]
@@ -1179,7 +1179,7 @@ dependencies = [
 name = "g3ts-package-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-package-types",
  "package-json-parser",
  "package-script-command-parser",
@@ -1227,7 +1227,7 @@ name = "g3ts-spelling-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "cspell-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-spelling-types",
  "package-json-parser",
  "package-script-command-parser",
@@ -1273,10 +1273,10 @@ version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
  "eslint-directive-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-style-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -1287,6 +1287,29 @@ dependencies = [
 [[package]]
 name = "g3ts-style-types"
 version = "0.1.0"
+
+[[package]]
+name = "g3ts-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-runtime",
+]
+
+[[package]]
+name = "g3ts-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "g3ts-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "g3ts-topology-file-tree-checks"
@@ -1371,7 +1394,7 @@ dependencies = [
 name = "g3ts-tsconfig-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-tsconfig-types",
  "tsconfig-json-parser",
 ]
@@ -1416,7 +1439,7 @@ dependencies = [
 name = "g3ts-typecov-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-typecov-types",
  "package-json-parser",
  "package-script-command-parser",
@@ -1458,33 +1481,10 @@ name = "guardrail3-check-types"
 version = "0.1.0"
 
 [[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "guardrail3-ts-app-types"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "guardrail3-check-types",
 ]
 
@@ -1500,7 +1500,7 @@ dependencies = [
 name = "guardrail3-ts-family-runner-config"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-eslint-config-checks",
  "g3ts-eslint-ingestion",
  "g3ts-fmt-config-checks",
@@ -1526,7 +1526,7 @@ dependencies = [
 name = "guardrail3-ts-family-runner-hooks"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-astro-content-hook-contract",
  "g3ts-astro-i18n-hook-contract",
  "g3ts-astro-mdx-hook-contract",
@@ -1559,7 +1559,7 @@ dependencies = [
 name = "guardrail3-ts-family-runner-structure"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-apparch-config-checks",
  "g3ts-apparch-ingestion",
  "g3ts-apparch-source-checks",
@@ -1590,7 +1590,7 @@ dependencies = [
 name = "guardrail3-ts-packages"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "guardrail3-ts-app-types",
 ]
 
@@ -1611,30 +1611,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "guardrail3-ts-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-ts-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-ts-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "guardrail3-ts-validate-command"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
+ "g3ts-toml-parser-runtime",
+ "g3ts-toml-parser-types",
  "guardrail3-check-types",
  "guardrail3-ts-app-types",
- "guardrail3-ts-toml-parser-runtime",
- "guardrail3-ts-toml-parser-types",
  "guardrail3-ts-validate-command-assertions",
  "tempfile",
 ]
@@ -1668,9 +1652,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.17.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
+checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "heck"
@@ -1813,9 +1797,9 @@ dependencies = [
 
 [[package]]
 name = "idna_adapter"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3acae9609540aa318d1bc588455225fb2085b9ed0c4f6bd0d9d5bcd86f1a0344"
+checksum = "cb68373c0d6620ef8105e855e7745e18b0d00d3bdb07fb532e434244cdb9a714"
 dependencies = [
  "icu_normalizer",
  "icu_properties",
@@ -1844,7 +1828,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.0",
+ "hashbrown 0.17.1",
  "serde",
  "serde_core",
 ]
@@ -1898,9 +1882,9 @@ dependencies = [
 
 [[package]]
 name = "jsonc-parser"
-version = "0.32.3"
+version = "0.32.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c2e5dea04f54739ca5694ee06e4448ffda065a55b3427d2b131bd5ea697ea2c"
+checksum = "840785e1a8b4fdb27be18440a35a81af64820dc185c3973ff8b012d4c6282512"
 dependencies = [
  "serde",
 ]
@@ -2102,7 +2086,7 @@ version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
 dependencies = [
- "siphasher 1.0.2",
+ "siphasher 1.0.3",
 ]
 
 [[package]]
@@ -2321,9 +2305,9 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 
 [[package]]
 name = "siphasher"
-version = "1.0.2"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2aa850e253778c88a04c3d7323b043aeda9d3e30d5971937c1855769763678e"
+checksum = "8ee5873ec9cce0195efcb7a4e9507a04cd49aec9c83d0389df45b1ef7ba2e649"
 
 [[package]]
 name = "smallvec"
@@ -2470,9 +2454,9 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_parser"
-version = "39.0.1"
+version = "39.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c94d9deb6d91ade011685df51fdbb345f33de17e0b70ea7b2028051a8b76da36"
+checksum = "8b13829b24cbdb2d7a08282bd968af8a258fd762c918df9a7b82291d44068bbc"
 dependencies = [
  "bitflags",
  "either",

@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_content_types::{
     G3TsAstroContentAdapterRootInput, G3TsAstroContentAdapterSourceInput,
     G3TsAstroContentAppRootInput, G3TsAstroContentConfigChecksInput,

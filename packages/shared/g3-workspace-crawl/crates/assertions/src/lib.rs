@@ -1,4 +1,4 @@
-//! Reusable assertion helpers for `g3-workspace-crawl` callers.
+//! Test-time assertions for the workspace crawl runtime.
 
 #[cfg(feature = "crawl")]
 use g3_workspace_crawl_runtime as _;

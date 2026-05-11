@@ -6,7 +6,7 @@ allowed_deps = [
   "g3rs-test-file-tree-checks",
   "g3rs-test-source-checks",
   "g3rs-test-types",
-  "g3rs-workspace-crawl",
+  "g3-workspace-crawl",
   "glob",
   "guardrail3-check-types",
   "hook-shell-parser",

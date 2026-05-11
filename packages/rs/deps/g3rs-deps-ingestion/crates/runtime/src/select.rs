@@ -1,31 +1,29 @@
 /// Select config entries from a workspace crawl.
 use cargo_toml_parser::types::CargoToml;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind};
+use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use glob::Pattern;
 
 /// Pair of (raw textual pattern, compiled glob) used to match workspace members and excludes.
 type NamedPattern<'a> = (&'a str, Pattern);
 
 /// Find `Cargo.toml` at the workspace root.
-pub(crate) fn select_workspace_cargo_toml(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
+pub(crate) fn select_workspace_cargo_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "Cargo.toml")
 }
 
 /// Find `guardrail3-rs.toml` at the workspace root.
 pub(crate) fn select_workspace_guardrail3_rs_toml(
-    crawl: &G3RsWorkspaceCrawl,
-) -> Option<&G3RsWorkspaceEntry> {
-    g3rs_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
+    crawl: &G3WorkspaceCrawl,
+) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
 /// List of crawl entries that correspond to selected workspace member `Cargo.toml` files.
-pub(crate) type WorkspaceMemberEntries<'a> = Vec<&'a G3RsWorkspaceEntry>;
+pub(crate) type WorkspaceMemberEntries<'a> = Vec<&'a G3WorkspaceEntry>;
 
 /// Find member `Cargo.toml` files declared by `[workspace].members`.
 pub(crate) fn select_member_cargo_tomls<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     workspace_cargo: &CargoToml,
 ) -> Result<WorkspaceMemberEntries<'a>, String> {
     let workspace = workspace_cargo
@@ -55,7 +53,7 @@ pub(crate) fn select_member_cargo_tomls<'a>(
         .entries
         .iter()
         .filter(|entry| {
-            entry.kind == G3RsWorkspaceEntryKind::File
+            entry.kind == G3WorkspaceEntryKind::File
                 && is_member_manifest_path(entry.path.rel_path.as_str())
         })
         .filter(|entry| {
@@ -73,7 +71,7 @@ pub(crate) fn select_member_cargo_tomls<'a>(
         .collect::<Vec<_>>();
 
     if workspace_cargo.package.is_some() && !workspace_root_is_excluded(&exclude_patterns) {
-        let root_entry = g3rs_workspace_crawl::root_file(crawl, "Cargo.toml")
+        let root_entry = g3_workspace_crawl::root_file(crawl, "Cargo.toml")
             .ok_or_else(|| "workspace root Cargo.toml missing from crawl".to_owned())?;
         members.push(root_entry);
     }

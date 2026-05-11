@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_setup_types::{
     G3TsAstroPackageSurfaceState, G3TsAstroSyncpackConfigSnapshot, G3TsAstroSyncpackConfigState,
     G3TsAstroSyncpackRequiredPin,
@@ -287,11 +287,11 @@ fn syncpack_config_is_app_local(syncpack_rel_path: &str, package_rel_path: &str)
 fn select_syncpack_config<'crawl>(
     crawl: &'crawl G3WorkspaceCrawl,
     app_root_rel_path: &str,
-) -> Option<&'crawl g3_workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'crawl g3_workspace_crawl::G3WorkspaceEntry> {
     let app_config = scoped_rel_path(app_root_rel_path, SYNCPACK_CONFIG_REL_PATH);
     crawl.entries.iter().find(|entry| {
-        entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-            && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+        entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+            && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
             && entry.path.rel_path == app_config
     })
 }

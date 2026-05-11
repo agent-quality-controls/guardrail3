@@ -1,11 +1,11 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_arch_types::types::{
     G3RsArchCrateNode, G3RsArchFileTreeChecksInput, G3RsArchFileTreeCrate, G3RsArchModuleDir,
     G3RsArchRustPolicyState,
 };
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use crate::error::G3RsArchIngestionError;
 use crate::view::CrawlView;
@@ -26,7 +26,7 @@ type ModuleDirEntry = (String, G3RsArchModuleDir);
 
 /// ingest for file tree checks fn.
 pub(crate) fn ingest_for_file_tree_checks(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> crate::run::IngestResult<G3RsArchFileTreeChecksInput> {
     let view = CrawlView::new(crawl);
     let crate_nodes = collect_crate_nodes(&view)?;
@@ -59,7 +59,7 @@ pub(crate) fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyStat
             };
         }
     };
-    let parsed = match guardrail3_rs_toml_parser::parse(&content) {
+    let parsed = match g3rs_toml_parser::parse(&content) {
         Ok(parsed) => parsed,
         Err(err) => {
             return G3RsArchRustPolicyState::ParseError {

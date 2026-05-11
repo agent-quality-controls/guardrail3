@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_media_types::{
     G3TsAstroPackageScriptCommand, G3TsAstroPackageScriptCommandSeparator,
     G3TsAstroPackageScriptParseBlocker, G3TsAstroPackageScriptToolInvocation,

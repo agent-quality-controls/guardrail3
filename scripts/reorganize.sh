@@ -30,7 +30,7 @@ git mv packages/nextest-toml-parser packages/parsers/
 git mv packages/release-plz-toml-parser packages/parsers/
 git mv packages/rust-toolchain-toml-parser packages/parsers/
 git mv packages/rustfmt-toml-parser packages/parsers/
-git mv packages/guardrail3-rs-toml-parser packages/parsers/
+git mv packages/g3rs-toml-parser packages/parsers/
 
 echo "=== Moving shared packages ==="
 git mv packages/guardrail3-check-types packages/shared/
@@ -79,7 +79,7 @@ MOVES[packages/nextest-toml-parser]=packages/parsers/nextest-toml-parser
 MOVES[packages/release-plz-toml-parser]=packages/parsers/release-plz-toml-parser
 MOVES[packages/rust-toolchain-toml-parser]=packages/parsers/rust-toolchain-toml-parser
 MOVES[packages/rustfmt-toml-parser]=packages/parsers/rustfmt-toml-parser
-MOVES[packages/guardrail3-rs-toml-parser]=packages/parsers/guardrail3-rs-toml-parser
+MOVES[packages/g3rs-toml-parser]=packages/parsers/g3rs-toml-parser
 # Shared
 MOVES[packages/guardrail3-check-types]=packages/shared/guardrail3-check-types
 MOVES[packages/reason-policy]=packages/shared/reason-policy

@@ -181,4 +181,4 @@ pub struct G3RsArchFileTreeChecksInput {
     pub module_dirs: Vec<G3RsArchModuleDir>,
     pub rust_policy: G3RsArchRustPolicyState,
 }
-use guardrail3_rs_toml_parser::types::WaiverConfig;
+use g3rs_toml_parser::types::WaiverConfig;

@@ -1,8 +1,8 @@
 use std::fs;
 
+use g3_workspace_crawl::{G3WorkspaceCrawl, crawl};
 use g3rs_arch_source_checks::check as check_source;
 use g3rs_arch_types::G3RsArchSourceChecksInput;
-use g3rs_workspace_crawl::{G3RsWorkspaceCrawl, crawl};
 use guardrail3_check_types::G3CheckResult;
 use tempfile::{TempDir, tempdir};
 
@@ -31,7 +31,7 @@ pub(super) fn make_dir(root: &TempDir, rel: &str) {
         .expect("create fixture directory for arch source ingestion test");
 }
 
-fn crawl_workspace(root: &TempDir) -> G3RsWorkspaceCrawl {
+fn crawl_workspace(root: &TempDir) -> G3WorkspaceCrawl {
     crawl(root.path()).expect("crawl fixture workspace for arch source ingestion test")
 }
 

@@ -3,10 +3,9 @@ profile = "library"
 allowed_deps = [
   "eslint-config-parser",
   "g3-workspace-crawl",
-  "g3rs-workspace-crawl",
   "g3ts-astro-check-support",
   "g3ts-astro-i18n-types",
-  "guardrail3-rs-toml-parser",
+  "g3ts-toml-parser",
   "package-json-parser",
   "serde_json",
 ]

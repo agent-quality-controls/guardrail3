@@ -1,7 +1,7 @@
 use cargo_toml_parser::types::CargoStringFieldState;
 use g3rs_cargo_types::G3RsCargoPolicyRoot;
+use g3rs_toml_parser::types::RustProfile;
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_rs_toml_parser::types::RustProfile;
 
 use crate::support::{rust_policy_valid, rust_profile};
 

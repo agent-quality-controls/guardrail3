@@ -5,9 +5,9 @@
     reason = "test fixtures need direct filesystem and process access to build temp workspaces; deterministic indexing is intentional in fixtures with known shape; per-fixture re-bindings (workspace_crawl, inputs, crate_inputs) reuse names across reset-and-resnapshot patterns"
 )]
 
+use g3_workspace_crawl::crawl;
 use g3rs_deps_ingestion_assertions::run as assertions;
 use g3rs_deps_types::G3RsDepsConfigInputScope;
-use g3rs_workspace_crawl::crawl;
 
 use crate::run::{ingest_for_config_checks, ingest_for_source_checks};
 

@@ -110,24 +110,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -152,11 +152,11 @@ version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
  "eslint-directive-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
  "g3ts-style-ingestion-assertions",
  "g3ts-style-types",
+ "g3ts-toml-parser",
  "globset",
- "guardrail3-rs-toml-parser",
  "package-json-parser",
  "package-script-command-parser",
  "serde_json",
@@ -169,6 +169,29 @@ name = "g3ts-style-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3ts-toml-parser"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-runtime",
+]
+
+[[package]]
+name = "g3ts-toml-parser-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3ts-toml-parser-types",
+ "toml",
+]
+
+[[package]]
+name = "g3ts-toml-parser-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "globset"
 version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -179,29 +202,6 @@ dependencies = [
  "log",
  "regex-automata",
  "regex-syntax",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-runtime",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-runtime"
-version = "0.1.0"
-dependencies = [
- "guardrail3-rs-toml-parser-types",
- "toml",
-]
-
-[[package]]
-name = "guardrail3-rs-toml-parser-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
 ]
 
 [[package]]

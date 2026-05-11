@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_i18n_types::{
     G3TsAstroI18nConfigChecksInput, G3TsAstroI18nEslintPluginContractInput,
     G3TsAstroI18nIntegrationContractInput,

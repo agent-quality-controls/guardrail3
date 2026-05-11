@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use cargo_toml_parser::types::{CargoToml, Dependency, TargetDependencyTables};
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_release_types::G3RsReleasePathTargetKind;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 #[derive(Debug, Clone)]
 /// `DependencyEdge` value.
@@ -26,7 +26,7 @@ pub(super) struct DependencyEdge {
 
 /// `dependency_edges` function.
 pub(super) fn dependency_edges(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     source_manifest_abs_path: &Path,
     cargo: &CargoToml,
     workspace_dependencies: &BTreeMap<String, Dependency>,
@@ -71,7 +71,7 @@ pub(super) fn dependency_edges(
 
 /// `collect_target_dependency_edges` function.
 fn collect_target_dependency_edges(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     source_manifest_dir: &Path,
     target: &TargetDependencyTables,
     target_name: &str,
@@ -100,7 +100,7 @@ fn collect_target_dependency_edges(
 
 /// `collect_dependency_edges` function.
 fn collect_dependency_edges(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     source_manifest_dir: &Path,
     dependencies: &BTreeMap<String, Dependency>,
     section_label: &str,
@@ -151,7 +151,7 @@ fn collect_dependency_edges(
 
 /// Classify the workspace-inherited dependency path, if any.
 fn inherited_path_target_kind(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     workspace_inherited: bool,
     workspace_detail: Option<&Dependency>,
 ) -> Option<G3RsReleasePathTargetKind> {

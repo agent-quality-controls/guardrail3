@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_i18n_types::{G3TsAstroI18nPolicySnapshot, G3TsAstroI18nPolicySurfaceState};
 
 /// Relative path of the guardrail TS config within an Astro app root.
@@ -28,7 +28,7 @@ pub(crate) fn ingest_i18n_policy_surface(
         };
     }
 
-    let config = match guardrail3_rs_toml_parser::from_path(&entry.path.abs_path) {
+    let config = match g3ts_toml_parser::from_path(&entry.path.abs_path) {
         Ok(config) => config,
         Err(error) => {
             return G3TsAstroI18nPolicySurfaceState::ParseError {
@@ -38,12 +38,7 @@ pub(crate) fn ingest_i18n_policy_surface(
         }
     };
 
-    let Some(ts) = config.ts else {
-        return G3TsAstroI18nPolicySurfaceState::MissingAstroPolicy {
-            rel_path: entry.path.rel_path.clone(),
-        };
-    };
-    let Some(astro) = ts.astro else {
+    let Some(astro) = config.astro else {
         return G3TsAstroI18nPolicySurfaceState::MissingAstroPolicy {
             rel_path: entry.path.rel_path.clone(),
         };

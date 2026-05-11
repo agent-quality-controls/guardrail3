@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_rs_app_types::{
     FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport,
     WorkspaceCrawlError, WorkspaceCrawler,
@@ -9,13 +9,13 @@ use guardrail3_rs_app_types::{
 struct StubCrawler;
 
 impl WorkspaceCrawler for StubCrawler {
-    fn crawl(&self, _root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
+    fn crawl(&self, _root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
         Err(WorkspaceCrawlError {
             message: "crawl failed".to_owned(),
         })
     }
 
-    fn crawl_any(&self, _root: &Path) -> Result<G3RsWorkspaceCrawl, WorkspaceCrawlError> {
+    fn crawl_any(&self, _root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
         Err(WorkspaceCrawlError {
             message: "crawl failed".to_owned(),
         })
@@ -29,7 +29,7 @@ impl FamilyRunner for StubFamilyRunner {
     fn run_family(
         &self,
         _family: SupportedFamily,
-        _crawl: &G3RsWorkspaceCrawl,
+        _crawl: &G3WorkspaceCrawl,
     ) -> Result<FamilyResults, FamilyRunError> {
         Ok(FamilyResults::new())
     }

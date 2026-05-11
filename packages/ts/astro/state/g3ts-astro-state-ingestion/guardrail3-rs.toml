@@ -2,11 +2,10 @@ profile = "library"
 
 allowed_deps = [
   "g3-workspace-crawl",
-  "g3rs-workspace-crawl",
   "g3ts-astro-check-support",
   "g3ts-astro-state-types",
   "globset",
-  "guardrail3-rs-toml-parser",
+  "g3ts-toml-parser",
   "package-json-parser",
 ]
 

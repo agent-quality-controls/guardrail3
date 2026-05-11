@@ -3,8 +3,8 @@ use std::ffi::OsStr;
 use std::path::Path;
 use std::process::Command;
 
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_release_types::{G3RsReleaseDryRunOutcome, G3RsReleaseInputFailure};
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::collect::{WorkflowFacts, input_failure};
 
@@ -21,7 +21,7 @@ type CliffParse = (bool, String, Option<cliff_toml_parser::types::CliffToml>);
 
 /// `parse_release_plz` function.
 pub(super) fn parse_release_plz(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
 ) -> ReleasePlzParse {
     let rel_path = "release-plz.toml".to_owned();
@@ -66,7 +66,7 @@ pub(super) fn parse_release_plz(
 
 /// `parse_cliff` function.
 pub(super) fn parse_cliff(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
 ) -> CliffParse {
     let rel_path = "cliff.toml".to_owned();
@@ -104,7 +104,7 @@ pub(super) fn parse_cliff(
 
 /// `collect_workflows` function.
 pub(super) fn collect_workflows(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     failures: &mut Vec<G3RsReleaseInputFailure>,
 ) -> Vec<WorkflowFacts> {
     let mut workflows = Vec::new();

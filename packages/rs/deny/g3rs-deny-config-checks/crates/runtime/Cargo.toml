@@ -27,7 +27,7 @@ deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser" }
 g3rs-deny-types = { path = "../../../g3rs-deny-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy", version = "0.0.0" }
-guardrail3-rs-toml-parser = { path = "../../../../../parsers/guardrail3-rs-toml-parser", version = "0.1.0" }
+g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 toml = "0.8"
 
 [dev-dependencies]

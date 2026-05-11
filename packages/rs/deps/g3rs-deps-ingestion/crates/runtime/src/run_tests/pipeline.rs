@@ -19,7 +19,7 @@ fn pipeline_reports_missing_dependency_allowlist_for_library() {
         "[package]\nname = \"core\"\nversion = \"0.1.0\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = inputs
         .iter()
@@ -50,7 +50,7 @@ fn pipeline_reports_workspace_tool_presence_in_deps_config_lane() {
     write_executable(tools_dir.join("cargo-machete"), "#!/bin/sh\nexit 0\n");
     write_executable(tools_dir.join("gitleaks"), "#!/bin/sh\nexit 0\n");
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs =
         crate::run::ingest_for_config_checks_with_path(&crawl, Some(tools_dir.as_os_str()))
             .expect("ingestion should succeed");
@@ -82,7 +82,7 @@ fn pipeline_emits_one_workspace_tool_result_set_even_with_multiple_crates() {
         "[package]\nname = \"support\"\nversion = \"0.1.0\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
     let inputs = crate::run::ingest_for_config_checks_with_path(&crawl, None)
         .expect("ingestion should succeed");
     let results = inputs

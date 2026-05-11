@@ -37,7 +37,7 @@ fn reports_malformed_method_section() {
         "disallowed-methods = [1]\n",
         parsed_rust_policy(
             "guardrail3-rs.toml",
-            Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+            Some(g3rs_toml_parser::types::RustProfile::Service),
             true,
         ),
         missing_cargo_root(),
@@ -57,7 +57,7 @@ fn drops_garde_owned_method_bans_when_garde_is_disabled() {
         "disallowed-methods = []\n",
         parsed_rust_policy(
             "guardrail3-rs.toml",
-            Some(guardrail3_rs_toml_parser::types::RustProfile::Service),
+            Some(g3rs_toml_parser::types::RustProfile::Service),
             false,
         ),
         missing_cargo_root(),

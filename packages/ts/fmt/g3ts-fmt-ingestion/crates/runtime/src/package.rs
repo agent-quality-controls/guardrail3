@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_fmt_types::{
     G3TsFmtPackageScriptCommandSeparator, G3TsFmtPackageScriptParseBlocker,
     G3TsFmtPackageScriptToolInvocation, G3TsFmtPackageSurfaceSnapshot, G3TsFmtPackageSurfaceState,

@@ -6,7 +6,7 @@ use cargo_toml_parser::types::{
     WorkspacePackageSection,
 };
 
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 
 use super::collect::{CrateBase, CrateReadmeFacts, ParsedCrate};
 
@@ -15,7 +15,7 @@ type ReadmePathField<'a> = (Option<&'a str>, bool);
 
 /// `build_crate_base` function.
 pub(super) fn build_crate_base(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     krate: &ParsedCrate,
     workspace_package: Option<&WorkspacePackageSection>,
 ) -> CrateBase {
@@ -120,13 +120,13 @@ fn readme_path_field<'a>(
 }
 
 /// `is_library_crate` function.
-fn is_library_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
+fn is_library_crate(crawl: &G3WorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
     cargo.lib.is_some()
         || super::paths::file_exists(crawl, &super::paths::join_under_root(rel_dir, "src/lib.rs"))
 }
 
 /// `is_binary_crate` function.
-fn is_binary_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
+fn is_binary_crate(crawl: &G3WorkspaceCrawl, rel_dir: &str, cargo: &CargoToml) -> bool {
     if !cargo.bin.is_empty() {
         return true;
     }
@@ -144,7 +144,7 @@ fn is_binary_crate(crawl: &G3RsWorkspaceCrawl, rel_dir: &str, cargo: &CargoToml)
 
 /// `binary_target_names` function.
 fn binary_target_names(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     rel_dir: &str,
     cargo: &CargoToml,
 ) -> BTreeSet<String> {
@@ -201,7 +201,7 @@ fn binary_target_names(
 }
 
 /// `autodiscovered_bin_exists` function.
-fn autodiscovered_bin_exists(crawl: &G3RsWorkspaceCrawl, rel_dir: &str) -> bool {
+fn autodiscovered_bin_exists(crawl: &G3WorkspaceCrawl, rel_dir: &str) -> bool {
     let src_bin_rel = super::paths::join_under_root(rel_dir, "src/bin");
     super::paths::direct_child_files(crawl, &src_bin_rel)
         .iter()

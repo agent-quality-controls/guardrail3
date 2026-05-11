@@ -5,7 +5,7 @@ allowed_deps = [
   "g3rs-arch-file-tree-checks-runtime",
   "g3rs-arch-types",
   "guardrail3-check-types",
-  "guardrail3-rs-toml-parser",
+  "g3rs-toml-parser",
 ]
 
 [checks]

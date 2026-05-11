@@ -3,7 +3,7 @@ use g3rs_cargo_types::{
     G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWaiver,
     G3RsCargoWorkspaceMember,
 };
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 
 /// Internal.
 ///

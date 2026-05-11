@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 
-use g3rs_workspace_crawl::{
-    G3RsWorkspaceCrawl, G3RsWorkspaceEntry, G3RsWorkspaceEntryKind, G3RsWorkspaceIgnoreState,
-    G3RsWorkspacePath,
+use g3_workspace_crawl::{
+    G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, G3WorkspaceIgnoreState,
+    G3WorkspacePath,
 };
 
 /// Locate a workspace-relative file path by first searching the crawl, then
@@ -14,10 +14,10 @@ use g3rs_workspace_crawl::{
 /// supplied as `rel_path` (e.g. `.githooks/pre-commit`). The synthesized
 /// `abs_path` always points at the actual file on disk.
 pub(crate) fn find_file_entry<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     rel_path: &str,
-) -> Option<Cow<'a, G3RsWorkspaceEntry>> {
-    if let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) {
+) -> Option<Cow<'a, G3WorkspaceEntry>> {
+    if let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) {
         return Some(Cow::Borrowed(entry));
     }
 
@@ -33,11 +33,11 @@ pub(crate) fn find_file_entry<'a>(
 /// Locate a workspace-relative directory path by first searching the crawl,
 /// then walking upward. Mirrors [`find_file_entry`] for directories.
 pub(crate) fn find_dir_entry<'a>(
-    crawl: &'a G3RsWorkspaceCrawl,
+    crawl: &'a G3WorkspaceCrawl,
     rel_path: &str,
-) -> Option<Cow<'a, G3RsWorkspaceEntry>> {
-    if let Some(entry) = g3rs_workspace_crawl::entry(crawl, rel_path) {
-        if entry.kind == G3RsWorkspaceEntryKind::Directory {
+) -> Option<Cow<'a, G3WorkspaceEntry>> {
+    if let Some(entry) = g3_workspace_crawl::entry(crawl, rel_path) {
+        if entry.kind == G3WorkspaceEntryKind::Directory {
             return Some(Cow::Borrowed(entry));
         }
     }
@@ -70,27 +70,27 @@ fn walk_upward_for(
 }
 
 /// `synthetic_file_entry` function.
-fn synthetic_file_entry(abs_path: PathBuf, rel_path: &str) -> G3RsWorkspaceEntry {
-    G3RsWorkspaceEntry {
-        path: G3RsWorkspacePath {
+fn synthetic_file_entry(abs_path: PathBuf, rel_path: &str) -> G3WorkspaceEntry {
+    G3WorkspaceEntry {
+        path: G3WorkspacePath {
             rel_path: rel_path.to_owned(),
             abs_path,
         },
-        kind: G3RsWorkspaceEntryKind::File,
-        ignore_state: G3RsWorkspaceIgnoreState::Included,
+        kind: G3WorkspaceEntryKind::File,
+        ignore_state: G3WorkspaceIgnoreState::Included,
         readable: true,
     }
 }
 
 /// `synthetic_dir_entry` function.
-fn synthetic_dir_entry(abs_path: PathBuf, rel_path: &str) -> G3RsWorkspaceEntry {
-    G3RsWorkspaceEntry {
-        path: G3RsWorkspacePath {
+fn synthetic_dir_entry(abs_path: PathBuf, rel_path: &str) -> G3WorkspaceEntry {
+    G3WorkspaceEntry {
+        path: G3WorkspacePath {
             rel_path: rel_path.to_owned(),
             abs_path,
         },
-        kind: G3RsWorkspaceEntryKind::Directory,
-        ignore_state: G3RsWorkspaceIgnoreState::Included,
+        kind: G3WorkspaceEntryKind::Directory,
+        ignore_state: G3WorkspaceIgnoreState::Included,
         readable: true,
     }
 }

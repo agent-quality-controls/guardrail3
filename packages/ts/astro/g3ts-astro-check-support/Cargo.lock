@@ -70,24 +70,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl"
+name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-runtime",
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-runtime",
+ "g3-workspace-crawl-types",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-runtime"
+name = "g3-workspace-crawl-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-workspace-crawl-types",
+ "g3-workspace-crawl-types",
  "ignore",
  "walkdir",
 ]
 
 [[package]]
-name = "g3rs-workspace-crawl-types"
+name = "g3-workspace-crawl-types"
 version = "0.1.0"
 
 [[package]]
@@ -95,7 +95,7 @@ name = "g3ts-astro-check-support"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3rs-workspace-crawl",
+ "g3-workspace-crawl",
 ]
 
 [[package]]

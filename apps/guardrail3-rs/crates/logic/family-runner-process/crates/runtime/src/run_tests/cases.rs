@@ -26,7 +26,7 @@ fn hooks_runner_injects_family_contracts_into_source_checks() {
     write(root.join(".git/HEAD"), "ref: refs/heads/main\n");
 
     let crawl =
-        g3rs_workspace_crawl::crawl(root.as_path()).expect("test workspace crawl should succeed");
+        g3_workspace_crawl::crawl(root.as_path()).expect("test workspace crawl should succeed");
     let results = run(SupportedFamily::Hooks, &crawl).expect("hooks family should run");
 
     assertions::assert_hooks_runner_injects_contracts(&results);

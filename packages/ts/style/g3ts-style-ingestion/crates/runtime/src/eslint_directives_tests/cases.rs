@@ -40,7 +40,7 @@ fn invalid_style_source_globs_fail_closed_for_disable_inventory() {
             extra_fields: Vec::new(),
         },
     };
-    let crawl = g3_workspace_crawl::G3RsWorkspaceCrawl {
+    let crawl = g3_workspace_crawl::G3WorkspaceCrawl {
         root_abs_path: std::path::PathBuf::from("/tmp/g3ts-style-test"),
         entries: Vec::new(),
     };

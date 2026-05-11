@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_check_support::surfaces::{
     G3TsAstroRawEslintConfigState, read_eslint_config_surface,
 };
@@ -387,8 +387,8 @@ fn mdx_content_paths(
         .entries
         .iter()
         .filter(|entry| {
-            entry.kind == g3_workspace_crawl::G3RsWorkspaceEntryKind::File
-                && entry.ignore_state == g3_workspace_crawl::G3RsWorkspaceIgnoreState::Included
+            entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
+                && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
                 && entry.path.rel_path.starts_with(&scoped_prefix)
                 && std::path::Path::new(&entry.path.rel_path)
                     .extension()

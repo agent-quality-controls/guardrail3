@@ -1,4 +1,4 @@
-use g3_workspace_crawl::G3RsWorkspaceCrawl as G3WorkspaceCrawl;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_astro_i18n_types::{G3TsAstroPackageSurfaceSnapshot, G3TsAstroPackageSurfaceState};
 
 /// Ingests the `package.json` surface for an Astro app rooted at `app_root_rel_path`.

@@ -2,7 +2,7 @@
 use std::path::Path;
 
 use cargo_toml_parser::types::CargoToml;
-use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
+use g3rs_toml_parser::types::Guardrail3RsToml;
 
 use crate::run::IngestionError;
 
@@ -36,11 +36,10 @@ pub(crate) fn parse_guardrail3_rs_toml(
             path: abs_path.to_path_buf(),
             reason: err.to_string(),
         })?;
-    let config =
-        guardrail3_rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
-            path: abs_path.to_path_buf(),
-            reason: err.to_string(),
-        })?;
+    let config = g3rs_toml_parser::parse(&content).map_err(|err| IngestionError::ParseFailed {
+        path: abs_path.to_path_buf(),
+        reason: err.to_string(),
+    })?;
     let allowlist_present = explicit_allowlist_present(&content, abs_path)?;
 
     Ok(ParsedGuardrail3RsToml {

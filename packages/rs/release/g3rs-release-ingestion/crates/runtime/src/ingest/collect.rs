@@ -3,9 +3,9 @@ use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
 
 use cargo_toml_parser::types::CargoToml;
+use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_release_ingestion_types::G3RsReleaseIngestionError as IngestionError;
 use g3rs_release_types as release_types;
-use g3rs_workspace_crawl::G3RsWorkspaceCrawl;
 
 use super::{crate_base, deps, paths, repo, root, workflow_predicates};
 use g3rs_release_types::G3RsReleaseWorkflowAnalysis as WorkflowAnalysis;
@@ -99,7 +99,7 @@ fn current_path_env() -> Option<OsString> {
 
 /// `config_result` function.
 pub(crate) fn config_result(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<release_types::G3RsReleaseConfigChecksInput, IngestionError> {
     require_pointed_workspace_root(crawl)?;
     Ok(config_input(crawl))
@@ -107,14 +107,14 @@ pub(crate) fn config_result(
 
 /// `config_input` function.
 pub(super) fn config_input(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> release_types::G3RsReleaseConfigChecksInput {
     config_input_with_path(crawl, current_path_env().as_deref())
 }
 
 /// `config_input_with_path` function.
 pub(super) fn config_input_with_path(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     path_env: Option<&OsStr>,
 ) -> release_types::G3RsReleaseConfigChecksInput {
     collect(crawl, path_env).config
@@ -122,7 +122,7 @@ pub(super) fn config_input_with_path(
 
 /// `source_result` function.
 pub(crate) fn source_result(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<release_types::G3RsReleaseSourceChecksInput, IngestionError> {
     require_pointed_workspace_root(crawl)?;
     Ok(source_input(crawl))
@@ -130,14 +130,14 @@ pub(crate) fn source_result(
 
 /// `source_input` function.
 pub(super) fn source_input(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> release_types::G3RsReleaseSourceChecksInput {
     collect(crawl, current_path_env().as_deref()).source
 }
 
 /// `filetree_result` function.
 pub(crate) fn filetree_result(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<release_types::G3RsReleaseFileTreeChecksInput, IngestionError> {
     require_pointed_workspace_root(crawl)?;
     Ok(filetree_input(crawl))
@@ -145,22 +145,22 @@ pub(crate) fn filetree_result(
 
 /// `filetree_input` function.
 pub(super) fn filetree_input(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> release_types::G3RsReleaseFileTreeChecksInput {
     collect(crawl, current_path_env().as_deref()).filetree
 }
 
 /// `repo_root_result` function.
 pub(crate) fn repo_root_result(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
 ) -> Result<release_types::G3RsReleaseConfigRepo, IngestionError> {
     require_pointed_workspace_root(crawl)?;
     Err(IngestionError::RepoRootChecksNotImplemented)
 }
 
 /// `require_pointed_workspace_root` function.
-fn require_pointed_workspace_root(crawl: &G3RsWorkspaceCrawl) -> Result<(), IngestionError> {
-    let Some(entry) = g3rs_workspace_crawl::entry(crawl, "Cargo.toml") else {
+fn require_pointed_workspace_root(crawl: &G3WorkspaceCrawl) -> Result<(), IngestionError> {
+    let Some(entry) = g3_workspace_crawl::entry(crawl, "Cargo.toml") else {
         return Err(IngestionError::CargoTomlNotFound);
     };
     if !entry.readable {
@@ -182,7 +182,7 @@ fn require_pointed_workspace_root(crawl: &G3RsWorkspaceCrawl) -> Result<(), Inge
 }
 
 /// `collect` function.
-pub(super) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> CollectedRelease {
+pub(super) fn collect(crawl: &G3WorkspaceCrawl, path_env: Option<&OsStr>) -> CollectedRelease {
     let mut config_failures = Vec::new();
     let mut filetree_failures = Vec::new();
     let mut source_failures = Vec::new();
@@ -277,7 +277,7 @@ pub(super) fn collect(crawl: &G3RsWorkspaceCrawl, path_env: Option<&OsStr>) -> C
     reason = "repo config aggregates several independent file-derived fields"
 )]
 fn build_repo_config(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     root_cargo: Option<&RootCargo>,
     release_plz_exists: bool,
     release_plz_rel_path: &str,
@@ -363,7 +363,7 @@ fn build_config_crates(
 
 /// Build dependency edges across all parsed crates.
 fn build_edges(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     crate_bases: &[CrateBase],
     config_crates: &[release_types::G3RsReleaseConfigCrate],
     workspace_dependencies: &std::collections::BTreeMap<
@@ -408,7 +408,7 @@ fn build_edges(
 
 /// Build source-checks READMEs by reading each publishable crate's README.
 fn build_source_readmes(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     crate_bases: &[CrateBase],
     source_failures: &mut Vec<release_types::G3RsReleaseInputFailure>,
 ) -> Vec<release_types::G3RsReleaseSourceReadme> {
@@ -417,7 +417,7 @@ fn build_source_readmes(
         if !krate.publishable || krate.readme.declared_false || !krate.readme.exists {
             continue;
         }
-        let Some(entry) = g3rs_workspace_crawl::entry(crawl, &krate.readme.rel_path) else {
+        let Some(entry) = g3_workspace_crawl::entry(crawl, &krate.readme.rel_path) else {
             continue;
         };
         if !entry.readable {
@@ -445,7 +445,7 @@ fn build_source_readmes(
 
 /// Build the file-tree repo payload describing release-relevant root files.
 fn build_repo_filetree(
-    crawl: &G3RsWorkspaceCrawl,
+    crawl: &G3WorkspaceCrawl,
     publishable_count: usize,
     release_plz_exists: bool,
     release_plz_rel_path: String,

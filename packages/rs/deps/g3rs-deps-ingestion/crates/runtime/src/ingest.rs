@@ -17,7 +17,7 @@ use g3rs_deps_types::{
     G3RsDepsConfigChecksInput, G3RsDepsConfigInputScope, G3RsDepsDependencySection,
     G3RsDepsResolvedDependency,
 };
-use guardrail3_rs_toml_parser::types::Guardrail3RsToml;
+use g3rs_toml_parser::types::Guardrail3RsToml;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Enum `NormalizedDependencyPath` used by this module.

@@ -30,7 +30,7 @@ struct HookScriptSurface {
 
 #[must_use]
 pub fn ingest_for_source_checks(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
 ) -> Vec<hook_types::G3TsHooksSourceChecksInput> {
     let hook_root =
         git_root(crawl.root_abs_path.as_path()).unwrap_or_else(|| crawl.root_abs_path.clone());
@@ -77,7 +77,7 @@ pub fn ingest_for_source_checks(
 
 /// Internal function `verifier_surface`.
 fn verifier_surface(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     hook_root: &Path,
 ) -> Option<HookScriptSurface> {
     hook_surface(crawl, hook_root, "scripts/g3ts/verify")
@@ -85,7 +85,7 @@ fn verifier_surface(
 
 #[must_use]
 pub fn ingest_for_file_tree_checks(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
 ) -> hook_types::G3TsHooksFileTreeChecksInput {
     let active = hooks_scope_is_active(crawl);
     if !active {
@@ -133,14 +133,14 @@ pub fn ingest_for_file_tree_checks(
 )]
 #[must_use]
 pub fn ingest_for_config_checks(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
 ) -> hook_types::G3TsHooksConfigChecksInput {
     ingest_for_config_checks_with_path(crawl, std::env::var_os("PATH").as_deref())
 }
 
 #[must_use]
 pub fn ingest_for_config_checks_with_path(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     path_env: Option<&OsStr>,
 ) -> hook_types::G3TsHooksConfigChecksInput {
     let active = hooks_scope_is_active(crawl);
@@ -163,13 +163,13 @@ pub fn ingest_for_config_checks_with_path(
 }
 
 /// Internal function `hooks_scope_is_active`.
-fn hooks_scope_is_active(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> bool {
+fn hooks_scope_is_active(crawl: &workspace_crawl::G3WorkspaceCrawl) -> bool {
     has_entry_file(crawl, "package.json") || !app_package_roots(crawl).is_empty()
 }
 
 /// Internal function `select_pre_commit_surface`.
 fn select_pre_commit_surface(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     hook_root: &Path,
     hooks_path: Option<&str>,
 ) -> Option<SelectedHookSurface> {
@@ -192,7 +192,7 @@ fn select_pre_commit_surface(
 
 /// Internal function `hook_surface`.
 fn hook_surface(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     hook_root: &Path,
     rel_path: &str,
 ) -> Option<HookScriptSurface> {
@@ -233,9 +233,9 @@ fn normalized_hooks_path(hook_root: &Path, hooks_path: Option<&str>) -> Option<S
 
 /// Internal function `entry`.
 fn entry<'a>(
-    crawl: &'a workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &'a workspace_crawl::G3WorkspaceCrawl,
     rel_path: &str,
-) -> Option<&'a workspace_crawl::G3RsWorkspaceEntry> {
+) -> Option<&'a workspace_crawl::G3WorkspaceEntry> {
     crawl
         .entries
         .iter()
@@ -243,26 +243,26 @@ fn entry<'a>(
 }
 
 /// Internal function `has_entry_file`.
-fn has_entry_file(crawl: &workspace_crawl::G3RsWorkspaceCrawl, rel_path: &str) -> bool {
+fn has_entry_file(crawl: &workspace_crawl::G3WorkspaceCrawl, rel_path: &str) -> bool {
     entry(crawl, rel_path)
-        .is_some_and(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
+        .is_some_and(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
 }
 
 /// Internal function `has_entry_dir`.
-fn has_entry_dir(crawl: &workspace_crawl::G3RsWorkspaceCrawl, rel_path: &str) -> bool {
+fn has_entry_dir(crawl: &workspace_crawl::G3WorkspaceCrawl, rel_path: &str) -> bool {
     entry(crawl, rel_path)
-        .is_some_and(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::Directory)
+        .is_some_and(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::Directory)
 }
 
 /// Internal function `direct_modular_entries`.
 fn direct_modular_entries(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     hook_root: &Path,
 ) -> Vec<HookScriptSurface> {
     let mut entries = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
         .filter(|entry| direct_child(&entry.path.rel_path, ".githooks/pre-commit.d/"))
         .map(|entry| HookScriptSurface {
             rel_path: entry.path.rel_path.clone(),
@@ -283,11 +283,11 @@ fn direct_modular_entries(
 }
 
 /// Internal function `direct_file_names`.
-fn direct_file_names(crawl: &workspace_crawl::G3RsWorkspaceCrawl, prefix: &str) -> Vec<String> {
+fn direct_file_names(crawl: &workspace_crawl::G3WorkspaceCrawl, prefix: &str) -> Vec<String> {
     let mut names = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
         .filter_map(|entry| {
             let suffix = entry.path.rel_path.strip_prefix(prefix)?;
             (!suffix.is_empty() && !suffix.contains('/')).then(|| suffix.to_owned())
@@ -345,12 +345,12 @@ fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
 }
 
 /// Internal function `app_package_roots`.
-fn app_package_roots(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String> {
+fn app_package_roots(crawl: &workspace_crawl::G3WorkspaceCrawl) -> Vec<String> {
     let current_root = current_root(crawl);
     let mut roots = crawl
         .entries
         .iter()
-        .filter(|entry| entry.kind == workspace_crawl::G3RsWorkspaceEntryKind::File)
+        .filter(|entry| entry.kind == workspace_crawl::G3WorkspaceEntryKind::File)
         .filter_map(|entry| entry.path.rel_path.strip_suffix("/package.json"))
         .filter(|root| root.starts_with("apps/") || root.starts_with("packages/") || *root == ".")
         .map(ToOwned::to_owned)
@@ -365,7 +365,7 @@ fn app_package_roots(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String>
 
 /// Internal function `enabled_categories`.
 fn enabled_categories(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     category_roots: &[String],
 ) -> hook_types::G3TsHooksEnabledCategories {
     hook_types::G3TsHooksEnabledCategories::new(
@@ -377,7 +377,7 @@ fn enabled_categories(
 
 /// Internal function `category_roots_for_selected_hook`.
 fn category_roots_for_selected_hook(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
+    crawl: &workspace_crawl::G3WorkspaceCrawl,
     hook_root: &Path,
     parsed: &hook_shell_parser::types::ParsedShellScript,
     app_roots: &[String],
@@ -403,7 +403,7 @@ fn category_roots_for_selected_hook(
 }
 
 /// Internal function `current_root`.
-fn current_root(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> String {
+fn current_root(crawl: &workspace_crawl::G3WorkspaceCrawl) -> String {
     git_root(crawl.root_abs_path.as_path())
         .and_then(|git_root| {
             crawl
@@ -472,7 +472,7 @@ fn normalize_scope_root(hook_root: &Path, scope: &str) -> Option<String> {
 }
 
 /// Internal function `stylelint_enabled`.
-fn stylelint_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {
+fn stylelint_enabled(crawl: &workspace_crawl::G3WorkspaceCrawl, app_roots: &[String]) -> bool {
     app_roots.iter().any(|root| {
         [
             "stylelint.config.js",
@@ -493,17 +493,14 @@ fn stylelint_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[S
 }
 
 /// Internal function `package_policy_enabled`.
-fn package_policy_enabled(
-    crawl: &workspace_crawl::G3RsWorkspaceCrawl,
-    app_roots: &[String],
-) -> bool {
+fn package_policy_enabled(crawl: &workspace_crawl::G3WorkspaceCrawl, app_roots: &[String]) -> bool {
     app_roots
         .iter()
         .any(|root| has_entry_file(crawl, root_file(root, "package.json").as_str()))
 }
 
 /// Internal function `typecov_enabled`.
-fn typecov_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[String]) -> bool {
+fn typecov_enabled(crawl: &workspace_crawl::G3WorkspaceCrawl, app_roots: &[String]) -> bool {
     app_roots.iter().any(|root| {
         package_content(crawl, root).is_some_and(|content| {
             content.contains("\"typecov\"") || content.contains("\"type-coverage\"")
@@ -520,7 +517,7 @@ fn typecov_enabled(crawl: &workspace_crawl::G3RsWorkspaceCrawl, app_roots: &[Str
 }
 
 /// Internal function `package_content`.
-fn package_content(crawl: &workspace_crawl::G3RsWorkspaceCrawl, root: &str) -> Option<String> {
+fn package_content(crawl: &workspace_crawl::G3WorkspaceCrawl, root: &str) -> Option<String> {
     let rel_path = root_file(root, "package.json");
     entry(crawl, rel_path.as_str()).map(|entry| read_to_string(entry.path.abs_path.as_path()))
 }
@@ -535,7 +532,7 @@ fn root_file(root: &str, file: &str) -> String {
 }
 
 /// Internal function `trust_risks`.
-fn trust_risks(crawl: &workspace_crawl::G3RsWorkspaceCrawl) -> Vec<String> {
+fn trust_risks(crawl: &workspace_crawl::G3WorkspaceCrawl) -> Vec<String> {
     [".husky/pre-commit", "lefthook.yml", ".lintstagedrc"]
         .into_iter()
         .filter(|path| has_entry_file(crawl, path))

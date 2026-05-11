@@ -101,8 +101,8 @@ dependencies = [
  "clippy-toml-parser",
  "g3rs-clippy-config-checks-assertions",
  "g3rs-clippy-types",
+ "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-rs-toml-parser",
  "test_support",
  "toml",
 ]
@@ -121,35 +121,35 @@ dependencies = [
  "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]
-name = "guardrail3-check-types"
-version = "0.1.0"
-
-[[package]]
-name = "guardrail3-rs-toml-parser"
+name = "g3rs-toml-parser"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser-runtime",
+ "g3rs-toml-parser-runtime",
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser-runtime"
+name = "g3rs-toml-parser-runtime"
 version = "0.1.0"
 dependencies = [
- "guardrail3-rs-toml-parser-types",
+ "g3rs-toml-parser-types",
  "toml",
 ]
 
 [[package]]
-name = "guardrail3-rs-toml-parser-types"
+name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
  "serde",
  "toml",
 ]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
 
 [[package]]
 name = "hashbrown"
@@ -249,7 +249,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-clippy-types",
- "guardrail3-rs-toml-parser",
+ "g3rs-toml-parser",
 ]
 
 [[package]]

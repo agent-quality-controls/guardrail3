@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use cargo_toml_parser::types::CargoToml;
 use g3rs_apparch_types::{G3RsApparchCrate, G3RsApparchLayer, G3RsApparchRustPolicyState};
+use g3rs_toml_parser::from_path as parse_guardrail3_rs_toml;
 use glob::Pattern;
-use guardrail3_rs_toml_parser::from_path as parse_guardrail3_rs_toml;
 
 use super::error::G3RsApparchIngestionError;
 use super::model::{CrateRecord, WorkspaceRoot};

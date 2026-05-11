@@ -1,6 +1,6 @@
 use g3rs_deny_config_checks_assertions::license_exceptions_inventory as assertions;
 
-use guardrail3_rs_toml_parser::types::RustProfile;
+use g3rs_toml_parser::types::RustProfile;
 use test_support::run;
 
 #[test]

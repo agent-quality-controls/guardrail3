@@ -22,7 +22,7 @@ fn pipeline_reports_nightly_rustfmt_keys_on_stable() {
         "group_imports = \"StdExternalCrate\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
@@ -44,7 +44,7 @@ fn pipeline_reports_nightly_key_blocker_when_toolchain_is_missing() {
         "group_imports = \"StdExternalCrate\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect(
         "ingestion should preserve missing toolchain for g3rs-fmt/nightly-keys-on-stable blocker reporting",
     );
@@ -65,7 +65,7 @@ fn pipeline_reports_edition_blocker_when_cargo_is_missing() {
     );
     write(root.join("rustfmt.toml"), "edition = \"2024\"\n");
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect(
         "ingestion should preserve missing Cargo.toml for g3rs-fmt/edition-mismatch blocker reporting",
     );
@@ -90,7 +90,7 @@ fn pipeline_reports_rustfmt_parse_error_via_config_rule() {
     );
     write(root.join("rustfmt.toml"), "edition = [\n");
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect(
         "ingestion should preserve rustfmt parse failures for g3rs-fmt/rustfmt-required-settings",
     );
@@ -123,7 +123,7 @@ fn pipeline_reports_rustfmt_ignore_waiver_from_guardrail3_rs_toml() {
         "[[escape_hatches]]\nfamily = \"fmt\"\nfile = \"rustfmt.toml\"\nkind = \"ignore\"\nselector = \"ignore\"\nreason = \"legacy dead config\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
@@ -149,7 +149,7 @@ fn pipeline_uses_root_dot_rustfmt_toml_for_config_checks() {
         "[toolchain]\nchannel = \"stable\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
 
     assert_eq!(input.rustfmt_rel_path, ".rustfmt.toml");
@@ -175,7 +175,7 @@ fn pipeline_keeps_config_01_active_when_cargo_is_parse_error() {
         "[toolchain]\nchannel = \"stable\"\n",
     );
 
-    let crawl = g3rs_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
+    let crawl = g3_workspace_crawl::crawl_any_root(root).expect("crawl should succeed");
     let input = crate::run::ingest_for_config_checks(&crawl).expect("ingestion should succeed");
     let results = g3rs_fmt_config_checks::check(&input);
 
