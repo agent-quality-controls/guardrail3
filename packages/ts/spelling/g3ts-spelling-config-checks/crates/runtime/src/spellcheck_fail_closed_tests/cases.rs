@@ -16,6 +16,30 @@ fn non_cspell_script_reports_fail_closed_rule() {
 }
 
 #[test]
+fn bare_cspell_reports_fail_closed_rule() {
+    let input = input(vec![invocation("spellcheck", "cspell", &[])]);
+
+    g3ts_spelling_config_checks_assertions::spellcheck_fail_closed::assert_error(
+        &input,
+        Some("package.json"),
+    );
+}
+
+#[test]
+fn cspell_with_flags_but_no_target_reports_fail_closed_rule() {
+    let input = input(vec![invocation(
+        "spellcheck",
+        "cspell",
+        &["--no-progress", "--no-summary"],
+    )]);
+
+    g3ts_spelling_config_checks_assertions::spellcheck_fail_closed::assert_error(
+        &input,
+        Some("package.json"),
+    );
+}
+
+#[test]
 fn or_fallback_reports_fail_closed_rule() {
     let mut bad_invocation = invocation("spellcheck", "cspell", &["."]);
     bad_invocation.followed_by = Some(G3TsSpellingPackageScriptCommandSeparator::Or);

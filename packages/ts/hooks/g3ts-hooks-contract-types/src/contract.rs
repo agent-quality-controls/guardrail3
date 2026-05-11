@@ -15,7 +15,7 @@ pub enum G3TsHookCommandRequirement {
     Eslint,
     /// `prettier --check .` format gate.
     Prettier,
-    /// `cspell --no-progress --no-summary` spelling gate.
+    /// `cspell . --no-progress --no-summary` spelling gate.
     Cspell,
     /// `stylelint --max-warnings 0 **/*.css` style lint gate.
     Stylelint,
@@ -51,7 +51,7 @@ impl G3TsHookCommandRequirement {
             Self::Tsc => &["tsc", "-p", "tsconfig.json", "--noEmit"],
             Self::Eslint => &["eslint", "--max-warnings", "0"],
             Self::Prettier => &["prettier", "--check", "."],
-            Self::Cspell => &["cspell", "--no-progress", "--no-summary"],
+            Self::Cspell => &["cspell", ".", "--no-progress", "--no-summary"],
             Self::Stylelint => &["stylelint", "--max-warnings", "0", "**/*.css"],
             Self::SyncpackLint => &["syncpack", "lint"],
             Self::TypeCoverage => &["type-coverage", "--at-least", "100"],

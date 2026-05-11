@@ -44,6 +44,28 @@ fn toolchain_gate_list_sources_all_runnable_requirements_from_contracts() {
 }
 
 #[test]
+fn cspell_toolchain_gate_has_explicit_target() {
+    let tempdir = tempfile::tempdir().expect("create temporary ts workspace for cspell gate test");
+    std::fs::write(tempdir.path().join("package.json"), "{}\n")
+        .expect("write package.json for cspell gate test");
+
+    let gates = toolchain_gate_list(tempdir.path(), PackageManager::Pnpm, &[]);
+    let argvs: Vec<Vec<String>> = gates.into_iter().map(|gate| gate.argv).collect();
+
+    assert!(
+        argvs.contains(&vec![
+            "pnpm".to_owned(),
+            "exec".to_owned(),
+            "cspell".to_owned(),
+            ".".to_owned(),
+            "--no-progress".to_owned(),
+            "--no-summary".to_owned(),
+        ]),
+        "cspell gate must include an explicit target path; got {argvs:?}"
+    );
+}
+
+#[test]
 fn toolchain_gate_list_skips_disabled_family_via_contract() {
     let tempdir =
         tempfile::tempdir().expect("create temporary ts workspace for disabled gate test");
