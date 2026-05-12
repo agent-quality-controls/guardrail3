@@ -1,0 +1,21 @@
+id = "L70-delegated-policy-valid-project-policy-violated"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", "repo", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "delegated_policy_valid_project_policy_violated"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+  "required_inputs_present",
+  "required_inputs_valid",
+  "delegated_tools_present",
+  "delegated_policy_valid",
+]
+
+intentionally_invalid = [
+  "project_policy_violated",
+]

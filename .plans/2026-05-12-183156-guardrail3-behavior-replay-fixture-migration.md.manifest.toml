@@ -1,0 +1,139 @@
+[fixture_set]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs"
+clean_source = "packages/rs/deny/g3rs-deny-config-checks"
+clean_fixture = "L80-project-policy-valid-clean"
+
+required_shared_links = [
+  "behavior/fixtures/parsers",
+  "behavior/fixtures/shared",
+  "behavior/fixtures/g3rs/L80-project-policy-valid-clean/g3rs-deny-types",
+]
+
+[[fixture]]
+id = "L00-workspace-root-not-found"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/README.md",
+]
+
+[[fixture]]
+id = "L10-workspace-root-found-guardrail-config-missing"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L20-workspace-root-found-guardrail-config-invalid"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L30-guardrail-config-valid-required-inputs-missing"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L40-required-inputs-present-invalid"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L50-required-inputs-valid-delegated-tools-missing"
+expected_exit = "nonzero"
+runner_mode = "path_without_delegated_tools"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L60-delegated-tools-present-policy-invalid"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L70-delegated-policy-valid-project-policy-violated"
+expected_exit = "nonzero"
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+
+[[fixture]]
+id = "L80-project-policy-valid-clean"
+expected_exit = "zero"
+closed_file_list = false
+required_files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/crates/runtime/src/lib.rs",
+]
+forbidden_paths = [
+  "repo/target",
+]

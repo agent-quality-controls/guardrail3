@@ -1,0 +1,16 @@
+id = "L10-workspace-root-found-guardrail-config-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", "repo", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "workspace_root_found_guardrail_config_missing"
+
+valid_state = [
+  "workspace_root_found",
+]
+
+intentionally_invalid = [
+  "guardrail_config_missing",
+]

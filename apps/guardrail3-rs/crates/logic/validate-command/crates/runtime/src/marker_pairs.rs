@@ -15,7 +15,7 @@ use crate::fs as local_fs;
 pub fn check_repo(repo_root: &Path) -> Vec<G3CheckResult> {
     let mut results = Vec::new();
     let mut visited = Vec::new();
-    walk(repo_root, &mut visited);
+    walk(repo_root, repo_root, &mut visited);
     for dir in visited {
         let cargo_toml = dir.join("Cargo.toml");
         let g3rs_toml = dir.join("guardrail3-rs.toml");
@@ -39,10 +39,13 @@ pub fn check_repo(repo_root: &Path) -> Vec<G3CheckResult> {
 
 /// Recursively collects directories under `dir` into `out`, skipping hidden and
 /// build-output directories.
-fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
+fn walk(repo_root: &Path, dir: &Path, out: &mut Vec<PathBuf>) {
     out.push(dir.to_path_buf());
     for path in local_fs::read_dir_paths(dir) {
         if !local_fs::is_dir(&path) {
+            continue;
+        }
+        if is_behavior_fixture_path(repo_root, &path) {
             continue;
         }
         let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
@@ -55,8 +58,17 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
         {
             continue;
         }
-        walk(&path, out);
+        walk(repo_root, &path, out);
     }
+}
+
+/// Returns true for guardrail replay fixture paths that must not participate in
+/// repo-wide adoption checks.
+fn is_behavior_fixture_path(repo_root: &Path, path: &Path) -> bool {
+    path.strip_prefix(repo_root)
+        .ok()
+        .and_then(Path::to_str)
+        .is_some_and(|rel| rel == "behavior/fixtures" || rel.starts_with("behavior/fixtures/"))
 }
 
 /// Returns true when `path` exists and its content contains a `[workspace]`
@@ -88,3 +100,7 @@ fn relative(root: &Path, path: &Path) -> String {
             },
         )
 }
+
+#[cfg(test)]
+#[path = "marker_pairs_tests/mod.rs"] // reason: owned sidecar tests for file module.
+mod marker_pairs_tests;

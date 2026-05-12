@@ -432,3 +432,37 @@ fn dist_is_excluded_from_phase1_without_gitignore() {
     assertions::assert_crawl_entry_absent(&crawl, "dist/assets/app.js");
     assertions::assert_crawl_entry_exists(&crawl, "Cargo.toml");
 }
+
+#[test]
+fn behavior_fixtures_are_excluded_from_phase1_without_gitignore() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    fs::create_dir_all(root.join("behavior/fixtures/g3rs/demo/repo/src"))
+        .expect("create behavior fixture dir");
+    write(
+        root.join("behavior/fixtures/g3rs/demo/repo/Cargo.toml"),
+        "[package]\nname = \"fixture\"\n",
+    );
+    write(
+        root.join("behavior/fixtures/g3rs/demo/repo/guardrail3-rs.toml"),
+        "profile = \"library\"\n",
+    );
+    write(
+        root.join("behavior/fixtures/g3rs/demo/repo/src/lib.rs"),
+        "pub fn fixture() {}\n",
+    );
+    write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\n");
+
+    let crawl =
+        crate::run::crawl(root).expect("crawl should succeed with un-gitignored behavior fixtures");
+
+    assertions::assert_crawl_entry_absent(&crawl, "behavior/fixtures");
+    assertions::assert_crawl_entry_absent(&crawl, "behavior/fixtures/g3rs/demo/repo/Cargo.toml");
+    assertions::assert_crawl_entry_absent(
+        &crawl,
+        "behavior/fixtures/g3rs/demo/repo/guardrail3-rs.toml",
+    );
+    assertions::assert_crawl_entry_exists(&crawl, "Cargo.toml");
+}

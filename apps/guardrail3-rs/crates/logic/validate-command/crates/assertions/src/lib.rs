@@ -6,4 +6,6 @@ pub mod cargo_gates;
 #[cfg(feature = "checks")]
 pub mod execute;
 #[cfg(feature = "checks")]
+pub mod marker_pairs;
+#[cfg(feature = "checks")]
 pub mod selection;
