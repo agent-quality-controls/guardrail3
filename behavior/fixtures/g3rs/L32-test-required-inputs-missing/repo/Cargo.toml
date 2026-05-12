@@ -12,8 +12,5 @@ path = "src/lib.rs"
 members = []
 resolver = "2"
 
-[dependencies]
-tokio = "1"
-
 [profile.mutants]
 inherits = "dev"

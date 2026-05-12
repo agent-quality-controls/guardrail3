@@ -49,6 +49,7 @@ baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
+  "repo/.gitignore",
   "repo/Cargo.toml",
   "repo/guardrail3-rs.toml",
   "repo/src/lib.rs",
@@ -61,6 +62,236 @@ required_results = [
   "g3rs-clippy/coverage-exists|workspace root uncovered by clippy config|clippy.toml",
   "g3rs-deny/coverage|workspace root uncovered by deny config|-",
   "g3rs-deps/cargo-lock-present|Cargo.lock missing|Cargo.lock",
+  "g3rs-deps/gitignore-not-ignoring-cargo-lock|Cargo.lock ignored in gitignore|.gitignore",
+]
+
+[[fixture]]
+id = "L30-toolchain-legacy-file-present"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain",
+  "repo/rust-toolchain.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-toolchain/legacy-file|both rust-toolchain files present|rust-toolchain",
+]
+
+[[fixture]]
+id = "L30-toolchain-legacy-only-file-present"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-toolchain/exists|rust-toolchain.toml missing|rust-toolchain.toml",
+  "g3rs-toolchain/legacy-file|legacy rust-toolchain file present|rust-toolchain",
+]
+
+[[fixture]]
+id = "L30-fmt-dual-file-conflict"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.rustfmt.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-fmt/dual-file-conflict|Conflicting rustfmt config files|rustfmt.toml",
+]
+
+[[fixture]]
+id = "L30-fmt-per-crate-override"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/crates/member/rustfmt.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-fmt/per-crate-override|Illegal nested rustfmt config|crates/member/rustfmt.toml",
+]
+
+[[fixture]]
+id = "L30-clippy-same-root-conflict"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.clippy.toml",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-clippy/same-root-conflict|same-root clippy config conflict|clippy.toml",
+]
+
+[[fixture]]
+id = "L30-deny-shadowing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.deny.toml",
+  "repo/Cargo.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-deny/shadowing|multiple deny configs at one policy root|.deny.toml",
+]
+
+[[fixture]]
+id = "L30-release-member-input-failures"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-release/config-input-failures|failed to read release config input|crates/missing/Cargo.toml",
+  "g3rs-release/filetree-input-failures|failed to read release filetree input|crates/missing/Cargo.toml",
+  "g3rs-release/source-input-failures|failed to read release source input|crates/missing/Cargo.toml",
+]
+
+[[fixture]]
+id = "L30-topology-member-path-escape"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/member-paths-must-not-escape-root|Workspace `.` uses escaping member path `../outside`|Cargo.toml",
+]
+
+[[fixture]]
+id = "L30-topology-undeclared-workspace-child"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/crates/member/Cargo.toml",
+  "repo/crates/member/src/lib.rs",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/declared-workspace-members-only|Workspace child `crates/member` must be declared explicitly|crates/member/Cargo.toml",
+]
+
+[[fixture]]
+id = "L30-topology-nested-workspace"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/crates/nested/Cargo.toml",
+  "repo/crates/nested/src/lib.rs",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/no-nested-workspaces|Nested workspace `crates/nested` is forbidden|crates/nested/Cargo.toml",
+]
+
+[[fixture]]
+id = "L30-topology-nested-guardrail-config"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/crates/member/guardrail3-rs.toml",
+  "repo/crates/member/src/lib.rs",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/no-nested-guardrail3-rs-toml|Nested adopted Rust unit `crates/member` is forbidden|crates/member/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`cargo` file `crates/member/guardrail3-rs.toml` is illegally placed|crates/member/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`deps` file `crates/member/guardrail3-rs.toml` is illegally placed|crates/member/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`garde` file `crates/member/guardrail3-rs.toml` is illegally placed|crates/member/guardrail3-rs.toml",
+]
+
+[[fixture]]
+id = "L30-topology-workspace-local-file-placement"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/crates/member/Cargo.toml",
+  "repo/crates/member/.cargo/config",
+  "repo/crates/member/.cargo/config.toml",
+  "repo/crates/member/.cargo/deny.toml",
+  "repo/crates/member/.cargo/mutants.toml",
+  "repo/crates/member/.config/nextest.toml",
+  "repo/crates/member/.deny.toml",
+  "repo/crates/member/cliff.toml",
+  "repo/crates/member/clippy.toml",
+  "repo/crates/member/deny.toml",
+  "repo/crates/member/release-plz.toml",
+  "repo/crates/member/rustfmt.toml",
+  "repo/crates/member/src/lib.rs",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/workspace-local-file-placement|`fmt` file `crates/member/rustfmt.toml` is illegally placed|crates/member/rustfmt.toml",
+  "g3rs-topology/workspace-local-file-placement|`clippy` file `crates/member/.cargo/config` is illegally placed|crates/member/.cargo/config",
+  "g3rs-topology/workspace-local-file-placement|`clippy` file `crates/member/.cargo/config.toml` is illegally placed|crates/member/.cargo/config.toml",
+  "g3rs-topology/workspace-local-file-placement|`clippy` file `crates/member/clippy.toml` is illegally placed|crates/member/clippy.toml",
+  "g3rs-topology/workspace-local-file-placement|`deny` file `crates/member/.cargo/deny.toml` is illegally placed|crates/member/.cargo/deny.toml",
+  "g3rs-topology/workspace-local-file-placement|`deny` file `crates/member/.deny.toml` is illegally placed|crates/member/.deny.toml",
+  "g3rs-topology/workspace-local-file-placement|`deny` file `crates/member/deny.toml` is illegally placed|crates/member/deny.toml",
+  "g3rs-topology/workspace-local-file-placement|`garde` file `crates/member/.cargo/config` is illegally placed|crates/member/.cargo/config",
+  "g3rs-topology/workspace-local-file-placement|`garde` file `crates/member/.cargo/config.toml` is illegally placed|crates/member/.cargo/config.toml",
+  "g3rs-topology/workspace-local-file-placement|`garde` file `crates/member/clippy.toml` is illegally placed|crates/member/clippy.toml",
+  "g3rs-topology/workspace-local-file-placement|`release` file `crates/member/cliff.toml` is illegally placed|crates/member/cliff.toml",
+  "g3rs-topology/workspace-local-file-placement|`release` file `crates/member/release-plz.toml` is illegally placed|crates/member/release-plz.toml",
+  "g3rs-topology/workspace-local-file-placement|`test` file `crates/member/.cargo/mutants.toml` is illegally placed|crates/member/.cargo/mutants.toml",
+  "g3rs-topology/workspace-local-file-placement|`test` file `crates/member/.config/nextest.toml` is illegally placed|crates/member/.config/nextest.toml",
 ]
 
 [[fixture]]
@@ -94,10 +325,8 @@ files = [
   "repo/bin/cargo-mutants",
   "repo/guardrail3-rs.toml",
   "repo/src/lib.rs",
-  "repo/tests/async_tests.rs",
 ]
 required_results = [
-  "g3rs-test/nextest-timeouts|nextest config missing|.config/nextest.toml",
   "g3rs-test/mutants-toml-exists|mutants config missing|.cargo/mutants.toml",
   "g3rs-test/mutation-hook-present|mutation hook step missing|Cargo.toml",
 ]
@@ -119,6 +348,112 @@ files = [
 required_results = [
   "g3rs-test/mutants-profile-present|profile.mutants missing|Cargo.toml",
   "g3rs-test/mutation-hook-present|mutation hook step missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L34-deps-library-policy-missing"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-deps/library-allowlist-present|dependency allowlist missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L35-garde-dependency-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-garde/dependency-present|garde dependency missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L36-garde-clippy-inputs-missing"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-garde/core-method-bans|cannot verify core garde method bans|-",
+  "g3rs-garde/extractor-type-bans|cannot verify garde extractor bans|-",
+  "g3rs-garde/reqwest-json-ban|cannot verify reqwest garde ban|-",
+  "g3rs-garde/additional-method-bans|cannot verify additional garde method bans|-",
+]
+
+[[fixture]]
+id = "L37-workspace-member-inputs-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-cargo/missing-member-cargo|declared workspace member missing Cargo.toml|Cargo.toml",
+  "g3rs-topology/declared-workspace-members-only|Workspace `.` has extra member `crates/missing`|Cargo.toml",
+]
+
+[[fixture]]
+id = "L38-fmt-nightly-toolchain-input-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-fmt/nightly-keys-on-stable|rust-toolchain.toml missing|rust-toolchain.toml",
+]
+
+[[fixture]]
+id = "L39-test-nextest-input-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/crates/assertions/Cargo.toml",
+  "repo/crates/assertions/src/foo.rs",
+  "repo/crates/assertions/src/lib.rs",
+  "repo/crates/runtime/Cargo.toml",
+  "repo/crates/runtime/src/foo.rs",
+  "repo/crates/runtime/src/foo_tests/mod.rs",
+  "repo/crates/runtime/src/lib.rs",
+  "repo/guardrail3-rs.toml",
+]
+required_results = [
+  "g3rs-test/nextest-timeouts|nextest config missing|.config/nextest.toml",
 ]
 
 [[fixture]]

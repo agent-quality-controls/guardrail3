@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "test",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T23:34:47.164678+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:faee495fd6c43ffbed2ecf5d249c3e1a3ac1baab554c828ad17ae2f7d9d439aa",
+  "fixture_id": "L39-test-nextest-input-missing",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== test ==\n[Error] g3rs-test/nextest-timeouts .config/nextest.toml nextest config missing\n  project root requires `.config/nextest.toml` with timeout settings for async tests.\n[Info] g3rs-test/owned-sidecar-shape crates/runtime/Cargo.toml owned sidecar shape confirmed\n  Root `` keeps internal harnesses inside module-owned `*_tests/` sidecars.\n[Info] g3rs-test/runtime-assertions-split crates/runtime/Cargo.toml runtime/assertions split confirmed\n  Root `` keeps runtime harnesses separated from sibling assertions crates.\n[Info] g3rs-test/assertions-modules-prove crates/assertions/src/foo.rs assertions module proves runtime\n  Assertions modules expose public helpers that ultimately prove through real assertions.\n[Info] g3rs-test/ignore-reason crates/assertions/src/foo.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/ignore-reason crates/assertions/src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/inline-test-bodies crates/runtime/src/foo.rs inline cfg(test) body absent\n  Owned `#[cfg(test)]` declarations stay as sidecar modules instead of inline bodies.\n[Info] g3rs-test/ignore-reason crates/runtime/src/foo.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/ignore-reason crates/runtime/src/foo_tests/mod.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/tautological-assertions crates/runtime/src/foo_tests/mod.rs tautological assertions absent\n  Test `owned_sidecar` uses real values in its assertions.\n[Info] g3rs-test/real-proof-site crates/runtime/src/foo_tests/mod.rs test uses shared proof\n  Test `owned_sidecar` in `crates/runtime/src/foo_tests/mod.rs` ends with a real assertion or calls the shared assertions crate, so the test actually proves the behavior it exercises.\n[Info] g3rs-test/weak-matches-assert crates/runtime/src/foo_tests/mod.rs weak matches assertion absent\n  Test `owned_sidecar` uses specific payload checks rather than weak wildcard matches.\n[Info] g3rs-test/ignore-reason crates/runtime/src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n",
+  "tool": "g3rs"
+}
