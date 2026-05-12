@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "release",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T23:34:45.528080+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:b44c924838ce46f3fcfb8c6d9bb4e71a9747f536ef0f5f34f276117232c63ff6",
+  "fixture_id": "L30-release-member-input-failures",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== release ==\n[Error] g3rs-release/config-input-failures crates/missing/Cargo.toml failed to read release config input\n  Declared workspace member `crates/missing` is missing Cargo.toml.\n[Error] g3rs-release/filetree-input-failures crates/missing/Cargo.toml failed to read release filetree input\n  Declared workspace member `crates/missing` is missing Cargo.toml.\n[Error] g3rs-release/source-input-failures crates/missing/Cargo.toml failed to read release source input\n  Declared workspace member `crates/missing` is missing Cargo.toml.\n",
+  "tool": "g3rs"
+}

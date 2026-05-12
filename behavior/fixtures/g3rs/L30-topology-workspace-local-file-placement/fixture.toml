@@ -1,0 +1,17 @@
+id = "L30-topology-workspace-local-file-placement"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "topology", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "guardrail_config_valid_required_inputs_missing"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+]
+
+intentionally_invalid = [
+  "workspace_local_file_misplaced",
+]

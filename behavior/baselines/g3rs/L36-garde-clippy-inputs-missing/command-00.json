@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "garde",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T23:34:47.070891+00:00",
+  "cwd": "repo",
+  "exit_code": 0,
+  "fixture_hash": "sha256:ceb0529158ed423e085a8f116c63e7dbe7554c26e0ca7ee7d40c44ad4355f82e",
+  "fixture_id": "L36-garde-clippy-inputs-missing",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== garde ==\n[Info] g3rs-garde/dependency-present Cargo.toml garde dependency found\n  garde is present in `Cargo.toml` for this workspace root. Garde-specific boundary checks are active.\n[Warn] g3rs-garde/core-method-bans - cannot verify core garde method bans\n  No clippy.toml found. Create one with a `disallowed-methods` section.\n[Warn] g3rs-garde/extractor-type-bans - cannot verify garde extractor bans\n  No clippy.toml found. Create one with a `disallowed-types` section.\n[Warn] g3rs-garde/reqwest-json-ban - cannot verify reqwest garde ban\n  No clippy.toml found. Create one with a `disallowed-methods` section.\n[Warn] g3rs-garde/additional-method-bans - cannot verify additional garde method bans\n  No clippy.toml found. Create one with a `disallowed-methods` section.\n",
+  "tool": "g3rs"
+}

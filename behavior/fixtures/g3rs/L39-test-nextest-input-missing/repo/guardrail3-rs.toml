@@ -1,0 +1,5 @@
+profile = "library"
+allowed_deps = ["tokio"]
+
+[checks]
+garde = false

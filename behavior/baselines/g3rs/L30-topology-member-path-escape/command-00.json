@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "topology",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T23:34:45.551926+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:2dc6407e04245e0336fae045d81e4950a0129d21de849d963f55870e843a4607",
+  "fixture_id": "L30-topology-member-path-escape",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== topology ==\n[Error] g3rs-topology/member-paths-must-not-escape-root Cargo.toml Workspace `.` uses escaping member path `../outside`\n  `Cargo.toml` declares member pattern `../outside`, which points outside the workspace directory. Workspace members must be relative subdirectory paths inside the workspace root, not absolute paths or `..` escapes. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace.\n",
+  "tool": "g3rs"
+}

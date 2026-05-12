@@ -33,7 +33,6 @@ id = "L32-test-required-inputs-missing"
 expected_exit = "nonzero"
 baseline_required = true
 required_results = [
-  "g3rs-test/nextest-timeouts|nextest config missing|.config/nextest.toml",
   "g3rs-test/mutants-toml-exists|mutants config missing|.cargo/mutants.toml",
   "g3rs-test/mutation-hook-present|mutation hook step missing|Cargo.toml",
 ]

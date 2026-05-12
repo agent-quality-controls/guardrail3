@@ -64,6 +64,7 @@ VALID_STATES = {
 }
 
 VALID_INVALID_STATES = {
+    "activation_file_conflict",
     "workspace_root_not_found",
     "guardrail_config_missing",
     "guardrail_config_invalid",
@@ -72,6 +73,8 @@ VALID_INVALID_STATES = {
     "delegated_tools_missing",
     "delegated_policy_invalid",
     "project_policy_violated",
+    "workspace_local_file_misplaced",
+    "workspace_topology_invalid",
 }
 
 VALID_EXPECTED_EXITS = {"zero", "nonzero"}

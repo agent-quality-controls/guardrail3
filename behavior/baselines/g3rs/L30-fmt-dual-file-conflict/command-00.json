@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "fmt",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T23:34:45.404317+00:00",
+  "cwd": "repo",
+  "exit_code": 0,
+  "fixture_hash": "sha256:bdf50d3e0f1eeed5e8de1fb8521aa41c3017302e4b29324c923e57ee0a838fea",
+  "fixture_id": "L30-fmt-dual-file-conflict",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== fmt ==\n[Warn] g3rs-fmt/dual-file-conflict rustfmt.toml Conflicting rustfmt config files\n  Both `rustfmt.toml` and `.rustfmt.toml` exist in `.`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.\n",
+  "tool": "g3rs"
+}

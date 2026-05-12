@@ -36,10 +36,9 @@ Add behavior replay coverage for every `g3rs validate` rule that can be exposed 
   - Missing crate `README.md`.
 
 - `L32-test-required-inputs-missing`
-  - Valid Rust workspace with async test surface.
+  - Valid Rust workspace with mutation testing active through `[profile.mutants]`.
   - Mutation testing active through `[profile.mutants]`.
   - Fixture-local fake `cargo-mutants` exists.
-  - Missing `.config/nextest.toml`.
   - Missing `.cargo/mutants.toml`.
   - Missing executable mutation hook step.
 
