@@ -1,4 +1,4 @@
-profile = "service"
+profile = "library"
 allowed_deps = []
 
 [checks]

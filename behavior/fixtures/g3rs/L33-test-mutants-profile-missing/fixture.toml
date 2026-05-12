@@ -1,8 +1,9 @@
-id = "L30-guardrail-config-valid-required-inputs-missing"
+id = "L33-test-mutants-profile-missing"
 tool = "g3rs"
 run_from = "repo"
+path_prepend = ["bin"]
 commands = [
-  ["validate", "--path", ".", "--family", "cargo", "--family", "clippy", "--family", "deny", "--family", "deps", "--family", "fmt", "--family", "toolchain", "--rules-only", "--inventory"],
+  ["validate", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "guardrail_config_valid_required_inputs_missing"

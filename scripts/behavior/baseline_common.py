@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
 import shutil
 import subprocess
 import tempfile
@@ -139,9 +140,19 @@ def fixture_hash(fixture_dir: Path) -> str:
 
 
 def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: list[str]) -> subprocess.CompletedProcess[str]:
+    env = None
+    path_prepend = metadata.get("path_prepend", [])
+    if path_prepend:
+        env = os.environ.copy()
+        prepend_paths = [
+            str(command_cwd(fixture_dir, metadata) / rel_path)
+            for rel_path in path_prepend
+        ]
+        env["PATH"] = os.pathsep.join([*prepend_paths, env.get("PATH", "")])
     return subprocess.run(
         [tool_executable(tool), *argv],
         cwd=command_cwd(fixture_dir, metadata),
+        env=env,
         text=True,
         capture_output=True,
         check=False,
