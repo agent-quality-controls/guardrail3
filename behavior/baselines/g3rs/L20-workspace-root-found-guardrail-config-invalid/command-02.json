@@ -4,10 +4,13 @@
     "g3rs",
     "validate",
     "--path",
-    "."
+    ".",
+    "--family",
+    "fmt",
+    "--inventory"
   ],
-  "command_index": 0,
-  "created_at": "2026-05-12T21:17:43.141410+00:00",
+  "command_index": 2,
+  "created_at": "2026-05-12T21:17:43.185709+00:00",
   "cwd": "repo",
   "exit_code": 1,
   "fixture_hash": "sha256:4b860322df8cb1082ab89a69b3275bc9f2842875667d21840e6d12c9aaf681e9",
