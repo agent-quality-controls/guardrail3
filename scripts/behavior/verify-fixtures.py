@@ -11,7 +11,7 @@ except ModuleNotFoundError:
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MANIFEST_PATH = (
+DEFAULT_MANIFEST_PATH = (
     REPO_ROOT
     / ".plans"
     / "2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
@@ -22,6 +22,14 @@ PRE_COMMIT_HOOK_PATH = REPO_ROOT / ".githooks" / "pre-commit"
 def load_toml(path: Path) -> dict:
     with path.open("rb") as file:
         return tomllib.load(file)
+
+
+def manifest_path_from_argv(argv: list[str]) -> Path:
+    if not argv:
+        return DEFAULT_MANIFEST_PATH
+    if len(argv) == 2 and argv[0] == "--manifest":
+        return (REPO_ROOT / argv[1]).resolve() if not Path(argv[1]).is_absolute() else Path(argv[1])
+    raise SystemExit("usage: verify-fixtures.py [--manifest <path>]")
 
 
 def relative_files(root: Path) -> list[str]:
@@ -68,15 +76,52 @@ VALID_INVALID_STATES = {
 
 VALID_EXPECTED_EXITS = {"zero", "nonzero"}
 
+REPO_LEVELS = {
+    "repo_root_invalid",
+    "repo_root_crawlable_no_adoption",
+    "repo_hooks_reachable_no_root_cargo",
+    "repo_marker_pair_policy",
+    "repo_root_adoption_pair_complete",
+    "repo_default_root",
+}
 
-def verify_fixture_metadata(fixture_id: str, metadata: dict) -> list[str]:
+REPO_VALID_STATES = {
+    "repo_root_found",
+    "repo_root_directory",
+    "repo_root_crawlable",
+    "repo_markers_absent",
+    "repo_marker_pair_complete",
+    "repo_marker_pair_incomplete_visible",
+    "repo_marker_pair_inverse_incomplete_visible",
+    "repo_marker_pair_ignored_under_behavior_fixtures",
+    "repo_topology_branch_reachable",
+    "repo_hooks_branch_reachable",
+    "repo_default_root_resolved",
+}
+
+REPO_INVALID_STATES = {
+    "repo_root_missing",
+    "repo_root_file",
+    "repo_marker_pair_incomplete",
+    "repo_hooks_missing",
+    "repo_topology_nested_workspace",
+}
+
+
+def verify_fixture_metadata(
+    fixture_id: str,
+    metadata: dict,
+    valid_levels: set[str],
+    valid_states: set[str],
+    valid_invalid_states: set[str],
+) -> list[str]:
     failures: list[str] = []
     commands = metadata.get("commands")
     if metadata.get("expected_exit") not in VALID_EXPECTED_EXITS:
         failures.append(f"{fixture_id}: expected_exit must be one of {sorted(VALID_EXPECTED_EXITS)}")
     if metadata.get("run_from") != "repo":
         failures.append(f"{fixture_id}: run_from must be `repo`")
-    if metadata.get("level") not in VALID_LEVELS:
+    if metadata.get("level") not in valid_levels:
         failures.append(f"{fixture_id}: invalid level {metadata.get('level')}")
     if not isinstance(commands, list) or not commands:
         failures.append(f"{fixture_id}: commands must be a non-empty list")
@@ -85,8 +130,8 @@ def verify_fixture_metadata(fixture_id: str, metadata: dict) -> list[str]:
             if not isinstance(command, list) or not all(isinstance(part, str) for part in command):
                 failures.append(f"{fixture_id}: command must be a list of strings: {command}")
     for key, valid_values in (
-        ("valid_state", VALID_STATES),
-        ("intentionally_invalid", VALID_INVALID_STATES),
+        ("valid_state", valid_states),
+        ("intentionally_invalid", valid_invalid_states),
     ):
         values = metadata.get(key)
         if not isinstance(values, list):
@@ -99,10 +144,14 @@ def verify_fixture_metadata(fixture_id: str, metadata: dict) -> list[str]:
 
 
 def main() -> int:
-    manifest = load_toml(MANIFEST_PATH)
+    manifest = load_toml(manifest_path_from_argv(sys.argv[1:]))
     fixture_set = manifest["fixture_set"]
     fixture_root = REPO_ROOT / fixture_set["root"]
     failures: list[str] = []
+    is_repo_fixture_set = fixture_set["root"] == "behavior/fixtures/g3rs-validate-repo"
+    valid_levels = REPO_LEVELS if is_repo_fixture_set else VALID_LEVELS
+    valid_states = REPO_VALID_STATES if is_repo_fixture_set else VALID_STATES
+    valid_invalid_states = REPO_INVALID_STATES if is_repo_fixture_set else VALID_INVALID_STATES
 
     if not fixture_root.is_dir():
         failures.append(f"missing fixture root: {fixture_set['root']}")
@@ -123,7 +172,7 @@ def main() -> int:
             if fragment not in hook:
                 failures.append(f"pre-commit hook does not exclude behavior fixtures from validation routing: {fragment}")
 
-    for link in fixture_set["required_shared_links"]:
+    for link in fixture_set.get("required_shared_links", []):
         path = REPO_ROOT / link
         if not path.is_symlink():
             failures.append(f"missing required symlink: {link}")
@@ -147,7 +196,9 @@ def main() -> int:
         for key in ("id", "tool", "expected_exit"):
             if key not in metadata:
                 failures.append(f"{fixture_id}: missing metadata key {key}")
-        failures.extend(verify_fixture_metadata(fixture_id, metadata))
+        failures.extend(
+            verify_fixture_metadata(fixture_id, metadata, valid_levels, valid_states, valid_invalid_states)
+        )
         if metadata.get("id") != fixture_id:
             failures.append(f"{fixture_id}: fixture.toml id mismatch: {metadata.get('id')}")
         if metadata.get("tool") != fixture_set["tool"]:

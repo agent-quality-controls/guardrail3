@@ -33,6 +33,17 @@ pub fn check_repo(repo_root: &Path) -> Vec<G3CheckResult> {
                 None,
             ));
         }
+        if has_workspace_cargo && !has_g3rs_toml {
+            let rel = relative(repo_root, &dir);
+            results.push(G3CheckResult::new(
+                "g3rs-topology/marker-pair-incomplete".to_owned(),
+                G3Severity::Error,
+                "incomplete adoption marker pair".to_owned(),
+                format!("{rel} has Cargo.toml with [workspace] but no guardrail3-rs.toml"),
+                Some(format!("{rel}/Cargo.toml")),
+                None,
+            ));
+        }
     }
     results
 }

@@ -1,0 +1,17 @@
+id = "R40-default-repo-root"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate-repo", "--inventory"],
+]
+expected_exit = "zero"
+level = "repo_default_root"
+
+valid_state = [
+  "repo_root_found",
+  "repo_root_directory",
+  "repo_root_crawlable",
+  "repo_default_root_resolved",
+]
+
+intentionally_invalid = []

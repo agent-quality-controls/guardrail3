@@ -1,0 +1,22 @@
+id = "R20-crawlable-repo-marker-pair-policy"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate-repo", "--repo-root", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "repo_marker_pair_policy"
+
+valid_state = [
+  "repo_root_found",
+  "repo_root_directory",
+  "repo_root_crawlable",
+  "repo_marker_pair_complete",
+  "repo_marker_pair_incomplete_visible",
+  "repo_marker_pair_inverse_incomplete_visible",
+  "repo_marker_pair_ignored_under_behavior_fixtures",
+]
+
+intentionally_invalid = [
+  "repo_marker_pair_incomplete",
+]

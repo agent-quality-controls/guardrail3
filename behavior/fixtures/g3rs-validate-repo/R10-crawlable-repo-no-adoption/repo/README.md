@@ -1,0 +1,1 @@
+crawlable repo without adoption

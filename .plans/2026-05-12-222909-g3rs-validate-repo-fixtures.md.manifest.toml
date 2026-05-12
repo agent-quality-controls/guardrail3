@@ -1,0 +1,73 @@
+[fixture_set]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs-validate-repo"
+baseline_root = "behavior/baselines/g3rs-validate-repo"
+
+[[fixture]]
+id = "R00-invalid-repo-root"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/README.md",
+]
+
+[[fixture]]
+id = "R10-crawlable-repo-no-adoption"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/README.md",
+]
+
+[[fixture]]
+id = "R15-hooks-reachable-no-root-cargo"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.githooks/pre-commit",
+  "repo/README.md",
+]
+
+[[fixture]]
+id = "R20-crawlable-repo-marker-pair-policy"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/behavior/fixtures/g3rs/demo/repo/guardrail3-rs.toml",
+  "repo/packages/absent/README.md",
+  "repo/packages/cargo-only/Cargo.toml",
+  "repo/packages/complete/Cargo.toml",
+  "repo/packages/complete/guardrail3-rs.toml",
+  "repo/packages/incomplete/guardrail3-rs.toml",
+]
+
+[[fixture]]
+id = "R30-root-adoption-pair-complete"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/nested/Cargo.toml",
+  "repo/nested/guardrail3-rs.toml",
+]
+
+[[fixture]]
+id = "R40-default-repo-root"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/README.md",
+]
