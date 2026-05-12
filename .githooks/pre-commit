@@ -52,9 +52,14 @@ while IFS= read -r file; do
     fi
 done <<< "$STAGED_FILES"
 
+# Behavior replay fixtures intentionally contain broken workspaces. Keep raw
+# staged-file safety scans above, but do not route fixtures into live package
+# validation or lockfile checks.
+VALIDATION_STAGED_FILES=$(printf '%s\n' "$STAGED_FILES" | grep -vE '^behavior/fixtures/' || true)
+
 # --- Migration consistency ---
 echo "Checking migration consistency..."
-MIGRATION_FILES=$(echo "$STAGED_FILES" | grep -E 'drizzle/' || true)
+MIGRATION_FILES=$(echo "$VALIDATION_STAGED_FILES" | grep -E 'drizzle/' || true)
 if [ -n "$MIGRATION_FILES" ]; then
     MODIFIED_MIGRATIONS=$(git diff --cached --name-only --diff-filter=M | grep -E 'drizzle/' || true)
     if [ -n "$MODIFIED_MIGRATIONS" ]; then
@@ -65,8 +70,8 @@ if [ -n "$MIGRATION_FILES" ]; then
     fi
 fi
 
-SCHEMA_CHANGED=$(echo "$STAGED_FILES" | grep -E 'db/schema/.*\.ts$' || true)
-NEW_MIGRATIONS=$(echo "$STAGED_FILES" | grep -E 'drizzle/.*\.sql$' || true)
+SCHEMA_CHANGED=$(echo "$VALIDATION_STAGED_FILES" | grep -E 'db/schema/.*\.ts$' || true)
+NEW_MIGRATIONS=$(echo "$VALIDATION_STAGED_FILES" | grep -E 'drizzle/.*\.sql$' || true)
 if [ -n "$SCHEMA_CHANGED" ] && [ -z "$NEW_MIGRATIONS" ]; then
     echo "Error: DB schema changed but no migration file added."
     echo "Run 'pnpm exec drizzle-kit generate' and stage the migration."
@@ -74,7 +79,7 @@ if [ -n "$SCHEMA_CHANGED" ] && [ -z "$NEW_MIGRATIONS" ]; then
 fi
 
 # --- Lockfile integrity ---
-STAGED_PACKAGE_JSON=$(echo "$STAGED_FILES" | grep -E '(^|/)package\.json$' || true)
+STAGED_PACKAGE_JSON=$(echo "$VALIDATION_STAGED_FILES" | grep -E '(^|/)package\.json$' || true)
 if [ -n "$STAGED_PACKAGE_JSON" ]; then
     echo "Checking lockfile integrity..."
     while IFS= read -r package_json; do
@@ -160,7 +165,7 @@ staged_file_dir() {
 
 # --- Rust discovery loop ---
 RUST_RELEVANT_PATTERN='(\.rs$|(^|/)Cargo\.toml$|(^|/)Cargo\.lock$|(^|/)rust-toolchain$|(^|/)rust-toolchain\.toml$|(^|/)rustfmt\.toml$|(^|/)\.rustfmt\.toml$|(^|/)clippy\.toml$|(^|/)\.clippy\.toml$|(^|/)deny\.toml$|(^|/)\.deny\.toml$|(^|/)guardrail3-rs\.toml$|(^|/)\.cargo/config$|(^|/)\.cargo/config\.toml$|(^|/)README\.md$|(^|/)Readme\.md$|(^|/)readme\.md$|(^|/)cliff\.toml$|(^|/)release-plz\.toml$)'
-RUST_RELEVANT_FILES=$(echo "$STAGED_FILES" | grep -E "$RUST_RELEVANT_PATTERN" || true)
+RUST_RELEVANT_FILES=$(echo "$VALIDATION_STAGED_FILES" | grep -E "$RUST_RELEVANT_PATTERN" || true)
 
 RUST_OWNING_UNITS=""
 if [ -n "$RUST_RELEVANT_FILES" ]; then
@@ -185,7 +190,7 @@ fi
 
 # --- TS discovery loop ---
 TS_RELEVANT_PATTERN='(\.(ts|tsx|mts|cts|mjs|cjs|js|jsx|css)$|(^|/)package\.json$|(^|/)pnpm-lock\.yaml$|(^|/)package-lock\.json$|(^|/)yarn\.lock$|(^|/)bun\.lockb$|(^|/)bun\.lock$|(^|/)npm-shrinkwrap\.json$|(^|/)tsconfig[^/]*\.json$|(^|/)eslint\.config\.[^/]+$|(^|/)\.eslintrc(\.[^/]+)?$|(^|/)\.prettierrc(\.[^/]+)?$|(^|/)prettier\.config\.[^/]+$|(^|/)\.cspell\.json$|(^|/)cspell\.config\.[^/]+$|(^|/)cspell\.json$|(^|/)stylelint\.config\.[^/]+$|(^|/)\.stylelintrc(\.[^/]+)?$|(^|/)\.syncpackrc(\.[^/]+)?$|(^|/)syncpack\.config\.[^/]+$|(^|/)\.type-coverage\.[^/]+$|(^|/)type-coverage\.[^/]+$|(^|/)guardrail3-ts\.toml$)'
-TS_RELEVANT_FILES=$(echo "$STAGED_FILES" | grep -E "$TS_RELEVANT_PATTERN" || true)
+TS_RELEVANT_FILES=$(echo "$VALIDATION_STAGED_FILES" | grep -E "$TS_RELEVANT_PATTERN" || true)
 
 TS_OWNING_UNITS=""
 if [ -n "$TS_RELEVANT_FILES" ]; then

@@ -1,0 +1,17 @@
+id = "L20-workspace-root-found-guardrail-config-invalid"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", "repo", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "workspace_root_found_guardrail_config_invalid"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_present",
+]
+
+intentionally_invalid = [
+  "guardrail_config_invalid",
+]

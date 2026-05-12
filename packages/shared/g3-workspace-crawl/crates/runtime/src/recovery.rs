@@ -9,7 +9,7 @@ use std::path::Path;
 const BANNED_DIR_NAMES: &[&str] = &[".git", "target", "node_modules", "dist"];
 
 /// Root-relative subtrees that are never walked during recovery.
-const BANNED_ROOTS: &[&str] = &[".claude/worktrees"];
+const BANNED_ROOTS: &[&str] = &[".claude/worktrees", "behavior/fixtures"];
 
 /// Config file names recovered from ignored space (exact match).
 const RECOVER_EXACT: &[&str] = &[

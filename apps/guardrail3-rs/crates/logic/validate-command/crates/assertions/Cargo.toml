@@ -5,6 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
+guardrail3-check-types.workspace = true
 guardrail3-rs-app-types = { path = "../../../../types/app-types" }
 guardrail3-rs-validate-command = { path = "../runtime" }
 
