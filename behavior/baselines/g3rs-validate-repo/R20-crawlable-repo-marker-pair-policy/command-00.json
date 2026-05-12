@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "2ce60f751f1c9d4bfed213e012404db4613eac25",
+  "command": [
+    "g3rs",
+    "validate-repo",
+    "--repo-root",
+    ".",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T22:22:52.159648+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:68009668e4b83122cee752cd84fa8b036328bb3996b25b2f4f9f98509021c797",
+  "fixture_id": "R20-crawlable-repo-marker-pair-policy",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== topology ==\n[Error] g3rs-topology/marker-pair-incomplete packages/incomplete/guardrail3-rs.toml incomplete adoption marker pair\n  packages/incomplete has guardrail3-rs.toml but no Cargo.toml with [workspace]\n[Error] g3rs-topology/marker-pair-incomplete packages/cargo-only/Cargo.toml incomplete adoption marker pair\n  packages/cargo-only has Cargo.toml with [workspace] but no guardrail3-rs.toml\n",
+  "tool": "g3rs"
+}

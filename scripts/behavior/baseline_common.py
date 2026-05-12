@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import json
 import hashlib
+import shutil
 import subprocess
+import tempfile
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -15,7 +17,7 @@ except ModuleNotFoundError:
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MANIFEST_PATH = (
+DEFAULT_MANIFEST_PATH = (
     REPO_ROOT
     / ".plans"
     / "2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
@@ -31,8 +33,16 @@ def load_toml(path: Path) -> dict[str, Any]:
         return tomllib.load(file)
 
 
-def load_manifest() -> dict[str, Any]:
-    return load_toml(MANIFEST_PATH)
+def manifest_path_from_argv(argv: list[str]) -> Path:
+    if not argv:
+        return DEFAULT_MANIFEST_PATH
+    if len(argv) == 2 and argv[0] == "--manifest":
+        return (REPO_ROOT / argv[1]).resolve() if not Path(argv[1]).is_absolute() else Path(argv[1])
+    raise SystemExit("usage: script [--manifest <path>]")
+
+
+def load_manifest(path: Path | None = None) -> dict[str, Any]:
+    return load_toml(path or DEFAULT_MANIFEST_PATH)
 
 
 def load_fixture_metadata(fixture_dir: Path) -> dict[str, Any]:
@@ -138,6 +148,14 @@ def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: li
     )
 
 
+def prepare_runtime_fixture(fixture_dir: Path, metadata: dict[str, Any]) -> None:
+    if metadata.get("git_init") is not True:
+        return
+    repo_dir = command_cwd(fixture_dir, metadata)
+    subprocess.run(["git", "init", "--quiet"], cwd=repo_dir, check=True)
+    subprocess.run(["git", "config", "core.hooksPath", ".githooks"], cwd=repo_dir, check=True)
+
+
 def output_record(
     tool: str,
     fixture_id: str,
@@ -146,20 +164,27 @@ def output_record(
     command_index: int,
     argv: list[str],
 ) -> dict[str, Any]:
-    result = run_command(tool, fixture_dir, metadata, argv)
+    with tempfile.TemporaryDirectory(prefix="g3rs-behavior-") as temp_root:
+        runtime_fixture_dir = Path(temp_root) / fixture_dir.name
+        shutil.copytree(fixture_dir, runtime_fixture_dir, symlinks=True)
+        prepare_runtime_fixture(runtime_fixture_dir, metadata)
+        result = run_command(tool, runtime_fixture_dir, metadata, argv)
+        cwd = command_cwd(runtime_fixture_dir, metadata).relative_to(runtime_fixture_dir).as_posix()
+        stdout = normalize_output(result.stdout, runtime_fixture_dir)
+        stderr = normalize_output(result.stderr, runtime_fixture_dir)
     return {
         "baseline_commit": git_head(),
         "fixture_id": fixture_id,
         "fixture_hash": fixture_hash(fixture_dir),
         "command_index": command_index,
         "command": [tool, *argv],
-        "cwd": command_cwd(fixture_dir, metadata).relative_to(fixture_dir).as_posix(),
+        "cwd": cwd,
         "normalizer_version": NORMALIZER_VERSION,
         "output_schema_version": OUTPUT_SCHEMA_VERSION,
         "runner_version": RUNNER_VERSION,
         "exit_code": result.returncode,
-        "stdout": normalize_output(result.stdout, fixture_dir),
-        "stderr": normalize_output(result.stderr, fixture_dir),
+        "stdout": stdout,
+        "stderr": stderr,
         "tool": tool,
     }
 

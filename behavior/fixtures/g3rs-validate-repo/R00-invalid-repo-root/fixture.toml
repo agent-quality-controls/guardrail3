@@ -1,0 +1,16 @@
+id = "R00-invalid-repo-root"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate-repo", "--repo-root", "missing", "--inventory"],
+  ["validate-repo", "--repo-root", "README.md", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "repo_root_invalid"
+
+valid_state = []
+
+intentionally_invalid = [
+  "repo_root_missing",
+  "repo_root_file",
+]

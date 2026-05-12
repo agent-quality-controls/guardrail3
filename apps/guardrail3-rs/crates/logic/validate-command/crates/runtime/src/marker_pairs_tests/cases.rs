@@ -50,3 +50,19 @@ fn marker_pairs_still_report_real_incomplete_adoption() {
 
     assert_incomplete_adoption_marker_pair(&results, "packages/demo/guardrail3-rs.toml");
 }
+
+#[test]
+fn marker_pairs_report_workspace_without_guardrail_config() {
+    let temp_dir = tempdir().expect("create temporary repo");
+    let root = temp_dir.path();
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+    write(
+        root.join("packages/demo/Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+
+    let results = check_repo(root);
+
+    assert_incomplete_adoption_marker_pair(&results, "packages/demo/Cargo.toml");
+}

@@ -9,13 +9,14 @@ from baseline_common import (
     baseline_path,
     load_fixture_metadata,
     load_manifest,
+    manifest_path_from_argv,
     output_record,
     write_json,
 )
 
 
 def main() -> int:
-    manifest = load_manifest()
+    manifest = load_manifest(manifest_path_from_argv(sys.argv[1:]))
     fixture_set = manifest["fixture_set"]
     fixture_root = REPO_ROOT / fixture_set["root"]
     baseline_root = REPO_ROOT / fixture_set["baseline_root"]

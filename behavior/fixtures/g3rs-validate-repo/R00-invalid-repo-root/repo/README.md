@@ -1,0 +1,1 @@
+invalid repo root fixture
