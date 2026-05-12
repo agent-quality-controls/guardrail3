@@ -1,0 +1,22 @@
+[package]
+name = "g3rs_fixture_l31"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = true
+description = "Publishable fixture for missing release file inputs."
+license = "MIT"
+repository = "https://example.com/g3rs-fixture-l31"
+keywords = ["guardrail", "fixture"]
+categories = ["development-tools"]
+exclude = ["target/**"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[lib]
+path = "src/lib.rs"
+
+[workspace]
+members = []
+resolver = "2"

@@ -209,6 +209,14 @@ def main() -> int:
             )
         if entry.get("runner_mode") and metadata.get("runner_mode") != entry["runner_mode"]:
             failures.append(f"{fixture_id}: runner_mode mismatch")
+        path_prepend = metadata.get("path_prepend", [])
+        if path_prepend:
+            if not isinstance(path_prepend, list) or not all(isinstance(item, str) for item in path_prepend):
+                failures.append(f"{fixture_id}: path_prepend must be a list of strings")
+            else:
+                for rel_path in path_prepend:
+                    if not (fixture_dir / "repo" / rel_path).is_dir():
+                        failures.append(f"{fixture_id}: path_prepend directory missing {rel_path}")
 
         repo_dir = fixture_dir / "repo"
         if not repo_dir.exists():

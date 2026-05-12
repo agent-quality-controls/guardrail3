@@ -46,6 +46,7 @@ def main() -> int:
             failures.extend(verify_metadata(fixture_id, expected, actual))
             failures.extend(verify_exit_code(fixture_id, entry, expected))
             failures.extend(verify_no_outer_repo_leak(fixture_id, expected))
+            failures.extend(verify_required_results(fixture_id, entry, expected))
             if actual != expected:
                 failures.append(f"{fixture_id}: baseline drift in {path.relative_to(REPO_ROOT)}")
             checked += 1
@@ -118,6 +119,22 @@ def verify_no_outer_repo_leak(fixture_id: str, expected: dict) -> list[str]:
         value = expected.get(key)
         if isinstance(value, str) and root in value:
             failures.append(f"{fixture_id}: baseline {key} leaked outer repo path")
+    return failures
+
+
+def verify_required_results(fixture_id: str, entry: dict, expected: dict) -> list[str]:
+    failures: list[str] = []
+    stdout = expected.get("stdout", "")
+    if not isinstance(stdout, str):
+        return [f"{fixture_id}: baseline stdout must be a string"]
+    for required in entry.get("required_results", []):
+        parts = required.split("|")
+        if len(parts) != 3:
+            failures.append(f"{fixture_id}: invalid required_results row {required!r}")
+            continue
+        rule_id, title, file_path = parts
+        if not any(rule_id in line and title in line and file_path in line for line in stdout.splitlines()):
+            failures.append(f"{fixture_id}: missing required result {required}")
     return failures
 
 

@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "8667c5045adb956418773a7bb5a18e1803def535",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "test",
+    "--rules-only",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T22:45:25.717621+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:b1c46c21824d8cde23c471d5f9a0ca618cf9ecaccaa7e49389feb02864b26511",
+  "fixture_id": "L32-test-required-inputs-missing",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== test ==\n[Error] g3rs-test/nextest-timeouts .config/nextest.toml nextest config missing\n  project root requires `.config/nextest.toml` with timeout settings for async tests.\n[Info] g3rs-test/cargo-mutants-installed Cargo.toml cargo-mutants installed\n  `cargo-mutants` is available on PATH.\n[Error] g3rs-test/mutants-toml-exists .cargo/mutants.toml mutants config missing\n  project root is missing required mutation config `.cargo/mutants.toml`. Create the mutation config file.\n[Info] g3rs-test/mutants-profile-present Cargo.toml profile.mutants configured\n  `Cargo.toml` defines `[profile.mutants]`.\n[Error] g3rs-test/mutation-hook-present Cargo.toml mutation hook step missing\n  Active hook surfaces do not contain an executable `cargo mutants` step. Add a `cargo mutants` step to the project's hook configuration.\n[Info] g3rs-test/owned-sidecar-shape Cargo.toml owned sidecar shape confirmed\n  Root `` keeps internal harnesses inside module-owned `*_tests/` sidecars.\n[Error] g3rs-test/runtime-assertions-split assertions/Cargo.toml assertions crate missing\n  Component `` has sidecar tests that require a shared assertions crate, but `` is still a single-crate package. Reshape it into one package with sibling member crates under `crates/`: `crates/runtime` for the production crate and `crates/assertions` for shared test proof. Do not add `/assertions/Cargo.toml` directly under the current crate root, because that creates a nested package instead of sibling member crates.\n[Info] g3rs-test/ignore-reason src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/ignore-reason tests/async_tests.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n[Info] g3rs-test/tautological-assertions tests/async_tests.rs tautological assertions absent\n  Test `fixture_async_test` uses real values in its assertions.\n[Info] g3rs-test/real-proof-site tests/async_tests.rs test uses shared proof\n  Test `fixture_async_test` in `tests/async_tests.rs` ends with a real assertion or calls the shared assertions crate, so the test actually proves the behavior it exercises.\n[Info] g3rs-test/weak-matches-assert tests/async_tests.rs weak matches assertion absent\n  Test `fixture_async_test` uses specific payload checks rather than weak wildcard matches.\n[Error] g3rs-test/external-harnesses-use-assertions tests/async_tests.rs external harness asserts directly\n  Test function `fixture_async_test` in `tests/async_tests.rs` uses assertion macros directly. External harnesses in `runtime/tests/` must not assert directly \u2014 call functions from the sibling assertions crate instead.\n",
+  "tool": "g3rs"
+}

@@ -45,6 +45,28 @@ files = [
 [[fixture]]
 id = "L30-guardrail-config-valid-required-inputs-missing"
 expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-toolchain/exists|rust-toolchain.toml missing|rust-toolchain.toml",
+  "g3rs-fmt/rustfmt-config-exists|rustfmt config missing|rustfmt.toml",
+  "g3rs-cargo/workspace-lints|rust lint table missing|Cargo.toml",
+  "g3rs-cargo/workspace-lints|clippy lint table missing|Cargo.toml",
+  "g3rs-clippy/coverage-exists|workspace root uncovered by clippy config|clippy.toml",
+  "g3rs-deny/coverage|workspace root uncovered by deny config|-",
+  "g3rs-deps/cargo-lock-present|Cargo.lock missing|Cargo.lock",
+]
+
+[[fixture]]
+id = "L31-release-required-inputs-missing"
+expected_exit = "nonzero"
+baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
@@ -52,6 +74,51 @@ files = [
   "repo/Cargo.toml",
   "repo/guardrail3-rs.toml",
   "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-release/license-file|LICENSE file missing|Cargo.toml",
+  "g3rs-release/release-plz-exists|release-plz.toml missing|release-plz.toml",
+  "g3rs-release/cliff-exists|cliff.toml missing|cliff.toml",
+  "g3rs-release/readme-exists|g3rs_fixture_l31: README missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L32-test-required-inputs-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/bin/cargo-mutants",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+  "repo/tests/async_tests.rs",
+]
+required_results = [
+  "g3rs-test/nextest-timeouts|nextest config missing|.config/nextest.toml",
+  "g3rs-test/mutants-toml-exists|mutants config missing|.cargo/mutants.toml",
+  "g3rs-test/mutation-hook-present|mutation hook step missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L33-test-mutants-profile-missing"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.cargo/mutants.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/bin/cargo-mutants",
+  "repo/guardrail3-rs.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-test/mutants-profile-present|profile.mutants missing|Cargo.toml",
+  "g3rs-test/mutation-hook-present|mutation hook step missing|Cargo.toml",
 ]
 
 [[fixture]]
