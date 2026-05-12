@@ -2,7 +2,14 @@ id = "L00-workspace-root-not-found"
 tool = "g3rs"
 run_from = "repo"
 commands = [
+  ["validate", "--path", "."],
   ["validate", "--path", ".", "--inventory"],
+  ["validate", "--path", "README.md", "--inventory"],
+  ["validate", "--path", ".", "--family", "fmt", "--inventory"],
+  ["validate", "--path", ".", "--family", "apparch", "--inventory"],
+  ["validate", "--path", ".", "--family", "apparch", "--family", "arch", "--family", "cargo", "--family", "clippy", "--family", "code", "--family", "deps", "--family", "deny", "--family", "fmt", "--family", "garde", "--family", "hooks", "--family", "release", "--family", "test", "--family", "toolchain", "--family", "topology", "--inventory"],
+  ["validate", "--path", ".", "--staged", "--inventory"],
+  ["validate", "--path", ".", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "workspace_root_not_found"

@@ -4,10 +4,12 @@
     "g3rs",
     "validate",
     "--path",
-    "."
+    ".",
+    "--staged",
+    "--inventory"
   ],
-  "command_index": 0,
-  "created_at": "2026-05-12T21:17:42.996076+00:00",
+  "command_index": 5,
+  "created_at": "2026-05-12T21:17:43.096137+00:00",
   "cwd": "repo",
   "exit_code": 1,
   "fixture_hash": "sha256:738f5cedb52e0b5e6005e229c6d9797eccd9b31700535cc68a1215f05408d619",
