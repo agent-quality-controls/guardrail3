@@ -19,6 +19,8 @@ mod deps {
 
     #[cfg(test)]
     use guardrail3_rs_assertions as _;
+    #[cfg(test)]
+    use tempfile as _;
 }
 
 fn main() -> std::process::ExitCode {

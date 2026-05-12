@@ -32,6 +32,72 @@ def relative_files(root: Path) -> list[str]:
     return sorted(files)
 
 
+VALID_LEVELS = {
+    "workspace_root_not_found",
+    "workspace_root_found_guardrail_config_missing",
+    "workspace_root_found_guardrail_config_invalid",
+    "guardrail_config_valid_required_inputs_missing",
+    "required_inputs_present_invalid",
+    "required_inputs_valid_delegated_tools_missing",
+    "delegated_tools_present_policy_invalid",
+    "delegated_policy_valid_project_policy_violated",
+    "project_policy_valid_clean",
+}
+
+VALID_STATES = {
+    "workspace_root_found",
+    "guardrail_config_present",
+    "guardrail_config_valid",
+    "required_inputs_present",
+    "required_inputs_valid",
+    "delegated_tools_present",
+    "delegated_policy_valid",
+    "project_policy_valid",
+}
+
+VALID_INVALID_STATES = {
+    "workspace_root_not_found",
+    "guardrail_config_missing",
+    "guardrail_config_invalid",
+    "required_inputs_missing",
+    "required_inputs_invalid",
+    "delegated_tools_missing",
+    "delegated_policy_invalid",
+    "project_policy_violated",
+}
+
+VALID_EXPECTED_EXITS = {"zero", "nonzero"}
+
+
+def verify_fixture_metadata(fixture_id: str, metadata: dict) -> list[str]:
+    failures: list[str] = []
+    commands = metadata.get("commands")
+    if metadata.get("expected_exit") not in VALID_EXPECTED_EXITS:
+        failures.append(f"{fixture_id}: expected_exit must be one of {sorted(VALID_EXPECTED_EXITS)}")
+    if metadata.get("run_from") != "repo":
+        failures.append(f"{fixture_id}: run_from must be `repo`")
+    if metadata.get("level") not in VALID_LEVELS:
+        failures.append(f"{fixture_id}: invalid level {metadata.get('level')}")
+    if not isinstance(commands, list) or not commands:
+        failures.append(f"{fixture_id}: commands must be a non-empty list")
+    else:
+        for command in commands:
+            if not isinstance(command, list) or not all(isinstance(part, str) for part in command):
+                failures.append(f"{fixture_id}: command must be a list of strings: {command}")
+    for key, valid_values in (
+        ("valid_state", VALID_STATES),
+        ("intentionally_invalid", VALID_INVALID_STATES),
+    ):
+        values = metadata.get(key)
+        if not isinstance(values, list):
+            failures.append(f"{fixture_id}: {key} must be a list")
+            continue
+        unknown = sorted(value for value in values if value not in valid_values)
+        if unknown:
+            failures.append(f"{fixture_id}: {key} has unknown values: {unknown}")
+    return failures
+
+
 def main() -> int:
     manifest = load_toml(MANIFEST_PATH)
     fixture_set = manifest["fixture_set"]
@@ -81,6 +147,7 @@ def main() -> int:
         for key in ("id", "tool", "expected_exit"):
             if key not in metadata:
                 failures.append(f"{fixture_id}: missing metadata key {key}")
+        failures.extend(verify_fixture_metadata(fixture_id, metadata))
         if metadata.get("id") != fixture_id:
             failures.append(f"{fixture_id}: fixture.toml id mismatch: {metadata.get('id')}")
         if metadata.get("tool") != fixture_set["tool"]:

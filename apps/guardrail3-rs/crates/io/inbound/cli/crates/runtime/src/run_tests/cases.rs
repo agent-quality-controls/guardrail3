@@ -22,6 +22,25 @@ impl WorkspaceCrawler for StubCrawler {
     }
 }
 
+#[allow(
+    clippy::disallowed_methods,
+    reason = "test fixture setup writes marker files needed to reach the stub crawler"
+)]
+fn workspace_root_with_guardrail_config() -> tempfile::TempDir {
+    let root = tempfile::tempdir().expect("create temporary workspace root");
+    std::fs::write(
+        root.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    )
+    .expect("write temporary Cargo.toml");
+    std::fs::write(
+        root.path().join("guardrail3-rs.toml"),
+        "profile = \"library\"\n",
+    )
+    .expect("write temporary guardrail config");
+    root
+}
+
 #[derive(Debug)]
 struct StubFamilyRunner;
 
@@ -46,9 +65,10 @@ impl ReportRenderer for StubRenderer {
 
 #[test]
 fn run_command_sends_failures_to_stderr() {
+    let root = workspace_root_with_guardrail_config();
     let output = super::super::run_command(
         super::super::Command::Validate {
-            path: ".".into(),
+            path: root.path().to_path_buf(),
             family: Vec::new(),
             inventory: false,
             staged: false,

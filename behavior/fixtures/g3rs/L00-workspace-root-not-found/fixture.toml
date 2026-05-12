@@ -2,7 +2,7 @@ id = "L00-workspace-root-not-found"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", "repo", "--inventory"],
+  ["validate", "--path", ".", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "workspace_root_not_found"

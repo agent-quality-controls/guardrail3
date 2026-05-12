@@ -1767,6 +1767,7 @@ dependencies = [
  "guardrail3-rs-packages",
  "guardrail3-rs-report",
  "guardrail3-rs-validate-command",
+ "tempfile",
 ]
 
 [[package]]

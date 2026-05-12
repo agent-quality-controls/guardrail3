@@ -21,6 +21,7 @@ guardrail3-rs-report = { path = "../../../../outbound/report/crates/runtime" }
 [dev-dependencies]
 g3-workspace-crawl.workspace = true
 guardrail3-rs-assertions = { path = "../assertions" }
+tempfile = "3.18.0"
 
 [features]
 default = ["api"]

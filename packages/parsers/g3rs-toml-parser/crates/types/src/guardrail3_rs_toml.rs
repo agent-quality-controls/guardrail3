@@ -41,6 +41,7 @@ pub enum RustProfile {
 pub struct RustChecksConfig {
     pub topology: Option<bool>,
     pub arch: Option<bool>,
+    pub apparch: Option<bool>,
     pub fmt: Option<bool>,
     pub toolchain: Option<bool>,
     pub clippy: Option<bool>,
