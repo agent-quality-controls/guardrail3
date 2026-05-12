@@ -42,6 +42,7 @@ future-key = "keep-me"
 [checks]
 fmt = true
 clippy = true
+apparch = false
 hexarch = false
 future_check = "preserve-me"
 
@@ -64,6 +65,7 @@ reviewer = "guardrail-team"
     assertions::assert_string_list(&cfg.allowed_deps, &["serde", "toml"], "allowed_deps");
     assertions::assert_fmt_check(cfg.checks.as_ref(), Some(true));
     assertions::assert_clippy_check(cfg.checks.as_ref(), Some(true));
+    assertions::assert_apparch_check(cfg.checks.as_ref(), Some(false));
     assertions::assert_check_extra_bool(cfg.checks.as_ref(), "hexarch", false);
     assertions::assert_check_extra_string(cfg.checks.as_ref(), "future_check", "preserve-me");
     assertions::assert_waiver(

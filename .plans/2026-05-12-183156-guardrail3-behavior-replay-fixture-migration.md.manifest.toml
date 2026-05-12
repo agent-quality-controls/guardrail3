@@ -1,6 +1,7 @@
 [fixture_set]
 tool = "g3rs"
 root = "behavior/fixtures/g3rs"
+baseline_root = "behavior/baselines/g3rs"
 clean_source = "packages/rs/deny/g3rs-deny-config-checks"
 clean_fixture = "L80-project-policy-valid-clean"
 
@@ -13,6 +14,7 @@ required_shared_links = [
 [[fixture]]
 id = "L00-workspace-root-not-found"
 expected_exit = "nonzero"
+baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
@@ -22,24 +24,22 @@ files = [
 [[fixture]]
 id = "L10-workspace-root-found-guardrail-config-missing"
 expected_exit = "nonzero"
+baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
-  "repo/Cargo.lock",
   "repo/Cargo.toml",
-  "repo/src/lib.rs",
 ]
 
 [[fixture]]
 id = "L20-workspace-root-found-guardrail-config-invalid"
 expected_exit = "nonzero"
+baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
-  "repo/Cargo.lock",
   "repo/Cargo.toml",
   "repo/guardrail3-rs.toml",
-  "repo/src/lib.rs",
 ]
 
 [[fixture]]

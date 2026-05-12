@@ -1,18 +1,26 @@
 /// Cargo gate execution: replicates the verifier's command sequence inside the binary.
+#[cfg(feature = "api")]
 mod cargo_gates;
 /// Command execution flow for validate requests.
+#[cfg(feature = "api")]
 mod execute;
 /// Per-workspace family opt-out via `guardrail3-rs.toml`.
+#[cfg(feature = "api")]
 mod family_opt_out;
 /// Centralized filesystem boundary.
+#[cfg(feature = "api")]
 mod fs;
 /// Repo-wide marker-pair completeness check.
+#[cfg(feature = "api")]
 mod marker_pairs;
 /// Final CLI outcome payload.
+#[cfg(feature = "api")]
 mod outcome;
 /// Family-selection helpers shared by command execution.
+#[cfg(feature = "api")]
 mod selection;
 /// Staged-file collection from git.
+#[cfg(feature = "api")]
 mod staged;
 
 #[cfg(feature = "api")]
@@ -23,7 +31,7 @@ pub use cargo_gates::{
 #[cfg(feature = "api")]
 pub use execute::{execute, execute_repo};
 #[cfg(feature = "api")]
-pub use family_opt_out::disabled_families;
+pub use family_opt_out::{DisabledFamilies, GuardrailConfigError, disabled_families};
 #[cfg(feature = "api")]
 pub use marker_pairs::check_repo as check_marker_pairs;
 #[cfg(feature = "api")]
@@ -34,3 +42,6 @@ pub use selection::{
 };
 #[cfg(feature = "api")]
 pub use staged::{read_staged_files, resolve_repo_root};
+
+#[cfg(not(feature = "api"))]
+mod no_api_dependency_markers;

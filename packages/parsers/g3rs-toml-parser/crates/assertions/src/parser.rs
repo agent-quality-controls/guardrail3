@@ -49,6 +49,11 @@ pub fn assert_clippy_check(checks: Option<&RustChecksConfig>, expected: Option<b
     assert_eq!(actual, expected, "clippy mismatch");
 }
 
+pub fn assert_apparch_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
+    let actual = checks.and_then(|checks| checks.apparch);
+    assert_eq!(actual, expected, "apparch mismatch");
+}
+
 pub fn assert_garde_check(checks: Option<&RustChecksConfig>, expected: Option<bool>) {
     let actual = checks.and_then(|checks| checks.garde);
     assert_eq!(actual, expected, "garde mismatch");

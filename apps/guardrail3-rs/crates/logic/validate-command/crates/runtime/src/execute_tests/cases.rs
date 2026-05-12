@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -18,6 +19,10 @@ fn write_fixture(path: &Path, content: &str) {
     std::fs::write(path, content).expect("write temporary workspace fixture file");
 }
 
+fn write_guardrail_config(root: &Path) {
+    write_fixture(&root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+}
+
 #[derive(Debug)]
 struct StubCrawler;
 
@@ -32,6 +37,27 @@ impl WorkspaceCrawler for StubCrawler {
         g3_workspace_crawl::crawl_any_root(root).map_err(|error| WorkspaceCrawlError {
             message: error.to_string(),
         })
+    }
+}
+
+#[derive(Debug)]
+struct PanicCrawler;
+
+impl WorkspaceCrawler for PanicCrawler {
+    #[allow(
+        clippy::panic,
+        reason = "test double proves config validation returns before crawl is invoked"
+    )]
+    fn crawl(&self, _root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
+        panic!("crawler should not run before config failure");
+    }
+
+    #[allow(
+        clippy::panic,
+        reason = "test double proves workspace validate never invokes repo crawl"
+    )]
+    fn crawl_any(&self, _root: &Path) -> Result<G3WorkspaceCrawl, WorkspaceCrawlError> {
+        panic!("repo crawler should not be used by workspace validate");
     }
 }
 
@@ -89,6 +115,34 @@ impl FamilyRunner for StubFamilyRunner {
 }
 
 #[derive(Debug)]
+struct CountingFamilyRunner {
+    runs: AtomicUsize,
+}
+
+impl CountingFamilyRunner {
+    fn new() -> Self {
+        Self {
+            runs: AtomicUsize::new(0),
+        }
+    }
+
+    fn runs(&self) -> usize {
+        self.runs.load(Ordering::SeqCst)
+    }
+}
+
+impl FamilyRunner for CountingFamilyRunner {
+    fn run_family(
+        &self,
+        _family: SupportedFamily,
+        _crawl: &G3WorkspaceCrawl,
+    ) -> Result<Vec<G3CheckResult>, FamilyRunError> {
+        let _previous_runs = self.runs.fetch_add(1, Ordering::SeqCst);
+        Ok(Vec::new())
+    }
+}
+
+#[derive(Debug)]
 struct StubRenderer;
 
 impl ReportRenderer for StubRenderer {
@@ -104,6 +158,7 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
+    write_guardrail_config(tempdir.path());
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),
@@ -133,6 +188,7 @@ fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
+    write_guardrail_config(tempdir.path());
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),
@@ -201,6 +257,7 @@ fn execute_keeps_successful_family_results_when_one_family_errors() {
         &tempdir.path().join("Cargo.toml"),
         "[workspace]\nmembers = []\n",
     );
+    write_guardrail_config(tempdir.path());
 
     let request = ValidateRequest {
         workspace_root: tempdir.path().to_path_buf(),
@@ -221,4 +278,125 @@ fn execute_keeps_successful_family_results_when_one_family_errors() {
         "deny: deny runner exploded\n",
         1,
     );
+}
+
+#[test]
+fn execute_applies_apparch_opt_out_from_guardrail_config() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    write_fixture(
+        &tempdir.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+    write_fixture(
+        &tempdir.path().join("guardrail3-rs.toml"),
+        "[checks]\napparch = false\n",
+    );
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Apparch],
+        include_inventory: true,
+        staged: false,
+        rules_only: true,
+    };
+
+    let outcome = execute(&request, &StubCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect("execute should succeed for disabled apparch family");
+
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "runs=0 inventory=true",
+        "",
+        0,
+    );
+}
+
+#[test]
+fn execute_reports_missing_workspace_manifest_before_guardrail_config() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Fmt],
+        include_inventory: true,
+        staged: false,
+        rules_only: true,
+    };
+
+    let error = execute(&request, &PanicCrawler, &StubFamilyRunner, &StubRenderer)
+        .expect_err("missing Cargo.toml should remain a workspace-root error");
+
+    assert_eq!(
+        error.to_string(),
+        format!(
+            "g3rs validates one Rust workspace or package root at a time. Target path \"{}\" has no root Cargo.toml. Run g3rs with --path pointing at a directory that contains the Rust workspace Cargo.toml.",
+            tempdir.path().display()
+        ),
+    );
+}
+
+#[test]
+fn execute_fails_before_family_runners_when_guardrail_config_missing() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    write_fixture(
+        &tempdir.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Fmt],
+        include_inventory: true,
+        staged: false,
+        rules_only: true,
+    };
+
+    let family_runner = CountingFamilyRunner::new();
+    let outcome = execute(&request, &PanicCrawler, &family_runner, &StubRenderer)
+        .expect("execute should report missing guardrail config as CLI outcome");
+
+    assert_eq!(family_runner.runs(), 0, "family runner should not run");
+    assertions::assert_execution_outcome(
+        outcome.stdout(),
+        outcome.stderr(),
+        outcome.exit_code(),
+        "",
+        "guardrail3-rs.toml missing at workspace root. Create `guardrail3-rs.toml` before running `g3rs validate`.\n",
+        1,
+    );
+}
+
+#[test]
+fn execute_fails_before_family_runners_when_guardrail_config_invalid() {
+    let tempdir = tempfile::tempdir().expect("create temporary workspace root");
+    write_fixture(
+        &tempdir.path().join("Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+    write_fixture(&tempdir.path().join("guardrail3-rs.toml"), "profile = [\n");
+
+    let request = ValidateRequest {
+        workspace_root: tempdir.path().to_path_buf(),
+        families: vec![SupportedFamily::Fmt],
+        include_inventory: true,
+        staged: false,
+        rules_only: true,
+    };
+
+    let family_runner = CountingFamilyRunner::new();
+    let outcome = execute(&request, &PanicCrawler, &family_runner, &StubRenderer)
+        .expect("execute should report invalid guardrail config as CLI outcome");
+
+    assert_eq!(family_runner.runs(), 0, "family runner should not run");
+    assert_eq!(outcome.stdout(), "");
+    assert!(
+        outcome.stderr().starts_with(
+            "guardrail3-rs.toml invalid at workspace root. invalid guardrail3-rs.toml:"
+        ),
+        "unexpected stderr: {}",
+        outcome.stderr()
+    );
+    assert_eq!(outcome.exit_code(), 1);
 }

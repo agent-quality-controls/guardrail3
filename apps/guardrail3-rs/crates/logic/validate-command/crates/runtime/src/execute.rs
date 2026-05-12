@@ -5,8 +5,10 @@ use guardrail3_rs_app_types::{
 };
 
 use crate::{
-    ExecutionOutcome, REPO_LEVEL_FAMILIES, cargo_gates, family_cli_name, family_opt_out,
-    marker_pairs, selected_families_with_opt_out, staged,
+    cargo_gates, family_opt_out, marker_pairs,
+    outcome::ExecutionOutcome,
+    selection::{REPO_LEVEL_FAMILIES, family_cli_name, selected_families_with_opt_out},
+    staged,
 };
 
 /// Executes one validated request through crawl, family run, and render steps.
@@ -20,11 +22,21 @@ pub fn execute(
     family_runner: &dyn FamilyRunner,
     renderer: &dyn ReportRenderer,
 ) -> Result<ExecutionOutcome, WorkspaceCrawlError> {
+    validate_workspace_root(&request.workspace_root)?;
+    let disabled = match family_opt_out::disabled_families(&request.workspace_root) {
+        Ok(disabled) => disabled,
+        Err(error) => {
+            return Ok(ExecutionOutcome::new(
+                String::new(),
+                format!("{error}\n"),
+                1,
+            ));
+        }
+    };
     let crawl = crawler.crawl(&request.workspace_root)?;
     let mut report = ValidateReport::default();
     let mut family_errors = Vec::new();
 
-    let disabled = family_opt_out::disabled_families(&request.workspace_root);
     let families = selected_families_with_opt_out(request, &disabled);
 
     for family in &families {
@@ -85,6 +97,24 @@ pub fn execute(
     };
 
     Ok(ExecutionOutcome::new(stdout, stderr, exit_code))
+}
+
+/// Validates only the explicit workspace root marker before config parsing.
+fn validate_workspace_root(workspace_root: &std::path::Path) -> Result<(), WorkspaceCrawlError> {
+    if !crate::fs::is_dir(workspace_root) {
+        return Err(WorkspaceCrawlError {
+            message: format!("path is not a directory: {}", workspace_root.display()),
+        });
+    }
+    if !crate::fs::is_file(&workspace_root.join("Cargo.toml")) {
+        return Err(WorkspaceCrawlError {
+            message: format!(
+                "g3rs validates one Rust workspace or package root at a time. Target path \"{}\" has no root Cargo.toml. Run g3rs with --path pointing at a directory that contains the Rust workspace Cargo.toml.",
+                workspace_root.display()
+            ),
+        });
+    }
+    Ok(())
 }
 
 /// Executes one repo-level validate request (validate-repo).

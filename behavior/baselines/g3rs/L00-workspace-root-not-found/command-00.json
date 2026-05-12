@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "7a5eaebe0d9378dd257edea868f0bc4f050bc77f",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-12T20:56:03.971736+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:71f93be8480ba56ff97c2005dde617cdf091334410fe6e10847dec125c65beca",
+  "fixture_id": "L00-workspace-root-not-found",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "g3rs validates one Rust workspace or package root at a time. Target path \".\" has no root Cargo.toml. Run g3rs with --path pointing at a directory that contains the Rust workspace Cargo.toml.\n",
+  "stdout": "",
+  "tool": "g3rs"
+}
