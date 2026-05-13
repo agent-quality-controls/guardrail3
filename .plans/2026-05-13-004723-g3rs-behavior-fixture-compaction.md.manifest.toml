@@ -1,7 +1,7 @@
 [fixture_set]
 tool = "g3rs"
 root = "behavior/fixtures/g3rs"
-baseline_root = "behavior/baselines/g3rs"
+golden_output = "behavior/golden/g3rs-validate/approved.normalized.json"
 
 [[kept_fixture]]
 id = "L30-guardrail-config-valid-required-inputs-missing"

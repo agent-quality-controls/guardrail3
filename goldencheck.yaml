@@ -1,0 +1,38 @@
+version: 1
+suites:
+  g3rs-validate:
+    fixtures:
+      - "behavior/fixtures/g3rs/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/goldencheck-g3rs-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    output:
+      format: "json"
+    storage:
+      approved_dir: "behavior/golden/g3rs-validate"
+      received_dir: ".goldencheck/g3rs-validate"
+      diff_dir: ".goldencheck/g3rs-validate"
+  g3rs-validate-repo:
+    fixtures:
+      - "behavior/fixtures/g3rs-validate-repo/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/goldencheck-g3rs-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    output:
+      format: "json"
+    storage:
+      approved_dir: "behavior/golden/g3rs-validate-repo"
+      received_dir: ".goldencheck/g3rs-validate-repo"
+      diff_dir: ".goldencheck/g3rs-validate-repo"

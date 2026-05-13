@@ -1,0 +1,142 @@
+[tool]
+required_name = "goldencheck"
+required_version = "0.1.4"
+required_check_mode = "--all"
+
+[[file_exists]]
+path = "goldencheck.yaml"
+
+[[yaml_suite]]
+manifest = "goldencheck.yaml"
+name = "g3rs-validate"
+fixture_glob = "behavior/fixtures/g3rs/*/fixture.toml"
+command_argv = [
+  "python3",
+  "scripts/behavior/goldencheck-g3rs-replay.py",
+  "--manifest",
+  ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml",
+  "{fixtures}",
+]
+ok_exit_codes = [0]
+output_format = "json"
+approved_dir = "behavior/golden/g3rs-validate"
+received_dir = ".goldencheck/g3rs-validate"
+diff_dir = ".goldencheck/g3rs-validate"
+
+[[yaml_suite]]
+manifest = "goldencheck.yaml"
+name = "g3rs-validate-repo"
+fixture_glob = "behavior/fixtures/g3rs-validate-repo/*/fixture.toml"
+command_argv = [
+  "python3",
+  "scripts/behavior/goldencheck-g3rs-replay.py",
+  "--manifest",
+  ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml",
+  "{fixtures}",
+]
+ok_exit_codes = [0]
+output_format = "json"
+approved_dir = "behavior/golden/g3rs-validate-repo"
+received_dir = ".goldencheck/g3rs-validate-repo"
+diff_dir = ".goldencheck/g3rs-validate-repo"
+
+[[file_exists]]
+path = "scripts/behavior/goldencheck-g3rs-replay.py"
+
+[[harness_output]]
+script = "scripts/behavior/goldencheck-g3rs-replay.py"
+schema_version = "g3rs-replay-v1"
+top_level_array = "records"
+required_record_fields = [
+  "fixture_id",
+  "fixture_hash",
+  "command_index",
+  "command",
+  "cwd",
+  "exit_code",
+  "stdout",
+  "stderr",
+]
+forbidden_record_fields = [
+  "baseline_commit",
+  "created_at",
+  "runner_version",
+  "normalizer_version",
+  "output_schema_version",
+]
+
+[[golden_output]]
+suite = "g3rs-validate"
+approved_normalized = "behavior/golden/g3rs-validate/approved.normalized.json"
+approved_meta = "behavior/golden/g3rs-validate/approved.meta.json"
+
+[[golden_output]]
+suite = "g3rs-validate-repo"
+approved_normalized = "behavior/golden/g3rs-validate-repo/approved.normalized.json"
+approved_meta = "behavior/golden/g3rs-validate-repo/approved.meta.json"
+
+[[script_contains]]
+path = "scripts/behavior/verify-all.sh"
+required = "goldencheck check --all"
+
+[[script_not_contains]]
+path = "scripts/behavior/verify-all.sh"
+forbidden = "verify-baselines.py"
+
+[[script_not_contains]]
+path = "scripts/behavior/verify-all.sh"
+forbidden = "generate-baselines.py"
+
+[[script_reads]]
+path = "scripts/behavior/verify-rule-coverage.py"
+required = "golden_outputs"
+
+[[script_not_contains]]
+path = "scripts/behavior/verify-rule-coverage.py"
+forbidden = "behavior/baselines"
+
+[[script_reads]]
+path = "scripts/behavior/verify-fixtures.py"
+required = "golden_output"
+
+[[absent_path]]
+path = "behavior/baselines/g3rs"
+
+[[absent_path]]
+path = "behavior/baselines/g3rs-validate-repo"
+
+[[absent_path]]
+path = "scripts/behavior/generate-baselines.py"
+
+[[absent_path]]
+path = "scripts/behavior/verify-baselines.py"
+
+[[forbidden_active_reference]]
+pattern = "behavior/baselines"
+search_paths = [
+  "scripts/behavior",
+  "behavior/coverage",
+  "behavior/migration",
+  "goldencheck.yaml",
+]
+
+[[verification_command]]
+argv = ["python3", "-m", "py_compile", "scripts/behavior/*.py"]
+
+[[verification_command]]
+argv = ["scripts/behavior/verify-all.sh"]
+
+[[verification_command]]
+argv = ["g3rs", "validate", "--path", "apps/guardrail3-rs", "--inventory"]
+
+[[verification_command]]
+argv = [
+  "g3rs",
+  "validate",
+  "--path",
+  "behavior/fixtures/g3rs/L80-project-policy-valid-clean/repo",
+  "--inventory",
+]
+
+[[verification_command]]
+argv = ["git", "diff", "--check"]

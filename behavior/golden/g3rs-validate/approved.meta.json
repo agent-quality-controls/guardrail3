@@ -1,0 +1,124 @@
+{
+  "suite": "g3rs-validate",
+  "kind": "approved",
+  "run_id": "2026-05-13T21-09-07.23912Z-3ba395f5",
+  "run_commit": "1b005760d",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-13T21:09:07.23912Z",
+  "fixture_hash": "sha256:d2559d6e5d825515d5b54cd76fdfb474438f77bc1c1c1926227a718ef366df4c",
+  "manifest_hash": "sha256:3ba395f51d3b7013170862093156a24c8027c69c39ef4d62de56f280f3d65913",
+  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
+  "tool_version": "0.1.4",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs/L00-workspace-root-not-found/fixture.toml",
+      "sha256": "sha256:5712807c5f007ed102ec609e762a1559da00354cc600f854a6aa9855327af359"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L10-workspace-root-found-guardrail-config-missing/fixture.toml",
+      "sha256": "sha256:27de685b4f510483888aae7c79885752e9a903438d62d578c86365349ff1cf0f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L20-workspace-root-found-guardrail-config-invalid/fixture.toml",
+      "sha256": "sha256:24ea68c1a2bacf36e4c2c6230ab583991e607bafc1f644c691f7d6767c97bc8f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L30-guardrail-config-valid-required-inputs-missing/fixture.toml",
+      "sha256": "sha256:25e24b0c22eb80ea2eeecac44d8a82168ef49e5eaef1f79c803f35ba3e120cc7"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L31-root-policy-conflicts-and-nextest-inputs/fixture.toml",
+      "sha256": "sha256:cfbd0ae8741587911080fb72d080a036643716169c9340b4f3f17e64a7011429"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L32-test-required-inputs-missing/fixture.toml",
+      "sha256": "sha256:e58e7e880ed5e0b82bc95a937f8a3fc64443d2640e1767cf4eb94c47e4dd9438"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L33-release-profile-and-mutants-inputs/fixture.toml",
+      "sha256": "sha256:6d370ff1b7639fe5cdf19d08d316d2bf2958567cca00ca8ca9aeb3785299735c"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L37-workspace-topology-input-conflicts/fixture.toml",
+      "sha256": "sha256:36bb929ed03ca967a8a067ebaadd5f4fd7c767b806c83e521687a039b62d1dd5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L40-required-inputs-present-invalid/fixture.toml",
+      "sha256": "sha256:f33b8460f6611110551a35bfb06dc386090b31335451f8d902254bb1f35e62fa"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L41-root-cargo-toml-invalid/fixture.toml",
+      "sha256": "sha256:8dae5c195d6063a6bdb441a7203d1e706421bbd3fb6751099f457b2d85d190b2"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L43-fmt-nightly-key-toolchain-invalid/fixture.toml",
+      "sha256": "sha256:2f0e325e987099bb7381ff9d9078a481031701bbc353f629b610a7a298a1b6e1"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L44-clippy-typed-config-invalid/fixture.toml",
+      "sha256": "sha256:40055fd67409df05ba8930e1ea16509e89bd8343a415facfb0c0ae339959ade0"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L45-source-and-filetree-input-failures/fixture.toml",
+      "sha256": "sha256:1c24e0fe08daf6e3bc74fc955539a0d2625ba83c55f19377a6f6b301c2dcb7ce"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L50-required-inputs-valid-delegated-tools-missing/fixture.toml",
+      "sha256": "sha256:98a3126528b700ec141a329c8fd891b30d98bb4b5f140f15b0933ff6b561e477"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L50-test-cargo-mutants-missing/fixture.toml",
+      "sha256": "sha256:ba212faa3678900e1e4f77d45a1250c56810bad71790e09157ca9b285dee319e"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-delegated-tools-present-policy-invalid/fixture.toml",
+      "sha256": "sha256:9a4f00d2033d51816d28da12bcacb74c99cc1b2a34c6296f25a2ac8d19463624"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-allow-override-policy-invalid/fixture.toml",
+      "sha256": "sha256:a98cd7c9b67f491b2c70bb316e8daafa69db3e84b2edb9a5700df739f017d71a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-cargo-valid-policy-invalid/fixture.toml",
+      "sha256": "sha256:611585cdaff97b7e162a668140bbc421eb9851f6ea6b77cc1a0bae0a99f52dcd"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-deprecated-advisories-policy-invalid/fixture.toml",
+      "sha256": "sha256:91ca536c3c0d08c5bfce4cf12732e2bc69f576e31261b87372626ec1d458e63e"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-schema-invalid-policy-invalid/fixture.toml",
+      "sha256": "sha256:14a70800f578522f33c567bbc24c8c0a467c6081aec51ba2933dc63a515e104a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-apparch-policy-violated/fixture.toml",
+      "sha256": "sha256:24bc13db28019febdc0856fc1308d26753ef382009a49d1a6e0c8f8c2afa922f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-delegated-policy-valid-project-policy-violated/fixture.toml",
+      "sha256": "sha256:b136dd0012ef723250b4872e9bb41d397b8e314124456015c21d62b54e968bd0"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-garde-boundary-policy-violated/fixture.toml",
+      "sha256": "sha256:4fe01ef5a848d1564bb514072506644c1f85eae06d3bf9b1cf696fe530d2a039"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-release-invalid-semver-policy-violated/fixture.toml",
+      "sha256": "sha256:913ea21676937fe24a1a29452da4d6eee853750b78afdd1b934b9a7244b186fc"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-release-metadata-policy-violated/fixture.toml",
+      "sha256": "sha256:fe17253e3a6b5fc887735d672cb54ebe46a998e35d6bf5428edf2cc543f5b964"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L70-workspace-package-policy-violated/fixture.toml",
+      "sha256": "sha256:39a9ab56867dae11c00a322761f6fd690688cfc8d00d8abe2479bb356c89ba83"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L80-project-policy-valid-clean/fixture.toml",
+      "sha256": "sha256:ca4d4b188d320d9bc6329df53c5c60f1b9d707f25e7ef8f650ce20bed9f8b4e0"
+    }
+  ],
+  "change_path": ".plans/2026-05-13-215648-migrate-behavior-replay-to-goldencheck.md"
+}

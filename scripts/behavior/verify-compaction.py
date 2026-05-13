@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 try:
@@ -9,7 +10,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib  # type: ignore
 
-from baseline_common import REPO_ROOT, read_json
+from replay_common import REPO_ROOT
 
 
 COMPACTION_MANIFEST = (
@@ -25,11 +26,24 @@ def load_toml(path: Path) -> dict:
         return tomllib.load(file)
 
 
+def golden_records_by_fixture(path: Path) -> dict[str, dict]:
+    if not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    records: dict[str, dict] = {}
+    for record in data.get("records", []):
+        fixture_id = record.get("fixture_id")
+        command_index = record.get("command_index")
+        if isinstance(fixture_id, str) and command_index == 0:
+            records[fixture_id] = record
+    return records
+
+
 def main() -> int:
     compaction = load_toml(COMPACTION_MANIFEST)
     behavior = load_toml(BEHAVIOR_MANIFEST)
     fixture_root = REPO_ROOT / compaction["fixture_set"]["root"]
-    baseline_root = REPO_ROOT / compaction["fixture_set"]["baseline_root"]
+    golden_records = golden_records_by_fixture(REPO_ROOT / compaction["fixture_set"]["golden_output"])
     active_ids = {entry["id"] for entry in behavior["fixture"]}
     kept_ids = {entry["id"] for entry in compaction.get("kept_fixture", [])}
     removed = compaction.get("removed_fixture", [])
@@ -41,8 +55,8 @@ def main() -> int:
             failures.append(f"{fixture_id}: kept fixture missing from behavior manifest")
         if not (fixture_root / fixture_id).is_dir():
             failures.append(f"{fixture_id}: kept fixture directory missing")
-        if not (baseline_root / fixture_id / "command-00.json").is_file():
-            failures.append(f"{fixture_id}: kept fixture baseline missing")
+        if fixture_id not in golden_records:
+            failures.append(f"{fixture_id}: kept fixture approved golden record missing")
 
     for entry in removed:
         fixture_id = entry["id"]
@@ -51,8 +65,8 @@ def main() -> int:
             failures.append(f"{fixture_id}: removed fixture still active in behavior manifest")
         if (fixture_root / fixture_id).exists():
             failures.append(f"{fixture_id}: removed fixture directory still exists")
-        if (baseline_root / fixture_id).exists():
-            failures.append(f"{fixture_id}: removed baseline directory still exists")
+        if fixture_id in golden_records:
+            failures.append(f"{fixture_id}: removed fixture still has approved golden record")
         if replacement not in kept_ids and replacement != "removed-as-topology-pollution":
             failures.append(f"{fixture_id}: replacement is not a kept fixture: {replacement}")
 
@@ -61,10 +75,10 @@ def main() -> int:
         for source_id in entry.get("merged_from", []):
             if source_id not in removed_ids:
                 failures.append(f"{fixture_id}: merged source is not listed as removed: {source_id}")
-        baseline_path = baseline_root / fixture_id / "command-00.json"
-        if not baseline_path.is_file():
+        record = golden_records.get(fixture_id)
+        if record is None:
             continue
-        stdout = read_json(baseline_path).get("stdout", "")
+        stdout = record.get("stdout", "")
         if not isinstance(stdout, str):
             failures.append(f"{fixture_id}: baseline stdout must be a string")
             continue

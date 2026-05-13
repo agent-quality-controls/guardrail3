@@ -110,12 +110,14 @@ def baseline_rule_state_by_fixture(
 ) -> tuple[dict[str, dict[str, set[str]]], dict[str, Counter[tuple[str, str, str, str]]]]:
     states: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     findings: dict[str, Counter[tuple[str, str, str, str]]] = defaultdict(Counter)
-    for root_name in plan_manifest["coverage_matrix"]["baseline_roots"]:
-        root = REPO_ROOT / root_name
-        for path in sorted(root.glob("*/command-*.json")):
-            fixture_id = path.parent.name
-            data = json.loads(path.read_text(encoding="utf-8"))
-            for line in data.get("stdout", "").splitlines():
+    for golden_output in plan_manifest["coverage_matrix"]["golden_outputs"]:
+        path = REPO_ROOT / golden_output
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for record in data.get("records", []):
+            fixture_id = record.get("fixture_id")
+            if not isinstance(fixture_id, str):
+                continue
+            for line in record.get("stdout", "").splitlines():
                 match = FINDING_PATTERN.match(line)
                 if not match:
                     continue

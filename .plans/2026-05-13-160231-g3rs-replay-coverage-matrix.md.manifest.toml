@@ -1,7 +1,7 @@
 [coverage_matrix]
 path = "behavior/coverage/g3rs-rule-coverage.toml"
 source_roots = [ "packages/rs", "apps/guardrail3-rs",]
-baseline_roots = [ "behavior/baselines/g3rs", "behavior/baselines/g3rs-validate-repo",]
+golden_outputs = [ "behavior/golden/g3rs-validate/approved.normalized.json", "behavior/golden/g3rs-validate-repo/approved.normalized.json",]
 fixture_manifests = [ ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml", ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml",]
 
 [expected_counts]
