@@ -28,6 +28,7 @@ RUNNER_VERSION = "1"
 NORMALIZER_VERSION = "1"
 OUTPUT_SCHEMA_VERSION = "1"
 G3RS_MANIFEST_PATH = REPO_ROOT / "apps" / "guardrail3-rs" / "Cargo.toml"
+DELEGATED_TOOL_NAMES = {"cargo-deny", "cargo-dupes", "cargo-machete", "gitleaks"}
 
 
 def load_toml(path: Path) -> dict[str, Any]:
@@ -170,26 +171,24 @@ def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: li
 @lru_cache(maxsize=1)
 def rust_toolchain_path_without_delegated_tools() -> str:
     temp_bin = Path(tempfile.mkdtemp(prefix="g3rs-behavior-path-"))
-    allowed = [
-        "bash",
-        "cargo",
-        "cargo-clippy",
-        "clippy-driver",
-        "env",
-        "git",
-        "rustc",
-        "rustdoc",
-        "rustfmt",
-        "rustup",
-        "sh",
-    ]
-    for name in allowed:
-        source = shutil.which(name)
-        if source is None:
+    for dir_name in os.environ.get("PATH", "").split(os.pathsep):
+        if not dir_name:
             continue
-        target = temp_bin / name
-        if not target.exists():
-            target.symlink_to(source)
+        source_dir = Path(dir_name)
+        if not source_dir.is_dir():
+            continue
+        for source in source_dir.iterdir():
+            if source.name in DELEGATED_TOOL_NAMES:
+                continue
+            try:
+                is_runnable_file = source.is_file() and os.access(source, os.X_OK)
+            except OSError:
+                continue
+            if not is_runnable_file:
+                continue
+            target = temp_bin / source.name
+            if not target.exists():
+                target.symlink_to(source)
     return temp_bin.as_posix()
 
 
