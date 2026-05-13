@@ -1,4 +1,4 @@
-id = "L40-required-inputs-present-invalid"
+id = "L42-member-cargo-toml-invalid"
 tool = "g3rs"
 run_from = "repo"
 commands = [
