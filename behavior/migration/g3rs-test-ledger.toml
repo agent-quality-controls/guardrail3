@@ -1,0 +1,116 @@
+[[group]]
+id = "apps-guardrail3-rs-cli"
+root = "apps/guardrail3-rs"
+status = "active"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/family-runner-process/crates/runtime/src/run_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/family-runner-process/crates/runtime/src/run_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/cargo_gates_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/cargo_gates_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/execute_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/execute_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/marker_pairs_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/marker_pairs_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/selection_tests/cases.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
+
+[[test]]
+old_test_path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/selection_tests/mod.rs"
+kind = "unclassified"
+status = "unclassified"
+fixture = ""
+reason = "initial inventory row; not audited yet"
