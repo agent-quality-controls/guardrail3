@@ -55,6 +55,8 @@ pub fn ingest_for_source_checks(
 
     let is_workspace_project = root_is_workspace_project(crawl)?;
 
+    let has_modular_dir = upward::find_dir_entry(crawl, ".githooks/pre-commit.d").is_some();
+
     if let Some(entry) = upward::find_file_entry(crawl, ".githooks/pre-commit") {
         if !entry.readable {
             return Err(IngestionError::Unreadable {
@@ -68,7 +70,7 @@ pub fn ingest_for_source_checks(
             kind: G3RsHookScriptKind::PreCommit,
             exists: true,
             parsed: parse_script(&content),
-            has_modular_dir: false,
+            has_modular_dir,
             is_workspace_project,
             requirements: Vec::new(),
         });
@@ -88,7 +90,7 @@ pub fn ingest_for_source_checks(
                 kind: G3RsHookScriptKind::G3RsVerifier,
                 exists: true,
                 parsed: parse_script(&content),
-                has_modular_dir: false,
+                has_modular_dir,
                 is_workspace_project,
                 requirements: Vec::new(),
             });
@@ -99,7 +101,7 @@ pub fn ingest_for_source_checks(
                 kind: G3RsHookScriptKind::G3RsVerifier,
                 exists: false,
                 parsed: parse_script(""),
-                has_modular_dir: false,
+                has_modular_dir,
                 is_workspace_project,
                 requirements: Vec::new(),
             });

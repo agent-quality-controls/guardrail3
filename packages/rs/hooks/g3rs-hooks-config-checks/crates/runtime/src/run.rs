@@ -22,6 +22,7 @@ pub fn check(input: &G3RsHooksConfigChecksInput) -> Vec<G3CheckResult> {
     );
     crate::guardrail_binary_available::check(selected_hook, &input.installed_tools, &mut results);
     crate::cargo_dupes_installed::check(selected_hook, &input.installed_tools, &mut results);
+    crate::hook_contract_inventory::check(selected_hook, &input.requirements, &mut results);
 
     results
 }

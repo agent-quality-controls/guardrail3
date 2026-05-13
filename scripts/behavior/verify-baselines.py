@@ -224,7 +224,7 @@ def fixture_requires_closed_findings(fixture_id: str) -> bool:
         return True
     if fixture_id.startswith(("L40-", "L50-", "L60-", "L70-", "L80-")):
         return True
-    if fixture_id.startswith(("R00-", "R10-", "R15-", "R20-", "R30-")):
+    if fixture_id.startswith(("R00-", "R10-", "R15-", "R16-", "R17-", "R20-", "R30-")):
         return True
     return False
 
@@ -280,7 +280,7 @@ def verify_validate_repo_semantics(baseline_root) -> list[str]:
     r15_stdout = r15.get("stdout", "")
     if "== hooks ==" not in r15_stdout:
         failures.append("R15-hooks-reachable-no-root-cargo: hooks branch was not visible")
-    if "g3rs-topology/" in r15_stdout:
+    if "== topology ==" in r15_stdout:
         failures.append("R15-hooks-reachable-no-root-cargo: topology branch should be skipped without root Cargo.toml")
 
     r30 = read_json(baseline_root / "R30-root-adoption-pair-complete" / "command-00.json")

@@ -1,5 +1,86 @@
 use g3rs_hooks_types::G3RsHooksSelectedHookConfigFact;
+use guardrail3_check_types::{G3CheckResult, G3Severity};
 use hook_shell_parser::command_query::{ResolvedCommand, any_resolved_command};
+
+/// Predicate over one selected hook.
+pub(crate) type SelectedHookPredicate = fn(&G3RsHooksSelectedHookConfigFact) -> bool;
+
+/// Messages used by one tool availability result.
+#[derive(Clone, Copy)]
+pub(crate) struct ToolAvailabilityMessages<'a> {
+    /// Rule identifier.
+    pub(crate) id: &'a str,
+    /// Inventory title when the tool is available.
+    pub(crate) available_title: &'a str,
+    /// Inventory message when the tool is available.
+    pub(crate) available_message: &'a str,
+    /// Error title when the tool is missing.
+    pub(crate) missing_title: &'a str,
+    /// Error message when the tool is missing.
+    pub(crate) missing_message: &'a str,
+}
+
+/// Inputs used to check one required tool.
+#[derive(Clone, Copy)]
+pub(crate) struct RequiredToolAvailabilityCheck<'a> {
+    /// Predicate that decides whether the selected hook requires the tool.
+    pub(crate) required: SelectedHookPredicate,
+    /// Predicate that decides whether the selected hook runs a path-qualified tool command.
+    pub(crate) path_qualified: SelectedHookPredicate,
+    /// Tool name expected on PATH.
+    pub(crate) tool: &'a str,
+    /// Findings emitted by this rule.
+    pub(crate) messages: ToolAvailabilityMessages<'a>,
+}
+
+/// Checks one required tool and appends one finding when the selected hook requires it.
+pub(crate) fn check_required_tool_availability(
+    selected_hook: &G3RsHooksSelectedHookConfigFact,
+    installed_tools: &[String],
+    check: RequiredToolAvailabilityCheck<'_>,
+    results: &mut Vec<G3CheckResult>,
+) {
+    if !(check.required)(selected_hook) {
+        return;
+    }
+
+    let available =
+        (check.path_qualified)(selected_hook) || tool_installed(installed_tools, check.tool);
+    push_tool_availability_result(selected_hook, available, check.messages, results);
+}
+
+/// Push one tool availability finding.
+pub(crate) fn push_tool_availability_result(
+    selected_hook: &G3RsHooksSelectedHookConfigFact,
+    available: bool,
+    messages: ToolAvailabilityMessages<'_>,
+    results: &mut Vec<G3CheckResult>,
+) {
+    let mut finding = G3CheckResult::new(
+        messages.id.to_owned(),
+        if available {
+            G3Severity::Info
+        } else {
+            G3Severity::Error
+        },
+        if available {
+            messages.available_title.to_owned()
+        } else {
+            messages.missing_title.to_owned()
+        },
+        if available {
+            messages.available_message.to_owned()
+        } else {
+            messages.missing_message.to_owned()
+        },
+        Some(selected_hook.rel_path.clone()),
+        None,
+    );
+    if available {
+        finding = finding.into_inventory();
+    }
+    results.push(finding);
+}
 
 /// Implements `tool installed`.
 pub(crate) fn tool_installed(installed_tools: &[String], tool: &str) -> bool {
@@ -179,7 +260,7 @@ fn parse_validate_args(args: &[String]) -> bool {
             }
             continue;
         }
-        if arg == "--inventory" {
+        if arg == "--inventory" || arg == "--staged" {
             continue;
         }
         return false;

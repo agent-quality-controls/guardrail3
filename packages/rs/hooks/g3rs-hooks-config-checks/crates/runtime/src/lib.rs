@@ -9,6 +9,8 @@ mod cargo_dupes_installed;
 mod contract_required_tools_installed;
 /// Rule implementation for `guardrail binary available`.
 mod guardrail_binary_available;
+/// Rule implementation for loaded family hook contract inventory.
+mod hook_contract_inventory;
 /// Rule implementation for `required tools installed`.
 mod required_tools_installed;
 /// Family entry point that runs all rules.

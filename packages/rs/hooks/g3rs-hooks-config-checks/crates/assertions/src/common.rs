@@ -131,7 +131,7 @@ macro_rules! define_result_assertions {
         #[must_use]
         pub const fn inventory<'a>(title: &'a str, message: &'a str, file: &'a str) -> Finding<'a> {
             $crate::common::finding(
-                guardrail3_check_types::G3Severity::Error,
+                guardrail3_check_types::G3Severity::Info,
                 title,
                 message,
                 file,

@@ -46,11 +46,11 @@ Measured replay output from:
 Current counts:
 
 - `266` distinct `g3rs-*/*` IDs found in active Rust source
-- `227` IDs appear in any replay baseline
-- `195` IDs appear as `Error` or `Warn` in replay baselines
+- `249` IDs appear in any replay baseline
+- `204` IDs appear as `Error` or `Warn` in replay baselines
 - `196` IDs are explicitly required in fixture manifests
-- `32` IDs appear only as clean or inventory `Info`
-- `39` IDs do not appear in any replay baseline
+- `45` IDs appear only as clean or inventory `Info`
+- `17` IDs do not appear in any replay baseline
 
 The current problem is not that existing fixture failures hide unexpected `Error` or `Warn` findings.
 
@@ -117,7 +117,7 @@ The script must:
 - fail if a row says `current_replay = "absent"` but the ID appears in replay baselines
 - fail if a row says `current_replay = "info_only"` but the ID is absent or appears as `Error` or `Warn`
 - fail if a row says `current_replay = "error_or_warn"` but the ID does not appear as `Error` or `Warn`
-- fail if `coverage_status = "covered"` and `current_replay != target_replay`
+- fail if `coverage_status = "covered"` and neither `current_replay == target_replay` nor `current_replay = "info_only"` with `target_replay = "info_inventory"`
 - fail if `coverage_status = "covered"` and no fixture is named
 - fail if `fixture` names a fixture absent from both fixture manifests
 - fail if a non-covered row has an empty `reason`
@@ -158,86 +158,13 @@ Then the next implementation pass must replace those placeholder reasons with ex
 
 These IDs are absent from replay baselines now.
 
-### Hook Contract IDs
+### Stage 2 Hook Replay Covered
 
-These IDs are active source IDs but are not currently emitted through the replay CLI boundary:
+Stage 2 now covers these IDs through `validate-repo --inventory`:
 
-- `g3rs-apparch/hook-contract`
-- `g3rs-arch/hook-contract`
-- `g3rs-cargo/hook-contract`
-- `g3rs-clippy/hook-contract`
-- `g3rs-code/hook-contract`
-- `g3rs-deny/hook-contract`
-- `g3rs-deps/hook-contract`
-- `g3rs-fmt/hook-contract`
-- `g3rs-garde/hook-contract`
-- `g3rs-release/hook-contract`
-- `g3rs-test/hook-contract`
-- `g3rs-toolchain/hook-contract`
-- `g3rs-topology/hook-contract`
-
-Required replay design:
-
-- add CLI-visible inventory output for loaded Rust family hook contracts
-- output must appear under `--inventory`
-- output must use each family contract's own rule ID
-- output must include enough stable text to prove the contract was loaded
-- output must not require running package-local hook-contract tests
-
-Preferred fixture:
-
-- `R15-hooks-reachable-no-root-cargo`
-
-Reason:
-
-- validate-repo already reaches hook analysis without needing a valid Rust workspace
-- hook contract loading belongs to repo hook validation, not package policy validation
-- emitting inventory here does not hide other hook findings
-
-### Hooks Rules Missing From Replay
-
-Missing IDs:
-
-- `g3rs-hooks/cargo-dupes-excludes`
-- `g3rs-hooks/cargo-dupes-installed`
-- `g3rs-hooks/clippy-denies-warnings`
-- `g3rs-hooks/contract-critical-command-not-fail-open`
-- `g3rs-hooks/executable-command-context-only`
-- `g3rs-hooks/guardrail-binary-available`
-- `g3rs-hooks/modular-scripts-executable`
-- `g3rs-hooks/no-fail-open-wrappers`
-- `g3rs-hooks/real-dispatcher-syntax-only`
-
-Required research before fixture edits:
-
-- read each hook rule implementation
-- determine whether the rule fires on missing command, malformed command, weakened command, or positive inventory
-- group rules by command-shape dependency
-
-Expected fixture split:
-
-- keep `R15-hooks-reachable-no-root-cargo` for missing-hook and monolithic-hook failures already covered
-- add `R16-hooks-required-steps-present-but-weakened`
-- add `R17-hooks-modular-scripts-invalid`
-
-`R16-hooks-required-steps-present-but-weakened` should cover:
-
-- required step present but wrong command
-- cargo command without required flags
-- cargo-dupes command without excluding tests
-- test command without workspace mode
-- clippy command without warnings denied
-- fail-open wrapper around critical command
-- command hidden in comments or echo text
-
-`R17-hooks-modular-scripts-invalid` should cover:
-
-- modular script referenced but not executable
-- modular script directory inventory
-- real dispatcher syntax
-- config-change routing when modular scripts exist
-
-Do not add separate one-rule hook fixtures unless a rule cannot emit in the same fixture without hiding another missing hooks rule.
+- hook contract inventory IDs through `R15-hooks-reachable-no-root-cargo`
+- hook weakened-command IDs through `R16-hooks-required-steps-present-but-weakened`
+- hook modular-script IDs through `R17-hooks-modular-scripts-invalid`
 
 ### Deny Rules Missing From Replay
 
