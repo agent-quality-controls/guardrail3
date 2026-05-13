@@ -1,0 +1,154 @@
+[coverage_matrix]
+path = "behavior/coverage/g3rs-rule-coverage.toml"
+required_rows = 276
+source_roots = [ "packages/rs", "apps/guardrail3-rs",]
+baseline_roots = [ "behavior/baselines/g3rs", "behavior/baselines/g3rs-validate-repo",]
+fixture_manifests = [
+  ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml",
+  ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml",
+]
+
+[verifier]
+path = "scripts/behavior/verify-rule-coverage.py"
+wire_into = "scripts/behavior/verify-all.sh"
+success_prefix = "behavior-rule-coverage: PASS"
+failure_prefix = "behavior-rule-coverage: FAIL"
+
+[expected_counts]
+source_rule_ids = 276
+baseline_rule_ids = 227
+baseline_error_warn_rule_ids = 195
+info_only_rule_ids = 32
+absent_rule_ids = 49
+
+[allowed_values]
+current_replay = [ "absent", "info_only", "error_or_warn",]
+target_replay = [ "error_or_warn", "info_inventory",]
+coverage_status = [
+  "covered",
+  "planned_fixture",
+  "planned_existing_fixture_expansion",
+  "planned_cli_surface",
+]
+
+[[planned_stage]]
+id = "stage-1-matrix-infrastructure"
+required = true
+description = "Create coverage matrix, verifier, and verify-all wiring without changing fixtures."
+
+[[planned_stage]]
+id = "stage-2-hook-replay-surface-and-hook-fixtures"
+required = false
+description = "Add CLI-visible family hook-contract inventory and hook fixtures."
+
+[[planned_stage]]
+id = "stage-3-deny-advanced-policy-fixture"
+required = false
+description = "Add deny advanced policy fixture."
+
+[[planned_stage]]
+id = "stage-4-source-and-filetree-input-failures"
+required = false
+description = "Add source and filetree input failure fixture."
+
+[[planned_stage]]
+id = "stage-5-release-workflow-fixture"
+required = false
+description = "Add release workflow fixture."
+
+[[planned_stage]]
+id = "stage-6-info-only-rule-decisions"
+required = false
+description = "Classify every info-only rule as positive inventory or add violation coverage."
+
+[[missing_group]]
+id = "hook-contract"
+target_status = "planned_cli_surface"
+target_fixture = "R15-hooks-reachable-no-root-cargo"
+rule_ids = [
+  "g3rs-apparch/hook-contract",
+  "g3rs-arch/hook-contract",
+  "g3rs-cargo/hook-contract",
+  "g3rs-clippy/hook-contract",
+  "g3rs-code/hook-contract",
+  "g3rs-deny/hook-contract",
+  "g3rs-deps/hook-contract",
+  "g3rs-fmt/hook-contract",
+  "g3rs-garde/hook-contract",
+  "g3rs-release/hook-contract",
+  "g3rs-test/hook-contract",
+  "g3rs-toolchain/hook-contract",
+  "g3rs-topology/hook-contract",
+]
+
+[[missing_group]]
+id = "hooks"
+target_status = "planned_fixture"
+target_fixture = "R16-hooks-required-steps-present-but-weakened"
+secondary_fixture = "R17-hooks-modular-scripts-invalid"
+rule_ids = [
+  "g3rs-hooks/cargo-deny-step-present",
+  "g3rs-hooks/cargo-dupes-excludes",
+  "g3rs-hooks/cargo-dupes-installed",
+  "g3rs-hooks/cargo-dupes-step-present",
+  "g3rs-hooks/cargo-machete-step-present",
+  "g3rs-hooks/clippy-denies-warnings",
+  "g3rs-hooks/clippy-step-present",
+  "g3rs-hooks/config-changes-trigger-validation",
+  "g3rs-hooks/contract-critical-command-not-fail-open",
+  "g3rs-hooks/duplication-tool-is-cargo-dupes",
+  "g3rs-hooks/executable-command-context-only",
+  "g3rs-hooks/fmt-step-present",
+  "g3rs-hooks/guardrail-binary-available",
+  "g3rs-hooks/guardrail-validate-staged-present",
+  "g3rs-hooks/modular-scripts-executable",
+  "g3rs-hooks/no-fail-open-wrappers",
+  "g3rs-hooks/real-dispatcher-syntax-only",
+  "g3rs-hooks/test-step-present",
+  "g3rs-hooks/test-uses-workspace",
+]
+
+[[missing_group]]
+id = "deny"
+target_status = "planned_fixture"
+target_fixture = "L60-deny-advanced-policy-invalid"
+rule_ids = [
+  "g3rs-deny/allow-override-channel",
+  "g3rs-deny/deprecated-advisories",
+  "g3rs-deny/extra-feature-bans-inventory",
+  "g3rs-deny/license-exceptions-inventory",
+  "g3rs-deny/stricter-advisories-inventory",
+  "g3rs-deny/unknown-keys",
+  "g3rs-deny/wrappers",
+]
+
+[[missing_group]]
+id = "release"
+target_status = "planned_fixture"
+target_fixture = "L70-release-workflow-policy-violated"
+rule_ids = [
+  "g3rs-release/publish-dry-run-workflow",
+  "g3rs-release/registry-token",
+  "g3rs-release/release-plz-workflow",
+  "g3rs-release/release-profile-inventory",
+]
+
+[[missing_group]]
+id = "source-filetree-input-failures"
+target_status = "planned_fixture"
+target_fixture = "L45-source-and-filetree-input-failures"
+rule_ids = [
+  "g3rs-code/input-failures",
+  "g3rs-garde/input-failures",
+  "g3rs-test/filetree-input-failures",
+  "g3rs-test/source-input-failures",
+]
+
+[[missing_group]]
+id = "toolchain-cargo"
+target_status = "planned_existing_fixture_expansion"
+target_fixture = "L60-delegated-tools-present-policy-invalid"
+rule_ids = [
+  "g3rs-toolchain/msrv-consistency",
+  "g3rs-cargo/approved-allow-inventory",
+]
