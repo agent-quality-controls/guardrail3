@@ -1,5 +1,5 @@
 [package]
-name = "g3rs_fixture_l30"
+name = "member_with_local_policy_files"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
@@ -8,9 +8,5 @@ publish = false
 [lib]
 path = "src/lib.rs"
 
-[dependencies]
-garde = "0.22"
-
-[workspace]
-members = []
-resolver = "2"
+[lints]
+workspace = true

@@ -1,0 +1,150 @@
+[fixture_set]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs"
+baseline_root = "behavior/baselines/g3rs"
+
+[[kept_fixture]]
+id = "L30-guardrail-config-valid-required-inputs-missing"
+merged_from = [
+  "L30-toolchain-legacy-only-file-present",
+  "L30-fmt-per-crate-override",
+  "L36-garde-clippy-inputs-missing",
+]
+must_not_emit = [
+  "g3rs-test/",
+]
+
+[[kept_fixture]]
+id = "L31-root-policy-conflicts-and-nextest-inputs"
+merged_from = [
+  "L30-fmt-dual-file-conflict",
+  "L30-clippy-same-root-conflict",
+  "L30-deny-shadowing",
+  "L38-fmt-nightly-toolchain-input-missing",
+  "L39-test-nextest-input-missing",
+]
+must_not_emit = [
+  "g3rs-toolchain/legacy-file",
+  "g3rs-clippy/missing-method-ban",
+  "g3rs-deny/license-allow-baseline",
+]
+
+[[kept_fixture]]
+id = "L32-test-required-inputs-missing"
+merged_from = []
+must_not_emit = [
+  "g3rs-test/mutants-profile-present",
+]
+
+[[kept_fixture]]
+id = "L33-release-profile-and-mutants-inputs"
+merged_from = [
+  "L30-toolchain-legacy-file-present",
+  "L31-release-required-inputs-missing",
+  "L33-test-mutants-profile-missing",
+  "L34-deps-library-policy-missing",
+  "L35-garde-dependency-missing",
+]
+must_not_emit = [
+  "g3rs-fmt/",
+  "g3rs-clippy/",
+  "g3rs-deny/",
+]
+
+[[kept_fixture]]
+id = "L37-workspace-topology-input-conflicts"
+merged_from = [
+  "L30-topology-member-path-escape",
+  "L30-topology-undeclared-workspace-child",
+  "L30-topology-nested-workspace",
+  "L30-topology-nested-guardrail-config",
+  "L30-topology-workspace-local-file-placement",
+  "L37-workspace-member-inputs-missing",
+]
+must_not_emit = [
+  "g3rs-release/",
+  "g3rs-deps/",
+  "g3rs-fmt/",
+  "g3rs-garde/",
+  "g3rs-test/",
+]
+
+[[removed_fixture]]
+id = "L30-toolchain-legacy-file-present"
+replacement = "L33-release-profile-and-mutants-inputs"
+
+[[removed_fixture]]
+id = "L30-toolchain-legacy-only-file-present"
+replacement = "L30-guardrail-config-valid-required-inputs-missing"
+
+[[removed_fixture]]
+id = "L30-fmt-dual-file-conflict"
+replacement = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[removed_fixture]]
+id = "L30-fmt-per-crate-override"
+replacement = "L30-guardrail-config-valid-required-inputs-missing"
+
+[[removed_fixture]]
+id = "L30-clippy-same-root-conflict"
+replacement = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[removed_fixture]]
+id = "L30-deny-shadowing"
+replacement = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[removed_fixture]]
+id = "L30-release-member-input-failures"
+replacement = "removed-as-topology-pollution"
+
+[[removed_fixture]]
+id = "L30-topology-member-path-escape"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L30-topology-undeclared-workspace-child"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L30-topology-nested-workspace"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L30-topology-nested-guardrail-config"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L30-topology-workspace-local-file-placement"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L31-release-required-inputs-missing"
+replacement = "L33-release-profile-and-mutants-inputs"
+
+[[removed_fixture]]
+id = "L33-test-mutants-profile-missing"
+replacement = "L33-release-profile-and-mutants-inputs"
+
+[[removed_fixture]]
+id = "L34-deps-library-policy-missing"
+replacement = "L33-release-profile-and-mutants-inputs"
+
+[[removed_fixture]]
+id = "L35-garde-dependency-missing"
+replacement = "L33-release-profile-and-mutants-inputs"
+
+[[removed_fixture]]
+id = "L36-garde-clippy-inputs-missing"
+replacement = "L30-guardrail-config-valid-required-inputs-missing"
+
+[[removed_fixture]]
+id = "L37-workspace-member-inputs-missing"
+replacement = "L37-workspace-topology-input-conflicts"
+
+[[removed_fixture]]
+id = "L38-fmt-nightly-toolchain-input-missing"
+replacement = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[removed_fixture]]
+id = "L39-test-nextest-input-missing"
+replacement = "L31-root-policy-conflicts-and-nextest-inputs"

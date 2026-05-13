@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 import sys
+from collections import Counter
 from datetime import datetime
 
 from baseline_common import (
@@ -47,6 +48,7 @@ def main() -> int:
             failures.extend(verify_exit_code(fixture_id, entry, expected))
             failures.extend(verify_no_outer_repo_leak(fixture_id, expected))
             failures.extend(verify_required_results(fixture_id, entry, expected))
+            failures.extend(verify_no_unlisted_findings(fixture_id, entry, expected))
             if actual != expected:
                 failures.append(f"{fixture_id}: baseline drift in {path.relative_to(REPO_ROOT)}")
             checked += 1
@@ -127,15 +129,65 @@ def verify_required_results(fixture_id: str, entry: dict, expected: dict) -> lis
     stdout = expected.get("stdout", "")
     if not isinstance(stdout, str):
         return [f"{fixture_id}: baseline stdout must be a string"]
-    for required in entry.get("required_results", []):
+    lines = stdout.splitlines()
+    required_counter = Counter(entry.get("required_results", []))
+    for required, expected_count in required_counter.items():
         parts = required.split("|")
         if len(parts) != 3:
             failures.append(f"{fixture_id}: invalid required_results row {required!r}")
             continue
         rule_id, title, file_path = parts
-        if not any(rule_id in line and title in line and file_path in line for line in stdout.splitlines()):
+        actual_count = sum(1 for line in lines if rule_id in line and title in line and file_path in line)
+        if actual_count < expected_count:
             failures.append(f"{fixture_id}: missing required result {required}")
     return failures
+
+
+def verify_no_unlisted_findings(fixture_id: str, entry: dict, expected: dict) -> list[str]:
+    if not fixture_requires_closed_findings(fixture_id):
+        return []
+    stdout = expected.get("stdout", "")
+    if not isinstance(stdout, str):
+        return [f"{fixture_id}: baseline stdout must be a string"]
+    required_rows = entry.get("required_results", [])
+    failures: list[str] = []
+    required_counter = Counter()
+    for required in required_rows:
+        parts = required.split("|")
+        if len(parts) == 3:
+            required_counter[tuple(parts)] += 1
+    actual_counter = Counter()
+    for line in stdout.splitlines():
+        if not (line.startswith("[Error]") or line.startswith("[Warn]")):
+            continue
+        matched = False
+        for required in required_counter:
+            rule_id, title, file_path = required
+            if rule_id in line and title in line and file_path in line:
+                actual_counter[required] += 1
+                matched = True
+                break
+        if not matched:
+            failures.append(f"{fixture_id}: unlisted finding {line}")
+    for required, actual_count in actual_counter.items():
+        expected_count = required_counter[required]
+        if actual_count > expected_count:
+            rule_id, title, file_path = required
+            failures.append(
+                f"{fixture_id}: finding listed {expected_count} times but emitted {actual_count} times: "
+                f"{rule_id}|{title}|{file_path}"
+            )
+    return failures
+
+
+def fixture_requires_closed_findings(fixture_id: str) -> bool:
+    if fixture_id.startswith(("L00-", "L10-", "L20-")):
+        return True
+    if fixture_id.startswith("L3"):
+        return True
+    if fixture_id.startswith(("R00-", "R10-", "R15-", "R20-", "R30-")):
+        return True
+    return False
 
 
 def verify_validate_repo_semantics(baseline_root) -> list[str]:
@@ -162,6 +214,21 @@ def verify_validate_repo_semantics(baseline_root) -> list[str]:
         failures.append("R20-crawlable-repo-marker-pair-policy: root cargo marker pair was reported")
     if "g3rs-topology/no-nested-workspaces" in r20_stdout:
         failures.append("R20-crawlable-repo-marker-pair-policy: unrelated topology branch leaked into marker-pair fixture")
+    r20_fixture_marker = (
+        baseline_root.parents[1]
+        / "fixtures"
+        / "g3rs-validate-repo"
+        / "R20-crawlable-repo-marker-pair-policy"
+        / "repo"
+        / "behavior"
+        / "fixtures"
+        / "g3rs"
+        / "demo"
+        / "repo"
+        / "guardrail3-rs.toml"
+    )
+    if not r20_fixture_marker.is_file():
+        failures.append("R20-crawlable-repo-marker-pair-policy: missing behavior fixture marker input")
     for forbidden in (
         "marker-pair-incomplete packages/complete",
         "marker-pair-incomplete packages/absent",

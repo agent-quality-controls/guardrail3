@@ -1,3 +1,0 @@
-[workspace]
-members = ["../outside"]
-resolver = "2"
