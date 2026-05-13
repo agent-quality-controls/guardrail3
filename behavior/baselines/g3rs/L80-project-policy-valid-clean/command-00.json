@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
+  "baseline_commit": "46a17d2c76871fd260c0a48c0fb64ada77dcd2fc",
   "command": [
     "g3rs",
     "validate",
@@ -9,7 +9,7 @@
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-13T00:28:31.579415+00:00",
+  "created_at": "2026-05-13T01:08:34.326115+00:00",
   "cwd": "repo",
   "exit_code": 0,
   "fixture_hash": "sha256:7ffea8e24c3c04af3ec8cd460bedd74377302d93c16d8e6a500bdc744bb9091c",

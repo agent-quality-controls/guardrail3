@@ -47,6 +47,7 @@ def main() -> int:
             failures.extend(verify_metadata(fixture_id, expected, actual))
             failures.extend(verify_exit_code(fixture_id, entry, expected))
             failures.extend(verify_no_outer_repo_leak(fixture_id, expected))
+            failures.extend(verify_no_volatile_output(fixture_id, expected))
             failures.extend(verify_required_results(fixture_id, entry, expected))
             failures.extend(verify_no_unlisted_findings(fixture_id, entry, expected))
             if actual != expected:
@@ -124,6 +125,23 @@ def verify_no_outer_repo_leak(fixture_id: str, expected: dict) -> list[str]:
     return failures
 
 
+def verify_no_volatile_output(fixture_id: str, expected: dict) -> list[str]:
+    failures: list[str] = []
+    patterns = [
+        (r"target\(s\) in [0-9.]+s", "cargo timing"),
+        (r"\.cargo-target/debug/deps/[A-Za-z0-9_]+-[0-9a-f]{16}", "test binary hash"),
+        (r"/private\$REPO", "partially normalized macOS temp path"),
+    ]
+    for key in ("stdout", "stderr"):
+        value = expected.get(key)
+        if not isinstance(value, str):
+            continue
+        for pattern, label in patterns:
+            if re.search(pattern, value):
+                failures.append(f"{fixture_id}: baseline {key} contains volatile {label}")
+    return failures
+
+
 def verify_required_results(fixture_id: str, entry: dict, expected: dict) -> list[str]:
     failures: list[str] = []
     stdout = expected.get("stdout", "")
@@ -184,6 +202,8 @@ def fixture_requires_closed_findings(fixture_id: str) -> bool:
     if fixture_id.startswith(("L00-", "L10-", "L20-")):
         return True
     if fixture_id.startswith("L3"):
+        return True
+    if fixture_id.startswith(("L40-", "L50-", "L60-", "L70-", "L80-")):
         return True
     if fixture_id.startswith(("R00-", "R10-", "R15-", "R20-", "R30-")):
         return True

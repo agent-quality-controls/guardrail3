@@ -1,0 +1,63 @@
+[fixture_path_fix]
+fixtures = [
+  "L40-required-inputs-present-invalid",
+  "L50-required-inputs-valid-delegated-tools-missing",
+  "L60-delegated-tools-present-policy-invalid",
+  "L70-delegated-policy-valid-project-policy-violated",
+]
+command_path = "."
+
+[runner_mode]
+name = "path_without_delegated_tools"
+must_hide = [
+  "cargo-deny",
+  "cargo-machete",
+  "cargo-dupes",
+  "gitleaks",
+]
+must_keep = [
+  "cargo",
+  "cargo-clippy",
+  "clippy-driver",
+  "rustc",
+  "rustdoc",
+  "rustfmt",
+  "rustup",
+]
+
+[baseline_normalization]
+forbidden_patterns = [
+  "target\\(s\\) in [0-9.]+s",
+  "\\.cargo-target/debug/deps/[A-Za-z0-9_]+-[0-9a-f]{16}",
+  "/private\\$REPO",
+]
+
+[[closed_fixture_findings]]
+id = "L40-required-inputs-present-invalid"
+required_results = [
+  "g3rs-fmt/rustfmt-required-settings|rustfmt config parse error|rustfmt.toml",
+  "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
+]
+
+[[closed_fixture_findings]]
+id = "L50-required-inputs-valid-delegated-tools-missing"
+required_results = [
+  "g3rs-deps/cargo-deny-installed|cargo-deny missing|Cargo.toml",
+  "g3rs-deps/cargo-machete-installed|cargo-machete missing|Cargo.toml",
+  "g3rs-deps/cargo-dupes-installed|cargo-dupes missing|Cargo.toml",
+  "g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
+]
+
+[[closed_fixture_findings]]
+id = "L60-delegated-tools-present-policy-invalid"
+required_results = [
+  "g3rs-clippy/too-many-lines-threshold|too-many-lines-threshold wrong value|clippy.toml",
+]
+
+[[closed_fixture_findings]]
+id = "L70-delegated-policy-valid-project-policy-violated"
+required_results = [
+  "g3rs-arch/lib-facade-only|lib.rs must be facade-only|src/lib.rs",
+  "g3rs-test/owned-sidecar-shape|ad hoc cfg(test) module declaration|src/lib.rs",
+  "g3rs-test/inline-test-bodies|inline cfg(test) body in src|src/lib.rs",
+]
