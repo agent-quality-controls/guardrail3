@@ -97,6 +97,29 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
 }
 
 #[test]
+fn cargo_mutants_probe_uses_cargo_subcommand() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let cargo = temp_dir.path().join("cargo");
+    write(
+        &cargo,
+        "\
+#!/bin/sh\n\
+if [ \"$1\" = \"mutants\" ] && [ \"$2\" = \"--version\" ]; then\n\
+    exit 0\n\
+fi\n\
+exit 64\n",
+    );
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let permissions = std::fs::Permissions::from_mode(0o755);
+        super::super::set_fixture_permissions(&cargo, permissions)
+            .expect("fake cargo should be executable");
+    }
+
+    assert!(super::super::cargo_mutants_installed_with_cargo(&cargo));
+}
+
+#[test]
 fn ingests_mutation_hook_when_hook_dispatches_through_function() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();

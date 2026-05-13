@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "8948672587e84bcba12a6b3ee26afe14d0ed2a92",
+  "baseline_commit": "33964d0b78393c8b34dc801e74b9704f3edda803",
   "command": [
     "g3rs",
     "validate",
@@ -11,10 +11,10 @@
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-13T02:43:31.242818+00:00",
+  "created_at": "2026-05-13T03:13:25.621954+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:db3d1a61369d41b8bc028193aee0b106a26f5b7e43c35940b91b93d7d56c057d",
+  "fixture_hash": "sha256:4a92e2717a7e18028e84870e49a1d7c3a0737cb131196500a6940ccde2e82d16",
   "fixture_id": "L50-test-cargo-mutants-missing",
   "normalizer_version": "1",
   "output_schema_version": "1",

@@ -1,5 +1,5 @@
 [graph]
-all-features = true
+all-features = false
 no-default-features = false
 
 [bans]
@@ -28,7 +28,6 @@ deny = [
   { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
   { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
   { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
-  { name = "axum", wrappers = [], reason = "Ban framework dependencies in library profile (standardize on typed boundaries)" },
   { name = "hyper", wrappers = [], reason = "Ban framework transport dependencies in library profile" },
   { name = "rocket", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
   { name = "warp", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
@@ -49,6 +48,7 @@ deny = [
   { name = "grep-cli", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
   { name = "grep-regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
   { name = "grep-matcher", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "simd-json", wrappers = [], reason = "Duplicate fixture entry for L60 policy coverage" },
 ]
 
 [[bans.features]]
@@ -72,7 +72,7 @@ allow = [
   "MPL-2.0",
   "CDLA-Permissive-2.0",
 ]
-confidence-threshold = 0.8
+confidence-threshold = 0.5
 unused-allowed-license = "allow"
 
 [licenses.private]

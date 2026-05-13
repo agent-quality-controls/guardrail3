@@ -186,13 +186,18 @@ fn parse_optional_mutants(
 }
 
 /// `cargo_mutants_installed` function.
+fn cargo_mutants_installed() -> bool {
+    cargo_mutants_installed_with_cargo("cargo")
+}
+
+/// `cargo_mutants_installed_with_cargo` function.
 #[expect(
     clippy::disallowed_methods,
     reason = "this is the single sanctioned site that probes whether the cargo-mutants subcommand is available; callers depend on this."
 )]
-fn cargo_mutants_installed() -> bool {
-    std::process::Command::new("cargo-mutants")
-        .arg("--version")
+fn cargo_mutants_installed_with_cargo(cargo_program: impl AsRef<std::ffi::OsStr>) -> bool {
+    std::process::Command::new(cargo_program)
+        .args(["mutants", "--version"])
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .status()

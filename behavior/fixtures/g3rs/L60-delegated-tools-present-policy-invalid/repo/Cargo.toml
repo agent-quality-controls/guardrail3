@@ -12,6 +12,9 @@ path = "src/lib.rs"
 members = []
 resolver = "2"
 
+[profile.mutants]
+inherits = "test"
+
 [workspace.lints.rust]
 warnings = "deny"
 unsafe_code = "forbid"

@@ -158,6 +158,9 @@ def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: li
     if metadata.get("runner_mode") == "path_without_delegated_tools":
         env = os.environ.copy()
         env["PATH"] = rust_toolchain_path_without_delegated_tools()
+        if metadata.get("blocked_cargo_subcommands"):
+            blocker_path = cargo_subcommand_blocker_path(metadata["blocked_cargo_subcommands"])
+            env["PATH"] = os.pathsep.join([blocker_path, env["PATH"]])
     elif path_prepend:
         env = os.environ.copy()
         prepend_paths = [
@@ -173,6 +176,21 @@ def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: li
         capture_output=True,
         check=False,
     )
+
+
+def cargo_subcommand_blocker_path(blocked_subcommands: list[str]) -> str:
+    real_cargo = shutil.which("cargo")
+    if real_cargo is None:
+        raise RuntimeError("cargo not found on PATH")
+    temp_bin = Path(tempfile.mkdtemp(prefix="g3rs-behavior-cargo-blocker-"))
+    cargo_wrapper = temp_bin / "cargo"
+    cases = "\n".join(
+        f'if [ "$1" = "{subcommand}" ]; then exit 101; fi'
+        for subcommand in blocked_subcommands
+    )
+    cargo_wrapper.write_text(f'#!/bin/sh\n{cases}\nexec "{real_cargo}" "$@"\n')
+    os.chmod(cargo_wrapper, 0o755)
+    return temp_bin.as_posix()
 
 
 @lru_cache(maxsize=1)
