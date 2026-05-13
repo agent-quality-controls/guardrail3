@@ -202,6 +202,32 @@ baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
+  "repo/.cargo/mutants.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/cliff.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/release-plz.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-fmt/rustfmt-required-settings|rustfmt config parse error|rustfmt.toml",
+  "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
+  "g3rs-release/config-input-failures|failed to read release config input|release-plz.toml",
+  "g3rs-release/config-input-failures|failed to read release config input|cliff.toml",
+]
+
+[[fixture]]
+id = "L41-root-cargo-toml-invalid"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
   "repo/Cargo.lock",
   "repo/Cargo.toml",
   "repo/clippy.toml",
@@ -212,8 +238,32 @@ files = [
   "repo/src/lib.rs",
 ]
 required_results = [
-  "g3rs-fmt/rustfmt-required-settings|rustfmt config parse error|rustfmt.toml",
-  "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
+  "g3rs-fmt/edition-mismatch|Cargo.toml parse error|Cargo.toml",
+]
+
+[[fixture]]
+id = "L42-member-cargo-toml-invalid"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/crates/bad/Cargo.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-topology/required-inputs-fail-closed|Rust topology required input failed closed|crates/bad/Cargo.toml",
+  "g3rs-cargo/input-failures|failed to read Cargo configuration|crates/bad/Cargo.toml",
+  "g3rs-release/config-input-failures|failed to read release config input|crates/bad/Cargo.toml",
+  "g3rs-release/filetree-input-failures|failed to read release filetree input|crates/bad/Cargo.toml",
+  "g3rs-release/source-input-failures|failed to read release source input|crates/bad/Cargo.toml",
 ]
 
 [[fixture]]
