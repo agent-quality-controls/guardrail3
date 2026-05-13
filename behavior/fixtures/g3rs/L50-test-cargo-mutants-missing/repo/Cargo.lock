@@ -2,5 +2,5 @@
 version = 4
 
 [[package]]
-name = "g3rs_fixture_l41"
+name = "g3rs_fixture_l50_mutants"
 version = "0.1.0"

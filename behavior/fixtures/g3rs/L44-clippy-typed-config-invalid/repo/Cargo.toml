@@ -1,5 +1,5 @@
 [package]
-name = "g3rs_fixture_l40"
+name = "g3rs_fixture_l44"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
@@ -9,11 +9,8 @@ publish = false
 path = "src/lib.rs"
 
 [workspace]
-members = ["crates/bad"]
+members = []
 resolver = "2"
-
-[profile.mutants]
-inherits = "test"
 
 [workspace.lints.rust]
 warnings = "deny"
