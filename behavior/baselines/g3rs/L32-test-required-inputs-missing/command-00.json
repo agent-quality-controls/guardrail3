@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "0cab7fb086b534de7461014149bc366731914465",
+  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
   "command": [
     "g3rs",
     "validate",
@@ -11,15 +11,15 @@
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-12T23:34:46.964577+00:00",
+  "created_at": "2026-05-13T00:28:27.889867+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:74f195ce947788c18d5a9a99d1b0d6595eb32cb710b7aac029bb5c7b0f63d348",
+  "fixture_hash": "sha256:407fe8bbaa8cc853bdf1238edb6efc6a10c834c25ec5f820abab731351eacbfc",
   "fixture_id": "L32-test-required-inputs-missing",
   "normalizer_version": "1",
   "output_schema_version": "1",
   "runner_version": "1",
   "stderr": "",
-  "stdout": "== test ==\n[Info] g3rs-test/cargo-mutants-installed Cargo.toml cargo-mutants installed\n  `cargo-mutants` is available on PATH.\n[Error] g3rs-test/mutants-toml-exists .cargo/mutants.toml mutants config missing\n  project root is missing required mutation config `.cargo/mutants.toml`. Create the mutation config file.\n[Info] g3rs-test/mutants-profile-present Cargo.toml profile.mutants configured\n  `Cargo.toml` defines `[profile.mutants]`.\n[Error] g3rs-test/mutation-hook-present Cargo.toml mutation hook step missing\n  Active hook surfaces do not contain an executable `cargo mutants` step. Add a `cargo mutants` step to the project's hook configuration.\n[Info] g3rs-test/ignore-reason src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n",
+  "stdout": "== test ==\n[Info] g3rs-test/cargo-mutants-installed Cargo.toml cargo-mutants installed\n  `cargo-mutants` is available on PATH.\n[Error] g3rs-test/mutants-toml-exists .cargo/mutants.toml mutants config missing\n  project root is missing required mutation config `.cargo/mutants.toml`. Create the mutation config file.\n[Info] g3rs-test/mutants-profile-present Cargo.toml profile.mutants configured\n  `Cargo.toml` defines `[profile.mutants]`.\n[Error] g3rs-test/mutation-hook-present Cargo.toml mutation hook step missing\n  Active hook surfaces do not contain an executable `cargo mutants` step. Add a `cargo mutants` step to the project's hook configuration.\n",
   "tool": "g3rs"
 }

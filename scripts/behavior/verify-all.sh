@@ -7,5 +7,6 @@ VALIDATE_REPO_MANIFEST="$REPO_ROOT/.plans/2026-05-12-222909-g3rs-validate-repo-f
 
 python3 "$HERE/verify-fixtures.py"
 python3 "$HERE/verify-baselines.py"
+python3 "$HERE/verify-compaction.py"
 python3 "$HERE/verify-fixtures.py" --manifest "$VALIDATE_REPO_MANIFEST"
 python3 "$HERE/verify-baselines.py" --manifest "$VALIDATE_REPO_MANIFEST"

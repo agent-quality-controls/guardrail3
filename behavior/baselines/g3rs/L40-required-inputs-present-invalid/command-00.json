@@ -1,0 +1,22 @@
+{
+  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    "repo",
+    "--inventory"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-13T00:28:29.542341+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:b276ff233c4323fe0db661d04f8e08d14944fce24569689d161b2407b933b0c1",
+  "fixture_id": "L40-required-inputs-present-invalid",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "path is not a directory: repo\n",
+  "stdout": "",
+  "tool": "g3rs"
+}

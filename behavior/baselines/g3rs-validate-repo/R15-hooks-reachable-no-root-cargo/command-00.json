@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "2ce60f751f1c9d4bfed213e012404db4613eac25",
+  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
   "command": [
     "g3rs",
     "validate-repo",
@@ -8,10 +8,10 @@
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-12T22:22:52.133399+00:00",
+  "created_at": "2026-05-13T00:28:33.348137+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:fcd4c3b4a0871502ba5ef4dcc12db6afa60bf7487d3cad78bed145bf9dd56b64",
+  "fixture_hash": "sha256:fbe7ae1c4bbd9525bba336012c11c5e736ecb05f0cff6adf354e93d6c85e93b8",
   "fixture_id": "R15-hooks-reachable-no-root-cargo",
   "normalizer_version": "1",
   "output_schema_version": "1",

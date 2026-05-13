@@ -31,7 +31,48 @@ closed_file_list = true
 files = [
   "fixture.toml",
   "repo/.githooks/pre-commit",
-  "repo/README.md",
+]
+required_results = [
+  "g3rs-hooks/required-tools-installed|gitleaks installed|.githooks/pre-commit",
+  "g3rs-hooks/required-tools-installed|cargo-deny installed|.githooks/pre-commit",
+  "g3rs-hooks/required-tools-installed|cargo-machete installed|.githooks/pre-commit",
+  "g3rs-hooks/contract-required-tools-installed|cargo-deny installed for hook contract|.githooks/pre-commit",
+  "g3rs-hooks/contract-required-tools-installed|cargo-dupes installed for hook contract|.githooks/pre-commit",
+  "g3rs-hooks/contract-required-tools-installed|cargo-machete installed for hook contract|.githooks/pre-commit",
+  "g3rs-hooks/contract-required-tools-installed|g3rs installed for hook contract|.githooks/pre-commit",
+  "g3rs-hooks/contract-required-tools-installed|gitleaks installed for hook contract|.githooks/pre-commit",
+  "g3rs-hooks/pre-commit-exists|pre-commit hook exists|.githooks/pre-commit",
+  "g3rs-hooks/hooks-path-configured|core.hooksPath configured|-",
+  "g3rs-hooks/execution-trust|no competing hook systems detected|-",
+  "g3rs-hooks/pre-commit-executable|pre-commit hook is not executable|.githooks/pre-commit",
+  "g3rs-hooks/dispatcher-pattern|monolithic hook mode|.githooks/pre-commit",
+  "g3rs-hooks/gitleaks-step-present|gitleaks step missing|.githooks/pre-commit",
+  "g3rs-hooks/routing-scope-not-hardcoded-literal|verifier scope not hardcoded|.githooks/pre-commit",
+  "g3rs-hooks/routing-no-env-override|no env-override routing|.githooks/pre-commit",
+  "g3rs-hooks/routing-no-upward-walk-from-units|no ancestor expansion of discovered units|.githooks/pre-commit",
+  "g3rs-hooks/routing-discovers-marker-pair|no Rust marker pair discovery present|.githooks/pre-commit",
+  "g3rs-hooks/routing-staged-files-diff-filter-acm|staged-file collection missing --diff-filter=ACM|.githooks/pre-commit",
+  "g3rs-hooks/calls-validate-repo|hook does not call g3rs validate-repo|.githooks/pre-commit",
+  "g3rs-hooks/dispatches-per-unit-validate-staged|hook does not dispatch per-unit g3rs validate --staged|.githooks/pre-commit",
+  "g3rs-hooks/dedups-owning-units|hook does not dedup owning units|.githooks/pre-commit",
+  "g3rs-hooks/skips-when-no-owning-unit|hook does not skip when no owning unit|.githooks/pre-commit",
+  "g3rs-hooks/no-toolchain-invocation|hook does not invoke cargo directly|.githooks/pre-commit",
+  "g3rs-hooks/contract-trigger-coverage|hook does not declare a RUST_RELEVANT_PATTERN|.githooks/pre-commit",
+  "g3rs-hooks/shell-error-handling|missing fail-closed shell options in `.githooks/pre-commit`|.githooks/pre-commit",
+  "g3rs-hooks/valid-shebang|valid hook shebang present|.githooks/pre-commit",
+  "g3rs-hooks/no-unconditional-exit-zero|no unconditional `exit 0` bypass in `.githooks/pre-commit`|.githooks/pre-commit",
+  "g3rs-hooks/merge-conflict-step-present|missing merge-conflict marker scan in `.githooks/pre-commit`|.githooks/pre-commit",
+  "g3rs-hooks/file-size-step-present|file-size check step missing|.githooks/pre-commit",
+  "g3rs-hooks/concrete-lockfile-command|missing concrete lockfile integrity command in `.githooks/pre-commit`|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
+  "g3rs-hooks/required-contract-command-present|hook contract command is missing|.githooks/pre-commit",
 ]
 
 [[fixture]]
@@ -42,11 +83,14 @@ closed_file_list = true
 files = [
   "fixture.toml",
   "repo/behavior/fixtures/g3rs/demo/repo/guardrail3-rs.toml",
-  "repo/packages/absent/README.md",
   "repo/packages/cargo-only/Cargo.toml",
   "repo/packages/complete/Cargo.toml",
   "repo/packages/complete/guardrail3-rs.toml",
   "repo/packages/incomplete/guardrail3-rs.toml",
+]
+required_results = [
+  "g3rs-topology/marker-pair-incomplete|incomplete adoption marker pair|packages/incomplete/guardrail3-rs.toml",
+  "g3rs-topology/marker-pair-incomplete|incomplete adoption marker pair|packages/cargo-only/Cargo.toml",
 ]
 
 [[fixture]]
@@ -60,6 +104,13 @@ files = [
   "repo/guardrail3-rs.toml",
   "repo/nested/Cargo.toml",
   "repo/nested/guardrail3-rs.toml",
+]
+required_results = [
+  "g3rs-topology/no-nested-workspaces|Nested workspace `nested` is forbidden|nested/Cargo.toml",
+  "g3rs-topology/no-nested-guardrail3-rs-toml|Nested adopted Rust unit `nested` is forbidden|nested/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`cargo` file `nested/guardrail3-rs.toml` is illegally placed|nested/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`deps` file `nested/guardrail3-rs.toml` is illegally placed|nested/guardrail3-rs.toml",
+  "g3rs-topology/workspace-local-file-placement|`garde` file `nested/guardrail3-rs.toml` is illegally placed|nested/guardrail3-rs.toml",
 ]
 
 [[fixture]]

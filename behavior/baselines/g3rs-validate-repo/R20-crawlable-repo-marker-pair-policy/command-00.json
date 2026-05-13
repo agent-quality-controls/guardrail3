@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "2ce60f751f1c9d4bfed213e012404db4613eac25",
+  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
   "command": [
     "g3rs",
     "validate-repo",
@@ -8,10 +8,10 @@
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-12T22:22:52.159648+00:00",
+  "created_at": "2026-05-13T00:28:33.630580+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:68009668e4b83122cee752cd84fa8b036328bb3996b25b2f4f9f98509021c797",
+  "fixture_hash": "sha256:07c9f2b2d8151c12d2259180e2c675a6d134fb12b3d6579067d609230799dcad",
   "fixture_id": "R20-crawlable-repo-marker-pair-policy",
   "normalizer_version": "1",
   "output_schema_version": "1",

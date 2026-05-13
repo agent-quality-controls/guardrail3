@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -115,13 +116,16 @@ def normalize_output(text: str, fixture_dir: Path) -> str:
     replacements = [
         (fixture_dir / "repo", "$REPO"),
         (fixture_dir, "$FIXTURE"),
+        (fixture_dir.parent.parent, "$FIXTURE_ROOT"),
         (REPO_ROOT / ".cargo-target", "$TARGET"),
     ]
     normalized = text
     for path, marker in replacements:
         normalized = normalized.replace(path.as_posix(), marker)
         normalized = normalized.replace(str(path), marker)
-    return normalized.replace("\\", "/")
+    normalized = normalized.replace("\\", "/")
+    normalized = re.sub(r"target\\(s\\) in [0-9.]+s", "target(s) in $TIME", normalized)
+    return re.sub(r"(\\.cargo-target/debug/deps/[A-Za-z0-9_]+)-[0-9a-f]{16}", r"\\1-$HASH", normalized)
 
 
 def fixture_hash(fixture_dir: Path) -> str:
@@ -176,8 +180,11 @@ def output_record(
     argv: list[str],
 ) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="g3rs-behavior-") as temp_root:
-        runtime_fixture_dir = Path(temp_root) / fixture_dir.name
-        shutil.copytree(fixture_dir, runtime_fixture_dir, symlinks=True)
+        temp_root_path = Path(temp_root)
+        copy_shared_fixture_inputs(temp_root_path)
+        runtime_fixture_dir = temp_root_path / fixture_dir.parent.name / fixture_dir.name
+        runtime_fixture_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(fixture_dir, runtime_fixture_dir, symlinks=False, ignore=fixture_copy_ignore)
         prepare_runtime_fixture(runtime_fixture_dir, metadata)
         result = run_command(tool, runtime_fixture_dir, metadata, argv)
         cwd = command_cwd(runtime_fixture_dir, metadata).relative_to(runtime_fixture_dir).as_posix()
@@ -198,6 +205,18 @@ def output_record(
         "stderr": stderr,
         "tool": tool,
     }
+
+
+def copy_shared_fixture_inputs(temp_root: Path) -> None:
+    shared_root = REPO_ROOT / "behavior" / "fixtures"
+    for name in ("parsers", "shared"):
+        source = shared_root / name
+        if source.exists():
+            shutil.copytree(source, temp_root / name, symlinks=False, ignore=fixture_copy_ignore)
+
+
+def fixture_copy_ignore(_directory: str, names: list[str]) -> set[str]:
+    return {name for name in names if name in {"target", ".git"}}
 
 
 def baseline_path(baseline_root: Path, fixture_id: str, command_index: int) -> Path:
