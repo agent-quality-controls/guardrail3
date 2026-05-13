@@ -1,0 +1,20 @@
+id = "L60-deny-cargo-valid-policy-invalid"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "delegated_tools_present_policy_invalid"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+  "required_inputs_present",
+  "required_inputs_valid",
+  "delegated_tools_present",
+]
+
+intentionally_invalid = [
+  "delegated_policy_invalid",
+]
