@@ -1,0 +1,2487 @@
+# Generated from active G3RS source IDs and current replay baselines.
+# Update rows only when rule coverage or planned fixture ownership changes.
+
+[[rule]]
+id = "g3rs-apparch/dev-dependency-direction"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/hook-contract"
+family = "g3rs-apparch"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-apparch/io-outbound-dependency-direction"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/io-traits-in-types"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/logic-dependency-direction"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/logic-purity"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/patch-replace-bypass"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/same-layer-cycles"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/types-dependency-direction"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/types-public-surface"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-apparch/types-purity"
+family = "g3rs-apparch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-apparch-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/crate-has-facade"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/dependency-count-split"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/feature-contract"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/feature-gated-exports"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/hook-contract"
+family = "g3rs-arch"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-arch/lib-facade-only"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/mod-facade-only"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/mod-rs-required"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/no-boundary-crossing"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/no-path-attr"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-arch/shared-flag-required"
+family = "g3rs-arch"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/approved-allow-inventory"
+family = "g3rs-cargo"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-cargo/disallowed-macros-deny"
+family = "g3rs-cargo"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-cargo/hook-contract"
+family = "g3rs-cargo"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-cargo/input-failures"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/lint-levels"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/member-edition-drift"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/member-local-allows-forbidden"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/missing-member-cargo"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/no-weakened-overrides"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/priority-order"
+family = "g3rs-cargo"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-cargo/resolver"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/rust-version-policy"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/unapproved-allow-entries"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/workspace-lints"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/workspace-lints-inherited"
+family = "g3rs-cargo"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-cargo/workspace-metadata"
+family = "g3rs-cargo"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/avoid-breaking-exported-api"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/ban-reason-quality"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/cognitive-complexity-threshold"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/config-parseable"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/coverage-exists"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/duplicate-bans"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/excessive-nesting-threshold"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/extra-method-ban"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/extra-type-ban"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/forbid-clippy-conf-dir-override"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/hook-contract"
+family = "g3rs-clippy"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-clippy/library-global-state"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/macro-bans"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/max-fn-params-bools"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/max-struct-bools"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/missing-method-ban"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/missing-type-ban"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/policy-context-parseable"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-clippy/same-root-conflict"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/test-relaxations"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/too-many-arguments-threshold"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/too-many-lines-threshold"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/type-complexity-threshold"
+family = "g3rs-clippy"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-clippy/unknown-keys"
+family = "g3rs-clippy"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-code/always-true-cfg-attr-bypass"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/cfg-attr-allow-inventory"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/crate-level-allow"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/deny-forbid-without-reason"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/direct-fs-usage"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/exception-comment-inventory"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/extern-allow"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/fs-glob-import"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/garde-skip-with-comment"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/garde-skip-without-comment"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/generic-parameter-cap"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/hook-contract"
+family = "g3rs-code"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-code/impl-allow-blast-radius"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/include-bypass"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/input-failures"
+family = "g3rs-code"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L45-source-and-filetree-input-failures; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-code/item-level-allow-with-reason"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/item-level-allow-without-reason"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/large-trait-surface"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/large-type-inventory"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/many-use-imports"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/panic-macro"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/path-attr-with-reason"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/public-struct-named-fields"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/public-weak-error-forms"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/string-dispatch-cap"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/test-expect-message-quality"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/todo-macros"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/too-many-effective-code-lines"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/too-many-use-imports"
+family = "g3rs-code"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-code/unsafe-code-lint"
+family = "g3rs-code"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L50-required-inputs-valid-delegated-tools-missing"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-code/unused-crate-dependencies-allow"
+family = "g3rs-code"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-deny/advisories-baseline"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/allow-git-inventory"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/allow-override-channel"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/allow-registry-baseline"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/allow-wildcard-paths"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/ban-baseline-complete"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/confidence-threshold"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/copyleft-allowlist"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/coverage"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/deprecated-advisories"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/duplicate-entries"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/extra-deny-bans-inventory"
+family = "g3rs-deny"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-deny/extra-feature-bans-inventory"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/graph-all-features"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/graph-no-default-features"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/highlight-inventory"
+family = "g3rs-deny"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-deny/hook-contract"
+family = "g3rs-deny"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-deny/ignore-accumulation"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/ignore-hygiene"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/license-allow-baseline"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/license-exceptions-inventory"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/multiple-versions-floor"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/shadowing"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/skip-hygiene"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/stricter-advisories-inventory"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/tokio-full-ban"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/unknown-keys"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deny/unknown-sources-policy"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/wildcards-inventory"
+family = "g3rs-deny"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deny/wrappers"
+family = "g3rs-deny"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L60-deny-advanced-policy-invalid; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-deps/build-dependencies-allowlisted"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/cargo-deny-installed"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/cargo-dupes-installed"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/cargo-lock-present"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/cargo-machete-installed"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/dependencies-allowlisted"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/dev-dependencies-allowlisted"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/direct-dependency-cap"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-workspace-package-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/gitignore-not-ignoring-cargo-lock"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/gitleaks-installed"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-deps/hook-contract"
+family = "g3rs-deps"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-deps/library-allowlist-present"
+family = "g3rs-deps"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/dual-file-conflict"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/edition-mismatch"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L41-root-cargo-toml-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/hook-contract"
+family = "g3rs-fmt"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-fmt/ignore-escape-hatch"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/nightly-keys-on-stable"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/per-crate-override"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/rustfmt-config-exists"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-fmt/rustfmt-extra-settings-inventory"
+family = "g3rs-fmt"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-fmt/rustfmt-required-settings"
+family = "g3rs-fmt"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/additional-method-bans"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/context-validation-surface"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/core-method-bans"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/dependency-present"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/enum-derive-validate"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/extractor-type-bans"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/field-level-constraints"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/hook-contract"
+family = "g3rs-garde"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-garde/input-failures"
+family = "g3rs-garde"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L45-source-and-filetree-input-failures; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-garde/manual-deserialize-impl"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/nested-validation-dive"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/query-as-inventory"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/reqwest-json-ban"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-garde/struct-derive-validate"
+family = "g3rs-garde"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-garde-boundary-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/calls-validate-repo"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/cargo-deny-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/cargo-dupes-excludes"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/cargo-dupes-installed"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/cargo-dupes-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/cargo-machete-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/clippy-denies-warnings"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/clippy-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/concrete-lockfile-command"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/config-changes-trigger-validation"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/contract-critical-command-not-fail-open"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/contract-required-tools-installed"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/contract-trigger-coverage"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/dedups-owning-units"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/dispatcher-pattern"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/dispatches-per-unit-validate-staged"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/duplication-tool-is-cargo-dupes"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/executable-command-context-only"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/execution-trust"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/file-size-step-present"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/fmt-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/gitleaks-step-present"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/guardrail-binary-available"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/guardrail-validate-staged-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/hooks-path-configured"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/local-override-inventory"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/merge-conflict-step-present"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/modular-directory-inventory"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/modular-scripts-executable"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/modular-scripts-inventory"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/no-bypass-instructions"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/no-fail-open-wrappers"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/no-toolchain-invocation"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/no-unconditional-exit-zero"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/pre-commit-executable"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/pre-commit-exists"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/pre-commit-file-size-inventory"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/real-dispatcher-syntax-only"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/required-contract-command-present"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/required-tools-installed"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/routing-discovers-marker-pair"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/routing-no-env-override"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/routing-no-upward-walk-from-units"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/routing-staged-files-diff-filter-acm"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/script-stats-inventory"
+family = "g3rs-hooks"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-hooks/shell-error-handling"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/skips-when-no-owning-unit"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-hooks/test-step-present"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/test-uses-workspace"
+family = "g3rs-hooks"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture R16-hooks-required-steps-present-but-weakened; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-hooks/valid-shebang"
+family = "g3rs-hooks"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/accidentally-publishable"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-metadata-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/binary-release-workflow"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-metadata-policy-violated"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/binstall-metadata"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-metadata-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/categories-present"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/cliff-baseline"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-invalid-semver-policy-violated"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/cliff-exists"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/config-input-failures"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/crate-inventory"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/description-present"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/docs-rs-metadata"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/filetree-input-failures"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/hook-contract"
+family = "g3rs-release"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-release/include-exclude-inventory"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/interdependent-version-consistency"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-metadata-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/keywords-present"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/license-file"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/license-present"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/linux-release-target"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-metadata-policy-violated"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/no-path-deps-to-unpublishable"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-metadata-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/publish-dry-run"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/publish-dry-run-workflow"
+family = "g3rs-release"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L70-release-workflow-policy-violated; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-release/publish-must-be-explicit"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-metadata-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/publish-status-inventory"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/readme-exists"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/readme-quality"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-release-invalid-semver-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/registry-token"
+family = "g3rs-release"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L70-release-workflow-policy-violated; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-release/release-plz-baseline"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-invalid-semver-policy-violated"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/release-plz-exists"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/release-plz-workflow"
+family = "g3rs-release"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L70-release-workflow-policy-violated; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-release/release-profile-inventory"
+family = "g3rs-release"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L70-release-workflow-policy-violated; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-release/repository-present"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/semver-checks-installed"
+family = "g3rs-release"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "currently appears only as Info; rule implementation must decide whether this is intentional inventory or needs violation coverage"
+
+[[rule]]
+id = "g3rs-release/source-input-failures"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-release/valid-semver"
+family = "g3rs-release"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/assertions-modules-prove"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/cargo-mutants-installed"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L32-test-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/external-harnesses-use-assertions"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/filetree-input-failures"
+family = "g3rs-test"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L45-source-and-filetree-input-failures; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-test/hook-contract"
+family = "g3rs-test"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-test/ignore-reason"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/inline-test-bodies"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/mutants-config-sane"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/mutants-profile-present"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L32-test-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/mutants-toml-exists"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L32-test-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/mutation-hook-present"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L32-test-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/nextest-timeouts"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/owned-sidecar-shape"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/real-proof-site"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/runtime-assertions-split"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/should-panic-expected"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/source-input-failures"
+family = "g3rs-test"
+coverage_status = "planned_fixture"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = ""
+reason = "planned future fixture L45-source-and-filetree-input-failures; planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-test/tautological-assertions"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/test-support-generic"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-test/weak-matches-assert"
+family = "g3rs-test"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-toolchain/channel-and-components"
+family = "g3rs-toolchain"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L33-release-profile-and-mutants-inputs"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-toolchain/exists"
+family = "g3rs-toolchain"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-toolchain/hook-contract"
+family = "g3rs-toolchain"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-toolchain/legacy-file"
+family = "g3rs-toolchain"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-toolchain/msrv-consistency"
+family = "g3rs-toolchain"
+coverage_status = "planned_existing_fixture_expansion"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+reason = "planned missing-rule fixture group from coverage matrix plan"
+
+[[rule]]
+id = "g3rs-topology/declared-workspace-members-only"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/hook-contract"
+family = "g3rs-topology"
+coverage_status = "planned_cli_surface"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "R15-hooks-reachable-no-root-cargo"
+reason = "requires CLI-visible inventory output before replay can cover this source rule ID"
+
+[[rule]]
+id = "g3rs-topology/marker-pair-incomplete"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "R20-crawlable-repo-marker-pair-policy"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/member-paths-must-not-escape-root"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/no-nested-guardrail3-rs-toml"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/no-nested-workspaces"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/required-inputs-fail-closed"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L40-required-inputs-present-invalid"
+reason = "covered by replay baseline error or warning"
+
+[[rule]]
+id = "g3rs-topology/workspace-local-file-placement"
+family = "g3rs-topology"
+coverage_status = "covered"
+current_replay = "error_or_warn"
+target_replay = "error_or_warn"
+fixture = "L37-workspace-topology-input-conflicts"
+reason = "covered by replay baseline error or warning"
+
