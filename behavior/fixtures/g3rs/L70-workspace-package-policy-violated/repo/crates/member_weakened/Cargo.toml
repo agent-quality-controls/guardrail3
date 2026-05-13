@@ -1,0 +1,14 @@
+[package]
+name = "member_weakened"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints]
+workspace = true
+
+[lints.rust]
+dead_code = "allow"
+
+[lints.clippy]
+module_name_repetitions = "allow"

@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "bec14f5e6c5fb82f7ee5617a41533f0efc4f23c3",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "garde",
+    "--inventory",
+    "--rules-only"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-13T13:41:38.362566+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:d5f7e2f50e7676f8d550a79ecfa8a1e728890d7245e73fe9152afaf6851158cf",
+  "fixture_id": "L70-garde-boundary-policy-violated",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== garde ==\n[Info] g3rs-garde/dependency-present Cargo.toml garde dependency found\n  garde is present in `Cargo.toml` for this workspace root. Garde-specific boundary checks are active.\n[Info] g3rs-garde/core-method-bans clippy.toml core garde method bans present\n  All core serde/toml/yaml deserialization bans are present in the covering clippy configuration.\n[Info] g3rs-garde/extractor-type-bans clippy.toml garde extractor bans present\n  All required Axum extractor bans are present in the covering clippy configuration.\n[Info] g3rs-garde/reqwest-json-ban clippy.toml reqwest garde ban present\n  `reqwest::Response::json` is banned in the covering clippy configuration.\n[Info] g3rs-garde/additional-method-bans clippy.toml additional garde method bans present\n  All additional garde deserialization entry-point bans are present in the covering clippy configuration.\n[Error] g3rs-garde/struct-derive-validate src/lib.rs struct `RawStructInput` missing Validate derive\n  Struct `RawStructInput` derives Deserialize but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this struct.\n[Error] g3rs-garde/manual-deserialize-impl src/lib.rs manual Deserialize impl for `ManualInput` without Validate\n  Manual `Deserialize` impl for `ManualInput` bypasses derive-based garde checks and the type does not also implement `Validate`. Add `#[derive(Validate)]` or `impl garde::Validate for ManualInput`.\n[Error] g3rs-garde/enum-derive-validate src/lib.rs enum `RawEnumInput` missing Validate derive\n  Enum `RawEnumInput` derives Deserialize and has non-primitive payload fields, but does not derive garde's `Validate`. Add `#[derive(Validate)]` to this enum.\n[Warn] g3rs-garde/query-as-inventory src/db.rs sqlx query_as requires validation review\n  `qa` bypasses derive-based garde boundary checks with documented reason `Temporary SQLx row mapping until validated DTO extraction lands.`. Review the target type and ensure validated input handling is explicit.\n[Error] g3rs-garde/query-as-inventory src/db.rs sqlx query_as reason too weak\n  `qa` bypasses derive-based garde boundary checks with a weak reason: reason must not be a placeholder. Provide a more specific reason.\n[Error] g3rs-garde/query-as-inventory src/lib.rs sqlx query_as missing reason\n  `sqlx::query_as` bypasses derive-based garde boundary checks without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this usage with a reason.\n[Warn] g3rs-garde/query-as-inventory - sqlx query_as count\n  `src/db.rs` has 2 sqlx query_as escape hatches.\n[Warn] g3rs-garde/query-as-inventory - sqlx query_as count\n  `src/lib.rs` has 1 sqlx query_as escape hatches.\n[Error] g3rs-garde/field-level-constraints src/lib.rs boundary field `name` missing garde validator\n  Field `name` in validated boundary `MissingFieldConstraint` has type `String` but no meaningful garde validator. Add a field-level garde rule such as `length`, `range`, `url`, or another explicit validator.\n[Error] g3rs-garde/nested-validation-dive src/lib.rs nested validated field `payload` missing garde(dive)\n  Field `payload` in validated boundary `MissingDive` points at validated nested type `Payload` but is missing `#[garde(dive)]`. Nested validated fields must opt into recursive garde validation.\n[Error] g3rs-garde/context-validation-surface src/lib.rs boundary `MissingContext` uses ctx without garde(context)\n  Field `title` in validated boundary `MissingContext` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`. Add `#[garde(context(YourContextType))]` to the struct definition.\n",
+  "tool": "g3rs"
+}

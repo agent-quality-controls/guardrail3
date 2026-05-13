@@ -1,0 +1,10 @@
+[package]
+name = "logic-worker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+logic-service = { path = "../service", package = "logic-service" }
+
+[dev-dependencies]
+db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }

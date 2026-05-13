@@ -94,14 +94,17 @@ Use the minimum number of L70 fixtures needed to avoid shadowing:
 - One app-architecture dependency fixture for `apparch` graph and source boundary rows.
 - One Garde boundary fixture for validation-source rows.
 - One release metadata fixture for publishability metadata rows.
+- One invalid-semver release fixture, because invalid semver makes `cargo publish --dry-run` fail for the same reason and hides the non-semver publishability path.
 
 Reason:
 
 - Source-only rows can coexist because G3RS scans parseable unreferenced source files and Cargo ignores them.
 - Workspace topology rows change workspace membership and can trigger cargo-family rows if mixed carelessly.
+- Dependency allowlist rows now live in the workspace/package fixture because they remain visible there and do not hide topology, cargo, or arch rows.
 - App-architecture rows need multiple crates and dependency edges.
 - Garde rows require Garde activation and boundary-shaped source.
-- Release rows require publishable-package activation and release metadata.
+- Release metadata rows require publishable-package activation and release metadata.
+- Invalid-semver release rows require a separate fixture because a syntactically invalid version dominates the release dry-run error text.
 
 ## Fixture 1: Existing L70 Dense Source/File-Tree Policy
 
@@ -234,23 +237,8 @@ Rows to include:
 - `g3rs-cargo/workspace-lints-inherited`
 - Trigger: workspace member lacks `[lints] workspace = true`.
 
-- `g3rs-cargo/no-weakened-overrides`
-- Trigger: workspace member has `[lints] workspace = true` plus a weaker local lint override.
-
 - `g3rs-cargo/member-edition-drift`
 - Trigger: member edition is older than root edition.
-
-- `g3rs-cargo/member-local-allows-forbidden`
-- Trigger: member has local `allow` lint entry.
-
-- `g3rs-deps/dependencies-allowlisted`
-- Trigger: normal dependency exists but is not in `allowed_deps`.
-
-- `g3rs-deps/build-dependencies-allowlisted`
-- Trigger: build dependency exists but is not in `allowed_deps`.
-
-- `g3rs-deps/dev-dependencies-allowlisted`
-- Trigger: dev dependency exists but is not in `allowed_deps`.
 
 - `g3rs-arch/crate-has-facade`
 - Trigger: member package has no `src/lib.rs` and no `src/main.rs`.
@@ -272,17 +260,21 @@ Rows to include:
 - Trigger: workspace-local family config file appears under a member or nested dir.
 - Choose a file that does not activate parser/input failures.
 
-Dependency-count rows:
+Arch dependency rows:
 
 - `g3rs-arch/dependency-count-split`
-- `g3rs-deps/direct-dependency-cap`
+- Trigger: one workspace member has more than 12 production path dependencies.
 
-Plan for these:
+- `g3rs-arch/no-boundary-crossing`
+- Trigger: package depends on an internal crate inside another crate boundary.
 
-- Try to include them in this fixture using local path dependency crates.
-- Each dependency must be used so `cargo-machete` stays clean.
-- Each dependency must be allowlisted unless the fixture intentionally needs the allowlist row.
-- If this creates a 26-crate synthetic fixture that hides simpler rows or makes delegated tools dominate, split it into `L70-dependency-surface-policy-violated`.
+- `g3rs-arch/shared-flag-required`
+- Trigger: package depends on sibling/internal path crate not marked `shared = true`.
+
+Implementation notes:
+
+- Run this fixture with `--rules-only`; the existing `L70-delegated-policy-valid-project-policy-violated` fixture is the one that proves delegated cargo gates are clean.
+- Mark dependency-count filler crates as `shared = true` so they do not also emit boundary violations.
 
 Rejected shapes for this fixture:
 
@@ -290,7 +282,42 @@ Rejected shapes for this fixture:
 - Escaping member path, because it can break Cargo discovery before L70 rows remain clean.
 - Invalid Cargo TOML, because it belongs to L40.
 
-## Fixture 3: L70 App-Architecture Policy
+Cargo member-local lint rows:
+
+- `g3rs-cargo/no-weakened-overrides`
+- Trigger: member has `[lints] workspace = true` plus local lint overrides that weaken workspace policy.
+- `g3rs-cargo/member-local-allows-forbidden`
+- Trigger: member has `[lints] workspace = true` plus member-local allow entries.
+- Keep these in `L70-workspace-package-policy-violated` because `--rules-only` reaches these rows without Cargo rejecting the manifest.
+
+## Merged Dependency Allowlist Policy
+
+Purpose:
+
+- Cover dependency allowlist and dependency-count rows that need many external package names inside `L70-workspace-package-policy-violated`.
+
+Rows to include:
+
+- `g3rs-deps/dependencies-allowlisted`
+- Trigger: normal dependency exists but is not in `allowed_deps`.
+
+- `g3rs-deps/build-dependencies-allowlisted`
+- Trigger: build dependency exists but is not in `allowed_deps`.
+
+- `g3rs-deps/dev-dependencies-allowlisted`
+- Trigger: dev dependency exists but is not in `allowed_deps`.
+
+- `g3rs-deps/direct-dependency-cap`
+- Trigger: crate has more than 25 unique direct dependencies.
+
+Implementation notes:
+
+- Run these rows inside `L70-workspace-package-policy-violated` with `--rules-only`.
+- Allowlist the filler dependencies used only to reach the direct-dependency cap.
+- Leave exactly one runtime dependency, one build dependency, and one dev dependency unallowlisted.
+- Do not keep a separate dependency fixture unless adding those dependency rows hides an existing workspace/package Error or Warn row.
+
+## Fixture 4: L70 App-Architecture Policy
 
 Create fixture id:
 
@@ -301,12 +328,6 @@ Purpose:
 - Cover app-architecture dependency and source-boundary rules that require multiple crates.
 
 Rows to include:
-
-- `g3rs-arch/no-boundary-crossing`
-- Trigger: package depends on an internal crate inside another crate boundary.
-
-- `g3rs-arch/shared-flag-required`
-- Trigger: package depends on sibling/internal path crate not marked `shared = true`.
 
 - `g3rs-apparch/types-dependency-direction`
 - Trigger: `types/...` crate production-depends on another internal apparch crate.
@@ -335,22 +356,15 @@ Rows to include:
 - `g3rs-apparch/io-traits-in-types`
 - Trigger: `io/inbound` or `io/outbound` crate defines public trait that should live in `types`.
 
+- `g3rs-apparch/same-layer-cycles`
+- Trigger: two same-layer crates depend on each other.
+
 Implementation rules:
 
 - Use local path crates for dependency edges.
-- Every dependency must be used so `cargo-machete` does not dominate.
-- Avoid reciprocal dependency cycles unless a probe proves `g3rs-apparch/same-layer-cycles` can fire without Cargo failing first.
+- Run this fixture with `--family apparch --rules-only` so Cargo cycle detection does not hide the apparch row.
 
-Excluded from initial L70 apparch fixture:
-
-- `g3rs-apparch/same-layer-cycles`
-
-Reason:
-
-- Real package cycles can fail Cargo before the G3RS row is useful.
-- Add it only if an inactive target-cfg dependency probe proves the row can fire without cargo-gate failure.
-
-## Fixture 4: L70 Garde Boundary Policy
+## Fixture 5: L70 Garde Boundary Policy
 
 Create fixture id:
 
@@ -396,7 +410,7 @@ Implementation rules:
 - Compile only the minimum code needed to keep delegated gates clean.
 - Do not introduce source parse failures.
 
-## Fixture 5: L70 Release Metadata Policy
+## Fixture 6: L70 Release Metadata Policy
 
 Create fixture id:
 
@@ -412,7 +426,7 @@ Setup:
 - Keep `LICENSE`, `README.md`, `release-plz.toml`, and `cliff.toml` present and parseable unless the row being tested specifically requires a source-quality issue.
 - Keep delegated release config policy valid.
 
-Rows to include if probe confirms they are visible without dry-run domination:
+Rows to include:
 
 - `g3rs-release/publish-must-be-explicit`
 - `g3rs-release/description-present`
@@ -428,16 +442,37 @@ Rows to include if probe confirms they are visible without dry-run domination:
 - `g3rs-release/no-path-deps-to-unpublishable`
 - `g3rs-release/interdependent-version-consistency`
 - `g3rs-release/readme-quality`
+- `g3rs-release/publish-dry-run`
 
 Split rules:
 
-- If `valid-semver` breaks Cargo metadata before other release rows, split it into its own L70 release fixture.
-- If path-dependency release rows require multi-crate structure that hides simple metadata rows, split them into `L70-release-path-dependency-policy-violated`.
-- If publish dry-run output dominates, keep static release metadata rows only and move dry-run behavior to a later fixture layer.
+- `valid-semver` is implemented in `L70-release-invalid-semver-policy-violated`.
+- Both `no-path-deps-to-unpublishable` branches are implemented in `L70-release-metadata-policy-violated`: one path dependency escapes the workspace, and one workspace path dependency points at a non-publishable crate.
+- Keep `g3rs-release/publish-dry-run` in the required result set because current release ingestion runs dry-run for publishable crates while building release facts. Do not treat it as a hidden failure unless it prevents other release rows from appearing.
+
+## Fixture 7: L70 Release Invalid Semver Policy
+
+Create fixture id:
+
+- `L70-release-invalid-semver-policy-violated`
+
+Purpose:
+
+- Cover `g3rs-release/valid-semver` without letting invalid semver dominate the broader release metadata fixture.
+
+Rows to include:
+
+- `g3rs-release/valid-semver`
+- `g3rs-release/publish-dry-run`
+
+Implementation notes:
+
+- Keep all other release metadata present and valid.
+- Keep `release-plz.toml` and `cliff.toml` parseable and policy-correct.
+- The only intended Error rows are invalid semver and the dry-run failure caused by invalid semver.
 
 Excluded from L70:
 
-- `g3rs-release/publish-dry-run`
 - `g3rs-release/semver-checks-installed`
 - `g3rs-release/publish-dry-run-workflow`
 - `g3rs-release/registry-token`
@@ -516,6 +551,7 @@ After fixture probes pass:
   - `closed_file_list = true`
 - Add every committed fixture file to `files`.
 - Add every Error/Warn row that defines the fixture purpose to `required_results`.
+- Required rows must use `severity|rule|title|path`; severity drift is a baseline behavior change.
 - Do not add Info-only rows to `required_results` unless the fixture exists to prove inventory output.
 
 ## Verification

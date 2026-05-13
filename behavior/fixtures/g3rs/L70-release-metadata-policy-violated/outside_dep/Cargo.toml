@@ -1,0 +1,11 @@
+[package]
+name = "outside_dep"
+version = "0.1.0"
+edition = "2024"
+publish = true
+description = "Publishable fixture outside the workspace"
+license = "MIT"
+repository = "https://example.com/repo"
+
+[lib]
+path = "src/lib.rs"

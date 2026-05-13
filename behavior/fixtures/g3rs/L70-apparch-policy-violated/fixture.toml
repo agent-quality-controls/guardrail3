@@ -1,0 +1,17 @@
+id = "L70-apparch-policy-violated"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "apparch", "--inventory", "--rules-only"],
+]
+expected_exit = "nonzero"
+level = "delegated_policy_valid_project_policy_violated"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+]
+
+intentionally_invalid = [
+  "project_policy_violated",
+]

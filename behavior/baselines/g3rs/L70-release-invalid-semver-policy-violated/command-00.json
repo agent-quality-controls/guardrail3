@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "bec14f5e6c5fb82f7ee5617a41533f0efc4f23c3",
+  "command": [
+    "g3rs",
+    "validate",
+    "--path",
+    ".",
+    "--family",
+    "release",
+    "--inventory",
+    "--rules-only"
+  ],
+  "command_index": 0,
+  "created_at": "2026-05-13T13:41:41.200414+00:00",
+  "cwd": "repo",
+  "exit_code": 1,
+  "fixture_hash": "sha256:018597a674639d15db7be16180284cc2b7ca7b9e5131916b0b3616b50d0d4c4d",
+  "fixture_id": "L70-release-invalid-semver-policy-violated",
+  "normalizer_version": "1",
+  "output_schema_version": "1",
+  "runner_version": "1",
+  "stderr": "",
+  "stdout": "== release ==\n[Info] g3rs-release/description-present Cargo.toml invalid_semver_fixture: description present\n  \n[Info] g3rs-release/license-present Cargo.toml invalid_semver_fixture: license present\n  \n[Info] g3rs-release/repository-present Cargo.toml invalid_semver_fixture: repository present\n  \n[Info] g3rs-release/keywords-present Cargo.toml invalid_semver_fixture: keywords present\n  \n[Info] g3rs-release/categories-present Cargo.toml invalid_semver_fixture: categories present\n  \n[Error] g3rs-release/valid-semver Cargo.toml invalid_semver_fixture: invalid version\n  Version \"not-semver\" is not valid semver (expected major.minor.patch).\n[Info] g3rs-release/docs-rs-metadata Cargo.toml invalid_semver_fixture: docs.rs metadata present\n  \n[Error] g3rs-release/publish-dry-run Cargo.toml invalid_semver_fixture: publish dry-run failed\n  `cargo publish --dry-run` failed: error: unexpected character 'n' while parsing major version number;  --> Cargo.toml:3:11;   |\n[Info] g3rs-release/include-exclude-inventory Cargo.toml invalid_semver_fixture: include/exclude configured\n  \n[Info] g3rs-release/release-plz-baseline release-plz.toml release-plz: baseline configuration correct\n  \n[Info] g3rs-release/cliff-baseline cliff.toml cliff: baseline configuration correct\n  \n[Info] g3rs-release/semver-checks-installed Cargo.toml cargo-semver-checks installed\n  \n[Info] g3rs-release/publish-status-inventory Cargo.toml Publish status inventory\n  Root Cargo metadata sets `publish = true`.\n[Info] g3rs-release/crate-inventory Cargo.toml Crate inventory\n  Repo has 1 publishable crate(s) and 0 non-publishable crate(s).\n[Info] g3rs-release/license-file LICENSE LICENSE file exists\n  Repo root includes `LICENSE`.\n[Info] g3rs-release/release-plz-exists release-plz.toml release-plz.toml exists\n  Repo root includes `release-plz.toml`.\n[Info] g3rs-release/cliff-exists cliff.toml cliff.toml exists\n  Repo root includes `cliff.toml`.\n[Info] g3rs-release/readme-exists README.md invalid_semver_fixture: README present\n  README exists at `README.md`.\n[Info] g3rs-release/readme-quality README.md invalid_semver_fixture: README quality looks good\n  README at `README.md` has content and headings.\n",
+  "tool": "g3rs"
+}

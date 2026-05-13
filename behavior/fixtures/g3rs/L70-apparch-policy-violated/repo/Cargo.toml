@@ -1,0 +1,13 @@
+[workspace]
+members = [
+  "types/core",
+  "logic/service",
+  "logic/worker",
+  "io/outbound/db",
+  "io/outbound/cache",
+  "io/inbound/http",
+]
+resolver = "2"
+
+[patch.crates-io]
+serde = { path = "io/outbound/db" }

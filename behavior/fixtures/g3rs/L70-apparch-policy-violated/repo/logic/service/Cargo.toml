@@ -1,0 +1,13 @@
+[package]
+name = "logic-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+db-outbound = { path = "../../io/outbound/db", package = "db-outbound" }
+http-inbound = { path = "../../io/inbound/http", package = "http-inbound" }
+logic-worker = { path = "../worker", package = "logic-worker" }
+reqwest = "0.12"
+
+[target.'cfg(unix)'.dev-dependencies]
+http-inbound = { path = "../../io/inbound/http", package = "http-inbound" }

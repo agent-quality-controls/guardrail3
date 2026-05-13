@@ -37,9 +37,9 @@ pub enum G3HookCommandRequirement {
     CargoDenyCheck,
     /// Concrete lockfile command (`cargo metadata --locked --format-version 1`).
     ConcreteLockfileCommand,
-    /// `cargo test --workspace`.
+    /// `cargo test --workspace -- --test-threads=1`.
     CargoTest,
-    /// `cargo machete`.
+    /// `cargo-machete`.
     CargoMachete,
     /// `cargo dupes check` with default thresholds.
     CargoDupes,
@@ -78,8 +78,8 @@ impl G3HookCommandRequirement {
             Self::ConcreteLockfileCommand => {
                 Some(&["cargo", "metadata", "--locked", "--format-version", "1"])
             }
-            Self::CargoTest => Some(&["cargo", "test", "--workspace"]),
-            Self::CargoMachete => Some(&["cargo", "machete"]),
+            Self::CargoTest => Some(&["cargo", "test", "--workspace", "--", "--test-threads=1"]),
+            Self::CargoMachete => Some(&["cargo-machete"]),
             Self::CargoDupes => Some(&[
                 "cargo",
                 "dupes",

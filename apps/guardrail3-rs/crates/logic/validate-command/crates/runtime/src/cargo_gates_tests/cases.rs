@@ -99,11 +99,22 @@ fn cargo_gate_commands_dedups_repeated_argv_across_families() {
 }
 
 #[test]
-fn cargo_metadata_gate_stdout_is_suppressed() {
-    assert!(
-        suppress_gate_stdout(argv_of(G3HookCommandRequirement::ConcreteLockfileCommand)),
-        "cargo metadata emits machine JSON on stdout and must not leak into g3rs output"
-    );
+fn cargo_gate_stdout_is_suppressed_for_all_delegated_commands() {
+    for requirement in [
+        G3HookCommandRequirement::ConcreteLockfileCommand,
+        G3HookCommandRequirement::CargoFmtCheck,
+        G3HookCommandRequirement::CargoClippyDenyWarnings,
+        G3HookCommandRequirement::CargoDenyCheck,
+        G3HookCommandRequirement::CargoMachete,
+        G3HookCommandRequirement::CargoDupes,
+        G3HookCommandRequirement::CargoDupesExcludeTests,
+        G3HookCommandRequirement::CargoTest,
+    ] {
+        assert!(
+            suppress_gate_stdout(argv_of(requirement)),
+            "delegated cargo gate output must not leak into g3rs output"
+        );
+    }
 }
 
 /// One `is_rust_relevant_path` test case: input path and expected relevance.

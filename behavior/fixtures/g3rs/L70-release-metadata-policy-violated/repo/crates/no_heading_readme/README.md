@@ -1,0 +1,1 @@
+This fixture README intentionally has enough text to avoid the stub branch, but it has no markdown heading. The release source checks should report the missing heading branch for this crate while every other metadata field remains valid. The text keeps going past the minimum size threshold so the rule does not stop at the shorter README validation branch.
