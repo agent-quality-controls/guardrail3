@@ -10,19 +10,19 @@ path = "src/lib.rs"
 
 [workspace]
 members = []
-resolver = "2"
+resolver = "1"
 
 [profile.mutants]
 inherits = "test"
 
 [workspace.lints.rust]
-warnings = "deny"
+warnings = "warn"
 unsafe_code = "forbid"
 dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
 missing_debug_implementations = "deny"
-unreachable_pub = "deny"
+unreachable_pub = "allow"
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
@@ -70,4 +70,4 @@ single_match_else = "deny"
 ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
-redundant_pub_crate = "allow"
+redundant_pub_crate = "deny"
