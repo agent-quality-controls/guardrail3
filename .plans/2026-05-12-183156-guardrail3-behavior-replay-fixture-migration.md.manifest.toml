@@ -217,7 +217,7 @@ forbidden_paths = [ "repo/target",]
 [fixture_set]
 tool = "g3rs"
 root = "behavior/fixtures/g3rs"
-baseline_root = "behavior/baselines/g3rs"
+golden_output = "behavior/golden/g3rs-validate/approved.normalized.json"
 clean_source = "packages/rs/deny/g3rs-deny-config-checks"
 clean_fixture = "L80-project-policy-valid-clean"
 required_shared_links = [ "behavior/fixtures/parsers", "behavior/fixtures/shared", "behavior/fixtures/g3rs/L80-project-policy-valid-clean/g3rs-deny-types",]

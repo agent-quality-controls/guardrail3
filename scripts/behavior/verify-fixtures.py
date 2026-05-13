@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 try:
@@ -157,6 +158,7 @@ def main() -> int:
     manifest = load_toml(manifest_path_from_argv(sys.argv[1:]))
     fixture_set = manifest["fixture_set"]
     fixture_root = REPO_ROOT / fixture_set["root"]
+    golden_records = golden_records_by_fixture(fixture_set.get("golden_output"))
     failures: list[str] = []
     is_repo_fixture_set = fixture_set["root"] == "behavior/fixtures/g3rs-validate-repo"
     valid_levels = REPO_LEVELS if is_repo_fixture_set else VALID_LEVELS
@@ -205,6 +207,13 @@ def main() -> int:
             continue
 
         metadata = load_toml(metadata_path)
+        if entry.get("baseline_required"):
+            expected_count = len(metadata.get("commands", [])) if isinstance(metadata.get("commands"), list) else 0
+            actual_count = golden_records.get(fixture_id, 0)
+            if actual_count != expected_count:
+                failures.append(
+                    f"{fixture_id}: approved golden record count mismatch: expected {expected_count}, got {actual_count}"
+                )
         for key in ("id", "tool", "expected_exit"):
             if key not in metadata:
                 failures.append(f"{fixture_id}: missing metadata key {key}")
@@ -256,6 +265,21 @@ def main() -> int:
 
     print(f"behavior-fixtures: PASS fixtures:{len(expected_ids)}")
     return 0
+
+
+def golden_records_by_fixture(raw_path: object) -> dict[str, int]:
+    if not isinstance(raw_path, str):
+        return {}
+    path = REPO_ROOT / raw_path
+    if not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    counts: dict[str, int] = {}
+    for record in data.get("records", []):
+        fixture_id = record.get("fixture_id")
+        if isinstance(fixture_id, str):
+            counts[fixture_id] = counts.get(fixture_id, 0) + 1
+    return counts
 
 
 def verify_fixture_kind(fixture_id: str, entry: dict, fixture_dir: Path) -> list[str]:

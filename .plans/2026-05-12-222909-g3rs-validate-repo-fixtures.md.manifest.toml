@@ -62,4 +62,4 @@ files = [ "fixture.toml", "repo/README.md",]
 [fixture_set]
 tool = "g3rs"
 root = "behavior/fixtures/g3rs-validate-repo"
-baseline_root = "behavior/baselines/g3rs-validate-repo"
+golden_output = "behavior/golden/g3rs-validate-repo/approved.normalized.json"

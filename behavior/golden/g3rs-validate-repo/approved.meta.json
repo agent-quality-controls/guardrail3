@@ -1,0 +1,48 @@
+{
+  "suite": "g3rs-validate-repo",
+  "kind": "approved",
+  "run_id": "2026-05-13T21-09-11.649024Z-3ba395f5",
+  "run_commit": "1b005760d",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-13T21:09:11.649024Z",
+  "fixture_hash": "sha256:91d019abc00dcec2ee3a2388b4c713df5f666830385c1aaff6cd78300625b434",
+  "manifest_hash": "sha256:3ba395f51d3b7013170862093156a24c8027c69c39ef4d62de56f280f3d65913",
+  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
+  "tool_version": "0.1.4",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R00-invalid-repo-root/fixture.toml",
+      "sha256": "sha256:206edc772654e879b8b4ff2f2da8076dbc75527a5b600f3c0783ee537c8c5e75"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R10-crawlable-repo-no-adoption/fixture.toml",
+      "sha256": "sha256:fb9ffed80de22e0301669c1b543c646d6269141922e979aa23ac36b705d63be5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R15-hooks-reachable-no-root-cargo/fixture.toml",
+      "sha256": "sha256:281dd81bb56f2a34ca1f8d2b62c90d65fb7aef6ba79ccd2c5a9fb8088c8f71b5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R16-hooks-required-steps-present-but-weakened/fixture.toml",
+      "sha256": "sha256:259f8fb7890b63fc077c862de58d2d3171db86ecc8f10fb6fd2c5b22d0826876"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R17-hooks-modular-scripts-invalid/fixture.toml",
+      "sha256": "sha256:41cc71c3b3e8820ef1100da74ed8f56b8bf152ecd79887a38fd1f8ee478557cf"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R20-crawlable-repo-marker-pair-policy/fixture.toml",
+      "sha256": "sha256:4f9a6a48204ffa28b381e4be39fd611d7420742c99e68a002a1f3a3f408ede89"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R30-root-adoption-pair-complete/fixture.toml",
+      "sha256": "sha256:22efca291a5a5507c38c514e06af08959707f4ddbfccd2196613a7974625f743"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-validate-repo/R40-default-repo-root/fixture.toml",
+      "sha256": "sha256:042b108e6718650689d7a7c50b0fd8dda0ee5c80b021024ba20ae3ec3a36ecd0"
+    }
+  ],
+  "change_path": ".plans/2026-05-13-215648-migrate-behavior-replay-to-goldencheck.md"
+}
