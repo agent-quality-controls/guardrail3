@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "46a17d2c76871fd260c0a48c0fb64ada77dcd2fc",
+  "baseline_commit": "8948672587e84bcba12a6b3ee26afe14d0ed2a92",
   "command": [
     "g3rs",
     "validate",
@@ -9,10 +9,10 @@
     "--inventory"
   ],
   "command_index": 7,
-  "created_at": "2026-05-13T01:08:24.974856+00:00",
+  "created_at": "2026-05-13T02:43:21.765378+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:c6931ab96c8f1c7ee7591f0bbaec3127cb4e0f70d6b3bb817bd600eff809d447",
+  "fixture_hash": "sha256:98ba45ce746fdde3a7bd38882d2e6ffb5c0f3204653725c7093837a1f710533f",
   "fixture_id": "L00-workspace-root-not-found",
   "normalizer_version": "1",
   "output_schema_version": "1",

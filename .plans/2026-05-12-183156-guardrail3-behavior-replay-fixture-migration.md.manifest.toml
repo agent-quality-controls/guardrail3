@@ -18,6 +18,8 @@ closed_file_list = true
 files = [
   "fixture.toml",
   "repo/README.md",
+  "repo/apps/service/Cargo.toml",
+  "repo/apps/service/src/lib.rs",
 ]
 
 [[fixture]]
@@ -202,11 +204,13 @@ baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
+  "repo/.cargo/config.toml",
   "repo/.cargo/mutants.toml",
   "repo/Cargo.lock",
   "repo/Cargo.toml",
   "repo/cliff.toml",
   "repo/clippy.toml",
+  "repo/crates/bad/Cargo.toml",
   "repo/deny.toml",
   "repo/guardrail3-rs.toml",
   "repo/release-plz.toml",
@@ -217,8 +221,14 @@ files = [
 required_results = [
   "g3rs-fmt/rustfmt-required-settings|rustfmt config parse error|rustfmt.toml",
   "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
+  "g3rs-clippy/forbid-clippy-conf-dir-override|cargo config override surface is not parseable|.cargo/config.toml",
   "g3rs-release/config-input-failures|failed to read release config input|release-plz.toml",
   "g3rs-release/config-input-failures|failed to read release config input|cliff.toml",
+  "g3rs-topology/required-inputs-fail-closed|Rust topology required input failed closed|crates/bad/Cargo.toml",
+  "g3rs-cargo/input-failures|failed to read Cargo configuration|crates/bad/Cargo.toml",
+  "g3rs-release/config-input-failures|failed to read release config input|crates/bad/Cargo.toml",
+  "g3rs-release/filetree-input-failures|failed to read release filetree input|crates/bad/Cargo.toml",
+  "g3rs-release/source-input-failures|failed to read release source input|crates/bad/Cargo.toml",
 ]
 
 [[fixture]]
@@ -228,21 +238,19 @@ baseline_required = true
 closed_file_list = true
 files = [
   "fixture.toml",
-  "repo/Cargo.lock",
   "repo/Cargo.toml",
   "repo/clippy.toml",
   "repo/deny.toml",
   "repo/guardrail3-rs.toml",
   "repo/rust-toolchain.toml",
   "repo/rustfmt.toml",
-  "repo/src/lib.rs",
 ]
 required_results = [
   "g3rs-fmt/edition-mismatch|Cargo.toml parse error|Cargo.toml",
 ]
 
 [[fixture]]
-id = "L42-member-cargo-toml-invalid"
+id = "L43-fmt-nightly-key-toolchain-invalid"
 expected_exit = "nonzero"
 baseline_required = true
 closed_file_list = true
@@ -251,7 +259,6 @@ files = [
   "repo/Cargo.lock",
   "repo/Cargo.toml",
   "repo/clippy.toml",
-  "repo/crates/bad/Cargo.toml",
   "repo/deny.toml",
   "repo/guardrail3-rs.toml",
   "repo/rust-toolchain.toml",
@@ -259,11 +266,27 @@ files = [
   "repo/src/lib.rs",
 ]
 required_results = [
-  "g3rs-topology/required-inputs-fail-closed|Rust topology required input failed closed|crates/bad/Cargo.toml",
-  "g3rs-cargo/input-failures|failed to read Cargo configuration|crates/bad/Cargo.toml",
-  "g3rs-release/config-input-failures|failed to read release config input|crates/bad/Cargo.toml",
-  "g3rs-release/filetree-input-failures|failed to read release filetree input|crates/bad/Cargo.toml",
-  "g3rs-release/source-input-failures|failed to read release source input|crates/bad/Cargo.toml",
+  "g3rs-fmt/nightly-keys-on-stable|rust-toolchain.toml parse error|rust-toolchain.toml",
+]
+
+[[fixture]]
+id = "L44-clippy-typed-config-invalid"
+expected_exit = "nonzero"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
 ]
 
 [[fixture]]
@@ -288,6 +311,29 @@ required_results = [
   "g3rs-deps/cargo-machete-installed|cargo-machete missing|Cargo.toml",
   "g3rs-deps/cargo-dupes-installed|cargo-dupes missing|Cargo.toml",
   "g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "L50-test-cargo-mutants-missing"
+expected_exit = "nonzero"
+runner_mode = "path_without_delegated_tools"
+baseline_required = true
+closed_file_list = true
+files = [
+  "fixture.toml",
+  "repo/.cargo/mutants.toml",
+  "repo/.githooks/pre-commit",
+  "repo/Cargo.lock",
+  "repo/Cargo.toml",
+  "repo/clippy.toml",
+  "repo/deny.toml",
+  "repo/guardrail3-rs.toml",
+  "repo/rust-toolchain.toml",
+  "repo/rustfmt.toml",
+  "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-test/cargo-mutants-installed|cargo-mutants missing|Cargo.toml",
 ]
 
 [[fixture]]

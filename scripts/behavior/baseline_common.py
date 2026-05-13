@@ -28,7 +28,13 @@ RUNNER_VERSION = "1"
 NORMALIZER_VERSION = "1"
 OUTPUT_SCHEMA_VERSION = "1"
 G3RS_MANIFEST_PATH = REPO_ROOT / "apps" / "guardrail3-rs" / "Cargo.toml"
-DELEGATED_TOOL_NAMES = {"cargo-deny", "cargo-dupes", "cargo-machete", "gitleaks"}
+DELEGATED_TOOL_NAMES = {
+    "cargo-deny",
+    "cargo-dupes",
+    "cargo-machete",
+    "cargo-mutants",
+    "gitleaks",
+}
 
 
 def load_toml(path: Path) -> dict[str, Any]:
@@ -126,6 +132,7 @@ def normalize_output(text: str, fixture_dir: Path) -> str:
         normalized = normalized.replace(str(path), marker)
     normalized = normalized.replace("/private$REPO", "$REPO")
     normalized = normalized.replace("\\", "/")
+    normalized = re.sub(r"^    Blocking waiting for file lock on package cache\n", "", normalized, flags=re.MULTILINE)
     normalized = re.sub(r"target\(s\) in [0-9.]+s", "target(s) in $TIME", normalized)
     return re.sub(r"(\.cargo-target/debug/deps/[A-Za-z0-9_]+)-[0-9a-f]{16}", r"\1-$HASH", normalized)
 
