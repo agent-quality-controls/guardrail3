@@ -1,6 +1,6 @@
 [coverage_matrix]
 path = "behavior/coverage/g3rs-rule-coverage.toml"
-required_rows = 276
+required_rows = 266
 source_roots = [ "packages/rs", "apps/guardrail3-rs",]
 baseline_roots = [ "behavior/baselines/g3rs", "behavior/baselines/g3rs-validate-repo",]
 fixture_manifests = [
@@ -15,11 +15,11 @@ success_prefix = "behavior-rule-coverage: PASS"
 failure_prefix = "behavior-rule-coverage: FAIL"
 
 [expected_counts]
-source_rule_ids = 276
+source_rule_ids = 266
 baseline_rule_ids = 227
 baseline_error_warn_rule_ids = 195
 info_only_rule_ids = 32
-absent_rule_ids = 49
+absent_rule_ids = 39
 
 [allowed_values]
 current_replay = [ "absent", "info_only", "error_or_warn",]
@@ -87,25 +87,15 @@ target_status = "planned_fixture"
 target_fixture = "R16-hooks-required-steps-present-but-weakened"
 secondary_fixture = "R17-hooks-modular-scripts-invalid"
 rule_ids = [
-  "g3rs-hooks/cargo-deny-step-present",
   "g3rs-hooks/cargo-dupes-excludes",
   "g3rs-hooks/cargo-dupes-installed",
-  "g3rs-hooks/cargo-dupes-step-present",
-  "g3rs-hooks/cargo-machete-step-present",
   "g3rs-hooks/clippy-denies-warnings",
-  "g3rs-hooks/clippy-step-present",
-  "g3rs-hooks/config-changes-trigger-validation",
   "g3rs-hooks/contract-critical-command-not-fail-open",
-  "g3rs-hooks/duplication-tool-is-cargo-dupes",
   "g3rs-hooks/executable-command-context-only",
-  "g3rs-hooks/fmt-step-present",
   "g3rs-hooks/guardrail-binary-available",
-  "g3rs-hooks/guardrail-validate-staged-present",
   "g3rs-hooks/modular-scripts-executable",
   "g3rs-hooks/no-fail-open-wrappers",
   "g3rs-hooks/real-dispatcher-syntax-only",
-  "g3rs-hooks/test-step-present",
-  "g3rs-hooks/test-uses-workspace",
 ]
 
 [[missing_group]]
