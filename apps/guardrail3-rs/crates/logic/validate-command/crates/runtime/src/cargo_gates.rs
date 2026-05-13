@@ -130,8 +130,9 @@ impl CargoGateOutcome {
 
 /// Runs the cargo gate sequence with the given working directory and target dir.
 ///
-/// Stderr is inherited from the parent process. Stdout is inherited only for
-/// commands whose successful stdout is human-readable.
+/// Delegated tool output is suppressed so validator output stays deterministic.
+/// Failures are reported through the command and exit code stored in the
+/// resulting `CargoGateOutcome`.
 ///
 /// Returns the per-gate outcomes in execution order. Stops at the first failure.
 #[allow(
@@ -159,8 +160,13 @@ pub fn run_cargo_gates(
             .args(args.iter().copied())
             .current_dir(cwd)
             .env("CARGO_TARGET_DIR", cargo_target_dir)
+            .env("CARGO_TERM_COLOR", "never")
+            .env("CLICOLOR", "0")
+            .env("CLICOLOR_FORCE", "0")
+            .env("NO_COLOR", "1")
+            .env("TERM", "dumb")
             .stdout(stdout)
-            .stderr(Stdio::inherit());
+            .stderr(Stdio::null());
         let exit_code = command
             .status()
             .map_or(127, |status| status.code().unwrap_or(1));
@@ -177,13 +183,11 @@ pub fn run_cargo_gates(
     outcomes
 }
 
-/// Returns true when a successful cargo gate writes machine output that should
-/// not be shown in normal validator output.
+/// Returns true when a cargo gate's output should not be shown in normal
+/// validator output.
 #[must_use]
-pub(crate) fn suppress_gate_stdout(cmd: &[&str]) -> bool {
-    cmd == G3HookCommandRequirement::ConcreteLockfileCommand
-        .concrete_command()
-        .unwrap_or(&[])
+pub(crate) const fn suppress_gate_stdout(cmd: &[&str]) -> bool {
+    !cmd.is_empty()
 }
 
 /// Returns true if at least one of the staged paths is Rust-relevant (would be

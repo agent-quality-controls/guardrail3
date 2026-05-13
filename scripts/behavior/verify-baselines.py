@@ -129,6 +129,7 @@ def verify_no_volatile_output(fixture_id: str, expected: dict) -> list[str]:
     failures: list[str] = []
     patterns = [
         (r"target\(s\) in [0-9.]+s", "cargo timing"),
+        (r"finished in [0-9.]+s", "rust test timing"),
         (r"\.cargo-target/debug/deps/[A-Za-z0-9_]+-[0-9a-f]{16}", "test binary hash"),
         (r"/private\$REPO", "partially normalized macOS temp path"),
     ]
@@ -147,15 +148,16 @@ def verify_required_results(fixture_id: str, entry: dict, expected: dict) -> lis
     stdout = expected.get("stdout", "")
     if not isinstance(stdout, str):
         return [f"{fixture_id}: baseline stdout must be a string"]
-    lines = stdout.splitlines()
+    findings = parse_finding_lines(stdout, include_info=True)
     required_counter = Counter(entry.get("required_results", []))
     for required, expected_count in required_counter.items():
         parts = required.split("|")
-        if len(parts) != 3:
-            failures.append(f"{fixture_id}: invalid required_results row {required!r}")
+        if len(parts) == 4:
+            severity, rule_id, title, file_path = parts
+        else:
+            failures.append(f"{fixture_id}: required_results row must be severity|rule|title|path: {required!r}")
             continue
-        rule_id, title, file_path = parts
-        actual_count = sum(1 for line in lines if rule_id in line and title in line and file_path in line)
+        actual_count = findings.count((severity, rule_id, title, file_path))
         if actual_count < expected_count:
             failures.append(f"{fixture_id}: missing required result {required}")
     return failures
@@ -172,30 +174,47 @@ def verify_no_unlisted_findings(fixture_id: str, entry: dict, expected: dict) ->
     required_counter = Counter()
     for required in required_rows:
         parts = required.split("|")
-        if len(parts) == 3:
+        if len(parts) == 4:
             required_counter[tuple(parts)] += 1
     actual_counter = Counter()
-    for line in stdout.splitlines():
-        if not (line.startswith("[Error]") or line.startswith("[Warn]")):
-            continue
+    for severity, rule_id, title, file_path in parse_finding_lines(stdout, include_info=False):
         matched = False
         for required in required_counter:
-            rule_id, title, file_path = required
-            if rule_id in line and title in line and file_path in line:
+            required_severity, required_rule_id, required_title, required_file_path = required
+            if (severity, rule_id, title, file_path) == (
+                required_severity,
+                required_rule_id,
+                required_title,
+                required_file_path,
+            ):
                 actual_counter[required] += 1
                 matched = True
                 break
         if not matched:
-            failures.append(f"{fixture_id}: unlisted finding {line}")
+            failures.append(f"{fixture_id}: unlisted finding {severity}|{rule_id}|{title}|{file_path}")
     for required, actual_count in actual_counter.items():
         expected_count = required_counter[required]
         if actual_count > expected_count:
-            rule_id, title, file_path = required
+            severity, rule_id, title, file_path = required
             failures.append(
                 f"{fixture_id}: finding listed {expected_count} times but emitted {actual_count} times: "
-                f"{rule_id}|{title}|{file_path}"
+                f"{severity}|{rule_id}|{title}|{file_path}"
             )
     return failures
+
+
+def parse_finding_lines(stdout: str, *, include_info: bool) -> list[tuple[str, str, str, str]]:
+    findings: list[tuple[str, str, str, str]] = []
+    prefixes = ("[Error]", "[Warn]", "[Info]") if include_info else ("[Error]", "[Warn]")
+    for line in stdout.splitlines():
+        if not line.startswith(prefixes):
+            continue
+        parts = line.split(" ", 3)
+        if len(parts) != 4:
+            continue
+        _severity, rule_id, file_path, title = parts
+        findings.append((_severity.strip("[]"), rule_id, title, file_path))
+    return findings
 
 
 def fixture_requires_closed_findings(fixture_id: str) -> bool:

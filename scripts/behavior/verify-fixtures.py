@@ -162,18 +162,20 @@ def main() -> int:
     if not PRE_COMMIT_HOOK_PATH.is_file():
         failures.append("missing pre-commit hook")
     else:
-        hook = PRE_COMMIT_HOOK_PATH.read_text(encoding="utf-8")
-        required_hook_fragments = [
-            "VALIDATION_STAGED_FILES=",
-            "grep -vE '^behavior/fixtures/'",
-            'MIGRATION_FILES=$(echo "$VALIDATION_STAGED_FILES"',
-            'STAGED_PACKAGE_JSON=$(echo "$VALIDATION_STAGED_FILES"',
-            'RUST_RELEVANT_FILES=$(echo "$VALIDATION_STAGED_FILES"',
-            'TS_RELEVANT_FILES=$(echo "$VALIDATION_STAGED_FILES"',
+        hook_lines = shell_assignment_lines(PRE_COMMIT_HOOK_PATH.read_text(encoding="utf-8"))
+        required_hook_assignments = [
+            ("VALIDATION_STAGED_FILES", 'grep -vE \'^behavior/fixtures/\''),
+            ("MIGRATION_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
+            ("STAGED_PACKAGE_JSON", '$(echo "$VALIDATION_STAGED_FILES"'),
+            ("RUST_RELEVANT_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
+            ("TS_RELEVANT_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
         ]
-        for fragment in required_hook_fragments:
-            if fragment not in hook:
-                failures.append(f"pre-commit hook does not exclude behavior fixtures from validation routing: {fragment}")
+        for variable_name, required_fragment in required_hook_assignments:
+            if not assignment_contains(hook_lines, variable_name, required_fragment):
+                failures.append(
+                    "pre-commit hook does not exclude behavior fixtures from validation routing: "
+                    + variable_name
+                )
 
     for link in fixture_set.get("required_shared_links", []):
         path = REPO_ROOT / link
@@ -246,6 +248,19 @@ def main() -> int:
 
     print(f"behavior-fixtures: PASS fixtures:{len(expected_ids)}")
     return 0
+
+
+def shell_assignment_lines(hook: str) -> list[str]:
+    return [
+        line.strip()
+        for line in hook.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def assignment_contains(lines: list[str], variable_name: str, required_fragment: str) -> bool:
+    prefix = f"{variable_name}="
+    return any(line.startswith(prefix) and required_fragment in line for line in lines)
 
 
 if __name__ == "__main__":

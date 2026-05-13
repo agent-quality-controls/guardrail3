@@ -1,5 +1,6 @@
 profile = "library"
 allowed_deps = []
+# EXCEPTION: fixture records documented config exceptions for inventory replay
 
 [checks]
 garde = false

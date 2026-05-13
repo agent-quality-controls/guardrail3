@@ -134,6 +134,7 @@ def normalize_output(text: str, fixture_dir: Path) -> str:
     normalized = normalized.replace("\\", "/")
     normalized = re.sub(r"^    Blocking waiting for file lock on package cache\n", "", normalized, flags=re.MULTILINE)
     normalized = re.sub(r"target\(s\) in [0-9.]+s", "target(s) in $TIME", normalized)
+    normalized = re.sub(r"finished in [0-9.]+s", "finished in $TIME", normalized)
     return re.sub(r"(\.cargo-target/debug/deps/[A-Za-z0-9_]+)-[0-9a-f]{16}", r"\1-$HASH", normalized)
 
 

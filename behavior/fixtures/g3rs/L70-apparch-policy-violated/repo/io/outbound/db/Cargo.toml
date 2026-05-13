@@ -1,0 +1,9 @@
+[package]
+name = "db-outbound"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cache-outbound = { path = "../cache", package = "cache-outbound" }
+http-inbound = { path = "../../io/inbound/http", package = "http-inbound" }
+logic-service = { path = "../../logic/service", package = "logic-service" }
