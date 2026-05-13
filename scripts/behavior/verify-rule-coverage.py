@@ -78,8 +78,18 @@ def source_rule_ids(plan_manifest: dict[str, Any]) -> set[str]:
         if not root.is_dir():
             continue
         for path in root.rglob("*.rs"):
+            if not is_active_rule_source(path):
+                continue
             rule_ids.update(RULE_PATTERN.findall(path.read_text(encoding="utf-8", errors="ignore")))
     return rule_ids
+
+
+def is_active_rule_source(path: Path) -> bool:
+    excluded_names = {"target", ".cargo-target", "tests", "rule_tests", "contract_tests", "assertions"}
+    parts = set(path.relative_to(REPO_ROOT).parts)
+    if parts & excluded_names:
+        return False
+    return not any(part.endswith("_tests") for part in parts)
 
 
 def baseline_rule_state(plan_manifest: dict[str, Any]) -> dict[str, set[str]]:

@@ -45,12 +45,12 @@ Measured replay output from:
 
 Current counts:
 
-- `276` distinct `g3rs-*/*` IDs found in active Rust source
+- `266` distinct `g3rs-*/*` IDs found in active Rust source
 - `227` IDs appear in any replay baseline
 - `195` IDs appear as `Error` or `Warn` in replay baselines
 - `196` IDs are explicitly required in fixture manifests
 - `32` IDs appear only as clean or inventory `Info`
-- `49` IDs do not appear in any replay baseline
+- `39` IDs do not appear in any replay baseline
 
 The current problem is not that existing fixture failures hide unexpected `Error` or `Warn` findings.
 
@@ -198,25 +198,15 @@ Reason:
 
 Missing IDs:
 
-- `g3rs-hooks/cargo-deny-step-present`
 - `g3rs-hooks/cargo-dupes-excludes`
 - `g3rs-hooks/cargo-dupes-installed`
-- `g3rs-hooks/cargo-dupes-step-present`
-- `g3rs-hooks/cargo-machete-step-present`
 - `g3rs-hooks/clippy-denies-warnings`
-- `g3rs-hooks/clippy-step-present`
-- `g3rs-hooks/config-changes-trigger-validation`
 - `g3rs-hooks/contract-critical-command-not-fail-open`
-- `g3rs-hooks/duplication-tool-is-cargo-dupes`
 - `g3rs-hooks/executable-command-context-only`
-- `g3rs-hooks/fmt-step-present`
 - `g3rs-hooks/guardrail-binary-available`
-- `g3rs-hooks/guardrail-validate-staged-present`
 - `g3rs-hooks/modular-scripts-executable`
 - `g3rs-hooks/no-fail-open-wrappers`
 - `g3rs-hooks/real-dispatcher-syntax-only`
-- `g3rs-hooks/test-step-present`
-- `g3rs-hooks/test-uses-workspace`
 
 Required research before fixture edits:
 
@@ -557,4 +547,3 @@ Reviewer C:
 - verifies no fixture emits unlisted `Error` or `Warn`
 
 No stage is done until adversarial review returns no `MUST FIX`.
-
