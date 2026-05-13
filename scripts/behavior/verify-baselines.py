@@ -164,7 +164,7 @@ def verify_required_results(fixture_id: str, entry: dict, expected: dict) -> lis
 
 
 def verify_no_unlisted_findings(fixture_id: str, entry: dict, expected: dict) -> list[str]:
-    if not fixture_requires_closed_findings(fixture_id):
+    if not fixture_requires_closed_findings(fixture_id, entry):
         return []
     stdout = expected.get("stdout", "")
     if not isinstance(stdout, str):
@@ -217,7 +217,9 @@ def parse_finding_lines(stdout: str, *, include_info: bool) -> list[tuple[str, s
     return findings
 
 
-def fixture_requires_closed_findings(fixture_id: str) -> bool:
+def fixture_requires_closed_findings(fixture_id: str, entry: dict) -> bool:
+    if entry.get("required_results"):
+        return True
     if fixture_id.startswith(("L00-", "L10-", "L20-")):
         return True
     if fixture_id.startswith("L3"):

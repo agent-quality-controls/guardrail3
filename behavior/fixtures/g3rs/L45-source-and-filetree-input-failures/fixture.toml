@@ -1,0 +1,20 @@
+id = "L45-source-and-filetree-input-failures"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "required_inputs_valid_source_filetree_inputs_invalid"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+  "required_inputs_present",
+  "required_inputs_valid",
+]
+
+intentionally_invalid = [
+  "source_inputs_invalid",
+  "filetree_inputs_invalid",
+]

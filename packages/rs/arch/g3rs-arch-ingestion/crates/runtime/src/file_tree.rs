@@ -130,7 +130,11 @@ fn collect_module_dirs_from_mod_declarations(
         if is_test_or_example_path(&rel_path) {
             continue;
         }
-        let ast = parse_rs_file(view, &rel_path)?;
+        let ast = match parse_rs_file(view, &rel_path) {
+            Ok(ast) => ast,
+            Err(G3RsArchIngestionError::ParseFailed { .. }) => continue,
+            Err(error) => return Err(error),
+        };
         let dir = rel_path
             .rsplit_once('/')
             .map_or(String::new(), |(prefix, _)| prefix.to_owned());

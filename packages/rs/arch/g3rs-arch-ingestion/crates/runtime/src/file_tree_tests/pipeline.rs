@@ -111,3 +111,32 @@ fn file_tree_ingestion_stays_inside_the_pointed_workspace() {
             .all(|module_dir| module_dir.dir_rel.starts_with("crate_a/"))
     );
 }
+
+#[test]
+fn file_tree_ingestion_skips_malformed_source_during_module_discovery() {
+    let root = temp_workspace_root();
+
+    write_file(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crate_a\"]\n",
+    );
+    make_dir(&root, "crate_a");
+    write_file(
+        &root,
+        "crate_a/Cargo.toml",
+        "[package]\nname = \"crate_a\"\nversion = \"0.1.0\"\n",
+    );
+    make_dir(&root, "crate_a/src");
+    write_file(&root, "crate_a/src/lib.rs", "pub struct Api;\n");
+    write_file(&root, "crate_a/src/broken.rs", "pub fn broken( {\n");
+
+    let input = file_tree_input(&root);
+
+    assert_eq!(input.crates.len(), 1);
+    let crate_input = input
+        .crates
+        .first()
+        .expect("fixture should keep the valid crate");
+    assert_eq!(crate_input.rel_dir, "crate_a");
+}
