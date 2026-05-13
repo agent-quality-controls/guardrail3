@@ -97,14 +97,14 @@ Target:
 
 Mutation:
 
-- add `src/broken_code.rs`
+- add `src/broken_garde.rs`
 - content: syntactically invalid Rust, for example `pub fn broken( {\n`
 
 Expected finding:
 
 - severity: `Error`
 - title: `code-family input failure`
-- path: `src/broken_code.rs`
+- path: `src/broken_garde.rs`
 
 Reason:
 
@@ -119,21 +119,21 @@ Target:
 
 Mutation:
 
-- same malformed `src/broken_code.rs` should be sufficient if garde is active
+- same malformed `src/broken_garde.rs` should be sufficient if garde is active
 - keep `garde` dependency or `[checks].garde = true` exactly as needed by the copied valid fixture
 
 Expected finding:
 
 - severity: `Error`
 - title: `garde-family input failure`
-- path: `src/broken_code.rs`
+- path: `src/broken_garde.rs`
 
 Reason:
 
 - `g3rs-garde-ingestion` parses Rust source through `syn`
 - malformed source is recorded as an input failure and reported by `g3rs-garde/input-failures`
 
-If this does not fire from `src/broken_code.rs`, first inspect garde activation in the copied fixture. Do not add malformed `guardrail3-rs.toml`, because that belongs to L20/L40 and would hide this layer.
+If this does not fire from `src/broken_garde.rs`, first inspect garde activation in the copied fixture. Do not add malformed `guardrail3-rs.toml`, because that belongs to L20/L40 and would hide this layer.
 
 ### Test Source Input Failure
 
@@ -143,14 +143,14 @@ Target:
 
 Mutation:
 
-- add `tests/broken_source.rs`
+- add `crates/runtime/tests/broken_source.rs`
 - content: syntactically invalid Rust, for example `#[test]\nfn broken( {\n`
 
 Expected finding:
 
 - severity: `Error`
 - title: `failed to read test input`
-- path: `tests/broken_source.rs`
+- path: `crates/runtime/tests/broken_source.rs`
 
 Reason:
 
@@ -165,7 +165,7 @@ Target:
 
 Mutation:
 
-- try to reuse `tests/broken_source.rs`
+- try to reuse `crates/runtime/tests/broken_source.rs`
 - if the same file emits both test source and filetree input failures, keep one fixture
 - if one parse failure suppresses the other in the filetree lane, split into a second L45 fixture with a different malformed file path
 
@@ -173,7 +173,7 @@ Expected finding:
 
 - severity: `Error`
 - title: `failed to read test input`
-- path: `tests/broken_source.rs` or the second fixture path
+- path: `crates/runtime/tests/broken_source.rs` or the second fixture path
 
 Reason:
 

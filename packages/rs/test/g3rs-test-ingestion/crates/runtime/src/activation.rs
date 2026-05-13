@@ -74,24 +74,25 @@ pub(crate) fn summarize_root(
                 reason: err.to_string(),
             }
         })?;
-        let source = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content))
-            .map_err(|err| IngestionError::ParseFailed {
-                path: entry.path.abs_path.clone(),
-                reason: err.to_string(),
-            })?;
-
-        let mut visitor = ActivationVisitor::default();
-        visitor.visit_file(&source);
-
-        if rel_path.starts_with(&runtime_tests)
+        let path_proves_test_surface = rel_path.starts_with(&runtime_tests)
             || is_sidecar_path(rel_path, &runtime_src)
             || rel_path.starts_with(&assertions_src)
             || support_srcs
                 .iter()
-                .any(|prefix| path_is_under(rel_path, prefix))
-            || visitor.has_tests
-            || visitor.has_cfg_test_module
-        {
+                .any(|prefix| path_is_under(rel_path, prefix));
+        if path_proves_test_surface {
+            summary.has_tests = true;
+        }
+
+        let Ok(source) = syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(&content))
+        else {
+            continue;
+        };
+
+        let mut visitor = ActivationVisitor::default();
+        visitor.visit_file(&source);
+
+        if path_proves_test_surface || visitor.has_tests || visitor.has_cfg_test_module {
             summary.has_tests = true;
         }
         if visitor.has_tokio_tests {

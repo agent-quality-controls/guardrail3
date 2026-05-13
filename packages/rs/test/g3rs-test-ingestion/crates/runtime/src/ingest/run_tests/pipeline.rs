@@ -5,7 +5,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use g3rs_test_ingestion_assertions::ingest::run::assert_file_has_result;
+use g3rs_test_ingestion_assertions::ingest::run::{assert_file_has_result, assert_result};
 use tempfile::tempdir;
 
 fn git_init(path: &Path) {
@@ -35,6 +35,26 @@ fn run_config_pipeline(
     inputs
         .iter()
         .flat_map(g3rs_test_config_checks::check)
+        .collect()
+}
+
+fn run_file_tree_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = super::super::ingest_for_file_tree_checks(&crawl)
+        .expect("file-tree ingestion should succeed");
+    inputs
+        .iter()
+        .flat_map(g3rs_test_file_tree_checks::check)
+        .collect()
+}
+
+fn run_source_pipeline(root: &Path) -> Vec<guardrail3_check_types::G3CheckResult> {
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs =
+        super::super::ingest_for_source_checks(&crawl).expect("source ingestion should succeed");
+    inputs
+        .iter()
+        .flat_map(g3rs_test_source_checks::check)
         .collect()
 }
 
@@ -138,5 +158,36 @@ tokio = { version = \"1\", features = [\"macros\"] }\n",
         &results,
         ".cargo/mutants.toml",
         "g3rs-test/mutants-config-sane",
+    );
+}
+
+#[test]
+fn pipeline_reports_malformed_test_source_without_activation_abort() {
+    let temp_dir = tempdir().expect("create temporary workspace root");
+    let root = temp_dir.path();
+    git_init(root);
+
+    write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write(root.join("src/lib.rs"), "pub fn ok() {}\n");
+    write(root.join("tests/broken.rs"), "#[test]\nfn broken( {\n");
+
+    let _config_results = run_config_pipeline(root, true);
+    let file_tree_results = run_file_tree_pipeline(root);
+    let source_results = run_source_pipeline(root);
+
+    assert_result(
+        &file_tree_results,
+        "g3rs-test/filetree-input-failures",
+        "failed to read test input",
+        Some("tests/broken.rs"),
+    );
+    assert_result(
+        &source_results,
+        "g3rs-test/source-input-failures",
+        "failed to read test input",
+        Some("tests/broken.rs"),
     );
 }
