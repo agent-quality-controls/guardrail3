@@ -78,6 +78,7 @@ VALID_INVALID_STATES = {
 }
 
 VALID_EXPECTED_EXITS = {"zero", "nonzero"}
+VALID_FIXTURE_KINDS = {"clean"}
 
 REPO_LEVELS = {
     "repo_root_invalid",
@@ -214,6 +215,7 @@ def main() -> int:
             )
         if entry.get("runner_mode") and metadata.get("runner_mode") != entry["runner_mode"]:
             failures.append(f"{fixture_id}: runner_mode mismatch")
+        failures.extend(verify_fixture_kind(fixture_id, entry, fixture_dir))
         path_prepend = metadata.get("path_prepend", [])
         if path_prepend:
             if not isinstance(path_prepend, list) or not all(isinstance(item, str) for item in path_prepend):
@@ -237,7 +239,7 @@ def main() -> int:
                 if not (fixture_dir / required).is_file():
                     failures.append(f"{fixture_id}: missing required file {required}")
             for forbidden in entry.get("forbidden_paths", []):
-                if (fixture_dir / forbidden).exists():
+                if path_present(fixture_dir / forbidden):
                     failures.append(f"{fixture_id}: forbidden path exists {forbidden}")
 
     if failures:
@@ -248,6 +250,48 @@ def main() -> int:
 
     print(f"behavior-fixtures: PASS fixtures:{len(expected_ids)}")
     return 0
+
+
+def verify_fixture_kind(fixture_id: str, entry: dict, fixture_dir: Path) -> list[str]:
+    fixture_kind = entry.get("fixture_kind")
+    if fixture_id == "L80-project-policy-valid-clean" and fixture_kind != "clean":
+        return [f"{fixture_id}: fixture_kind must be clean"]
+    if fixture_kind is None:
+        return []
+    failures: list[str] = []
+    if fixture_kind not in VALID_FIXTURE_KINDS:
+        failures.append(f"{fixture_id}: invalid fixture_kind {fixture_kind}")
+        return failures
+    if fixture_kind == "clean":
+        if entry.get("expected_exit") != "zero":
+            failures.append(f"{fixture_id}: clean fixture must have expected_exit zero")
+        if entry.get("baseline_required") is not True:
+            failures.append(f"{fixture_id}: clean fixture must require baseline")
+        if entry.get("closed_file_list") is not False:
+            failures.append(f"{fixture_id}: clean fixture must keep closed_file_list false")
+        required_files = {
+            "fixture.toml",
+            "repo/Cargo.toml",
+            "repo/guardrail3-rs.toml",
+            "repo/Cargo.lock",
+        }
+        configured_required = set(entry.get("required_files", []))
+        missing_required = sorted(required_files - configured_required)
+        for required in missing_required:
+            failures.append(f"{fixture_id}: clean fixture missing required_files entry {required}")
+        if "repo/target" not in entry.get("forbidden_paths", []):
+            failures.append(f"{fixture_id}: clean fixture must forbid repo/target")
+        for required in required_files:
+            if not (fixture_dir / required).is_file():
+                failures.append(f"{fixture_id}: clean fixture required file missing on disk {required}")
+        target_dir = fixture_dir / "repo" / "target"
+        if path_present(target_dir):
+            failures.append(f"{fixture_id}: clean fixture has forbidden repo/target")
+    return failures
+
+
+def path_present(path: Path) -> bool:
+    return path.exists() or path.is_symlink()
 
 
 def shell_assignment_lines(hook: str) -> list[str]:

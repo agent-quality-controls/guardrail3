@@ -167,6 +167,7 @@ required_results = [ "Error|g3rs-release/valid-semver|invalid_semver_fixture: in
 
 [[fixture]]
 id = "L80-project-policy-valid-clean"
+fixture_kind = "clean"
 expected_exit = "zero"
 baseline_required = true
 closed_file_list = false
