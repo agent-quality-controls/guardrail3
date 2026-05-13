@@ -7,6 +7,7 @@ commands = [
 expected_exit = "nonzero"
 level = "required_inputs_valid_delegated_tools_missing"
 runner_mode = "path_without_delegated_tools"
+blocked_cargo_subcommands = ["mutants"]
 
 valid_state = [
   "workspace_root_found",

@@ -1,0 +1,2 @@
+exclude_re = [".*"]
+timeout_multiplier = 0.5

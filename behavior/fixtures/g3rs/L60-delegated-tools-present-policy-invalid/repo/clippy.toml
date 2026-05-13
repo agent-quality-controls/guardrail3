@@ -8,33 +8,33 @@
 too-many-lines-threshold = 999
 
 # Maximum cognitive complexity score per function.
-cognitive-complexity-threshold = 15
+cognitive-complexity-threshold = 99
 
 # Maximum number of function parameters.
-too-many-arguments-threshold = 7
+too-many-arguments-threshold = 99
 
 # Maximum type nesting complexity score.
-type-complexity-threshold = 75
+type-complexity-threshold = 999
 
 # Maximum number of bool fields in a struct before clippy::struct_excessive_bools fires.
-max-struct-bools = 3
+max-struct-bools = 99
 
 # Maximum number of bool parameters in a function.
-max-fn-params-bools = 3
+max-fn-params-bools = 99
 
 # Maximum control-flow nesting depth before clippy::excessive_nesting fires.
-excessive-nesting-threshold = 4
+excessive-nesting-threshold = 99
 
 # SETTINGS
 # Keep lint signal on exported APIs instead of suppressing compatibility-sensitive checks.
 avoid-breaking-exported-api = false
 
 # Tests should stay quiet and deterministic.
-allow-dbg-in-tests = false
-allow-expect-in-tests = true
-allow-panic-in-tests = false
-allow-print-in-tests = false
-allow-unwrap-in-tests = false
+allow-dbg-in-tests = true
+allow-expect-in-tests = false
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-unwrap-in-tests = true
 
 # DISALLOWED METHODS
 disallowed-methods = [
