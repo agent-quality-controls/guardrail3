@@ -1,0 +1,21 @@
+id = "R17-hooks-modular-scripts-invalid"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+commands = [
+  ["validate-repo", "--repo-root", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "repo_hooks_reachable_no_root_cargo"
+
+valid_state = [
+  "repo_root_found",
+  "repo_root_directory",
+  "repo_root_crawlable",
+  "repo_hooks_branch_reachable",
+]
+
+intentionally_invalid = [
+  "repo_modular_hook_dispatch_invalid",
+  "repo_modular_hook_script_not_executable",
+]

@@ -62,6 +62,27 @@ pub(crate) fn script_contains_clippy_deny(parsed: &ParsedShellScript) -> bool {
     found
 }
 
+/// Returns whether the script contains any executable cargo clippy command.
+pub(crate) fn script_contains_clippy_command(parsed: &ParsedShellScript) -> bool {
+    let mut found = false;
+    visit_resolved_commands_with_env(
+        parsed,
+        EnvState::default(),
+        CommandQueryOptions::default().with_forward_functions(),
+        |command, _state| {
+            if command.command_name() == "cargo"
+                && crate::support::cargo_subcommand_tail(command, "clippy").is_some()
+            {
+                found = true;
+                CommandVisit::Stop
+            } else {
+                CommandVisit::Continue
+            }
+        },
+    );
+    found
+}
+
 #[cfg(test)]
 pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
     let parsed = hook_shell_parser::parse_script(content);

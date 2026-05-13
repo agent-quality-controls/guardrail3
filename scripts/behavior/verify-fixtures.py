@@ -108,6 +108,9 @@ REPO_INVALID_STATES = {
     "repo_root_file",
     "repo_marker_pair_incomplete",
     "repo_hooks_missing",
+    "repo_hook_steps_weakened",
+    "repo_modular_hook_dispatch_invalid",
+    "repo_modular_hook_script_not_executable",
     "repo_topology_nested_workspace",
 }
 

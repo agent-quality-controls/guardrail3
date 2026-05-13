@@ -1,5 +1,5 @@
 use g3rs_hooks_types::G3RsHooksSelectedHookConfigFact;
-use guardrail3_check_types::{G3CheckResult, G3Severity};
+use guardrail3_check_types::G3CheckResult;
 
 /// Rule identifier emitted by this check.
 const ID: &str = "g3rs-hooks/cargo-dupes-installed";
@@ -10,36 +10,23 @@ pub(crate) fn check(
     installed_tools: &[String],
     results: &mut Vec<G3CheckResult>,
 ) {
-    let cargo_dupes_required = crate::support::hook_requires_cargo_dupes(selected_hook);
-    if !cargo_dupes_required {
-        return;
-    }
-
-    let path_qualified = crate::support::hook_uses_path_qualified_cargo_dupes(selected_hook);
-    let installed = crate::support::tool_installed(installed_tools, "cargo-dupes");
-
-    if path_qualified || installed {
-        results.push(
-            G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                "cargo-dupes installed".to_owned(),
-                "cargo-dupes is available for Rust duplication checks.".to_owned(),
-                Some(selected_hook.rel_path.clone()),
-                None,
-            )
-            .into_inventory(),
-        );
-    } else {
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Error,
-            "cargo-dupes missing".to_owned(),
-            "Hook requires cargo-dupes, but it is not available on PATH.".to_owned(),
-            Some(selected_hook.rel_path.clone()),
-            None,
-        ));
-    }
+    crate::support::check_required_tool_availability(
+        selected_hook,
+        installed_tools,
+        crate::support::RequiredToolAvailabilityCheck {
+            required: crate::support::hook_requires_cargo_dupes,
+            path_qualified: crate::support::hook_uses_path_qualified_cargo_dupes,
+            tool: "cargo-dupes",
+            messages: crate::support::ToolAvailabilityMessages {
+                id: ID,
+                available_title: "cargo-dupes installed",
+                available_message: "cargo-dupes is available for Rust duplication checks.",
+                missing_title: "cargo-dupes missing",
+                missing_message: "Hook requires cargo-dupes, but it is not available on PATH.",
+            },
+        },
+        results,
+    );
 }
 
 #[cfg(test)]

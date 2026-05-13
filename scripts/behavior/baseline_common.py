@@ -33,6 +33,7 @@ DELEGATED_TOOL_NAMES = {
     "cargo-dupes",
     "cargo-machete",
     "cargo-mutants",
+    "g3rs",
     "gitleaks",
 }
 

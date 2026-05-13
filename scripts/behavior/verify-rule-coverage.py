@@ -57,7 +57,8 @@ def load_toml(path: Path) -> dict[str, Any]:
 def verify_rule_coverage(plan_manifest: dict[str, Any]) -> list[str]:
     failures: list[str] = []
     source_ids = source_rule_ids(plan_manifest)
-    baseline_state = baseline_rule_state(plan_manifest)
+    baseline_state_by_fixture = baseline_rule_state_by_fixture(plan_manifest)
+    baseline_state = aggregate_rule_state(baseline_state_by_fixture)
     fixture_ids = fixture_ids_from_manifests(plan_manifest, failures)
     matrix_path = REPO_ROOT / plan_manifest["coverage_matrix"]["path"]
     if not matrix_path.is_file():
@@ -67,7 +68,7 @@ def verify_rule_coverage(plan_manifest: dict[str, Any]) -> list[str]:
     if not isinstance(rows, list):
         return ["coverage matrix must define [[rule]] rows"]
     failures.extend(verify_counts(plan_manifest, source_ids, baseline_state))
-    failures.extend(verify_rows(plan_manifest, rows, source_ids, baseline_state, fixture_ids))
+    failures.extend(verify_rows(plan_manifest, rows, source_ids, baseline_state, baseline_state_by_fixture, fixture_ids))
     return failures
 
 
@@ -92,18 +93,29 @@ def is_active_rule_source(path: Path) -> bool:
     return not any(part.endswith("_tests") for part in parts)
 
 
-def baseline_rule_state(plan_manifest: dict[str, Any]) -> dict[str, set[str]]:
-    states: dict[str, set[str]] = defaultdict(set)
+def baseline_rule_state_by_fixture(plan_manifest: dict[str, Any]) -> dict[str, dict[str, set[str]]]:
+    states: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     for root_name in plan_manifest["coverage_matrix"]["baseline_roots"]:
         root = REPO_ROOT / root_name
         for path in sorted(root.glob("*/command-*.json")):
+            fixture_id = path.parent.name
             data = json.loads(path.read_text(encoding="utf-8"))
             for line in data.get("stdout", "").splitlines():
                 match = FINDING_PATTERN.match(line)
                 if not match:
                     continue
                 severity, rule_id = match.groups()
-                states[rule_id].add("error_or_warn" if severity in {"Error", "Warn"} else "info")
+                states[fixture_id][rule_id].add("error_or_warn" if severity in {"Error", "Warn"} else "info")
+    return states
+
+
+def aggregate_rule_state(
+    baseline_state_by_fixture: dict[str, dict[str, set[str]]],
+) -> dict[str, set[str]]:
+    states: dict[str, set[str]] = defaultdict(set)
+    for fixture_state in baseline_state_by_fixture.values():
+        for rule_id, rule_states in fixture_state.items():
+            states[rule_id].update(rule_states)
     return states
 
 
@@ -150,6 +162,7 @@ def verify_rows(
     rows: list[Any],
     source_ids: set[str],
     baseline_state: dict[str, set[str]],
+    baseline_state_by_fixture: dict[str, dict[str, set[str]]],
     fixture_ids: set[str],
 ) -> list[str]:
     allowed = plan_manifest["allowed_values"]
@@ -167,7 +180,7 @@ def verify_rows(
             failures.append(f"{rule_id}: duplicate coverage row")
         row_by_id[rule_id] = row
         failures.extend(verify_row_schema(row, allowed))
-        failures.extend(verify_row_state(row, baseline_state, fixture_ids))
+        failures.extend(verify_row_state(row, baseline_state, baseline_state_by_fixture, fixture_ids))
 
     missing = sorted(source_ids - set(row_by_id))
     extra = sorted(set(row_by_id) - source_ids)
@@ -199,6 +212,7 @@ def verify_row_schema(row: dict[str, Any], allowed: dict[str, list[str]]) -> lis
 def verify_row_state(
     row: dict[str, Any],
     baseline_state: dict[str, set[str]],
+    baseline_state_by_fixture: dict[str, dict[str, set[str]]],
     fixture_ids: set[str],
 ) -> list[str]:
     rule_id = row.get("id")
@@ -215,14 +229,36 @@ def verify_row_state(
         failures.append(f"{rule_id}: current_replay info_only but baseline emits {sorted(states)}")
     if current == "error_or_warn" and "error_or_warn" not in states:
         failures.append(f"{rule_id}: current_replay error_or_warn but baseline does not emit Error/Warn")
-    if status == "covered" and current != target:
+    inventory_covered = current == "info_only" and target == "info_inventory"
+    if status == "covered" and current != target and not inventory_covered:
         failures.append(f"{rule_id}: covered row must have current_replay equal target_replay")
     if status == "covered" and not fixture:
         failures.append(f"{rule_id}: covered row must name fixture")
     if fixture and fixture not in fixture_ids:
         failures.append(f"{rule_id}: fixture {fixture} is not in fixture manifests")
+    if status == "covered" and isinstance(fixture, str) and fixture in fixture_ids:
+        fixture_states = baseline_state_by_fixture.get(fixture, {}).get(rule_id, set())
+        failures.extend(verify_fixture_state(rule_id, current, fixture, fixture_states))
     if status != "covered" and not reason:
         failures.append(f"{rule_id}: non-covered row must include reason")
+    return failures
+
+
+def verify_fixture_state(
+    rule_id: object,
+    current: object,
+    fixture: str,
+    states: set[str],
+) -> list[str]:
+    if not isinstance(rule_id, str):
+        return []
+    failures: list[str] = []
+    if current == "absent" and states:
+        failures.append(f"{rule_id}: fixture {fixture} must not emit, got {sorted(states)}")
+    if current == "info_only" and states != {"info"}:
+        failures.append(f"{rule_id}: fixture {fixture} must emit only Info, got {sorted(states)}")
+    if current == "error_or_warn" and "error_or_warn" not in states:
+        failures.append(f"{rule_id}: fixture {fixture} must emit Error/Warn")
     return failures
 
 

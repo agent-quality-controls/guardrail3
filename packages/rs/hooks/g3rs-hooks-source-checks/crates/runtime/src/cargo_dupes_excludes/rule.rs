@@ -40,7 +40,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
     } else {
         results.push(G3CheckResult::from_parts(
             ID.to_owned(),
-            G3Severity::Info,
+            G3Severity::Warn,
             "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
                 .to_owned(),
             "Change the `cargo dupes` command in `.githooks/pre-commit` to `cargo dupes --exclude-tests`. This keeps the duplication check focused on real workspace dependency versions instead of test-only crates.".to_owned(),
@@ -55,6 +55,13 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
 pub(crate) fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript) -> bool {
     any_resolved_command_relaxed(parsed, cargo_dupes_with_exclude_tests)
         && !any_resolved_command_relaxed(parsed, cargo_dupes_without_exclude_tests)
+}
+
+/// Returns whether the script contains any executable cargo-dupes command.
+pub(crate) fn script_contains_cargo_dupes_command(parsed: &ParsedShellScript) -> bool {
+    any_resolved_command_relaxed(parsed, |command| {
+        cargo_dupes_exclude_state(command).is_some()
+    })
 }
 
 /// `cargo_dupes_with_exclude_tests` function.

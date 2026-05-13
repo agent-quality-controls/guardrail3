@@ -10,4 +10,6 @@ pub mod contract_required_tools_installed;
 #[cfg(feature = "checks")]
 pub mod guardrail_binary_available;
 #[cfg(feature = "checks")]
+pub mod hook_contract_inventory;
+#[cfg(feature = "checks")]
 pub mod required_tools_installed;

@@ -23,7 +23,7 @@ pub(crate) fn check(
             results.push(
                 G3CheckResult::new(
                     ID.to_owned(),
-                    G3Severity::Error,
+                    G3Severity::Info,
                     format!("{tool} installed for hook contract"),
                     format!("{tool} is available for contract-owned Rust hook execution."),
                     Some(selected_hook.rel_path.clone()),

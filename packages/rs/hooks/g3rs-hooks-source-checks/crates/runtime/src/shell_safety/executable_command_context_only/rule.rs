@@ -83,7 +83,33 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
     ];
     families
         .into_iter()
-        .find_map(|(needle, family)| line.contains(needle).then_some(family))
+        .find_map(|(needle, family)| contains_step_phrase(line, needle).then_some(family))
+}
+
+/// Returns whether inert text contains a guarded hook command phrase.
+fn contains_step_phrase(line: &str, phrase: &str) -> bool {
+    if !phrase.starts_with("g3rs") {
+        return line.contains(phrase);
+    }
+    line.match_indices(phrase)
+        .any(|(index, _)| has_guardrail_phrase_boundary(line, index, phrase.len()))
+}
+
+/// Returns whether a matched guardrail phrase is not part of a hyphenated lookalike command.
+fn has_guardrail_phrase_boundary(line: &str, start: usize, len: usize) -> bool {
+    let Some(end) = start.checked_add(len) else {
+        return false;
+    };
+    let before = line
+        .get(..start)
+        .and_then(|prefix| prefix.chars().next_back());
+    let after = line.get(end..).and_then(|suffix| suffix.chars().next());
+    before.is_none_or(|char| !is_command_word_char(char)) && after != Some('-')
+}
+
+/// Returns whether a character can be part of a shell command word before a guardrail phrase.
+const fn is_command_word_char(char: char) -> bool {
+    char.is_ascii_alphanumeric() || matches!(char, '_' | '/')
 }
 
 /// `matches_step_family` function.

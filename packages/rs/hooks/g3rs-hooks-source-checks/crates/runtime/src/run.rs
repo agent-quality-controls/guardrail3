@@ -79,6 +79,12 @@ fn check_single(
         crate::shell_safety::real_dispatcher_syntax_only::check(&dispatcher_input, &mut results);
 
         crate::gitleaks_step_present::check(&rust_input, &mut results);
+        if crate::clippy_denies_warnings::script_contains_clippy_command(&input.parsed) {
+            crate::clippy_denies_warnings::check(&rust_input, &mut results);
+        }
+        if crate::cargo_dupes_excludes::script_contains_cargo_dupes_command(&input.parsed) {
+            crate::cargo_dupes_excludes::check(&rust_input, &mut results);
+        }
         crate::routing::scope_not_hardcoded_literal::check(&rust_input, &mut results);
         crate::routing::no_env_override_routing::check(&rust_input, &mut results);
         crate::routing::no_upward_walk_from_units::check(&rust_input, &mut results);

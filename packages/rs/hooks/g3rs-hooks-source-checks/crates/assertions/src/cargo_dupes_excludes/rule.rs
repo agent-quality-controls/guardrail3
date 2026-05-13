@@ -16,7 +16,7 @@ pub fn assert_missing(results: &[G3CheckResult]) {
     self::assert_rule_results(
         results,
         &[ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(Severity::Warn),
             title: Some("missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"),
             message_contains: Some("test-only crates"),
             inventory: Some(false),
