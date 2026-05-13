@@ -73,8 +73,8 @@ family = "g3rs-deny"
 coverage_status = "planned_fixture"
 current_replay = "absent"
 target_replay = "error_or_warn"
-fixture = "L60-deny-advanced-policy-invalid"
-reason = "deny config policy is valid enough for delegated policy checks; unknown keys do not hide other deny policy findings"
+fixture = "L60-deny-schema-invalid-policy-invalid"
+reason = "deny schema-invalid fixture isolates cargo-deny deserialization failures from cargo-deny-valid policy drift"
 ```
 
 Allowed `current_replay` values:
@@ -178,15 +178,18 @@ Missing IDs:
 - `g3rs-deny/unknown-keys`
 - `g3rs-deny/wrappers`
 
-Expected fixture:
+Expected fixtures:
 
-- `L60-deny-advanced-policy-invalid`
+- `L60-deny-cargo-valid-policy-invalid`
+- `L60-deny-schema-invalid-policy-invalid`
+- `L60-deny-deprecated-advisories-policy-invalid`
+- `L60-deny-allow-override-policy-invalid`
 
 Reason:
 
 - these are deny config policy behaviors
 - they require valid required inputs and delegated tools
-- they should not be mixed into `L60-delegated-tools-present-policy-invalid` until the rule implementations are checked for hiding
+- cargo-deny-valid policy drift, unknown-key schema failure, deprecated-advisory schema failure, and cargo-deny allow/deny validation failure must not be merged into one fixture
 
 Coverage approach:
 
@@ -373,7 +376,10 @@ Expected result:
 
 Implement:
 
-- `L60-deny-advanced-policy-invalid`
+- `L60-deny-cargo-valid-policy-invalid`
+- `L60-deny-schema-invalid-policy-invalid`
+- `L60-deny-deprecated-advisories-policy-invalid`
+- `L60-deny-allow-override-policy-invalid`
 
 Update:
 

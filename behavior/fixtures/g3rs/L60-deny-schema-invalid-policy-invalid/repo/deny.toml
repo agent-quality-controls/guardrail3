@@ -1,0 +1,91 @@
+fixture-unknown-top-level = true
+
+[graph]
+all-features = true
+no-default-features = false
+
+[bans]
+multiple-versions = "deny"
+wildcards = "allow"
+allow-wildcard-paths = true
+highlight = "all"
+skip = []
+
+deny = [
+  { name = "simd-json", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
+  { name = "json5", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
+  { name = "sonic-rs", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
+  { name = "openssl", wrappers = [], reason = "Ban OpenSSL (standardize on rustls)" },
+  { name = "openssl-sys", wrappers = [], reason = "Ban OpenSSL (standardize on rustls)" },
+  { name = "ureq", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+  { name = "surf", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+  { name = "isahc", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+  { name = "log4rs", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+  { name = "env_logger", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+  { name = "simple_logger", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+  { name = "fern", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+  { name = "async-std", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
+  { name = "smol", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
+  { name = "tokio", wrappers = [], reason = "Ban async runtime dependencies in library profile" },
+  { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
+  { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
+  { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+  { name = "axum", wrappers = [], reason = "Ban framework dependencies in library profile (standardize on typed boundaries)" },
+  { name = "hyper", wrappers = [], reason = "Ban framework transport dependencies in library profile" },
+  { name = "rocket", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+  { name = "warp", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+  { name = "poem", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+  { name = "chrono", wrappers = [], reason = "Ban chrono (standardize on time crate)" },
+  { name = "diesel", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
+  { name = "reqwest", wrappers = [], reason = "Ban HTTP client dependencies in library profile" },
+  { name = "sea-orm", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
+  { name = "sqlx", wrappers = [], reason = "Ban ORM dependencies in library profile" },
+  { name = "bincode", wrappers = [], reason = "Ban competing binary serialization formats" },
+  { name = "rmp-serde", wrappers = [], reason = "Ban competing binary serialization formats" },
+  { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
+  { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
+  { name = "regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, serde_json, toml)" },
+  { name = "fancy-regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "onig", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "pcre2", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "grep-cli", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "grep-regex", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+  { name = "grep-matcher", wrappers = [], reason = "Ban regex crates - use structured parsers (syn, tree-sitter, serde_json, toml)" },
+]
+
+[[bans.features]]
+name = "tokio"
+deny = ["full"]
+allow = ["rt-multi-thread", "macros", "net", "sync", "signal", "bytes", "default", "io-util", "time"]
+
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-DFS-2016",
+  "Unicode-3.0",
+  "Zlib",
+  "CC0-1.0",
+  "OpenSSL",
+  "BSL-1.0",
+  "MPL-2.0",
+  "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.8
+
+[licenses.private]
+ignore = true
+
+[advisories]
+unmaintained = "workspace"
+yanked = "deny"
+ignore = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["sparse+https://index.crates.io/"]
+allow-git = []
