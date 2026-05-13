@@ -211,6 +211,10 @@ files = [
   "repo/rustfmt.toml",
   "repo/src/lib.rs",
 ]
+required_results = [
+  "g3rs-fmt/rustfmt-required-settings|rustfmt config parse error|rustfmt.toml",
+  "g3rs-clippy/config-parseable|clippy.toml parse error|clippy.toml",
+]
 
 [[fixture]]
 id = "L50-required-inputs-valid-delegated-tools-missing"
@@ -229,6 +233,12 @@ files = [
   "repo/rustfmt.toml",
   "repo/src/lib.rs",
 ]
+required_results = [
+  "g3rs-deps/cargo-deny-installed|cargo-deny missing|Cargo.toml",
+  "g3rs-deps/cargo-machete-installed|cargo-machete missing|Cargo.toml",
+  "g3rs-deps/cargo-dupes-installed|cargo-dupes missing|Cargo.toml",
+  "g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
+]
 
 [[fixture]]
 id = "L60-delegated-tools-present-policy-invalid"
@@ -246,6 +256,9 @@ files = [
   "repo/rustfmt.toml",
   "repo/src/lib.rs",
 ]
+required_results = [
+  "g3rs-clippy/too-many-lines-threshold|too-many-lines-threshold wrong value|clippy.toml",
+]
 
 [[fixture]]
 id = "L70-delegated-policy-valid-project-policy-violated"
@@ -262,6 +275,11 @@ files = [
   "repo/rust-toolchain.toml",
   "repo/rustfmt.toml",
   "repo/src/lib.rs",
+]
+required_results = [
+  "g3rs-arch/lib-facade-only|lib.rs must be facade-only|src/lib.rs",
+  "g3rs-test/owned-sidecar-shape|ad hoc cfg(test) module declaration|src/lib.rs",
+  "g3rs-test/inline-test-bodies|inline cfg(test) body in src|src/lib.rs",
 ]
 
 [[fixture]]

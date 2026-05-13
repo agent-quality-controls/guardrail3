@@ -73,6 +73,7 @@ allow = [
   "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.8
+unused-allowed-license = "allow"
 
 [licenses.private]
 ignore = true
@@ -87,3 +88,4 @@ unknown-registry = "deny"
 unknown-git = "deny"
 allow-registry = ["sparse+https://index.crates.io/"]
 allow-git = []
+unused-allowed-source = "allow"

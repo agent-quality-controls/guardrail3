@@ -2,7 +2,7 @@ id = "L50-required-inputs-valid-delegated-tools-missing"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", "repo", "--inventory"],
+  ["validate", "--path", ".", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "required_inputs_valid_delegated_tools_missing"

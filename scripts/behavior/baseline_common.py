@@ -123,9 +123,10 @@ def normalize_output(text: str, fixture_dir: Path) -> str:
     for path, marker in replacements:
         normalized = normalized.replace(path.as_posix(), marker)
         normalized = normalized.replace(str(path), marker)
+    normalized = normalized.replace("/private$REPO", "$REPO")
     normalized = normalized.replace("\\", "/")
-    normalized = re.sub(r"target\\(s\\) in [0-9.]+s", "target(s) in $TIME", normalized)
-    return re.sub(r"(\\.cargo-target/debug/deps/[A-Za-z0-9_]+)-[0-9a-f]{16}", r"\\1-$HASH", normalized)
+    normalized = re.sub(r"target\(s\) in [0-9.]+s", "target(s) in $TIME", normalized)
+    return re.sub(r"(\.cargo-target/debug/deps/[A-Za-z0-9_]+)-[0-9a-f]{16}", r"\1-$HASH", normalized)
 
 
 def fixture_hash(fixture_dir: Path) -> str:
@@ -146,7 +147,10 @@ def fixture_hash(fixture_dir: Path) -> str:
 def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: list[str]) -> subprocess.CompletedProcess[str]:
     env = None
     path_prepend = metadata.get("path_prepend", [])
-    if path_prepend:
+    if metadata.get("runner_mode") == "path_without_delegated_tools":
+        env = os.environ.copy()
+        env["PATH"] = rust_toolchain_path_without_delegated_tools()
+    elif path_prepend:
         env = os.environ.copy()
         prepend_paths = [
             str(command_cwd(fixture_dir, metadata) / rel_path)
@@ -161,6 +165,32 @@ def run_command(tool: str, fixture_dir: Path, metadata: dict[str, Any], argv: li
         capture_output=True,
         check=False,
     )
+
+
+@lru_cache(maxsize=1)
+def rust_toolchain_path_without_delegated_tools() -> str:
+    temp_bin = Path(tempfile.mkdtemp(prefix="g3rs-behavior-path-"))
+    allowed = [
+        "bash",
+        "cargo",
+        "cargo-clippy",
+        "clippy-driver",
+        "env",
+        "git",
+        "rustc",
+        "rustdoc",
+        "rustfmt",
+        "rustup",
+        "sh",
+    ]
+    for name in allowed:
+        source = shutil.which(name)
+        if source is None:
+            continue
+        target = temp_bin / name
+        if not target.exists():
+            target.symlink_to(source)
+    return temp_bin.as_posix()
 
 
 def prepare_runtime_fixture(fixture_dir: Path, metadata: dict[str, Any]) -> None:

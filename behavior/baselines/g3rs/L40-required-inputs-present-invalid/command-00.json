@@ -1,22 +1,22 @@
 {
-  "baseline_commit": "f012585e5a482c7ec5f24b39c373db6277be8676",
+  "baseline_commit": "46a17d2c76871fd260c0a48c0fb64ada77dcd2fc",
   "command": [
     "g3rs",
     "validate",
     "--path",
-    "repo",
+    ".",
     "--inventory"
   ],
   "command_index": 0,
-  "created_at": "2026-05-13T00:28:29.542341+00:00",
+  "created_at": "2026-05-13T01:08:31.440700+00:00",
   "cwd": "repo",
   "exit_code": 1,
-  "fixture_hash": "sha256:b276ff233c4323fe0db661d04f8e08d14944fce24569689d161b2407b933b0c1",
+  "fixture_hash": "sha256:75b9d77fd757139ed28e76b14c9bc21465e8d0418ab6fc2edc7687dd37830d5e",
   "fixture_id": "L40-required-inputs-present-invalid",
   "normalizer_version": "1",
   "output_schema_version": "1",
   "runner_version": "1",
-  "stderr": "path is not a directory: repo\n",
-  "stdout": "",
+  "stderr": "error: could not parse override file: '$REPO/rust-toolchain.toml': error parsing override file: TOML parse error at line 1, column 11\n  |\n1 | [toolchain\n  |           ^\ninvalid table header\nexpected `.`, `]`\n\ntoolchain: ParseFailed { path: \"$REPO/rust-toolchain.toml\", reason: \"invalid rust-toolchain.toml: TOML parse error at line 1, column 11/n  |/n1 | [toolchain/n  |           ^/ninvalid table header/nexpected `.`, `]`/n\" }\ndeny: ParseFailed { path: \"$REPO/deny.toml\", reason: \"invalid deny.toml: TOML parse error at line 1, column 12/n  |/n1 | [advisories/n  |            ^/ninvalid table header/nexpected `.`, `]`/n\" }\ncode: ParseFailed { path: \"$REPO/clippy.toml\", reason: \"invalid clippy.toml: TOML parse error at line 1, column 30/n  |/n1 | too-many-lines-threshold = [/n  |                              ^/ninvalid array/nexpected `]`/n\" }\ncargo gate failed (exit 1): cargo fmt --all -- --check\n",
+  "stdout": "== fmt ==\n[Error] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt config parse error\n  rustfmt config exists but could not be parsed as a TOML table\n== cargo ==\n[Info] g3rs-cargo/workspace-lints Cargo.toml workspace lint tables present\n  `Cargo.toml` defines all required cargo policy lint tables and entries.\n[Info] g3rs-cargo/lint-levels Cargo.toml lint levels match policy\n  `Cargo.toml` uses the expected lint levels for this Cargo policy file.\n[Info] g3rs-cargo/workspace-metadata Cargo.toml edition policy satisfied\n  `Cargo.toml` declares edition `2024`.\n[Info] g3rs-cargo/priority-order Cargo.toml specific lint priorities are safe\n  Specific clippy deny lints do not use negative priority.\n[Info] g3rs-cargo/resolver Cargo.toml workspace resolver set\n  Workspace resolver = `2`\n[Info] g3rs-cargo/disallowed-macros-deny Cargo.toml disallowed macros lint enforced\n  `[workspace.lints.clippy]` enforces `clippy::disallowed_macros = \"deny\"`.\n[Info] g3rs-cargo/unapproved-allow-entries Cargo.toml no unapproved allow entries\n  `Cargo.toml` does not introduce manifest-level allow entries outside the approved inventory.\n[Info] g3rs-cargo/rust-version-policy Cargo.toml library rust-version declared\n  `Cargo.toml` declares `rust-version = \"1.85\"`.\n[Info] g3rs-cargo/missing-member-cargo Cargo.toml all declared workspace members have Cargo.toml\n  workspace root declares only member directories that contain Cargo.toml.\n[Info] g3rs-cargo/input-failures Cargo.toml cargo-family inputs parsed cleanly\n  Active Cargo policy inputs parsed without cargo-family input failures.\n== clippy ==\n[Info] g3rs-clippy/policy-context-parseable guardrail3-rs.toml clippy rust policy parseable\n  Active `guardrail3-rs.toml` parsed successfully for clippy policy context.\n[Info] g3rs-clippy/forbid-clippy-conf-dir-override - no clippy config dir overrides found\n  No applicable cargo config surfaces set `CLIPPY_CONF_DIR`.\n[Error] g3rs-clippy/config-parseable clippy.toml clippy.toml parse error\n  Failed to parse `clippy.toml`: invalid clippy.toml: TOML parse error at line 1, column 30\n  |\n1 | too-many-lines-threshold = [\n  |                              ^\ninvalid array\nexpected `]`\n\n[Info] g3rs-clippy/coverage-exists clippy.toml workspace root covered by clippy config\n  Workspace root is covered by `clippy.toml`.\n== arch ==\n[Info] g3rs-arch/crate-has-facade Cargo.toml crate has facade entry point\n  Crate `` has a facade entry point (lib.rs).\n[Info] g3rs-arch/lib-facade-only src/lib.rs lib.rs is facade-only\n  lib.rs in `` contains only facade declarations.\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `g3rs_fixture_l40` has an `allowed_deps` policy.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock committed\n  Workspace root has `Cargo.lock` committed.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n== test ==\n[Info] g3rs-test/ignore-reason src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n",
   "tool": "g3rs"
 }
