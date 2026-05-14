@@ -199,11 +199,11 @@ reason = "covered by replay baseline error, warning, or inventory row"
 [[rule]]
 id = "g3rs-cargo/approved-allow-inventory"
 family = "g3rs-cargo"
-coverage_status = "planned_existing_fixture_expansion"
-current_replay = "absent"
+coverage_status = "covered"
+current_replay = "error_or_warn"
 target_replay = "error_or_warn"
 fixture = "L60-delegated-tools-present-policy-invalid"
-reason = "planned missing-rule fixture group from coverage matrix plan"
+reason = "L60 exposes root-package approved clippy allow without a matching guardrail waiver, producing approved allow error and count warning"
 
 [[rule]]
 id = "g3rs-cargo/disallowed-macros-deny"
@@ -2310,11 +2310,11 @@ reason = "covered by replay baseline error, warning, or inventory row"
 [[rule]]
 id = "g3rs-toolchain/msrv-consistency"
 family = "g3rs-toolchain"
-coverage_status = "planned_existing_fixture_expansion"
-current_replay = "absent"
+coverage_status = "covered"
+current_replay = "error_or_warn"
 target_replay = "error_or_warn"
 fixture = "L60-delegated-tools-present-policy-invalid"
-reason = "planned missing-rule fixture group from coverage matrix plan"
+reason = "L60 pins rust-toolchain.toml to 1.85.0 while Cargo workspace package rust-version is 1.86"
 
 [[rule]]
 id = "g3rs-topology/declared-workspace-members-only"
