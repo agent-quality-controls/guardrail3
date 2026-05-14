@@ -231,7 +231,7 @@ run_from = "repo"
 commands = [
   ["validate", "--path", ".", "--family", "release", "--inventory", "--rules-only"],
 ]
-expected_exit = "nonzero"
+expected_exit = "zero"
 level = "delegated_policy_valid_project_policy_violated"
 
 valid_state = [
@@ -273,7 +273,7 @@ Modify:
 Add `[[fixture]]`:
 
 - `id = "L70-release-workflow-policy-violated"`
-- `expected_exit = "nonzero"`
+- `expected_exit = "zero"`
 - `baseline_required = true`
 - `closed_file_list = true`
 - exact `files = [...]`
@@ -288,7 +288,7 @@ Closure requirement:
 
 Generate:
 
-- `behavior/baselines/g3rs/L70-release-workflow-policy-violated/command-00.json`
+- `behavior/golden/g3rs-validate/approved.normalized.json`
 
 Use:
 
@@ -360,7 +360,7 @@ apps/guardrail3-rs/target/debug/g3rs validate --path behavior/fixtures/g3rs/L80-
 git diff --check
 ```
 
-The direct L70 fixture command should exit nonzero. Its stdout must contain the three workflow warnings.
+The direct L70 fixture command should exit zero because workflow misses are warnings. Its stdout must contain the three workflow warnings.
 
 ### 8. Adversarial Review
 
@@ -385,4 +385,3 @@ Reviewer C:
 - Verify `release-profile-inventory` is correctly treated as Info inventory, not a missing violation branch.
 
 No implementation is complete until all MUST FIX findings are resolved and a final adversarial pass returns no MUST FIX.
-

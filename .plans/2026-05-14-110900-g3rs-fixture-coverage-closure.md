@@ -51,15 +51,15 @@ Do not replay family ingestion functions.
 
 Do not replay assertion crates.
 
-## Goldencheck Boundary
+## Fixture3 Boundary
 
-Replay storage is `goldencheck`.
+Replay storage is `fixture3`.
 
 Required commands:
 
 ```sh
-goldencheck check --all
-goldencheck approve --suite <suite> --change <plan-or-worklog>
+fixture3 check --all
+fixture3 approve --suite <suite> --change <plan-or-worklog>
 ```
 
 Do not recreate:
@@ -79,7 +79,7 @@ For every rule row:
 4. Add the mutation to that fixture if it does not hide any existing required result.
 5. Split only when the mutation changes unlock state or suppresses another rule branch.
 6. Pin the resulting `Error`, `Warn`, or intentional `Info` row in the fixture manifest.
-7. Approve the changed golden output through `goldencheck`.
+7. Approve the changed golden output through `fixture3`.
 8. Update `behavior/coverage/g3rs-rule-coverage.toml`.
 
 Hiding means:
@@ -224,7 +224,7 @@ Run after every stage:
 ```sh
 python3 -m py_compile scripts/behavior/*.py
 scripts/behavior/verify-all.sh
-goldencheck check --all
+fixture3 check --all
 g3rs validate --path apps/guardrail3-rs --inventory
 g3rs validate --path behavior/fixtures/g3rs/L80-project-policy-valid-clean/repo --inventory
 git diff --check
@@ -244,6 +244,6 @@ After each stage:
 - Check whether any new fixture can be merged into an existing fixture.
 - Check whether any fixture mutation hides a branch that was previously observable.
 - Check whether every new output row is pinned.
-- Check whether all golden output changes were approved through `goldencheck`.
+- Check whether all golden output changes were approved through `fixture3`.
 
 No stage is complete until these checks pass.

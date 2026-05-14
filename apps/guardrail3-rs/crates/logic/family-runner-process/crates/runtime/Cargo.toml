@@ -25,6 +25,7 @@ g3rs-release-hook-contract.workspace = true
 g3rs-release-config-checks.workspace = true
 g3rs-release-filetree-checks.workspace = true
 g3rs-release-ingestion.workspace = true
+g3rs-release-repo-root-checks.workspace = true
 g3rs-release-source-checks.workspace = true
 g3rs-test-hook-contract.workspace = true
 g3rs-toolchain-hook-contract.workspace = true

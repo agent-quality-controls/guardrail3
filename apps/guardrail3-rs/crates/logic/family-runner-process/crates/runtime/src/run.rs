@@ -61,11 +61,16 @@ pub fn run(
                         message: format!("{error:?}"),
                     }
                 })?;
+            let repo_root_input = g3rs_release_ingestion::ingest_for_repo_root_checks(crawl)
+                .map_err(|error| FamilyRunError {
+                    message: format!("{error:?}"),
+                })?;
 
             let mut results = Vec::new();
             results.extend(g3rs_release_config_checks::check(&config_input));
             results.extend(g3rs_release_filetree_checks::check(&filetree_input));
             results.extend(g3rs_release_source_checks::check(&source_input));
+            results.extend(g3rs_release_repo_root_checks::check(&repo_root_input));
             Ok(results)
         }
         SupportedFamily::Topology

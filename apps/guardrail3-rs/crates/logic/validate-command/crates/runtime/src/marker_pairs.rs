@@ -59,6 +59,9 @@ fn walk(repo_root: &Path, dir: &Path, out: &mut Vec<PathBuf>) {
         if is_behavior_fixture_path(repo_root, &path) {
             continue;
         }
+        if is_legacy_archive_path(repo_root, &path) {
+            continue;
+        }
         let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
             continue;
         };
@@ -80,6 +83,15 @@ fn is_behavior_fixture_path(repo_root: &Path, path: &Path) -> bool {
         .ok()
         .and_then(Path::to_str)
         .is_some_and(|rel| rel == "behavior/fixtures" || rel.starts_with("behavior/fixtures/"))
+}
+
+/// Returns true for archived legacy code that is intentionally outside active
+/// repo-wide marker-pair adoption checks.
+fn is_legacy_archive_path(repo_root: &Path, path: &Path) -> bool {
+    path.strip_prefix(repo_root)
+        .ok()
+        .and_then(Path::to_str)
+        .is_some_and(|rel| rel == "legacy" || rel.starts_with("legacy/"))
 }
 
 /// Returns true when `path` exists and its content contains a `[workspace]`

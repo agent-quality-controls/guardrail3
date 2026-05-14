@@ -1336,6 +1336,29 @@ name = "g3rs-release-ingestion-types"
 version = "0.1.0"
 
 [[package]]
+name = "g3rs-release-repo-root-checks"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-repo-root-checks-runtime",
+ "g3rs-release-repo-root-checks-types",
+]
+
+[[package]]
+name = "g3rs-release-repo-root-checks-runtime"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-types",
+ "guardrail3-check-types",
+]
+
+[[package]]
+name = "g3rs-release-repo-root-checks-types"
+version = "0.1.0"
+dependencies = [
+ "g3rs-release-types",
+]
+
+[[package]]
 name = "g3rs-release-source-checks"
 version = "0.1.0"
 dependencies = [
@@ -1823,6 +1846,7 @@ dependencies = [
  "g3rs-release-filetree-checks",
  "g3rs-release-hook-contract",
  "g3rs-release-ingestion",
+ "g3rs-release-repo-root-checks",
  "g3rs-release-source-checks",
  "g3rs-test-hook-contract",
  "g3rs-toolchain-hook-contract",

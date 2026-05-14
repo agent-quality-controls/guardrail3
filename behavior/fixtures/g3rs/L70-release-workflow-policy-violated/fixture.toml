@@ -1,0 +1,19 @@
+id = "L70-release-workflow-policy-violated"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "release", "--inventory", "--rules-only"],
+]
+expected_exit = "zero"
+level = "delegated_policy_valid_project_policy_violated"
+
+valid_state = [
+  "workspace_root_found",
+  "guardrail_config_valid",
+  "required_inputs_present",
+  "required_inputs_valid",
+]
+
+intentionally_invalid = [
+  "project_policy_violated",
+]

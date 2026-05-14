@@ -119,7 +119,60 @@ edition = "2024"
 }
 
 #[test]
-fn repo_root_checks_stub_returns_not_implemented() {
+fn repo_root_checks_ingest_workflow_facts() {
+    let temp = tempdir().expect("create temporary workspace");
+    let root = temp.path();
+    git_init(root);
+    write(
+        root.join("Cargo.toml"),
+        r#"
+[workspace]
+members = []
+resolver = "2"
+"#,
+    );
+    write(
+        root.join(".github/workflows/release.yml"),
+        r#"
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: release-plz/action@v0.5
+      - run: cargo publish --dry-run
+"#,
+    );
+
+    let crawl = crawl(root);
+    let repo = super::super::repo_root_result(&crawl).expect("repo-root ingestion should succeed");
+
+    assert!(repo.workflow_flags.has_release_plz_workflow);
+    assert!(repo.workflow_flags.has_publish_dry_run_workflow);
+    assert!(repo.workflow_flags.has_registry_token_workflow);
+    assert_eq!(
+        repo.release_plz_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml")
+    );
+    assert_eq!(
+        repo.publish_dry_run_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml")
+    );
+    assert_eq!(
+        repo.registry_token_workflow_rel_path.as_deref(),
+        Some(".github/workflows/release.yml")
+    );
+}
+
+#[test]
+fn repo_root_checks_ingest_missing_workflows_as_false_flags() {
     let temp = tempdir().expect("create temporary workspace");
     let root = temp.path();
     git_init(root);
@@ -133,12 +186,14 @@ resolver = "2"
     );
 
     let crawl = crawl(root);
-    let error = super::super::repo_root_result(&crawl).expect_err("stub should fail");
+    let repo = super::super::repo_root_result(&crawl).expect("repo-root ingestion should succeed");
 
-    assert!(matches!(
-        error,
-        crate::IngestionError::RepoRootChecksNotImplemented
-    ));
+    assert!(!repo.workflow_flags.has_release_plz_workflow);
+    assert!(!repo.workflow_flags.has_publish_dry_run_workflow);
+    assert!(!repo.workflow_flags.has_registry_token_workflow);
+    assert!(repo.release_plz_workflow_rel_path.is_none());
+    assert!(repo.publish_dry_run_workflow_rel_path.is_none());
+    assert!(repo.registry_token_workflow_rel_path.is_none());
 }
 
 #[test]

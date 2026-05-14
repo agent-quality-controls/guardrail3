@@ -1,14 +1,14 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-14T10-23-36.716643Z-3ba395f5",
-  "run_commit": "6f89d23f4",
+  "run_id": "2026-05-14T10-58-41.059546Z-6df8fd75",
+  "run_commit": "e4fc87eba",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-14T10:23:36.716643Z",
-  "fixture_hash": "sha256:d2559d6e5d825515d5b54cd76fdfb474438f77bc1c1c1926227a718ef366df4c",
+  "recorded_at": "2026-05-14T10:58:41.059546Z",
+  "fixture_hash": "sha256:4f5734c590adc826293771a17b3c903343bf2985c75bea7eca20d3edc825fa58",
   "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
-  "tool_version": "0.1.5",
+  "tool_version": "0.1.6",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -112,6 +112,10 @@
       "sha256": "sha256:fe17253e3a6b5fc887735d672cb54ebe46a998e35d6bf5428edf2cc543f5b964"
     },
     {
+      "path": "behavior/fixtures/g3rs/L70-release-workflow-policy-violated/fixture.toml",
+      "sha256": "sha256:0496a037d21336694a025328e84c641d663b5497c28539021383340e442e29cd"
+    },
+    {
       "path": "behavior/fixtures/g3rs/L70-workspace-package-policy-violated/fixture.toml",
       "sha256": "sha256:39a9ab56867dae11c00a322761f6fd690688cfc8d00d8abe2479bb356c89ba83"
     },
@@ -120,5 +124,5 @@
       "sha256": "sha256:ca4d4b188d320d9bc6329df53c5c60f1b9d707f25e7ef8f650ce20bed9f8b4e0"
     }
   ],
-  "change_path": ".plans/2026-05-14-113549-migrate-behavior-replay-to-fixture3.md"
+  "change_path": ".plans/2026-05-14-110900-g3rs-fixture-coverage-closure.md"
 }

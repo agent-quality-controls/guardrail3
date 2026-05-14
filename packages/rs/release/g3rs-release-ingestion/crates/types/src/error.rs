@@ -3,8 +3,6 @@ use std::path::PathBuf;
 /// Ingestion failure for release.
 #[derive(Debug)]
 pub enum G3RsReleaseIngestionError {
-    /// Repo-root release ingestion exists in API only for now.
-    RepoRootChecksNotImplemented,
     /// No `Cargo.toml` found at the workspace root.
     CargoTomlNotFound,
     /// The crawl root is not a pointed workspace root.
@@ -33,9 +31,6 @@ pub enum G3RsReleaseIngestionError {
 impl std::fmt::Display for G3RsReleaseIngestionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::RepoRootChecksNotImplemented => {
-                f.write_str("repo-root release ingestion is not implemented yet")
-            }
             Self::CargoTomlNotFound => f.write_str("no Cargo.toml found at the workspace root"),
             Self::NormalizationFailed { path, reason } => {
                 write!(f, "cannot normalize {}: {reason}", path.display())
