@@ -1,14 +1,14 @@
 {
   "suite": "g3rs-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-13T21-09-11.649024Z-3ba395f5",
-  "run_commit": "1b005760d",
+  "run_id": "2026-05-14T11-09-54.201959Z-6df8fd75",
+  "run_commit": "e4fc87eba",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-13T21:09:11.649024Z",
+  "recorded_at": "2026-05-14T11:09:54.201959Z",
   "fixture_hash": "sha256:91d019abc00dcec2ee3a2388b4c713df5f666830385c1aaff6cd78300625b434",
   "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
-  "tool_version": "0.1.5",
+  "tool_version": "0.1.6",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -44,5 +44,5 @@
       "sha256": "sha256:042b108e6718650689d7a7c50b0fd8dda0ee5c80b021024ba20ae3ec3a36ecd0"
     }
   ],
-  "change_path": ".plans/2026-05-14-113549-migrate-behavior-replay-to-fixture3.md"
+  "change_path": ".plans/2026-05-14-175946-g3rs-info-only-coverage-closure.md"
 }

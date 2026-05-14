@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-14T10-58-41.059546Z-6df8fd75",
-  "run_commit": "e4fc87eba",
+  "run_id": "2026-05-14T17-59-59.527729Z-6df8fd75",
+  "run_commit": "4f19cc635",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-14T10:58:41.059546Z",
-  "fixture_hash": "sha256:4f5734c590adc826293771a17b3c903343bf2985c75bea7eca20d3edc825fa58",
+  "recorded_at": "2026-05-14T17:59:59.527729Z",
+  "fixture_hash": "sha256:cfe93721f8570006c507a2e22f6e099e34f013790e16de0bbbdaf831d598e5ce",
   "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
@@ -64,6 +64,10 @@
       "sha256": "sha256:1c24e0fe08daf6e3bc74fc955539a0d2625ba83c55f19377a6f6b301c2dcb7ce"
     },
     {
+      "path": "behavior/fixtures/g3rs/L50-release-semver-checks-missing/fixture.toml",
+      "sha256": "sha256:4e3e602a49320afd755c54b86ba78513ccda7379a29e89762c6828c7a0c05450"
+    },
+    {
       "path": "behavior/fixtures/g3rs/L50-required-inputs-valid-delegated-tools-missing/fixture.toml",
       "sha256": "sha256:98a3126528b700ec141a329c8fd891b30d98bb4b5f140f15b0933ff6b561e477"
     },
@@ -90,6 +94,10 @@
     {
       "path": "behavior/fixtures/g3rs/L60-deny-schema-invalid-policy-invalid/fixture.toml",
       "sha256": "sha256:14a70800f578522f33c567bbc24c8c0a467c6081aec51ba2933dc63a515e104a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L61-cargo-clippy-code-config-branches/fixture.toml",
+      "sha256": "sha256:e9eed73eff7a0af48f04b9a05b0b1b8d2aa3ac8d84baf2c4e6d95f31d1b1dd00"
     },
     {
       "path": "behavior/fixtures/g3rs/L70-apparch-policy-violated/fixture.toml",
@@ -124,5 +132,5 @@
       "sha256": "sha256:ca4d4b188d320d9bc6329df53c5c60f1b9d707f25e7ef8f650ce20bed9f8b4e0"
     }
   ],
-  "change_path": ".plans/2026-05-14-110900-g3rs-fixture-coverage-closure.md"
+  "change_path": ".plans/2026-05-14-175946-g3rs-info-only-coverage-closure.md"
 }

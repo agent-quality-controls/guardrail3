@@ -24,6 +24,7 @@ max-fn-params-bools = 3
 
 # Maximum control-flow nesting depth before clippy::excessive_nesting fires.
 excessive-nesting-threshold = 4
+too-many-lnes-threshold = 75
 
 # SETTINGS
 # Keep lint signal on exported APIs instead of suppressing compatibility-sensitive checks.
@@ -38,6 +39,7 @@ allow-unwrap-in-tests = false
 
 # DISALLOWED METHODS
 disallowed-methods = [
+    1,
     # --- Ban direct environment variable access (std::env::var*) ---
     { path = "std::env::var", reason = "Use the centralized config module -- direct env access scatters configuration and is untestable" },
     { path = "std::env::var_os", reason = "Use the centralized config module -- direct env access scatters configuration and is untestable" },
@@ -130,6 +132,7 @@ disallowed-methods = [
 
 # DISALLOWED TYPES
 disallowed-types = [
+    1,
     # --- Ban HashMap/HashSet (use BTree variants for deterministic ordering) ---
     { path = "std::collections::HashMap", reason = "Use BTreeMap for deterministic iteration order" },
     { path = "std::collections::HashSet", reason = "Use BTreeSet for deterministic iteration order" },
@@ -171,4 +174,3 @@ disallowed-macros = [
     { path = "std::todo", reason = "Ship concrete code or explicit errors -- todo! leaves unfinished control flow in production code" },
     { path = "std::unimplemented", reason = "Ship concrete code or explicit errors -- unimplemented! leaves unfinished control flow in production code" },
 ]
-totally_fake_field = true

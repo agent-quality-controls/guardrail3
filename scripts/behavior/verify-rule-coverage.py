@@ -81,6 +81,13 @@ def verify_rule_coverage(plan_manifest: dict[str, Any]) -> list[str]:
             required_results_by_fixture,
         )
     )
+    failures.extend(
+        verify_error_warn_fixture_closure(
+            rows,
+            baseline_findings_by_fixture,
+            required_results_by_fixture,
+        )
+    )
     return failures
 
 
@@ -234,6 +241,31 @@ def verify_rows(
     return failures
 
 
+def verify_error_warn_fixture_closure(
+    rows: list[Any],
+    baseline_findings_by_fixture: dict[str, Counter[tuple[str, str, str, str]]],
+    required_results_by_fixture: dict[str, Counter[tuple[str, str, str, str]]],
+) -> list[str]:
+    del rows
+    fixtures = sorted(baseline_findings_by_fixture)
+    failures: list[str] = []
+    severities = {"Error", "Warn"}
+    for fixture in fixtures:
+        baseline = Counter(
+            {finding: count for finding, count in baseline_findings_by_fixture.get(fixture, Counter()).items() if finding[0] in severities}
+        )
+        required = Counter(
+            {finding: count for finding, count in required_results_by_fixture.get(fixture, Counter()).items() if finding[0] in severities}
+        )
+        extra = sorted((baseline - required).items())
+        if extra:
+            failures.append(f"{fixture}: emits unpinned Error/Warn rows: {extra}")
+        missing = sorted((required - baseline).items())
+        if missing:
+            failures.append(f"{fixture}: pins Error/Warn rows not emitted by baseline: {missing}")
+    return failures
+
+
 def verify_row_schema(row: dict[str, Any], allowed: dict[str, list[str]]) -> list[str]:
     failures: list[str] = []
     required = ["id", "family", "coverage_status", "current_replay", "target_replay", "fixture", "reason"]
@@ -286,9 +318,20 @@ def verify_row_state(
         failures.extend(verify_fixture_state(rule_id, current, fixture, fixture_states))
         if target == "info_inventory":
             failures.extend(
-                verify_info_inventory_required_result(
+                verify_exact_required_result(
                     rule_id,
                     fixture,
+                    "Info",
+                    baseline_findings_by_fixture.get(fixture, Counter()),
+                    required_results_by_fixture.get(fixture, Counter()),
+                )
+            )
+        if current == "error_or_warn":
+            failures.extend(
+                verify_exact_required_result(
+                    rule_id,
+                    fixture,
+                    "Error/Warn",
                     baseline_findings_by_fixture.get(fixture, Counter()),
                     required_results_by_fixture.get(fixture, Counter()),
                 )
@@ -298,28 +341,30 @@ def verify_row_state(
     return failures
 
 
-def verify_info_inventory_required_result(
+def verify_exact_required_result(
     rule_id: object,
     fixture: str,
+    severity_filter: str,
     baseline_findings: Counter[tuple[str, str, str, str]],
     required_results: Counter[tuple[str, str, str, str]],
 ) -> list[str]:
     if not isinstance(rule_id, str):
         return []
-    info_findings = Counter(
-        {finding: count for finding, count in baseline_findings.items() if finding[0] == "Info" and finding[1] == rule_id}
+    severities = {"Info"} if severity_filter == "Info" else {"Error", "Warn"}
+    matching_findings = Counter(
+        {finding: count for finding, count in baseline_findings.items() if finding[0] in severities and finding[1] == rule_id}
     )
-    pinned_info_findings = Counter(
-        {finding: count for finding, count in required_results.items() if finding[0] == "Info" and finding[1] == rule_id}
+    pinned_findings = Counter(
+        {finding: count for finding, count in required_results.items() if finding[0] in severities and finding[1] == rule_id}
     )
-    if not pinned_info_findings:
-        return [f"{rule_id}: fixture {fixture} must pin an exact Info required_result row"]
-    extra = sorted((info_findings - pinned_info_findings).items())
+    if not pinned_findings:
+        return [f"{rule_id}: fixture {fixture} must pin exact {severity_filter} required_result rows"]
+    extra = sorted((matching_findings - pinned_findings).items())
     if extra:
-        return [f"{rule_id}: fixture {fixture} emits unpinned Info rows: {extra}"]
-    missing = sorted((pinned_info_findings - info_findings).items())
+        return [f"{rule_id}: fixture {fixture} emits unpinned {severity_filter} rows: {extra}"]
+    missing = sorted((pinned_findings - matching_findings).items())
     if missing:
-        return [f"{rule_id}: fixture {fixture} pins Info rows not emitted by baseline: {missing}"]
+        return [f"{rule_id}: fixture {fixture} pins {severity_filter} rows not emitted by baseline: {missing}"]
     return []
 
 

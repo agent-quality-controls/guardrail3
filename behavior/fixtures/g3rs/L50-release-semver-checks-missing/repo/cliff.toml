@@ -1,6 +1,6 @@
 [git]
-conventional_commits = false
-filter_unconventional = false
+conventional_commits = true
+filter_unconventional = true
 
 [[git.commit_parsers]]
 message = "^feat"
