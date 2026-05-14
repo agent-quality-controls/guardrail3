@@ -1,6 +1,6 @@
 target/
 .cargo-target/
-.goldencheck/
+.fixture3/
 mutants.out/
 mutants.out.old/
 node_modules/
