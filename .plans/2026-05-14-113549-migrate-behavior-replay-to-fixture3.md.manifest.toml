@@ -1,0 +1,61 @@
+[migration]
+from = "goldencheck"
+to = "fixture3"
+
+[[rename]]
+from = "goldencheck.yaml"
+to = "fixture3.yaml"
+
+[[rename]]
+from = "scripts/behavior/goldencheck-g3rs-replay.py"
+to = "scripts/behavior/fixture3-g3rs-replay.py"
+
+[[rename]]
+from = "scripts/behavior/verify-goldencheck-migration.py"
+to = "scripts/behavior/verify-fixture3-migration.py"
+
+[[fixture3_suite]]
+name = "g3rs-validate"
+manifest = "fixture3.yaml"
+approved_dir = "behavior/golden/g3rs-validate"
+received_dir = ".fixture3/g3rs-validate"
+diff_dir = ".fixture3/g3rs-validate"
+runner = "scripts/behavior/fixture3-g3rs-replay.py"
+
+[[fixture3_suite]]
+name = "g3rs-validate-repo"
+manifest = "fixture3.yaml"
+approved_dir = "behavior/golden/g3rs-validate-repo"
+received_dir = ".fixture3/g3rs-validate-repo"
+diff_dir = ".fixture3/g3rs-validate-repo"
+runner = "scripts/behavior/fixture3-g3rs-replay.py"
+
+[[forbidden_active_reference]]
+pattern = "goldencheck"
+path_globs = [
+  "fixture3.yaml",
+  "scripts/behavior/*.py",
+  "scripts/behavior/*.sh",
+  ".gitignore",
+]
+
+[[forbidden_path]]
+path = "goldencheck.yaml"
+
+[[forbidden_path]]
+path = "scripts/behavior/goldencheck-g3rs-replay.py"
+
+[[forbidden_path]]
+path = "scripts/behavior/verify-goldencheck-migration.py"
+
+[[forbidden_path]]
+path = ".goldencheck"
+
+[[required_command]]
+argv = ["fixture3", "check", "--all"]
+
+[[required_command]]
+argv = ["python3", "scripts/behavior/verify-fixture3-migration.py"]
+
+[[required_command]]
+argv = ["scripts/behavior/verify-all.sh"]

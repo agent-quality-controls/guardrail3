@@ -6,9 +6,9 @@
   "working_tree": "dirty",
   "recorded_at": "2026-05-13T21:09:11.649024Z",
   "fixture_hash": "sha256:91d019abc00dcec2ee3a2388b4c713df5f666830385c1aaff6cd78300625b434",
-  "manifest_hash": "sha256:3ba395f51d3b7013170862093156a24c8027c69c39ef4d62de56f280f3d65913",
+  "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
-  "tool_version": "0.1.4",
+  "tool_version": "0.1.5",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -44,5 +44,5 @@
       "sha256": "sha256:042b108e6718650689d7a7c50b0fd8dda0ee5c80b021024ba20ae3ec3a36ecd0"
     }
   ],
-  "change_path": ".plans/2026-05-13-215648-migrate-behavior-replay-to-goldencheck.md"
+  "change_path": ".plans/2026-05-14-113549-migrate-behavior-replay-to-fixture3.md"
 }
