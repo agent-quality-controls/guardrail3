@@ -85,6 +85,7 @@ g3rs-release-config-checks = { path = "../../packages/rs/release/g3rs-release-co
 g3rs-release-filetree-checks = { path = "../../packages/rs/release/g3rs-release-filetree-checks", features = ["api"] }
 g3rs-release-hook-contract = { path = "../../packages/rs/release/g3rs-release-hook-contract" }
 g3rs-release-ingestion = { path = "../../packages/rs/release/g3rs-release-ingestion", features = ["api"] }
+g3rs-release-repo-root-checks = { path = "../../packages/rs/release/g3rs-release-repo-root-checks", features = ["api"] }
 g3rs-release-source-checks = { path = "../../packages/rs/release/g3rs-release-source-checks", features = ["api"] }
 
 g3rs-test-config-checks = { path = "../../packages/rs/test/g3rs-test-config-checks", features = ["api"] }

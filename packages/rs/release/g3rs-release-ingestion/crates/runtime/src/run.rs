@@ -43,7 +43,7 @@ pub fn ingest_for_file_tree_checks(
 ///
 /// # Errors
 ///
-/// Returns `IngestionError` when the workspace root is missing or the repo-root checks input is not yet implemented.
+/// Returns `IngestionError` when the workspace root is missing, unreadable, or fails to parse.
 pub fn ingest_for_repo_root_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsReleaseConfigRepo, IngestionError> {

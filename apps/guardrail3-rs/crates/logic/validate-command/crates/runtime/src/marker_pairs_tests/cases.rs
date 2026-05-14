@@ -36,6 +36,22 @@ fn marker_pairs_ignore_behavior_fixtures() {
 }
 
 #[test]
+fn marker_pairs_ignore_legacy_archives() {
+    let temp_dir = tempdir().expect("create temporary repo");
+    let root = temp_dir.path();
+    write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n");
+    write(root.join("guardrail3-rs.toml"), "profile = \"library\"\n");
+    write(
+        root.join("legacy/apps/old/Cargo.toml"),
+        "[workspace]\nmembers = []\n",
+    );
+
+    let results = check_repo(root);
+
+    assert_no_marker_pair_findings(&results);
+}
+
+#[test]
 fn marker_pairs_still_report_real_incomplete_adoption() {
     let temp_dir = tempdir().expect("create temporary repo");
     let root = temp_dir.path();

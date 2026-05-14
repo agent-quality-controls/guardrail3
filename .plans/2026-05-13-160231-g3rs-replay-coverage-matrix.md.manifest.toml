@@ -6,10 +6,10 @@ fixture_manifests = [ ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixtu
 
 [expected_counts]
 source_rule_ids = 266
-baseline_rule_ids = 262
-baseline_error_warn_rule_ids = 215
-info_only_rule_ids = 47
-absent_rule_ids = 4
+baseline_rule_ids = 266
+baseline_error_warn_rule_ids = 218
+info_only_rule_ids = 48
+absent_rule_ids = 0
 
 [allowed_values]
 coverage_status = [ "covered", "planned_fixture", "planned_existing_fixture_expansion", "planned_cli_surface",]

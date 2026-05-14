@@ -155,7 +155,13 @@ pub(crate) fn repo_root_result(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<release_types::G3RsReleaseConfigRepo, IngestionError> {
     require_pointed_workspace_root(crawl)?;
-    Err(IngestionError::RepoRootChecksNotImplemented)
+    let collected = collect(crawl, current_path_env().as_deref());
+    collected
+        .config
+        .repos
+        .into_iter()
+        .next()
+        .ok_or(IngestionError::CargoTomlNotFound)
 }
 
 /// `require_pointed_workspace_root` function.

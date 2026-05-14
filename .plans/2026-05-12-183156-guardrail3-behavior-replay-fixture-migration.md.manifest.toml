@@ -206,6 +206,14 @@ files = [ "fixture.toml", "repo/Cargo.toml", "repo/LICENSE", "repo/README.md", "
 required_results = [ "Error|g3rs-release/valid-semver|invalid_semver_fixture: invalid version|Cargo.toml", "Error|g3rs-release/publish-dry-run|invalid_semver_fixture: publish dry-run failed|Cargo.toml",]
 
 [[fixture]]
+id = "L70-release-workflow-policy-violated"
+expected_exit = "zero"
+baseline_required = true
+closed_file_list = true
+files = [ "fixture.toml", "repo/Cargo.toml", "repo/LICENSE", "repo/README.md", "repo/cliff.toml", "repo/guardrail3-rs.toml", "repo/release-plz.toml", "repo/src/lib.rs",]
+required_results = [ "Info|g3rs-release/release-profile-inventory|Release profile inventory|Cargo.toml", "Warn|g3rs-release/release-plz-workflow|Release-plz workflow missing|Cargo.toml", "Warn|g3rs-release/publish-dry-run-workflow|Publish dry-run workflow missing|Cargo.toml", "Warn|g3rs-release/registry-token|CARGO_REGISTRY_TOKEN missing from workflows|Cargo.toml",]
+
+[[fixture]]
 id = "L80-project-policy-valid-clean"
 fixture_kind = "clean"
 expected_exit = "zero"
