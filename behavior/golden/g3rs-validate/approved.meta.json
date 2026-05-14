@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-13T21-09-07.23912Z-3ba395f5",
-  "run_commit": "1b005760d",
+  "run_id": "2026-05-14T10-23-36.716643Z-3ba395f5",
+  "run_commit": "6f89d23f4",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-13T21:09:07.23912Z",
+  "recorded_at": "2026-05-14T10:23:36.716643Z",
   "fixture_hash": "sha256:d2559d6e5d825515d5b54cd76fdfb474438f77bc1c1c1926227a718ef366df4c",
   "manifest_hash": "sha256:3ba395f51d3b7013170862093156a24c8027c69c39ef4d62de56f280f3d65913",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
@@ -120,5 +120,5 @@
       "sha256": "sha256:ca4d4b188d320d9bc6329df53c5c60f1b9d707f25e7ef8f650ce20bed9f8b4e0"
     }
   ],
-  "change_path": ".plans/2026-05-13-215648-migrate-behavior-replay-to-goldencheck.md"
+  "change_path": ".plans/2026-05-14-110900-g3rs-fixture-coverage-closure.md"
 }

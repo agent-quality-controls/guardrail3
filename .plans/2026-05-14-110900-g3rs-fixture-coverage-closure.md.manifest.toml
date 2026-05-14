@@ -1,0 +1,320 @@
+[coverage_goal]
+source_rule_ids = 266
+target_covered = 266
+target_planned = 0
+golden_outputs = [
+  "behavior/golden/g3rs-validate/approved.normalized.json",
+  "behavior/golden/g3rs-validate-repo/approved.normalized.json",
+]
+coverage_matrix = "behavior/coverage/g3rs-rule-coverage.toml"
+
+[[stage]]
+id = "stage-1-existing-l60-expansion"
+target_fixture = "L60-delegated-tools-present-policy-invalid"
+required_before_status = "planned_existing_fixture_expansion"
+done_when = "listed rows are no longer absent and are pinned in the fixture manifest"
+
+[[stage.rule]]
+id = "g3rs-cargo/approved-allow-inventory"
+family = "g3rs-cargo"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+
+[[stage.rule]]
+id = "g3rs-toolchain/msrv-consistency"
+family = "g3rs-toolchain"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L60-delegated-tools-present-policy-invalid"
+
+[[stage]]
+id = "stage-2-release-workflow-fixture"
+target_fixture = "L70-release-workflow-policy-violated"
+required_before_status = "planned_fixture"
+done_when = "fixture exists only if required and listed rows are error_or_warn"
+
+[[stage.rule]]
+id = "g3rs-release/publish-dry-run-workflow"
+family = "g3rs-release"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L70-release-workflow-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/registry-token"
+family = "g3rs-release"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L70-release-workflow-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/release-plz-workflow"
+family = "g3rs-release"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L70-release-workflow-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/release-profile-inventory"
+family = "g3rs-release"
+current_replay = "absent"
+target_replay = "error_or_warn"
+fixture = "L70-release-workflow-policy-violated"
+
+[[stage]]
+id = "stage-3-info-only-decision-audit"
+target_fixture = "existing-fixtures"
+required_before_status = "planned_existing_fixture_expansion"
+done_when = "no listed row has placeholder info-only reason or planned status"
+
+[[stage.rule]]
+id = "g3rs-cargo/disallowed-macros-deny"
+family = "g3rs-cargo"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L37-workspace-topology-input-conflicts"
+
+[[stage.rule]]
+id = "g3rs-cargo/priority-order"
+family = "g3rs-cargo"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L37-workspace-topology-input-conflicts"
+
+[[stage.rule]]
+id = "g3rs-cargo/workspace-metadata"
+family = "g3rs-cargo"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+
+[[stage.rule]]
+id = "g3rs-clippy/avoid-breaking-exported-api"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/ban-reason-quality"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/duplicate-bans"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/extra-method-ban"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/extra-type-ban"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/library-global-state"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/macro-bans"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/missing-method-ban"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/missing-type-ban"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/policy-context-parseable"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-clippy/unknown-keys"
+family = "g3rs-clippy"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-code/unsafe-code-lint"
+family = "g3rs-code"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L50-required-inputs-valid-delegated-tools-missing"
+
+[[stage.rule]]
+id = "g3rs-code/unused-crate-dependencies-allow"
+family = "g3rs-code"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-deny/highlight-inventory"
+family = "g3rs-deny"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L60-delegated-tools-present-policy-invalid"
+
+[[stage.rule]]
+id = "g3rs-fmt/rustfmt-extra-settings-inventory"
+family = "g3rs-fmt"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L31-root-policy-conflicts-and-nextest-inputs"
+
+[[stage.rule]]
+id = "g3rs-hooks/local-override-inventory"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-hooks/modular-directory-inventory"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-hooks/modular-scripts-inventory"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-hooks/no-bypass-instructions"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-hooks/pre-commit-file-size-inventory"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-hooks/script-stats-inventory"
+family = "g3rs-hooks"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "R15-hooks-reachable-no-root-cargo"
+
+[[stage.rule]]
+id = "g3rs-release/binary-release-workflow"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-metadata-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/cliff-baseline"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-invalid-semver-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/crate-inventory"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+
+[[stage.rule]]
+id = "g3rs-release/linux-release-target"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-metadata-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/publish-status-inventory"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+
+[[stage.rule]]
+id = "g3rs-release/release-plz-baseline"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L70-release-invalid-semver-policy-violated"
+
+[[stage.rule]]
+id = "g3rs-release/semver-checks-installed"
+family = "g3rs-release"
+current_replay = "info_only"
+target_replay = "info_inventory"
+fixture = "L33-release-profile-and-mutants-inputs"
+
+[[stage]]
+id = "stage-4-pinning-audit"
+target_fixture = "all-changed-fixtures"
+done_when = "every newly covered row is present in required_results or is deliberately checked by the coverage verifier"
+
+[[stage]]
+id = "stage-5-coverage-closure"
+target_fixture = "all-fixtures"
+done_when = "behavior-rule-coverage reports source:266 covered:266 planned:0"
+
+[[verification_command]]
+argv = ["python3", "-m", "py_compile", "scripts/behavior/*.py"]
+
+[[verification_command]]
+argv = ["scripts/behavior/verify-all.sh"]
+
+[[verification_command]]
+argv = ["goldencheck", "check", "--all"]
+
+[[verification_command]]
+argv = ["g3rs", "validate", "--path", "apps/guardrail3-rs", "--inventory"]
+
+[[verification_command]]
+argv = [
+  "g3rs",
+  "validate",
+  "--path",
+  "behavior/fixtures/g3rs/L80-project-policy-valid-clean/repo",
+  "--inventory",
+]
+
+[[verification_command]]
+argv = ["git", "diff", "--check"]

@@ -12,6 +12,10 @@ path = "src/lib.rs"
 members = []
 resolver = "1"
 
+[workspace.package]
+edition = "2024"
+rust-version = "1.86"
+
 [profile.mutants]
 inherits = "test"
 
@@ -71,3 +75,6 @@ ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
 redundant_pub_crate = "deny"
+
+[lints.clippy]
+module_name_repetitions = "allow"
