@@ -7,8 +7,8 @@ fixture_manifests = [ ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixtu
 [expected_counts]
 source_rule_ids = 266
 baseline_rule_ids = 266
-baseline_error_warn_rule_ids = 218
-info_only_rule_ids = 48
+baseline_error_warn_rule_ids = 235
+info_only_rule_ids = 31
 absent_rule_ids = 0
 
 [allowed_values]

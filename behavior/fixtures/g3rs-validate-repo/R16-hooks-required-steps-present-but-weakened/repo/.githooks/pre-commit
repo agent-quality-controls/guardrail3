@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Do not use git commit --no-verify; this fixture proves the detector sees bypass instructions.
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 grep -qE '^(<{7} |={7}$|>{7} )' .githooks/pre-commit 2>/dev/null || true

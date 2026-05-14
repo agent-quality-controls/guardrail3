@@ -1,7 +1,7 @@
 [workspace]
-changelog_config = "cliff.toml"
-git_release_enable = true
-release_always = false
+changelog_config = "wrong.toml"
+git_release_enable = false
+release_always = true
 
 [[package]]
 name = "invalid_semver_fixture"
