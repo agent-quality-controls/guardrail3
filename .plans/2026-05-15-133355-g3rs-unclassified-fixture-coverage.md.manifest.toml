@@ -1,0 +1,92 @@
+[coverage_plan]
+ledger = "behavior/migration/g3rs-test-fixture-ledger.toml"
+strict_required = true
+new_g3rs_fixtures = 6
+new_validate_repo_fixtures = 1
+
+[[fixture_contract]]
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+action = "extend_existing"
+rows_covered = 4
+reason = "source-policy branches share the existing delegated-policy-valid fixture layer"
+
+[[fixture_contract]]
+fixture = "L70-workspace-package-policy-violated"
+action = "extend_existing"
+rows_covered = 1
+reason = "build dependency allowlist behavior belongs to the existing package-policy fixture layer"
+
+[[fixture_contract]]
+fixture = "L60-deny-missing-sections-policy-invalid"
+action = "new_g3rs_fixture"
+rows_covered = 7
+reason = "missing deny sections hide field-level deny checks, so this state must be separate"
+
+[[fixture_contract]]
+fixture = "L60-deny-wrong-values-policy-invalid"
+action = "new_g3rs_fixture"
+rows_covered = 3
+reason = "wrong parsed deny values can be bundled because their sections are present and independently checkable"
+
+[[fixture_contract]]
+fixture = "L60-deny-nonstricter-values-policy-invalid"
+action = "new_g3rs_fixture"
+rows_covered = 2
+reason = "valid non-stricter advisory values must not be mixed with wrong baseline values"
+
+[[fixture_contract]]
+fixture = "L60-fmt-package-edition-fallback-policy-invalid"
+action = "new_g3rs_fixture"
+rows_covered = 2
+reason = "package-edition fallback requires absent workspace.package.edition"
+
+[[fixture_contract]]
+fixture = "L60-fmt-workspace-edition-precedence-policy-invalid"
+action = "new_g3rs_fixture"
+rows_covered = 2
+reason = "workspace-edition precedence requires present workspace.package.edition"
+
+[[fixture_contract]]
+fixture = "R18-hooks-path-qualified-safe-comments"
+action = "new_validate_repo_fixture"
+rows_covered = 8
+reason = "hook path-qualified commands and safe comment parsing are compatible non-hiding repo-level behaviors"
+
+[[fixture_contract]]
+fixture = "L38-topology-non-root-nested-context"
+action = "new_g3rs_fixture"
+rows_covered = 5
+reason = "nested-context topology behavior needs the nested workspace as the validation root"
+
+[[fixture_contract]]
+fixture = "L60-deny-deprecated-advisories-policy-invalid"
+action = "reuse_existing"
+rows_covered = 4
+reason = "existing fixture already proves all deprecated advisory fields"
+
+[[fixture_contract]]
+fixture = "L80-project-policy-valid-clean"
+action = "reuse_existing"
+rows_covered = 8
+reason = "clean fixture proves deny/fmt non-hit inventory where no matching findings are allowed"
+
+[[verification]]
+command = "fixture3 check --all"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-fixtures.py"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-fixtures.py --manifest .plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-unclassified-fixture-coverage.py"
+
+[[verification]]
+command = "python3 scripts/behavior/classify-test-fixture-ledger.py --check"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-fixture-ledger.py --strict"
+
+[[verification]]
+command = "scripts/behavior/verify-all.sh"

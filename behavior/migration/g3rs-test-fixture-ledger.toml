@@ -1664,10 +1664,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "inventories_when_edition_is_supported"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -1675,10 +1675,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "inventories_when_hybrid_root_falls_back_to_package_edition"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -1686,10 +1686,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "errors_when_edition_is_not_a_string"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -1697,10 +1697,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "errors_when_edition_is_missing"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -1708,10 +1708,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "errors_when_edition_is_older_than_minimum"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -1719,10 +1719,10 @@ test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/works
 test_name = "errors_when_edition_is_unrecognized"
 line = 4
 status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
+fixture = "L38-topology-non-root-nested-context"
 severity = "Error"
 rule = "g3rs-cargo/workspace-metadata"
-title = "edition below minimum"
+title = "edition missing"
 file = "Cargo.toml"
 
 [[test]]
@@ -4271,8 +4271,12 @@ file = "src/code_policy.rs"
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/many_use_imports/rule_tests/direct.rs"
 test_name = "public_reexports_count_in_non_facade_source"
 line = 35
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+severity = "Warn"
+rule = "g3rs-code/many-use-imports"
+title = "many use imports"
+file = "src/many_use_imports.rs"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/many_use_imports/rule_tests/direct.rs"
@@ -4996,8 +5000,12 @@ file = "src/too_many_use_imports.rs"
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/too_many_use_imports/rule_tests/direct.rs"
 test_name = "public_reexports_count_in_non_facade_source"
 line = 54
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+severity = "Error"
+rule = "g3rs-code/too-many-use-imports"
+title = "too many use imports"
+file = "src/too_many_use_imports.rs"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/too_many_use_imports/rule_tests/direct.rs"
@@ -5036,22 +5044,31 @@ file = "src/too_many_use_imports.rs"
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/direct.rs"
 test_name = "inventories_crate_level_unused_crate_dependencies_allow"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+severity = "Info"
+rule = "g3rs-code/unused-crate-dependencies-allow"
+title = "unused_crate_dependencies exemption"
+file = "src/code_policy.rs"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/direct.rs"
 test_name = "inventories_inline_module_unused_crate_dependencies_allow"
 line = 26
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L70-delegated-policy-valid-project-policy-violated"
+severity = "Info"
+rule = "g3rs-code/unused-crate-dependencies-allow"
+title = "unused_crate_dependencies exemption"
+file = "src/code_policy.rs"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/false_positives.rs"
 test_name = "ignores_other_crate_level_allows"
 line = 1
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-code/unused-crate-dependencies-allow"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/advisories_baseline/rule_tests/golden.rs"
@@ -5101,8 +5118,12 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/advisories_baseline/rule_tests/missing_section.rs"
 test_name = "no_advisories_section"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+severity = "Error"
+rule = "g3rs-deny/advisories-baseline"
+title = "[advisories] section missing"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/advisories_baseline/rule_tests/wrong_values.rs"
@@ -5141,64 +5162,91 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/golden.rs"
 test_name = "no_advisories_section"
 line = 17
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+rule = "g3rs-deny/deprecated-advisories"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/golden.rs"
 test_name = "no_deprecated_fields"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/deprecated-advisories"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/has_deprecated.rs"
 test_name = "all_deprecated_fields_present"
 line = 68
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-deprecated-advisories-policy-invalid"
+severity = "Warn"
+rule = "g3rs-deny/deprecated-advisories"
+title = "deprecated advisory field `vulnerability`"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/has_deprecated.rs"
 test_name = "notice_present"
 line = 26
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-deprecated-advisories-policy-invalid"
+severity = "Warn"
+rule = "g3rs-deny/deprecated-advisories"
+title = "deprecated advisory field `notice`"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/has_deprecated.rs"
 test_name = "unsound_present"
 line = 47
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-deprecated-advisories-policy-invalid"
+severity = "Warn"
+rule = "g3rs-deny/deprecated-advisories"
+title = "deprecated advisory field `unsound`"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/deprecated_advisories/rule_tests/has_deprecated.rs"
 test_name = "vulnerability_present"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-deprecated-advisories-policy-invalid"
+severity = "Warn"
+rule = "g3rs-deny/deprecated-advisories"
+title = "deprecated advisory field `vulnerability`"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_all_features/rule_tests/golden.rs"
 test_name = "all_features_true"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/graph-all-features"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_all_features/rule_tests/missing_section.rs"
 test_name = "no_graph_section"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+severity = "Error"
+rule = "g3rs-deny/graph-all-features"
+title = "[graph] section missing"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_all_features/rule_tests/wrong_value.rs"
 test_name = "all_features_false"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-wrong-values-policy-invalid"
+severity = "Error"
+rule = "g3rs-deny/graph-all-features"
+title = "graph all-features must be true"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_all_features/rule_tests/wrong_value.rs"
@@ -5215,15 +5263,20 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_no_default_features/rule_tests/golden.rs"
 test_name = "no_default_features_false"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/graph-no-default-features"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_no_default_features/rule_tests/missing_section.rs"
 test_name = "no_graph_section"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+severity = "Error"
+rule = "g3rs-deny/graph-no-default-features"
+title = "[graph] section missing"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_no_default_features/rule_tests/wrong_value.rs"
@@ -5240,50 +5293,63 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/graph_no_default_features/rule_tests/wrong_value.rs"
 test_name = "no_default_features_true"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-wrong-values-policy-invalid"
+severity = "Error"
+rule = "g3rs-deny/graph-no-default-features"
+title = "graph no-default-features must be false"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/golden.rs"
 test_name = "matching_baseline"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/stricter-advisories-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/golden.rs"
 test_name = "no_advisories_section"
 line = 17
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+rule = "g3rs-deny/stricter-advisories-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/stricter.rs"
 test_name = "unmaintained_all_is_stricter_than_workspace_baseline"
 line = 17
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-deny-wrong-values-policy-invalid"
+severity = "Info"
+rule = "g3rs-deny/stricter-advisories-inventory"
+title = "advisories `unmaintained` stricter than baseline"
+file = "deny.toml"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/stricter.rs"
 test_name = "unmaintained_transitive_is_not_stricter_than_workspace_baseline"
 line = 36
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-nonstricter-values-policy-invalid"
+rule = "g3rs-deny/stricter-advisories-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/stricter.rs"
 test_name = "yanked_allow_is_not_stricter_than_warn_baseline"
 line = 47
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-nonstricter-values-policy-invalid"
+rule = "g3rs-deny/stricter-advisories-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/advisories/stricter_advisories_inventory/rule_tests/stricter.rs"
 test_name = "yanked_deny"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/stricter-advisories-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/allow_override_channel_tests/golden.rs"
@@ -5510,15 +5576,17 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/extra_feature_bans_inventory/rule_tests/golden.rs"
 test_name = "no_findings_when_only_tokio_entry"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/extra-feature-bans-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/extra_feature_bans_inventory/rule_tests/missing_section.rs"
 test_name = "no_findings_when_bans_section_missing"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+rule = "g3rs-deny/extra-feature-bans-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/highlight_inventory/rule_tests/different_value.rs"
@@ -5535,15 +5603,17 @@ file = "deny.toml"
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/highlight_inventory/rule_tests/golden.rs"
 test_name = "no_findings_when_highlight_matches_baseline"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+rule = "g3rs-deny/highlight-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/highlight_inventory/rule_tests/missing_section.rs"
 test_name = "no_findings_when_bans_section_missing"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_non_hit"
+fixture = "L60-deny-missing-sections-policy-invalid"
+rule = "g3rs-deny/highlight-inventory"
 
 [[test]]
 test_path = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/bans/multiple_versions_floor/rule_tests/golden.rs"
@@ -6868,8 +6938,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/deps/g3rs-deps-config-checks/crates/runtime/src/build_dependencies_allowlisted/rule_tests/golden.rs"
 test_name = "workspace_true_external_build_dependency_is_checked"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L70-workspace-package-policy-violated"
+severity = "Error"
+rule = "g3rs-deps/build-dependencies-allowlisted"
+title = "unauthorized build dependency"
+file = "Cargo.toml"
 
 [[test]]
 test_path = "packages/rs/deps/g3rs-deps-config-checks/crates/runtime/src/cargo_deny_installed/rule_tests/golden.rs"
@@ -7389,8 +7463,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/package_edition.rs"
 test_name = "uses_package_edition_fallback_when_workspace_package_edition_is_absent"
 line = 6
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-fmt-package-edition-fallback-policy-invalid"
+severity = "Warn"
+rule = "g3rs-fmt/edition-mismatch"
+title = "rustfmt edition differs from Cargo edition"
+file = "rustfmt.toml"
 
 [[test]]
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/parse_error.rs"
@@ -7407,8 +7485,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/precedence.rs"
 test_name = "prefers_workspace_package_edition_over_package_edition"
 line = 6
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-fmt-workspace-edition-precedence-policy-invalid"
+severity = "Warn"
+rule = "g3rs-fmt/edition-mismatch"
+title = "rustfmt edition differs from Cargo edition"
+file = "rustfmt.toml"
 
 [[test]]
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/unreadable.rs"
@@ -7436,15 +7518,23 @@ file = "rustfmt.toml"
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/extra_settings/rule_tests/skip_macro_invocations.rs"
 test_name = "inventories_empty_skip_macro_invocations"
 line = 5
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-fmt-package-edition-fallback-policy-invalid"
+severity = "Info"
+rule = "g3rs-fmt/rustfmt-extra-settings-inventory"
+title = "rustfmt extra setting: skip_macro_invocations"
+file = "rustfmt.toml"
 
 [[test]]
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/extra_settings/rule_tests/skip_macro_invocations.rs"
 test_name = "inventories_nonempty_skip_macro_invocations"
 line = 25
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L60-fmt-workspace-edition-precedence-policy-invalid"
+severity = "Info"
+rule = "g3rs-fmt/rustfmt-extra-settings-inventory"
+title = "rustfmt extra setting: skip_macro_invocations"
+file = "rustfmt.toml"
 
 [[test]]
 test_path = "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/ignore_escape_hatch/rule_tests/documented.rs"
@@ -8696,8 +8786,12 @@ file = ".githooks/pre-commit"
 test_path = "packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/contract_required_tools_installed/rule_tests/golden.rs"
 test_name = "path_qualified_machete_and_dupes_satisfy_contract"
 line = 130
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/contract-required-tools-installed"
+title = "cargo-dupes installed for hook contract"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/contract_required_tools_installed/rule_tests/golden.rs"
@@ -8838,8 +8932,12 @@ file = ".githooks/pre-commit"
 test_path = "packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/required_tools_installed/rule_tests/cases.rs"
 test_name = "treats_path_qualified_tools_as_installed"
 line = 80
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/required-tools-installed"
+title = "cargo-deny installed"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-file-tree-checks/crates/runtime/src/execution_trust/rule_tests/cases.rs"
@@ -11333,8 +11431,12 @@ file = ".githooks/pre-commit"
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs"
 test_name = "cargo_metadata_locked_satisfies_concrete_lockfile_contract"
 line = 196
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/required-contract-command-present"
+title = "hook contract command is present"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs"
@@ -11351,8 +11453,12 @@ file = ".githooks/pre-commit"
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs"
 test_name = "cargo_update_locked_satisfies_concrete_lockfile_contract"
 line = 208
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/required-contract-command-present"
+title = "hook contract command is present"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs"
@@ -11860,29 +11966,45 @@ file = ".githooks/pre-commit"
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_bypass_instructions/rule_tests/golden.rs"
 test_name = "ignores_escaped_hash_when_comment_text_looks_like_bypass_instruction"
 line = 36
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/no-bypass-instructions"
+title = "no hook bypass instructions"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_bypass_instructions/rule_tests/golden.rs"
 test_name = "ignores_escaped_space_before_hash_when_comment_text_looks_like_bypass_instruction"
 line = 53
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/no-bypass-instructions"
+title = "no hook bypass instructions"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_bypass_instructions/rule_tests/golden.rs"
 test_name = "ignores_hash_inside_quotes"
 line = 70
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/no-bypass-instructions"
+title = "no hook bypass instructions"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_bypass_instructions/rule_tests/golden.rs"
 test_name = "passes_when_no_no_verify_comment_exists"
 line = 84
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "R18-hooks-path-qualified-safe-comments"
+severity = "Info"
+rule = "g3rs-hooks/no-bypass-instructions"
+title = "no hook bypass instructions"
+file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/no_fail_open_wrappers/rule_tests/golden.rs"
@@ -15381,8 +15503,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/declared_workspace_members_only/rule_tests/cases.rs"
 test_name = "undeclared_issue_under_nested_workspace_mentions_parent_workspace"
 line = 60
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-topology/declared-workspace-members-only"
+title = "Workspace child `crates/core` must be declared explicitly"
+file = "crates/core/Cargo.toml"
 
 [[test]]
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/member_paths_must_not_escape_root/rule_tests/cases.rs"
@@ -15421,8 +15547,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/member_paths_must_not_escape_root/rule_tests/cases.rs"
 test_name = "escaping_member_under_nested_workspace_mentions_that_workspace"
 line = 121
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-topology/member-paths-must-not-escape-root"
+title = "Workspace `.` uses escaping member path `../shared`"
+file = "Cargo.toml"
 
 [[test]]
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/member_paths_must_not_escape_root/rule_tests/cases.rs"
@@ -15450,8 +15580,12 @@ file = "Cargo.toml"
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_guardrail3_rs_toml/rule_tests/cases.rs"
 test_name = "nested_guardrail3_rs_toml_under_non_root_outer_mentions_that_outer"
 line = 29
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-topology/no-nested-guardrail3-rs-toml"
+title = "Nested adopted Rust unit `inner` is forbidden"
+file = "inner/guardrail3-rs.toml"
 
 [[test]]
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_guardrail3_rs_toml/rule_tests/cases.rs"
@@ -15512,8 +15646,12 @@ file = "crates/nested/Cargo.toml"
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_workspaces/rule_tests/cases.rs"
 test_name = "nested_workspace_under_non_root_parent_mentions_that_parent"
 line = 98
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-topology/no-nested-workspaces"
+title = "Nested workspace `inner` is forbidden"
+file = "inner/Cargo.toml"
 
 [[test]]
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/required_inputs_fail_closed/rule_tests/cases.rs"
@@ -15559,8 +15697,12 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/workspace_local_file_placement/rule_tests/cases.rs"
 test_name = "fmt_message_is_preserved_verbatim"
 line = 147
-status = "unclassified"
-reason = "current fixtures do not prove this rule test's hit or non-hit behavior"
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-topology/workspace-local-file-placement"
+title = "`fmt` file `crates/core/rustfmt.toml` is illegally placed"
+file = "crates/core/rustfmt.toml"
 
 [[test]]
 test_path = "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/workspace_local_file_placement/rule_tests/cases.rs"
