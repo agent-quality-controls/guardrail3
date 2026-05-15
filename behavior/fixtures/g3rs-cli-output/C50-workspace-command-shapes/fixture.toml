@@ -1,0 +1,11 @@
+id = "C50-workspace-command-shapes"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+commands = [
+  ["init", "workspace", "--path", "."],
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "cli_workspace_command_shapes"
+

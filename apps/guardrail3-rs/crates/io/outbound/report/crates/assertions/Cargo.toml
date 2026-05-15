@@ -4,7 +4,13 @@ version.workspace = true
 edition.workspace = true
 publish = false
 
+[[bin]]
+name = "guardrail3-rs-report-fixture-output"
+path = "src/report_fixture_output/main.rs"
+
 [dependencies]
+guardrail3-check-types.workspace = true
+guardrail3-rs-app-types = { path = "../../../../../types/app-types" }
 guardrail3-rs-report = { path = "../runtime" }
 
 [features]

@@ -18,11 +18,11 @@ name = "needs_validate_command_output"
 expected_rows = 23
 
 [[approved_disposition]]
-name = "needs_cli_output"
+name = "covered_by_cli_output"
 expected_rows = 11
 
 [[approved_disposition]]
-name = "needs_renderer_output"
+name = "covered_by_renderer_output"
 expected_rows = 4
 
 [[approved_disposition]]

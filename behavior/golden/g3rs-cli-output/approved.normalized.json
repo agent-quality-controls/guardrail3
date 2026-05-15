@@ -1,0 +1,195 @@
+{
+  "manifest": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md.manifest.toml",
+  "records": [
+    {
+      "command": [
+        "g3rs",
+        "--help"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73ad1f891d2ac5cae713d02ea003377a1815a70836c474498b0a15f552f8ab5b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Top-level CLI parser for the guardrail3-rs binary\n\nUsage: g3rs <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n\nG3RS enforces Rust repo setup and Rust workspace guardrails.\n\nStart here:\n  g3rs init repo\n  g3rs init workspace --path <path>\n  g3rs validate repo\n  g3rs validate workspace --path <path>\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted Rust unit: Cargo.toml plus guardrail3-rs.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3RS.\n  validate workspace checks one Rust unit.\n\nDeleted command shapes:\n  g3rs validate-repo\n  g3rs validate --path <path>\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "--help"
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73ad1f891d2ac5cae713d02ea003377a1815a70836c474498b0a15f552f8ab5b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Reports repo or workspace validation findings\n\nUsage: g3rs validate <COMMAND>\n\nCommands:\n  repo       Validates repository-level guardrails\n  workspace  Validates one workspace root against the selected families\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "init",
+        "--help"
+      ],
+      "command_index": 2,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73ad1f891d2ac5cae713d02ea003377a1815a70836c474498b0a15f552f8ab5b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Writes repo or workspace setup\n\nUsage: g3rs init <COMMAND>\n\nCommands:\n  repo       Bootstraps repo-level hook guardrails\n  workspace  Bootstraps one adopted Rust workspace or package root\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate-repo"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:f2e61967b8345b8eeeb7d3c880df3949deb0e23f73c27a8a54a352639fa80cdc",
+      "fixture_id": "C20-reject-old-command-shapes",
+      "stderr": "error: unrecognized subcommand 'validate-repo'\n\n  tip: a similar subcommand exists: 'validate'\n\nUsage: g3rs <COMMAND>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "--path",
+        "."
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:f2e61967b8345b8eeeb7d3c880df3949deb0e23f73c27a8a54a352639fa80cdc",
+      "fixture_id": "C20-reject-old-command-shapes",
+      "stderr": "error: unexpected argument '--path' found\n\nUsage: g3rs validate <COMMAND>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "init",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:446a47608c5bbec9505bdc3ffc8516c84930c262a9d9dbff83ebb1ebbcf5ccb5",
+      "fixture_id": "C30-init-repo-managed-hooks",
+      "stderr": "",
+      "stdout": "initialized repo\ncreated .githooks\ncreated .githooks/pre-commit.d\ncreated .githooks/pre-commit.d/g3rs\ncreated .githooks/pre-commit\nvalidated with: g3rs validate repo --path $REPO\nscope: repo\nroot: $REPO\n\nNo findings.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "init",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:ee06f9317e6f5d7ed8e6eda7f179ff37086fd6d33d6c040d31e154c212240b0d",
+      "fixture_id": "C40-init-repo-refuses-owned-hook",
+      "stderr": "refused to modify .githooks/pre-commit\nreason: project-owned hook needs explicit managed-block insertion\nrerun with --force to insert the G3RS managed block\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "init",
+        "workspace",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:876c1674e43d9264c7fa4b71f061aa13a7e182158e2188eba98c440995e83fdb",
+      "fixture_id": "C50-workspace-command-shapes",
+      "stderr": "",
+      "stdout": "initialized workspace\ncreated guardrail3-rs.toml\nvalidated with: g3rs validate workspace --path .\nscope: workspace\nroot: .\n\n== toolchain ==\n[Error] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml missing\n  Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.\n== fmt ==\n[Error] g3rs-fmt/rustfmt-config-exists rustfmt.toml rustfmt config missing\n  Expected `rustfmt.toml` at workspace root. Create one with the required formatting settings.\n== cargo ==\n[Error] g3rs-cargo/workspace-lints Cargo.toml rust lint table missing\n  `Cargo.toml` must define `[lints.rust]`. Add the required lint entries to `[lints.rust]`.\n[Error] g3rs-cargo/workspace-lints Cargo.toml clippy lint table missing\n  `Cargo.toml` must define `[lints.clippy]`. Add the required lint entries to `[lints.clippy]`.\n[Error] g3rs-cargo/workspace-metadata Cargo.toml edition missing\n  `Cargo.toml` must declare an edition for this workspace root. Add `edition = \"2024\"` to the package metadata.\n[Error] g3rs-cargo/rust-version-policy Cargo.toml library rust-version missing\n  Library crates must declare `rust-version` (minimum supported Rust version). Add `rust-version = \"1.75\"` (or appropriate version) to `[package]`.\n== clippy ==\n[Error] g3rs-clippy/coverage-exists clippy.toml workspace root uncovered by clippy config\n  Add `clippy.toml` or `.clippy.toml` at the workspace root so clippy policy is not left to defaults.\n== deny ==\n[Error] g3rs-deny/coverage - workspace root uncovered by deny config\n  workspace root `.` is not covered by any allowed deny config.\n== deps ==\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock missing\n  Library-profile workspace is missing `Cargo.lock`.\n== release ==\n[Warn] g3rs-release/release-plz-workflow Cargo.toml Release-plz workflow missing\n  No workflow contains an actual release-plz execution step. Add a release-plz step to a GitHub Actions workflow.\n[Warn] g3rs-release/publish-dry-run-workflow Cargo.toml Publish dry-run workflow missing\n  No workflow contains an actual `cargo publish --dry-run` step. Add a `cargo publish --dry-run` step to a CI workflow.\n[Warn] g3rs-release/registry-token Cargo.toml CARGO_REGISTRY_TOKEN missing from workflows\n  No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps. Add `CARGO_REGISTRY_TOKEN` as a secret in the release workflow.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "fmt",
+        "--inventory"
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:876c1674e43d9264c7fa4b71f061aa13a7e182158e2188eba98c440995e83fdb",
+      "fixture_id": "C50-workspace-command-shapes",
+      "stderr": "guardrail3-rs.toml missing at workspace root. Create `guardrail3-rs.toml` before running `g3rs validate`.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "init",
+        "workspace",
+        "--path",
+        ".",
+        "--profile",
+        "library"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:0f63afb450f4ecdf1059328075e6743b6a1de5f294785e27e1eefd178401e669",
+      "fixture_id": "C60-reject-removed-workspace-arguments",
+      "stderr": "error: unexpected argument '--profile' found\n\nUsage: g3rs init workspace --path <PATH>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "hexarch"
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:0f63afb450f4ecdf1059328075e6743b6a1de5f294785e27e1eefd178401e669",
+      "fixture_id": "C60-reject-removed-workspace-arguments",
+      "stderr": "error: invalid value 'hexarch' for '--family <FAMILY>'\n  [possible values: apparch, arch, cargo, clippy, code, deps, deny, fmt, garde, hooks, release, test, toolchain, topology]\n\n  tip: a similar value exists: 'apparch'\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:2777d3f61680eeac39231ca678224470152f0d61222845832f6c18018197af88",
+      "fixture_id": "C70-validate-repo-command-shape",
+      "stderr": "",
+      "stdout": "scope: repo\nroot: $REPO\n\n== hooks ==\n[Error] g3rs-hooks/pre-commit-exists .githooks/pre-commit pre-commit hook missing\n  Expected a cached `.githooks/pre-commit` or `hooks/pre-commit` hook.\n"
+    }
+  ],
+  "schema_version": "g3rs-replay-v1",
+  "tool": "g3rs"
+}

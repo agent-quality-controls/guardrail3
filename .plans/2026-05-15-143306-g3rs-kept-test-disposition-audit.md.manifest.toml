@@ -24,14 +24,14 @@ expected_rows = 23
 meaning = "validate-command cargo gates, staged-path, family-selection, and execution behavior"
 
 [[disposition]]
-name = "needs_cli_output"
+name = "covered_by_cli_output"
 expected_rows = 11
-meaning = "CLI parse, rejected argument, stdout, stderr, and exit behavior"
+meaning = "CLI parse, rejected argument, stdout, stderr, and exit behavior covered by the g3rs-cli-output fixture3 suite"
 
 [[disposition]]
-name = "needs_renderer_output"
+name = "covered_by_renderer_output"
 expected_rows = 4
-meaning = "plain text report rendering behavior"
+meaning = "plain text report rendering behavior covered by the g3rs-report-output fixture3 suite"
 
 [[disposition]]
 name = "keep_public_api_contract"

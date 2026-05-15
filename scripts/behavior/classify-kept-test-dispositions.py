@@ -78,13 +78,13 @@ def classify_row(test_path: str) -> tuple[str, str]:
         )
     if test_path.startswith("apps/guardrail3-rs/crates/io/inbound/cli/"):
         return (
-            "needs_cli_output",
-            "CLI parse and run behavior should be captured by command stdout/stderr/exit output",
+            "covered_by_cli_output",
+            "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite",
         )
     if test_path.startswith("apps/guardrail3-rs/crates/io/outbound/report/"):
         return (
-            "needs_renderer_output",
-            "report formatting behavior should be captured by renderer output snapshots",
+            "covered_by_renderer_output",
+            "plain text report formatting behavior is captured by the g3rs-report-output fixture3 suite",
         )
     if test_path.startswith("apps/guardrail3-rs/crates/logic/validate-command/"):
         return (

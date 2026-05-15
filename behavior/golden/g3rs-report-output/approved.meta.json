@@ -1,0 +1,32 @@
+{
+  "suite": "g3rs-report-output",
+  "kind": "approved",
+  "run_id": "2026-05-15T21-31-11.147912Z-b29dbf2b",
+  "run_commit": "925b1dffc",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-15T21:31:11.147912Z",
+  "fixture_hash": "sha256:0be691abe14b090095b0063490560e3e34dde7e2e972016750fb433f8e598a25",
+  "manifest_hash": "sha256:bc81885aac6e7611923c4b00e06257412f55dae895261fab7f1b059b30ba9019",
+  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
+  "tool_version": "0.1.6",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-report-output/P10-hidden-inventory-with-visible-warning/fixture.toml",
+      "sha256": "sha256:0b5e3d1caa29b7dd374642314251c6d433a7133ad554a18104b0a6ce93ac179e"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-report-output/P20-all-results-hidden/fixture.toml",
+      "sha256": "sha256:56679dfe7d64585c86203078f791034a54155ff6421b0e36fe4be7a8315059d2"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-report-output/P30-rule-message/fixture.toml",
+      "sha256": "sha256:5595229d8eabe1adcf1dff67d7a4aabab5c62f0d0708122e9375e294a5bc45c9"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-report-output/P40-scope-root/fixture.toml",
+      "sha256": "sha256:e7b48c58db89e0cd95f9741620c0abf4d6a89cfa3e771fdaa6e0a360d872212a"
+    }
+  ],
+  "change_path": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md"
+}

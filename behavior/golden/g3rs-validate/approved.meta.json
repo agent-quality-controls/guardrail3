@@ -1,12 +1,12 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-15T17-55-56.439704Z-2c448014",
-  "run_commit": "4ef95b423",
+  "run_id": "2026-05-15T19-46-26.226243Z-2c448014",
+  "run_commit": "925b1dffc",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-15T17:55:56.439704Z",
+  "recorded_at": "2026-05-15T19:46:26.226243Z",
   "fixture_hash": "sha256:427014332f1540b093c633678db65cc69d970300a0a6a54749445e68adebaa21",
-  "manifest_hash": "sha256:2c44801464e945e48befe18734120020d5a4fc047180cd179f358747d5b3003d",
+  "manifest_hash": "sha256:bc81885aac6e7611923c4b00e06257412f55dae895261fab7f1b059b30ba9019",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
   "output_schema_version": "1",
@@ -156,5 +156,5 @@
       "sha256": "sha256:e17b7c3c36f20c1d1069e05f910a642bf282e87eea978126575b05586988bcf1"
     }
   ],
-  "change_path": ".plans/2026-05-15-163150-g3rs-cli-contract-init-validate.md"
+  "change_path": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md"
 }
