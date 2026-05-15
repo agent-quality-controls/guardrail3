@@ -6,7 +6,7 @@ use deny_toml_parser::types::DenyToml;
 use g3rs_toml_parser::types::Guardrail3RsToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::types::RustfmtToml;
-use syn::File;
+use serde::Serialize;
 
 /// One of the recognised Rust-family TOML configuration file kinds.
 ///
@@ -22,7 +22,7 @@ use syn::File;
     clippy::large_enum_variant,
     reason = "variant names and payload shape are part of the cross-workspace public matching API; changing them would break out-of-scope callers"
 )]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsCodeConfigFileKind {
     /// A `guardrail3-rs.toml` adoption marker.
     Guardrail3RsToml {
@@ -57,7 +57,7 @@ pub enum G3RsCodeConfigFileKind {
 }
 
 /// A discovered configuration file alongside its repo-relative path.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCodeConfigFile {
     /// Repo-relative path of the configuration file.
     pub rel_path: String,
@@ -66,7 +66,7 @@ pub struct G3RsCodeConfigFile {
 }
 
 /// A `// g3rs-allow:` style exception comment found in a source file.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCodeExceptionComment {
     /// Repo-relative path of the file containing the comment.
     pub rel_path: String,
@@ -77,7 +77,7 @@ pub struct G3RsCodeExceptionComment {
 }
 
 /// Input contract for code-family configuration checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCodeConfigChecksInput {
     /// Discovered configuration files to validate.
     pub files: Vec<G3RsCodeConfigFile>,
@@ -86,7 +86,7 @@ pub struct G3RsCodeConfigChecksInput {
 }
 
 /// A single Rust source file fed into the source-checks pipeline.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsSourceFile {
     /// Repo-relative path of the source file.
     pub rel_path: String,
@@ -100,25 +100,11 @@ pub struct G3RsSourceFile {
     pub is_library_root: bool,
 }
 
-/// Result of attempting to parse a source file with `syn`.
-#[derive(Debug, Clone)]
-pub enum G3RsCodeParsedSourceState {
-    /// Parser produced a valid `syn::File`.
-    Parsed(File),
-    /// Parser failed; carries the human-readable failure message.
-    Invalid {
-        /// Human-readable parse error message.
-        message: String,
-    },
-}
-
 /// Input contract for code-family source checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCodeSourceChecksInput {
     /// Source file under inspection.
     pub source_file: G3RsSourceFile,
-    /// Parsed AST (or failure) for the file.
-    pub parsed_source: G3RsCodeParsedSourceState,
     /// True when the file belongs to a shared (cross-family) crate.
     pub is_shared_crate: bool,
     /// Waiver entries that may suppress findings on this file.
@@ -126,7 +112,7 @@ pub struct G3RsCodeSourceChecksInput {
 }
 
 /// A waiver that suppresses a specific rule on a specific selector.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCodeWaiver {
     /// Rule identifier the waiver applies to.
     pub rule: String,
@@ -139,7 +125,7 @@ pub struct G3RsCodeWaiver {
 }
 
 /// A structural cap root used for module-tree size checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCodeStructuralCapRoot {
     /// Repo-relative directory the cap applies to.
     pub root_rel_dir: String,
@@ -148,7 +134,7 @@ pub struct G3RsCodeStructuralCapRoot {
 }
 
 /// Input contract for code-family file-tree checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCodeFileTreeChecksInput {
     /// Roots to evaluate for structural caps.
     pub roots: Vec<G3RsCodeStructuralCapRoot>,

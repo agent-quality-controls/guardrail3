@@ -271,7 +271,7 @@ edition = \"2024\"\n",
 }
 
 #[test]
-fn routes_parse_failures_into_source_input() {
+fn retains_source_content_without_parsing_it() {
     let temp_dir = tempdir().expect("create temporary workspace root");
     let root = temp_dir.path();
     git_init(root);
@@ -287,7 +287,14 @@ fn routes_parse_failures_into_source_input() {
         crate::run::ingest_for_source_checks(&workspace_crawl).expect("ingestion should succeed");
 
     let input = assertions::require_source_file(&inputs, "src/lib.rs");
-    assertions::assert_source_parse_failure(input, "src/lib.rs");
+    assertions::assert_source_file(
+        input,
+        "src/lib.rs",
+        false,
+        Some("library"),
+        true,
+        "pub fn broken( {}\n",
+    );
 }
 
 #[test]

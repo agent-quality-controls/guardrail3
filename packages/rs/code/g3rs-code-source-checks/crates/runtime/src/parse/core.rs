@@ -38,7 +38,6 @@
     reason = "code-source-checks parse/visitor walks every variant of large external syntax-tree enums (syn::Type, syn::Item, syn::Expr, syn::Pat, etc.) and the ban-detection visitors mirror the source structure they are looking for; the rule modules accept the schema-versioned shape verbatim because the per-rule findings depend on the exact spans and the rule ids embed the schema."
 )]
 
-#[cfg(test)]
 pub(crate) fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
     syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
 }

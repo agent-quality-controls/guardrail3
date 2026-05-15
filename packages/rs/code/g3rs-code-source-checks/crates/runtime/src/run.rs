@@ -3,14 +3,15 @@ use guardrail3_check_types::G3CheckResult;
 
 #[must_use]
 pub fn check(input: &G3RsCodeSourceChecksInput) -> Vec<G3CheckResult> {
-    let rule_input = match crate::support::rule_input(input) {
-        Ok(rule_input) => rule_input,
+    let prepared_input = match crate::support::parse_input(input) {
+        Ok(prepared_input) => prepared_input,
         Err(parse_failure) => {
             let mut results = Vec::new();
             crate::input_failures::check(&parse_failure, &mut results);
             return results;
         }
     };
+    let rule_input = prepared_input.rule_input();
     let mut results = Vec::new();
 
     crate::crate_level_allow::check(&rule_input, &mut results);

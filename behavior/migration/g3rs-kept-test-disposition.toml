@@ -2104,14 +2104,14 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "classifies_custom_library_root_path"
-line = 437
+line = 444
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "classifies_explicit_binary_path"
-line = 463
+line = 470
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -2125,56 +2125,56 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "classifies_nested_workspace_member_ownership"
-line = 489
+line = 496
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "classifies_nested_workspace_members_from_their_own_manifest"
-line = 385
+line = 392
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ignores_foreign_nested_repo_config_files"
-line = 808
+line = 815
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingested_inputs_drive_code_ast_checks"
-line = 572
+line = 579
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_exception_comments_from_all_supported_owned_config_filenames"
-line = 699
+line = 706
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_exception_comments_from_owned_config_files"
-line = 641
+line = 648
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_multiple_exception_comments_from_one_owned_file_with_exact_lines"
-line = 673
+line = 680
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_only_parser_backed_code_config_files"
-line = 729
+line = 736
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -2188,14 +2188,14 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_workspace_unsafe_code_lints_from_cargo"
-line = 758
+line = 765
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "ingests_workspace_unsafe_code_lints_from_detailed_form"
-line = 785
+line = 792
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -2209,21 +2209,21 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "leaves_unowned_source_without_profile"
-line = 528
+line = 535
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "malformed_cargo_toml_fails_config_ingestion"
-line = 856
+line = 863
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "malformed_nearest_cargo_toml_fails_ingestion"
-line = 625
+line = 632
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -2236,7 +2236,7 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
-test_name = "routes_parse_failures_into_source_input"
+test_name = "retains_source_content_without_parsing_it"
 line = 273
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
@@ -2244,42 +2244,42 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "threads_guardrail3_rs_waivers_into_source_inputs"
-line = 293
+line = 300
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "threads_package_root_waivers_into_member_crate_sources"
-line = 334
+line = 341
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "unreadable_foreign_config_file_does_not_fail_config_ingestion"
-line = 897
+line = 904
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "unreadable_owned_config_file_fails_config_ingestion"
-line = 872
+line = 879
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "unreadable_selected_source_fails_ingestion"
-line = 601
+line = 608
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-ingestion/crates/runtime/src/run_tests/basic.rs"
 test_name = "virtual_workspace_root_does_not_own_src_lib"
-line = 550
+line = 557
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -2432,15 +2432,15 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/run_tests/cases.rs"
-test_name = "run_dispatches_prebound_parse_failure"
-line = 28
+test_name = "run_parses_source_once_before_dispatch"
+line = 4
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/run_tests/cases.rs"
-test_name = "run_dispatches_prebound_parsed_source"
-line = 4
+test_name = "run_reports_parse_failure_from_source_content"
+line = 24
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 

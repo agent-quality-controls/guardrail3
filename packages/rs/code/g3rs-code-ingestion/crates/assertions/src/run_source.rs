@@ -42,13 +42,6 @@ pub fn assert_source_file(
         "unexpected is_library_root"
     );
     assert_eq!(input.source_file.content, content, "unexpected content");
-    assert!(
-        matches!(
-            input.parsed_source,
-            code_types::G3RsCodeParsedSourceState::Parsed(_)
-        ),
-        "unexpected parsed_source: {input:#?}"
-    );
 }
 
 pub fn assert_shared_crate(input: &code_types::G3RsCodeSourceChecksInput) {
@@ -57,17 +50,6 @@ pub fn assert_shared_crate(input: &code_types::G3RsCodeSourceChecksInput) {
 
 pub fn assert_not_shared_crate(input: &code_types::G3RsCodeSourceChecksInput) {
     assert!(!input.is_shared_crate, "{input:#?}");
-}
-
-pub fn assert_source_parse_failure(input: &code_types::G3RsCodeSourceChecksInput, rel_path: &str) {
-    assert_eq!(input.source_file.rel_path, rel_path, "unexpected rel_path");
-    assert!(
-        matches!(
-            input.parsed_source,
-            code_types::G3RsCodeParsedSourceState::Invalid { .. }
-        ),
-        "unexpected parsed_source: {input:#?}"
-    );
 }
 
 pub fn assert_source_waiver(
