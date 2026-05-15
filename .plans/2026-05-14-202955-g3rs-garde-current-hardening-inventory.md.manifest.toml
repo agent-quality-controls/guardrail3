@@ -1,0 +1,125 @@
+plan = ".plans/2026-05-14-202955-g3rs-garde-current-hardening-inventory.md"
+
+[[active_package]]
+path = "packages/rs/garde/g3rs-garde-types"
+
+[[active_package]]
+path = "packages/rs/garde/g3rs-garde-ingestion"
+
+[[active_package]]
+path = "packages/rs/garde/g3rs-garde-config-checks"
+
+[[active_package]]
+path = "packages/rs/garde/g3rs-garde-source-checks"
+
+[[active_package]]
+path = "packages/rs/garde/g3rs-garde-hook-contract"
+
+[[active_rule]]
+id = "g3rs-garde/dependency-present"
+lane = "config"
+rule_file = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/dependency_present/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/dependency_present/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/core-method-bans"
+lane = "config"
+rule_file = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/core_method_bans/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/core_method_bans/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/extractor-type-bans"
+lane = "config"
+rule_file = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/extractor_type_bans/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/extractor_type_bans/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/reqwest-json-ban"
+lane = "config"
+rule_file = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/reqwest_json_ban/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/reqwest_json_ban/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/additional-method-bans"
+lane = "config"
+rule_file = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/additional_method_bans/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-config-checks/crates/runtime/src/additional_method_bans/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/struct-derive-validate"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/struct_derive_validate/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/struct_derive_validate/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/manual-deserialize-impl"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/manual_deserialize_impl/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/manual_deserialize_impl/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/enum-derive-validate"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/enum_derive_validate/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/enum_derive_validate/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/query-as-inventory"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/query_as_inventory/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/query_as_inventory/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/input-failures"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/input_failures/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/input_failures/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/field-level-constraints"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/field_level_constraints/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/field_level_constraints/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/nested-validation-dive"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/nested_validation_dive/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/nested_validation_dive/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/context-validation-surface"
+lane = "source"
+rule_file = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/context_validation_surface/rule.rs"
+test_mod = "packages/rs/garde/g3rs-garde-source-checks/crates/runtime/src/context_validation_surface/rule_tests/mod.rs"
+
+[[active_rule]]
+id = "g3rs-garde/hook-contract"
+lane = "hook-contract"
+rule_file = "packages/rs/garde/g3rs-garde-hook-contract/crates/runtime/src/contract.rs"
+test_mod = "packages/rs/garde/g3rs-garde-hook-contract/crates/runtime/src/contract_tests/mod.rs"
+
+[[open_gap]]
+id = "GARDE-HARDEN-01"
+kind = "plan_drift"
+summary = "Active Garde plans still point to old apps/guardrail3 paths instead of packages/rs/garde."
+
+[[open_gap]]
+id = "GARDE-HARDEN-02"
+kind = "missing_rule"
+summary = "Plans claim a GuardrailConfig validate-call source rule exists, but active packages/rs/garde code has no rule ID or rule file for it."
+
+[[open_gap]]
+id = "GARDE-HARDEN-03"
+kind = "dead_surface"
+summary = "Garde file-tree input and not-implemented error exist without a checks package or runner call."
+
+[[open_gap]]
+id = "GARDE-HARDEN-04"
+kind = "parser_contract"
+summary = "Plans claim package-driven Garde policy inheritance, but g3rs-toml-parser exposes only top-level checks.garde."
+
+[[open_gap]]
+id = "GARDE-HARDEN-05"
+kind = "semantic_matrix"
+summary = "Behavior replay covers active Garde rule IDs, but a current per-rule semantic hardening matrix is missing."
