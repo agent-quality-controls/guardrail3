@@ -1,11 +1,14 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_rs_app_types::{
-    FamilyResults, FamilyRunError, FamilyRunner, ReportRenderer, SupportedFamily,
-    ValidateRepoRequest, ValidateRequest, WorkspaceCrawler,
+    FamilyResults, FamilyRunError, FamilyRunner, InitRepoRequest, InitWorkspaceRequest,
+    ReportRenderer, SupportedFamily, ValidateRepoRequest, ValidateWorkspaceRequest,
+    WorkspaceCrawler,
 };
-use guardrail3_rs_validate_command::{execute, execute_repo, resolve_repo_root};
+use guardrail3_rs_validate_command::{
+    execute, execute_init_repo, execute_init_workspace, execute_repo, resolve_repo_root,
+};
 
-use crate::Command;
+use crate::{Command, InitCommand, ValidateCommand};
 
 /// CLI-local adapter that dispatches families into the bounded runner groups.
 #[derive(Debug, Default)]
@@ -57,56 +60,95 @@ pub fn run_command(
     renderer: &dyn ReportRenderer,
 ) -> CliOutput {
     match command {
-        Command::Validate {
+        Command::Init { command } => run_init(command, crawler, family_runner, renderer),
+        Command::Validate { command } => run_validate(command, crawler, family_runner, renderer),
+    }
+}
+
+/// Runs the selected init command and maps it into CLI output.
+fn run_init(
+    command: InitCommand,
+    crawler: &dyn WorkspaceCrawler,
+    family_runner: &dyn FamilyRunner,
+    renderer: &dyn ReportRenderer,
+) -> CliOutput {
+    let outcome = match command {
+        InitCommand::Repo { path, force } => execute_init_repo(
+            &InitRepoRequest { path, force },
+            crawler,
+            family_runner,
+            renderer,
+        ),
+        InitCommand::Workspace { path, force } => execute_init_workspace(
+            &InitWorkspaceRequest {
+                workspace_root: path,
+                force,
+            },
+            crawler,
+            family_runner,
+            renderer,
+        ),
+    };
+    CliOutput {
+        stdout: outcome.stdout().to_owned(),
+        stderr: outcome.stderr().to_owned(),
+        exit_code: outcome.exit_code(),
+    }
+}
+
+/// Runs the selected validate command and maps it into CLI output.
+fn run_validate(
+    command: ValidateCommand,
+    crawler: &dyn WorkspaceCrawler,
+    family_runner: &dyn FamilyRunner,
+    renderer: &dyn ReportRenderer,
+) -> CliOutput {
+    match command {
+        ValidateCommand::Workspace {
             path,
             family,
             inventory,
             staged,
             rules_only,
         } => {
-            let request = ValidateRequest {
+            let request = ValidateWorkspaceRequest {
                 workspace_root: path,
                 families: family.into_iter().map(Into::into).collect(),
                 include_inventory: inventory,
                 staged,
                 rules_only,
             };
-            match execute(&request, crawler, family_runner, renderer) {
-                Ok(outcome) => CliOutput {
-                    stdout: outcome.stdout().to_owned(),
-                    stderr: outcome.stderr().to_owned(),
-                    exit_code: outcome.exit_code(),
-                },
-                Err(error) => CliOutput {
-                    stdout: String::new(),
-                    stderr: format!("{error}\n"),
-                    exit_code: 1,
-                },
-            }
+            outcome_to_cli(execute(&request, crawler, family_runner, renderer))
         }
-        Command::ValidateRepo {
-            repo_root,
-            inventory,
-        } => {
-            let resolved_root =
-                repo_root.unwrap_or_else(|| resolve_repo_root(&std::path::PathBuf::from(".")));
+        ValidateCommand::Repo { path, inventory } => {
+            let resolved_root = resolve_repo_root(&path);
             let request = ValidateRepoRequest {
                 repo_root: resolved_root,
                 include_inventory: inventory,
             };
-            match execute_repo(&request, crawler, family_runner, renderer) {
-                Ok(outcome) => CliOutput {
-                    stdout: outcome.stdout().to_owned(),
-                    stderr: outcome.stderr().to_owned(),
-                    exit_code: outcome.exit_code(),
-                },
-                Err(error) => CliOutput {
-                    stdout: String::new(),
-                    stderr: format!("{error}\n"),
-                    exit_code: 1,
-                },
-            }
+            outcome_to_cli(execute_repo(&request, crawler, family_runner, renderer))
         }
+    }
+}
+
+/// Converts command execution output into the CLI return type.
+fn outcome_to_cli(
+    outcome: Result<
+        guardrail3_rs_validate_command::ExecutionOutcome,
+        guardrail3_rs_app_types::WorkspaceCrawlError,
+    >,
+) -> CliOutput {
+    match outcome {
+        Ok(outcome) => CliOutput {
+            stdout: outcome.stdout().to_owned(),
+            stderr: outcome.stderr().to_owned(),
+            exit_code: outcome.exit_code(),
+        },
+        Err(error) => CliOutput {
+            stdout: String::new(),
+            stderr: format!("{error}\n"),
+            exit_code: 1,
+        },
     }
 }
 

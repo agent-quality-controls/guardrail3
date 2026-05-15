@@ -1,4 +1,4 @@
-use guardrail3_rs_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateRequest};
+use guardrail3_rs_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateWorkspaceRequest};
 
 #[must_use]
 pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
@@ -27,7 +27,7 @@ pub const REPO_LEVEL_FAMILIES: &[SupportedFamily] =
     &[SupportedFamily::Hooks, SupportedFamily::Topology];
 
 #[must_use]
-pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
+pub fn selected_families(request: &ValidateWorkspaceRequest) -> Vec<SupportedFamily> {
     if request.families.is_empty() {
         return PER_WORKSPACE_DEFAULT_FAMILIES.to_vec();
     }
@@ -42,7 +42,7 @@ pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
 /// workspace's `guardrail3-rs.toml` opt-out for disabled families.
 #[must_use]
 pub fn selected_families_with_opt_out(
-    request: &ValidateRequest,
+    request: &ValidateWorkspaceRequest,
     disabled: &[SupportedFamily],
 ) -> Vec<SupportedFamily> {
     selected_families(request)

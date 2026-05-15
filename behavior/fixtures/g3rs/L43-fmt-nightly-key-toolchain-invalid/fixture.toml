@@ -2,7 +2,7 @@ id = "L43-fmt-nightly-key-toolchain-invalid"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "required_inputs_present_invalid"

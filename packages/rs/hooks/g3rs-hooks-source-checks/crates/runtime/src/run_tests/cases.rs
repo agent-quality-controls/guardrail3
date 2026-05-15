@@ -7,16 +7,16 @@ use hook_shell_parser::parse_script;
 
 use super::super::check;
 
-const REAL_PRE_COMMIT_HOOK: &str = include_str!("../../../../../../../../.githooks/pre-commit");
+const REAL_MANAGED_G3RS_HOOK: &str =
+    include_str!("../../../../../../../../.githooks/pre-commit.d/g3rs");
 
-fn real_hook_input(content: &str) -> G3RsHooksSourceChecksInput {
+fn real_managed_hook_input(content: &str) -> G3RsHooksSourceChecksInput {
     G3RsHooksSourceChecksInput {
-        rel_path: ".githooks/pre-commit".to_owned(),
-        kind: G3RsHookScriptKind::PreCommit,
+        rel_path: ".githooks/pre-commit.d/g3rs".to_owned(),
+        kind: G3RsHookScriptKind::Modular,
         exists: true,
         parsed: parse_script(content),
-        // The repo has no `.githooks/pre-commit.d/` directory; mirror the real ingestion result.
-        has_modular_dir: false,
+        has_modular_dir: true,
         is_workspace_project: true,
         requirements: Vec::new(),
     }
@@ -51,30 +51,32 @@ fn requirement(command: G3HookCommandRequirement) -> G3HookRequirement {
 
 #[test]
 fn real_repo_pre_commit_hook_passes_all_rules() {
-    let results = check(&real_hook_input(REAL_PRE_COMMIT_HOOK));
-    assertions::run::assert_no_non_inventory_findings(&results, "real .githooks/pre-commit");
+    let results = check(&real_managed_hook_input(REAL_MANAGED_G3RS_HOOK));
+    assertions::run::assert_no_non_inventory_findings(&results, "real .githooks/pre-commit.d/g3rs");
 }
 
 #[test]
 fn real_repo_pre_commit_hook_with_validate_repo_stripped_fires_calls_validate_repo() {
-    let broken = REAL_PRE_COMMIT_HOOK.replace("g3rs validate-repo\n", "");
+    let broken = REAL_MANAGED_G3RS_HOOK.replace("g3rs validate repo --path \"$repo_root\"\n", "");
     assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
-        "stripping `g3rs validate-repo` must alter the hook content",
+        broken, REAL_MANAGED_G3RS_HOOK,
+        "stripping `g3rs validate repo` must alter the hook content",
     );
-    let results = check(&real_hook_input(&broken));
+    let results = check(&real_managed_hook_input(&broken));
     assertions::dispatch::calls_validate_repo::rule::assert_error_finding(&results);
 }
 
 #[test]
 fn real_repo_pre_commit_hook_with_per_unit_validate_stripped_fires_dispatches() {
-    let broken =
-        REAL_PRE_COMMIT_HOOK.replace("        g3rs validate --path \"$unit\" --staged\n", "");
-    assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
-        "stripping per-unit `g3rs validate --path --staged` must alter the hook content",
+    let broken = REAL_MANAGED_G3RS_HOOK.replace(
+        "        g3rs validate workspace --path \"$unit\" --staged\n",
+        "",
     );
-    let results = check(&real_hook_input(&broken));
+    assert_ne!(
+        broken, REAL_MANAGED_G3RS_HOOK,
+        "stripping per-unit `g3rs validate workspace --path --staged` must alter the hook content",
+    );
+    let results = check(&real_managed_hook_input(&broken));
     assertions::dispatch::dispatches_per_unit_validate_staged::rule::assert_error_finding(&results);
 }
 
@@ -82,14 +84,14 @@ fn real_repo_pre_commit_hook_with_per_unit_validate_stripped_fires_dispatches() 
 fn real_repo_pre_commit_hook_with_dedup_stripped_fires_dedups() {
     // The hook uses `awk 'NF' | sort -u` to dedup discovered units; stripping `sort -u`
     // and the awk dedup makes the check fire.
-    let broken = REAL_PRE_COMMIT_HOOK
+    let broken = REAL_MANAGED_G3RS_HOOK
         .replace(" | awk 'NF' | sort -u", "")
         .replace("awk '!seen", "echo '!seen");
     assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
+        broken, REAL_MANAGED_G3RS_HOOK,
         "stripping dedup must alter the hook content",
     );
-    let results = check(&real_hook_input(&broken));
+    let results = check(&real_managed_hook_input(&broken));
     assertions::dispatch::dedups_owning_units::rule::assert_error_finding(&results);
 }
 
@@ -101,10 +103,10 @@ fn skip_guards_missing_fires_skips_when_no_owning_unit() {
 set -e
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 gitleaks protect --staged --no-banner
-g3rs validate-repo
+g3rs validate repo
 RUST_UNIQUE_UNITS=$(printf '%s' "$STAGED_FILES" | awk 'NF' | sort -u)
 for unit in $RUST_UNIQUE_UNITS; do
-    g3rs validate --path "$unit" --staged
+    g3rs validate workspace --path "$unit" --staged
 done
 "#;
     let results = check(&input(
@@ -118,40 +120,37 @@ done
 
 #[test]
 fn real_repo_pre_commit_hook_with_cargo_invocation_fires_no_toolchain_invocation() {
-    let broken = REAL_PRE_COMMIT_HOOK.replace(
-        "echo \"All pre-commit checks passed.\"",
-        "cargo --version\necho \"All pre-commit checks passed.\"",
-    );
+    let broken = format!("{REAL_MANAGED_G3RS_HOOK}\ncargo --version\n");
     assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
+        broken, REAL_MANAGED_G3RS_HOOK,
         "injecting `cargo` must alter the hook content",
     );
-    let results = check(&real_hook_input(&broken));
+    let results = check(&real_managed_hook_input(&broken));
     assertions::dispatch::no_toolchain_invocation::rule::assert_error_finding(&results);
 }
 
 #[test]
 fn real_repo_pre_commit_hook_with_gitleaks_stripped_fires_error() {
-    let broken = REAL_PRE_COMMIT_HOOK.replace(
+    let broken = REAL_MANAGED_G3RS_HOOK.replace(
         "if ! gitleaks protect --staged --no-banner; then",
         "if ! true; then",
     );
     assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
+        broken, REAL_MANAGED_G3RS_HOOK,
         "stripping gitleaks must alter the hook content",
     );
-    let results = check(&real_hook_input(&broken));
+    let results = check(&real_managed_hook_input(&broken));
     assertions::gitleaks_step_present::rule::assert_error_finding(&results);
 }
 
 #[test]
 fn real_repo_pre_commit_hook_with_marker_stripped_fires_error() {
-    let broken = REAL_PRE_COMMIT_HOOK.replace("guardrail3-rs.toml", "Cargo.toml");
+    let broken = REAL_MANAGED_G3RS_HOOK.replace("guardrail3-rs.toml", "Cargo.toml");
     assert_ne!(
-        broken, REAL_PRE_COMMIT_HOOK,
+        broken, REAL_MANAGED_G3RS_HOOK,
         "stripping the second marker must alter the hook content",
     );
-    let results = check(&real_hook_input(&broken));
+    let results = check(&real_managed_hook_input(&broken));
     assertions::routing::discovers_marker_pair::assert_error_finding(&results);
 }
 
@@ -160,12 +159,12 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 gitleaks protect --staged --no-banner
-g3rs validate-repo
+g3rs validate repo
 g3ts validate-repo
 RUST_UNIQUE_UNITS=$(printf '%s' "$RUST_OWNING_UNITS" | awk 'NF' | sort -u)
 while IFS= read -r unit; do
     [ -n "$unit" ] || continue
-    g3rs validate --path "$unit" --staged
+    g3rs validate workspace --path "$unit" --staged
 done <<< "$RUST_UNIQUE_UNITS"
 "#;
 

@@ -2,7 +2,7 @@ id = "L50-release-semver-checks-missing"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "release", "--inventory", "--rules-only"],
+  ["validate", "workspace", "--path", ".", "--family", "release", "--inventory", "--rules-only"],
 ]
 expected_exit = "zero"
 level = "required_inputs_valid_delegated_tools_missing"

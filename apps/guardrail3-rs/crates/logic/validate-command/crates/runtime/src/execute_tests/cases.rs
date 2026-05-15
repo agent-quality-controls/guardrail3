@@ -5,7 +5,7 @@ use g3_workspace_crawl::G3WorkspaceCrawl;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_rs_app_types::{
     FamilyRunError, FamilyRunner, ReportRenderer, SUPPORTED_FAMILIES, SupportedFamily,
-    ValidateReport, ValidateRequest, WorkspaceCrawlError, WorkspaceCrawler,
+    ValidateReport, ValidateWorkspaceRequest, WorkspaceCrawlError, WorkspaceCrawler,
 };
 use guardrail3_rs_validate_command_assertions::execute as assertions;
 
@@ -160,7 +160,7 @@ fn execute_uses_selected_families_and_hides_inventory_for_exit_code() {
     );
     write_guardrail_config(tempdir.path());
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Fmt],
         include_inventory: false,
@@ -190,7 +190,7 @@ fn execute_defaults_to_all_families_and_errors_on_non_inventory_error() {
     );
     write_guardrail_config(tempdir.path());
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: Vec::new(),
         include_inventory: false,
@@ -259,7 +259,7 @@ fn execute_keeps_successful_family_results_when_one_family_errors() {
     );
     write_guardrail_config(tempdir.path());
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Deny, SupportedFamily::Fmt],
         include_inventory: false,
@@ -292,7 +292,7 @@ fn execute_applies_apparch_opt_out_from_guardrail_config() {
         "[checks]\napparch = false\n",
     );
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Apparch],
         include_inventory: true,
@@ -317,7 +317,7 @@ fn execute_applies_apparch_opt_out_from_guardrail_config() {
 fn execute_reports_missing_workspace_manifest_before_guardrail_config() {
     let tempdir = tempfile::tempdir().expect("create temporary workspace root");
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Fmt],
         include_inventory: true,
@@ -345,7 +345,7 @@ fn execute_fails_before_family_runners_when_guardrail_config_missing() {
         "[workspace]\nmembers = []\n",
     );
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Fmt],
         include_inventory: true,
@@ -377,7 +377,7 @@ fn execute_fails_before_family_runners_when_guardrail_config_invalid() {
     );
     write_fixture(&tempdir.path().join("guardrail3-rs.toml"), "profile = [\n");
 
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: tempdir.path().to_path_buf(),
         families: vec![SupportedFamily::Fmt],
         include_inventory: true,

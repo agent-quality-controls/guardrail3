@@ -2,7 +2,7 @@ id = "L44-clippy-typed-config-invalid"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "required_inputs_present_invalid"

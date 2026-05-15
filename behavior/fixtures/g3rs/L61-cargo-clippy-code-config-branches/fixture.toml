@@ -2,7 +2,7 @@ id = "L61-cargo-clippy-code-config-branches"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "cargo", "--family", "clippy", "--family", "code", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--family", "clippy", "--family", "code", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "required_inputs_valid_config_policy_invalid"

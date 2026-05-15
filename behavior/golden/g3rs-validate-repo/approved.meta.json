@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-15T16-11-16.944083Z-6df8fd75",
-  "run_commit": "7961b9a05",
+  "run_id": "2026-05-15T17-56-01.395291Z-2c448014",
+  "run_commit": "4ef95b423",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-15T16:11:16.944083Z",
-  "fixture_hash": "sha256:b44c5995c76fdd284fe94cb6c6ba37e5de4528ab9d3eb56a19d67f620649311a",
+  "recorded_at": "2026-05-15T17:56:01.395291Z",
+  "fixture_hash": "sha256:1a814577a7223e059dbc1b15ccd62bfba5847b31f377f760b12bf5430fadda3f",
   "manifest_hash": "sha256:2c44801464e945e48befe18734120020d5a4fc047180cd179f358747d5b3003d",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
@@ -13,40 +13,40 @@
   "fixtures": [
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R00-invalid-repo-root/fixture.toml",
-      "sha256": "sha256:206edc772654e879b8b4ff2f2da8076dbc75527a5b600f3c0783ee537c8c5e75"
+      "sha256": "sha256:a3a7dc3792c23560a56a4ae5f9925300c40598ace354fdd8120b33169be2b407"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R10-crawlable-repo-no-adoption/fixture.toml",
-      "sha256": "sha256:fb9ffed80de22e0301669c1b543c646d6269141922e979aa23ac36b705d63be5"
+      "sha256": "sha256:32a8206c447ed5e2784bb8b1dcde25d1560a4689f20035e40db189a3034a247b"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R15-hooks-reachable-no-root-cargo/fixture.toml",
-      "sha256": "sha256:281dd81bb56f2a34ca1f8d2b62c90d65fb7aef6ba79ccd2c5a9fb8088c8f71b5"
+      "sha256": "sha256:0b687f2b19e4e9ccbde87f7d2839f78db4c9684ae05cdc5a0ac8212132ceebf6"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R16-hooks-required-steps-present-but-weakened/fixture.toml",
-      "sha256": "sha256:259f8fb7890b63fc077c862de58d2d3171db86ecc8f10fb6fd2c5b22d0826876"
+      "sha256": "sha256:205ce4a62d157a1904e3c43da84e16d89f36281ffcc9b4233b105d0bee25999e"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R17-hooks-modular-scripts-invalid/fixture.toml",
-      "sha256": "sha256:41cc71c3b3e8820ef1100da74ed8f56b8bf152ecd79887a38fd1f8ee478557cf"
+      "sha256": "sha256:599a41d558c21d4589231c12d60bbec6828b029bf8441328e20260e70f39597d"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R18-hooks-path-qualified-safe-comments/fixture.toml",
-      "sha256": "sha256:ca1e316ac64d74661b4f61e61d8a336e508dd373b37d71c74ab3351ca283be60"
+      "sha256": "sha256:a5287019cc82b6fa6126be11bb05ddb3efa6698e7ffdb013fd8927d8b69de8d0"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R20-crawlable-repo-marker-pair-policy/fixture.toml",
-      "sha256": "sha256:4f9a6a48204ffa28b381e4be39fd611d7420742c99e68a002a1f3a3f408ede89"
+      "sha256": "sha256:af8ac6e540bd3fb0b7a4602680874e51a90e542a4df5ca9442a81c006d17939f"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R30-root-adoption-pair-complete/fixture.toml",
-      "sha256": "sha256:22efca291a5a5507c38c514e06af08959707f4ddbfccd2196613a7974625f743"
+      "sha256": "sha256:eeabcc8de3c21b04d4f5a6a9ecd024115b3c3642f18cb8a584164a966aebda8d"
     },
     {
       "path": "behavior/fixtures/g3rs-validate-repo/R40-default-repo-root/fixture.toml",
-      "sha256": "sha256:042b108e6718650689d7a7c50b0fd8dda0ee5c80b021024ba20ae3ec3a36ecd0"
+      "sha256": "sha256:3c2b4868f05c5d19489e4ec07a0da07590a7f018b981579ce38dadd67b9beff7"
     }
   ],
-  "change_path": ".plans/2026-05-15-172324-code-ingestion-fixture-output.md"
+  "change_path": ".plans/2026-05-15-163150-g3rs-cli-contract-init-validate.md"
 }

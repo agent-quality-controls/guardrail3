@@ -5,13 +5,13 @@ golden_outputs = [ "behavior/golden/g3rs-validate/approved.normalized.json", "be
 fixture_manifests = [ ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml", ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml",]
 
 [expected_counts]
-source_rule_ids = 266
-baseline_rule_ids = 266
-baseline_error_warn_rule_ids = 235
+source_rule_ids = 267
+baseline_rule_ids = 250
+baseline_error_warn_rule_ids = 219
 info_only_rule_ids = 31
-absent_rule_ids = 0
+absent_rule_ids = 17
 
 [allowed_values]
-coverage_status = [ "covered", "planned_fixture", "planned_existing_fixture_expansion", "planned_cli_surface",]
+coverage_status = [ "covered", "planned_fixture", "planned_existing_fixture_expansion", "planned_cli_surface", "replaced_by_managed_hook",]
 current_replay = [ "absent", "info_only", "error_or_warn",]
 target_replay = [ "error_or_warn", "info_inventory",]

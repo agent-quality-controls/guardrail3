@@ -33,11 +33,16 @@ pub fn check_all(inputs: &[G3RsHooksSourceChecksInput]) -> Vec<G3CheckResult> {
         .collect::<Vec<_>>();
 
     check_required_contracts_across_selected_surface(inputs, &mut results);
+    crate::managed_chain::check(inputs, &mut results);
 
     results
 }
 
 /// `check_single` function.
+#[expect(
+    clippy::too_many_lines,
+    reason = "hook source orchestration fans out one parsed script into multiple rule families"
+)]
 fn check_single(
     input: &G3RsHooksSourceChecksInput,
     include_required_contracts: bool,
@@ -46,7 +51,7 @@ fn check_single(
         G3RsHookScriptKind::PreCommit => crate::facts::HookScriptKind::PreCommit,
         G3RsHookScriptKind::Modular => crate::facts::HookScriptKind::Modular,
         // Reason: the bash verifier was deleted; the verifier is now in-binary
-        // (`g3rs validate --path` / `g3rs validate-repo`). Any leftover ingestion
+        // (`g3rs validate workspace --path` / `g3rs validate repo`). Any leftover ingestion
         // input in the verifier slot is treated as a modular script for shape checks.
         G3RsHookScriptKind::G3RsVerifier => crate::facts::HookScriptKind::Modular,
     };
@@ -73,11 +78,15 @@ fn check_single(
     };
     let _ = rust_input.is_workspace_project;
     let mut results = Vec::new();
+    let validates_rust_contracts = input.kind == G3RsHookScriptKind::PreCommit
+        || input.rel_path == crate::managed_chain::MANAGED_G3RS_HOOK_PATH;
 
     if input.kind == G3RsHookScriptKind::PreCommit {
         crate::bootstrap::dispatcher_pattern::check(&dispatcher_input, &mut results);
         crate::shell_safety::real_dispatcher_syntax_only::check(&dispatcher_input, &mut results);
+    }
 
+    if validates_rust_contracts && include_required_contracts {
         crate::gitleaks_step_present::check(&rust_input, &mut results);
         if crate::clippy_denies_warnings::script_contains_clippy_command(&input.parsed) {
             crate::clippy_denies_warnings::check(&rust_input, &mut results);
@@ -96,9 +105,7 @@ fn check_single(
         check_skips_when_no_owning_unit(&rust_input, &mut results);
         check_no_toolchain_invocation(&rust_input, &mut results);
         crate::contract_trigger_coverage::rule::check(&rust_input, &mut results);
-        if include_required_contracts {
-            crate::required_contract_command_present::rule::check(&rust_input, &mut results);
-        }
+        crate::required_contract_command_present::rule::check(&rust_input, &mut results);
     }
 
     if !input.exists {
@@ -110,13 +117,15 @@ fn check_single(
     if input.exists {
         crate::shell_safety::no_unconditional_exit_zero::check(&executable_input, &mut results);
         crate::shell_safety::no_bypass_instructions::check(&executable_input, &mut results);
-        crate::workflow::merge_conflict_step_present::check(&executable_input, &mut results);
-        crate::workflow::file_size_step_present::check(&executable_input, &mut results);
         crate::shell_safety::executable_command_context_only::check(
             &executable_input,
             &mut results,
         );
-        crate::shell_safety::concrete_lockfile_command::check(&executable_input, &mut results);
+        if include_required_contracts || input.kind != G3RsHookScriptKind::PreCommit {
+            crate::workflow::merge_conflict_step_present::check(&executable_input, &mut results);
+            crate::workflow::file_size_step_present::check(&executable_input, &mut results);
+            crate::shell_safety::concrete_lockfile_command::check(&executable_input, &mut results);
+        }
     }
     if input.exists {
         crate::shell_safety::no_fail_open_wrappers::check(&fail_open_input, &mut results);
@@ -137,7 +146,6 @@ const DEDUPS_OWNING_UNITS_ID: &str = "g3rs-hooks/dedups-owning-units";
 const SKIPS_WHEN_NO_OWNING_UNIT_ID: &str = "g3rs-hooks/skips-when-no-owning-unit";
 /// `NO_TOOLCHAIN_INVOCATION_ID` constant.
 const NO_TOOLCHAIN_INVOCATION_ID: &str = "g3rs-hooks/no-toolchain-invocation";
-
 /// `check_calls_validate_repo` function.
 fn check_calls_validate_repo(
     input: &crate::inputs::RustHookCommandInput<'_>,
@@ -145,15 +153,16 @@ fn check_calls_validate_repo(
 ) {
     let found = any_resolved_command(input.parsed, |command| {
         command.command_name() == "g3rs"
-            && command.args().first().map(String::as_str) == Some("validate-repo")
+            && command.args().first().map(String::as_str) == Some("validate")
+            && command.args().get(1).map(String::as_str) == Some("repo")
     });
     if found {
         results.push(
             CompatResult::from_parts(
                 CALLS_VALIDATE_REPO_ID.to_owned(),
                 G3Severity::Warn,
-                "hook calls g3rs validate-repo".to_owned(),
-                ".githooks/pre-commit invokes `g3rs validate-repo` for repo-level invariants."
+                "hook calls g3rs validate repo".to_owned(),
+                "The managed hook invokes `g3rs validate repo` for repo-level invariants."
                     .to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
@@ -166,8 +175,8 @@ fn check_calls_validate_repo(
     results.push(CompatResult::from_parts(
         CALLS_VALIDATE_REPO_ID.to_owned(),
         G3Severity::Error,
-        "hook does not call g3rs validate-repo".to_owned(),
-        ".githooks/pre-commit must invoke `g3rs validate-repo` to enforce repo-level invariants \
+        "hook does not call g3rs validate repo".to_owned(),
+        "The managed hook must invoke `g3rs validate repo` to enforce repo-level invariants \
          (hook shape, tool presence, repo-wide topology, marker-pair completeness)."
             .to_owned(),
         Some(input.rel_path.to_owned()),
@@ -181,7 +190,7 @@ fn check_dispatches_per_unit_validate_staged(
     input: &crate::inputs::RustHookCommandInput<'_>,
     results: &mut Vec<CompatResult>,
 ) {
-    // Walk source lines, find a `g3rs validate --path <var> --staged` call inside a `while`
+    // Walk source lines, find a staged workspace validation call inside a `while`
     // or `for` loop body.
     let lines: Vec<&str> = input
         .parsed
@@ -215,7 +224,7 @@ fn check_dispatches_per_unit_validate_staged(
                 DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID.to_owned(),
                 G3Severity::Warn,
                 "hook dispatches per-unit g3rs validate --staged".to_owned(),
-                ".githooks/pre-commit invokes `g3rs validate --path <unit> --staged` from a discovery loop."
+                "The managed hook invokes `g3rs validate workspace --path <unit> --staged` from a discovery loop."
                     .to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
@@ -229,7 +238,7 @@ fn check_dispatches_per_unit_validate_staged(
         DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID.to_owned(),
         G3Severity::Error,
         "hook does not dispatch per-unit g3rs validate --staged".to_owned(),
-        ".githooks/pre-commit must invoke `g3rs validate --path <unit> --staged` from a discovery loop over staged files."
+        "The managed hook must invoke `g3rs validate workspace --path <unit> --staged` from a discovery loop over staged files."
             .to_owned(),
         Some(input.rel_path.to_owned()),
         None,
@@ -269,7 +278,9 @@ fn check_dedups_owning_units(
         }
         line.contains("sort -u")
             || line.contains("sort --unique")
-            || line.contains("uniq")
+            || hook_shell_parser::command_query::shell_words(line)
+                .iter()
+                .any(|word| word == "uniq")
             || line.contains("awk '!seen")
     });
     if dedup_present {
@@ -355,7 +366,7 @@ fn check_no_toolchain_invocation(
 ) {
     // Cargo invocation outside of allowed contexts (e.g. inside command-substitution
     // for environment metadata). The new contract: hook must not run `cargo` directly.
-    // All cargo work is inside `g3rs validate --path X --staged`.
+    // All cargo work is inside `g3rs validate workspace --path X --staged`.
     let offending = first_offending_cargo_call(input.parsed);
     if let Some((line_no, command_text)) = offending {
         results.push(CompatResult::from_parts(
@@ -363,7 +374,8 @@ fn check_no_toolchain_invocation(
             G3Severity::Error,
             "hook invokes cargo directly".to_owned(),
             format!(
-                "`.githooks/pre-commit` invokes `{command_text}` directly. The hook must delegate all cargo work to `g3rs validate --path <unit> --staged`; no direct `cargo` invocations are allowed."
+                "`{}` invokes `{command_text}` directly. The hook must delegate all cargo work to `g3rs validate workspace --path <unit> --staged`; no direct `cargo` invocations are allowed.",
+                input.rel_path
             ),
             Some(input.rel_path.to_owned()),
             Some(line_no),
@@ -470,10 +482,9 @@ fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
             .iter()
             .skip(1)
             .any(|word| word.trim_end_matches('/') == ".githooks/pre-commit.d"),
-        "." | "source" => words
-            .iter()
-            .skip(1)
-            .any(|word| word == ".githooks/pre-commit.d"),
+        "." | "source" => words.iter().skip(1).any(|word| {
+            word == ".githooks/pre-commit.d" || word == crate::managed_chain::MANAGED_G3RS_HOOK_PATH
+        }),
         _ => false,
     }
 }

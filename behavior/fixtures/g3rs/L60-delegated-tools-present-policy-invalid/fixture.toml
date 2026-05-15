@@ -2,7 +2,7 @@ id = "L60-delegated-tools-present-policy-invalid"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "delegated_tools_present_policy_invalid"

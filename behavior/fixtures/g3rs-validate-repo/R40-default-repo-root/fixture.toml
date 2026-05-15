@@ -2,7 +2,7 @@ id = "R40-default-repo-root"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate-repo", "--inventory"],
+  ["validate", "repo", "--inventory"],
 ]
 expected_exit = "zero"
 level = "repo_default_root"

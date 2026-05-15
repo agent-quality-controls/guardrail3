@@ -491,6 +491,40 @@ fn pipeline_reports_dispatcher_findings_for_real_pre_commit_script() {
 }
 
 #[test]
+fn pipeline_reports_dispatcher_findings_for_managed_g3rs_hook_script() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = repo_root(&temp_dir);
+
+    fs::create_dir_all(root.join(".githooks/pre-commit.d")).expect("create modular dir");
+    write_fixture(
+        root.join(".githooks/pre-commit"),
+        r#". ".githooks/pre-commit.d/g3rs""#,
+    );
+
+    let crawl = g3_workspace_crawl::crawl(root).expect("crawl should succeed");
+    let inputs = super::super::ingest_for_source_checks(&crawl).expect("ingestion should succeed");
+    let results = inputs
+        .iter()
+        .flat_map(g3rs_hooks_source_checks::check)
+        .collect::<Vec<_>>();
+
+    assert_result_present(
+        &results,
+        "g3rs-hooks/dispatcher-pattern",
+        "dispatcher pattern present",
+        Some(".githooks/pre-commit"),
+        true,
+    );
+    assert_result_present(
+        &results,
+        "g3rs-hooks/real-dispatcher-syntax-only",
+        "dispatcher uses real executable syntax",
+        Some(".githooks/pre-commit"),
+        true,
+    );
+}
+
+#[test]
 fn pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_echoed() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);

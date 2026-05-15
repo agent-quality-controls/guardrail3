@@ -302,12 +302,14 @@ dependencies = [
  "glob",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
- "syn",
 ]
 
 [[package]]
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "g3rs-code-source-checks"
@@ -339,7 +341,7 @@ dependencies = [
  "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
- "syn",
+ "serde",
 ]
 
 [[package]]

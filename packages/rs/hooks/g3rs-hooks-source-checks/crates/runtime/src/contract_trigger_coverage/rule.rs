@@ -145,28 +145,3 @@ fn regex_escape(path: &str) -> String {
     }
     out
 }
-
-#[expect(
-    clippy::needless_pass_by_value,
-    reason = "API takes owned Vec to keep signature stable across the contract surface; downstream callers pass ownership"
-)]
-#[cfg(test)]
-pub(crate) fn run_case(
-    content: &str,
-    requirements: Vec<g3rs_hooks_contract_types::G3HookRequirement>,
-) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let input = RustHookCommandInput {
-        rel_path: ".githooks/pre-commit",
-        parsed: &parsed,
-        is_workspace_project: true,
-        requirements: &requirements,
-    };
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    crate::compat::finish(results)
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

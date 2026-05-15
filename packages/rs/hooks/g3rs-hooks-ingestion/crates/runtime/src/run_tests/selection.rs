@@ -4,7 +4,7 @@ use tempfile::tempdir;
 use super::helpers::{repo_root, write_fixture};
 
 #[test]
-fn ingests_pre_commit_and_g3rs_verifier_only_for_source_checks() {
+fn ingests_pre_commit_modular_scripts_and_g3rs_verifier_for_source_checks() {
     let temp_dir = tempdir().expect("create temp dir");
     let root = repo_root(&temp_dir);
 
@@ -19,8 +19,8 @@ fn ingests_pre_commit_and_g3rs_verifier_only_for_source_checks() {
     );
     write_fixture(root.join("scripts/guardrails/verify"), "echo shared\n");
     write_fixture(
-        root.join(".githooks/pre-commit.d/10-rust.sh"),
-        "cargo fmt\n",
+        root.join(".githooks/pre-commit.d/g3rs"),
+        "g3rs validate repo\n",
     );
     write_fixture(root.join("hooks/pre-commit"), "cargo test\n");
 
@@ -33,10 +33,15 @@ fn ingests_pre_commit_and_g3rs_verifier_only_for_source_checks() {
         .collect::<Vec<_>>();
     assert_eq!(
         rel_paths,
-        vec![".githooks/pre-commit", "scripts/g3rs/verify"]
+        vec![
+            ".githooks/pre-commit",
+            ".githooks/pre-commit.d/g3rs",
+            "scripts/g3rs/verify",
+        ]
     );
     assert_eq!(inputs[0].kind, G3RsHookScriptKind::PreCommit);
-    assert_eq!(inputs[1].kind, G3RsHookScriptKind::G3RsVerifier);
+    assert_eq!(inputs[1].kind, G3RsHookScriptKind::Modular);
+    assert_eq!(inputs[2].kind, G3RsHookScriptKind::G3RsVerifier);
     assert!(inputs.iter().all(|input| input.exists));
 }
 

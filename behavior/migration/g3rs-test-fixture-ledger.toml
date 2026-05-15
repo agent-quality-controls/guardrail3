@@ -10,15 +10,71 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_repo"
+line = 20
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_workspace"
+line = 36
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_validate_repo"
+line = 52
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_init_workspace_profile"
+line = 100
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_path_shape"
+line = 92
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_repo_command"
+line = 84
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_removed_hexarch_family"
-line = 19
+line = 68
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_creates_managed_g3rs_hook_files"
+line = 111
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_refuses_project_owned_hook_without_force"
+line = 142
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
 test_name = "run_command_sends_failures_to_stderr"
-line = 66
+line = 83
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -32,14 +88,21 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_includes_rule_message"
-line = 61
+line = 63
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_includes_scope_and_root"
+line = 85
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_reports_no_findings_when_all_results_are_hidden"
-line = 37
+line = 38
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9172,42 +9235,42 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "nested_package_workspace_is_out_of_scope_for_repo_global_hooks"
-line = 921
+line = 955
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements"
-line = 687
+line = 721
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_missing_g3rs_binary_when_required"
-line = 527
+line = 561
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries"
-line = 639
+line = 673
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_tool_inventory_and_missing_cargo_dupes"
-line = 569
+line = 603
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_treats_path_qualified_tools_as_installed"
-line = 744
+line = 778
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9221,49 +9284,49 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk"
-line = 998
+line = 1032
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_existing_pre_commit_hook"
-line = 787
+line = 821
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_layout_stats_permissions_and_overrides"
-line = 1027
+line = 1061
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_missing_pre_commit_hook"
-line = 897
+line = 931
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path"
-line = 849
+line = 883
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_trust_risk"
-line = 964
+line = 998
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract"
-line = 813
+line = 847
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9284,7 +9347,14 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes"
-line = 1419
+line = 1453
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
+test_name = "pipeline_reports_dispatcher_findings_for_managed_g3rs_hook_script"
+line = 493
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9298,7 +9368,7 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_reports_fail_open_wrapper_on_called_function"
-line = 1443
+line = 1477
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9361,56 +9431,56 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_runs_shared_source_checks_on_modular_scripts"
-line = 1152
+line = 1186
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_inert_text_false_pass_risk"
-line = 1342
+line = 1376
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_invalid_dispatcher_syntax"
-line = 1392
+line = 1426
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_inventory_for_normalized_wrapped_commands"
-line = 1215
+line = 1249
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_echoed"
-line = 493
+line = 527
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_rust_and_shell_steps"
-line = 1251
+line = 1285
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_workspace_scope_for_workspace_project"
-line = 1368
+line = 1402
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_shell_safety_inventory_for_valid_hook"
-line = 1182
+line = 1216
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -9431,13 +9501,13 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/selection.rs"
 test_name = "emits_missing_g3rs_verifier_fact_without_ingesting_g3ts"
-line = 43
+line = 48
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/selection.rs"
-test_name = "ingests_pre_commit_and_g3rs_verifier_only_for_source_checks"
+test_name = "ingests_pre_commit_modular_scripts_and_g3rs_verifier_for_source_checks"
 line = 6
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
@@ -9522,1458 +9592,6 @@ fixture = "R15-hooks-reachable-no-root-cargo"
 severity = "Error"
 rule = "g3rs-hooks/dispatcher-pattern"
 title = "monolithic hook mode"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_attached_jobs_flag_precedes_cargo_dupes_subcommand"
-line = 141
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_attached_manifest_path_precedes_cargo_dupes_subcommand"
-line = 117
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_backgrounded_cargo_dupes_runs_with_exclude_tests"
-line = 362
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_called_function_runs_cargo_dupes_with_exclude_tests"
-line = 280
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_called_helper_chain_runs_cargo_dupes_with_exclude_tests"
-line = 292
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_cargo_dupes_binary_has_exclude_tests"
-line = 38
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_cargo_dupes_subcommand_has_exclude_tests"
-line = 25
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_cargo_dupes_uses_template_threshold_flags_with_exclude_tests"
-line = 31
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_clustered_shell_short_flags_wrap_cargo_dupes_with_exclude_tests"
-line = 159
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_command_double_dash_runs_cargo_dupes"
-line = 238
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_command_p_runs_cargo_dupes"
-line = 244
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_command_substitution_runs_cargo_dupes_with_exclude_tests"
-line = 406
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_command_wrapper_bypasses_shadowed_cargo_function"
-line = 497
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_command_wrapper_runs_cargo_dupes_binary"
-line = 208
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_declare_assignment_command_substitution_runs_cargo_dupes"
-line = 430
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_double_quoted_argument_substitution_runs_cargo_dupes"
-line = 418
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_double_quoted_assignment_substitution_runs_cargo_dupes"
-line = 412
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_assignment_precedes_cargo_dupes_subcommand"
-line = 50
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_chdir_precedes_cargo_dupes_subcommand"
-line = 62
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_double_dash_runs_cargo_dupes"
-line = 220
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_long_split_string_wraps_cargo_dupes_with_exclude_tests"
-line = 74
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_split_string_assignment_only_payload_precedes_cargo_dupes"
-line = 80
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_split_string_equals_wraps_cargo_dupes_with_exclude_tests"
-line = 87
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_split_string_wraps_cargo_dupes_with_exclude_tests"
-line = 68
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_unset_precedes_cargo_dupes_subcommand"
-line = 56
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_wrapper_bypasses_shadowed_cargo_function"
-line = 484
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_env_wraps_cargo_dupes_subcommand_with_exclude_tests"
-line = 44
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_exec_double_dash_runs_cargo_dupes"
-line = 274
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_exec_wrapper_runs_cargo_dupes_binary"
-line = 262
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_exec_wrapper_runs_cargo_dupes_subcommand"
-line = 256
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_export_assignment_command_substitution_runs_cargo_dupes"
-line = 424
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_if_wrapper_runs_cargo_dupes_with_exclude_tests"
-line = 398
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_inline_comment_mentions_help_after_real_flag"
-line = 472
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_leading_env_assignment_precedes_cargo_dupes"
-line = 99
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_left_side_of_chained_command_runs_cargo_dupes_with_exclude_tests"
-line = 338
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_left_side_of_pipeline_runs_cargo_dupes_with_exclude_tests"
-line = 350
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_manifest_path_precedes_cargo_dupes_subcommand"
-line = 135
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_nested_helper_defined_inside_called_function_runs_cargo_dupes"
-line = 300
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_nested_wrappers_run_cargo_dupes_with_exclude_tests"
-line = 226
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_path_qualified_cargo_dupes_binary_has_exclude_tests"
-line = 129
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_path_qualified_cargo_dupes_subcommand_has_exclude_tests"
-line = 123
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_right_side_of_false_or_runs_cargo_dupes_with_exclude_tests"
-line = 392
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_right_side_of_true_and_runs_cargo_dupes_with_exclude_tests"
-line = 344
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_same_line_helper_definition_runs_cargo_dupes"
-line = 308
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_semicolon_precedes_cargo_dupes_with_exclude_tests"
-line = 356
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_shell_option_value_precedes_cargo_dupes_script"
-line = 178
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_runs_cargo_dupes_with_exclude_tests"
-line = 153
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_runs_helper_function_inside_payload"
-line = 171
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_runs_multiline_cargo_dupes_script"
-line = 165
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "passes_when_toolchain_prefixed_cargo_dupes_has_exclude_tests"
-line = 111
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "reports_non_inventory_when_exclude_tests_flag_missing"
-line = 19
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_attached_exclude_tests_value_is_used"
-line = 552
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_binary_has_exclude_tests_but_no_subcommand"
-line = 190
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_binary_starts_with_unknown_flag_before_subcommand"
-line = 184
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_called_function_runs_cargo_dupes_without_exact_flag"
-line = 564
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_binary_has_unknown_flag_after_subcommand"
-line = 202
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_binary_is_only_help"
-line = 528
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_binary_only_passes_exclude_tests_after_double_dash"
-line = 546
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_function_shadows_real_binary"
-line = 576
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_is_only_prose"
-line = 5
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_only_exists_inside_uncalled_function"
-line = 583
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_subcommand_has_unknown_flag_after_subcommand"
-line = 196
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_subcommand_is_only_help"
-line = 510
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_dupes_subcommand_only_passes_exclude_tests_after_double_dash"
-line = 540
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_function_shadows_real_binary"
-line = 570
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_global_help_precedes_dupes_subcommand"
-line = 516
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_cargo_global_version_precedes_dupes_subcommand"
-line = 522
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_command_lookup_only_mentions_cargo_dupes"
-line = 504
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_command_wrapper_runs_cargo_dupes_without_exact_flag"
-line = 214
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_dead_command_substitution_is_only_cargo_dupes_occurrence"
-line = 436
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_dead_right_side_of_false_and_is_only_cargo_dupes_occurrence"
-line = 368
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_dead_right_side_of_true_or_is_only_cargo_dupes_occurrence"
-line = 374
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_env_help_only_wraps_cargo_dupes_command"
-line = 534
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_env_wrapper_runs_cargo_dupes_without_exact_flag"
-line = 478
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_env_wrapper_uses_unknown_flag"
-line = 93
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_escaped_command_substitution_literal_is_only_occurrence"
-line = 454
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exclude_tests_only_appears_in_inline_comment"
-line = 466
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exclude_tests_only_appears_in_later_command"
-line = 460
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exec_wrapper_runs_cargo_dupes_without_exact_flag"
-line = 268
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exec_wrapper_uses_unknown_flag"
-line = 250
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exit_one_prevents_later_or_command"
-line = 386
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_exit_zero_prevents_later_and_command"
-line = 380
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_hook_contains_mixed_compliant_and_noncompliant_cargo_dupes"
-line = 442
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_near_match_cargo_dupes_subcommand_is_used"
-line = 558
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_nested_helper_is_called_before_its_definition_inside_called_function"
-line = 322
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_nested_helper_shadows_compliant_root_helper"
-line = 330
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_nested_wrappers_run_cargo_dupes_without_exact_flag"
-line = 232
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_recursive_helper_never_reaches_cargo_dupes"
-line = 286
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_shell_wrapper_runs_cargo_dupes_without_exact_flag"
-line = 491
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_shell_wrapper_uses_unknown_flag_before_c_script"
-line = 147
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_single_quoted_command_substitution_literal_is_only_occurrence"
-line = 448
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_top_level_helper_is_called_before_its_definition"
-line = 314
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/cargo_dupes_excludes/rule_tests/golden.rs"
-test_name = "warns_when_unknown_cargo_global_flag_precedes_dupes_subcommand"
-line = 105
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/cargo-dupes-excludes"
-title = "missing `--exclude-tests` on `cargo dupes` in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_for_clippy_with_compact_dash_dwarnings"
-line = 17
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_for_clippy_with_dash_d_warnings"
-line = 11
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_for_clippy_with_deny_equals_warnings"
-line = 23
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_called_function_runs_clippy_with_deny_warnings"
-line = 59
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_cargo_chdir_precedes_clippy"
-line = 109
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_cargo_jobs_attached_short_flag_precedes_clippy"
-line = 103
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_cargo_jobs_short_flag_precedes_clippy"
-line = 97
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_clippy_args_override_softer_rustflags"
-line = 147
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_clippy_runs_inside_cd_wrapper_in_if_guard"
-line = 121
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_env_rustflags_denies_warnings"
-line = 35
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_env_rustflags_uses_deny_equals_warnings"
-line = 47
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_env_unset_only_applies_to_other_command"
-line = 171
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_env_wraps_clippy_denies_warnings"
-line = 91
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_exported_rustflags_denies_warnings_before_clippy"
-line = 53
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_later_deny_overrides_earlier_allow_in_clippy_args"
-line = 129
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_later_deny_overrides_earlier_allow_in_rustflags"
-line = 141
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_later_deny_overrides_earlier_warn_in_clippy_args"
-line = 135
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_path_qualified_cargo_runs_clippy_denies_warnings"
-line = 115
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_rustflags_denies_warnings"
-line = 29
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_rustflags_uses_deny_warnings_spelling"
-line = 41
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_sh_option_value_precedes_clippy_script"
-line = 79
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_runs_clippy_with_deny_warnings"
-line = 66
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_uses_init_file_before_clippy_script"
-line = 72
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "passes_when_toolchain_prefixed_clippy_denies_warnings"
-line = 85
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_for_clippy_without_deny_warnings"
-line = 5
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_cargo_global_help_precedes_clippy"
-line = 211
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_clippy_caps_lints_to_allow"
-line = 241
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_clippy_command_is_only_help"
-line = 205
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_clippy_force_warns_warnings"
-line = 235
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_clippy_later_allows_warnings_again"
-line = 223
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_clippy_later_warns_warnings_again"
-line = 229
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_deny_warnings_only_appears_inside_echo"
-line = 186
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_env_rustflags_only_applies_to_other_command"
-line = 165
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_env_unsets_exported_rustflags_before_clippy"
-line = 192
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_inline_rustflags_only_applies_to_other_command"
-line = 159
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_near_match_clippy_subcommand_is_used"
-line = 199
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_other_cargo_command_mentions_clippy_text"
-line = 217
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_rustflags_near_match_only_mentions_warnings"
-line = 153
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/clippy_denies_warnings/rule_tests/golden.rs"
-test_name = "warns_when_shell_wrapper_exports_rustflags_only_in_subshell"
-line = 179
-status = "covered_hit"
-fixture = "R16-hooks-required-steps-present-but-weakened"
-severity = "Warn"
-rule = "g3rs-hooks/clippy-denies-warnings"
-title = "missing deny-warnings `cargo clippy` command in `.githooks/pre-commit`"
 file = ".githooks/pre-commit"
 
 [[test]]
@@ -11139,215 +9757,6 @@ fixture = "R16-hooks-required-steps-present-but-weakened"
 severity = "Error"
 rule = "g3rs-hooks/contract-critical-command-not-fail-open"
 title = "contract-critical hook command is fail-open"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/contract_trigger_coverage/rule_tests/golden.rs"
-test_name = "fires_missing_coverage_when_pattern_omits_an_exact_trigger_path"
-line = 16
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/contract-trigger-coverage"
-title = "hook does not declare a RUST_RELEVANT_PATTERN"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/contract_trigger_coverage/rule_tests/golden.rs"
-test_name = "fires_missing_pattern_error_when_hook_lacks_rust_relevant_pattern"
-line = 6
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/contract-trigger-coverage"
-title = "hook does not declare a RUST_RELEVANT_PATTERN"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/contract_trigger_coverage/rule_tests/golden.rs"
-test_name = "passes_inventory_when_pattern_covers_every_exact_trigger_path"
-line = 26
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/contract-trigger-coverage"
-title = "hook does not declare a RUST_RELEVANT_PATTERN"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_called_function_runs_gitleaks"
-line = 67
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_called_helper_chain_runs_gitleaks"
-line = 74
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_command_wrapper_runs_gitleaks"
-line = 55
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_env_split_string_wraps_gitleaks_command"
-line = 31
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_env_wraps_gitleaks_command"
-line = 25
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_exec_wrapper_runs_gitleaks"
-line = 61
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_gitleaks_command_exists"
-line = 19
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_left_side_of_chained_command_runs_gitleaks"
-line = 82
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_path_qualified_gitleaks_command_exists"
-line = 37
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_shell_option_value_precedes_gitleaks_script"
-line = 43
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "passes_when_shell_wrapper_runs_gitleaks"
-line = 49
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "warns_when_gitleaks_command_is_only_help"
-line = 94
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "warns_when_gitleaks_command_is_only_version"
-line = 100
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "warns_when_gitleaks_only_appears_in_comment"
-line = 5
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "warns_when_gitleaks_only_appears_in_echo"
-line = 88
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/gitleaks_step_present/rule_tests/golden.rs"
-test_name = "warns_when_gitleaks_only_exists_inside_uncalled_function"
-line = 106
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/gitleaks-step-present"
-title = "gitleaks step missing"
 file = ".githooks/pre-commit"
 
 [[test]]
@@ -11661,28 +10070,28 @@ file = ".githooks/pre-commit"
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "family_owned_commands_emit_inventory_when_hook_dispatches_validate_staged"
-line = 189
+line = 188
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "family_owned_commands_warn_when_hook_neither_delegates_nor_runs_them"
-line = 209
+line = 208
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "gitleaks_requirement_is_not_satisfied_by_validate_staged_delegation"
-line = 229
+line = 228
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "passes_all_rules_for_inline_synthesised_hook"
-line = 245
+line = 244
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -11696,28 +10105,28 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_cargo_invocation_fires_no_toolchain_invocation"
-line = 119
+line = 121
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_dedup_stripped_fires_dedups"
-line = 81
+line = 83
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_gitleaks_stripped_fires_error"
-line = 133
+line = 132
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_marker_stripped_fires_error"
-line = 147
+line = 146
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
@@ -11738,86 +10147,9 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "skip_guards_missing_fires_skips_when_no_owning_unit"
-line = 96
+line = 98
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "passes_when_called_function_executes_real_cargo_metadata_locked_command"
-line = 76
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "passes_when_env_wrapper_executes_real_cargo_metadata_locked_command"
-line = 48
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "passes_when_path_qualified_cargo_executes_real_metadata_locked_command"
-line = 62
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "passes_when_real_cargo_metadata_locked_command_exists"
-line = 20
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "warns_when_cargo_metadata_locked_command_is_echoed"
-line = 91
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "warns_when_lockfile_check_is_only_prose"
-line = 5
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/concrete_lockfile_command/rule_tests/golden.rs"
-test_name = "warns_when_non_metadata_cargo_command_uses_locked_flag"
-line = 34
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Warn"
-rule = "g3rs-hooks/concrete-lockfile-command"
-title = "missing concrete lockfile integrity command in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/shell_safety/executable_command_context_only/rule_tests/golden.rs"
@@ -12510,116 +10842,6 @@ fixture = "R15-hooks-reachable-no-root-cargo"
 severity = "Warn"
 rule = "g3rs-hooks/valid-shebang"
 title = "valid hook shebang present"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule_tests/golden.rs"
-test_name = "passes_when_assignment_runs_git_cat_file_size"
-line = 19
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/file-size-step-present"
-title = "file-size check step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule_tests/golden.rs"
-test_name = "passes_when_called_function_runs_env_wrapped_stat_bytes"
-line = 33
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/file-size-step-present"
-title = "file-size check step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule_tests/golden.rs"
-test_name = "warns_when_file_size_only_appears_in_comment"
-line = 5
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/file-size-step-present"
-title = "file-size check step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule_tests/golden.rs"
-test_name = "warns_when_git_cat_file_size_is_only_echoed"
-line = 68
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/file-size-step-present"
-title = "file-size check step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/file_size_step_present/rule_tests/golden.rs"
-test_name = "warns_when_only_max_file_size_threshold_is_referenced"
-line = 47
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/file-size-step-present"
-title = "file-size check step missing"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule_tests/golden.rs"
-test_name = "passes_when_called_function_runs_path_qualified_conflict_check"
-line = 34
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/merge-conflict-step-present"
-title = "missing merge-conflict marker scan in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule_tests/golden.rs"
-test_name = "passes_when_real_grep_conflict_command_exists"
-line = 20
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-hooks/merge-conflict-step-present"
-title = "missing merge-conflict marker scan in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule_tests/golden.rs"
-test_name = "warns_when_conflict_check_only_appears_in_comment"
-line = 5
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/merge-conflict-step-present"
-title = "missing merge-conflict marker scan in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule_tests/golden.rs"
-test_name = "warns_when_grep_only_mentions_merge_conflict_prose"
-line = 63
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/merge-conflict-step-present"
-title = "missing merge-conflict marker scan in `.githooks/pre-commit`"
-file = ".githooks/pre-commit"
-
-[[test]]
-test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/workflow/merge_conflict_step_present/rule_tests/golden.rs"
-test_name = "warns_when_only_echo_mentions_conflict_markers"
-line = 49
-status = "covered_hit"
-fixture = "R15-hooks-reachable-no-root-cargo"
-severity = "Error"
-rule = "g3rs-hooks/merge-conflict-step-present"
-title = "missing merge-conflict marker scan in `.githooks/pre-commit`"
 file = ".githooks/pre-commit"
 
 [[test]]
