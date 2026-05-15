@@ -1,0 +1,48 @@
+[disposition_audit]
+source_ledger = "behavior/migration/g3rs-test-fixture-ledger.toml"
+output_ledger = "behavior/migration/g3rs-kept-test-disposition.toml"
+kept_rows = 745
+
+[[disposition]]
+name = "needs_fixture_or_golden_backfill"
+expected_rows = 236
+meaning = "direct rule-sidecar behavior that should be moved to fixture or golden replay"
+
+[[disposition]]
+name = "needs_ingestion_replay"
+expected_rows = 420
+meaning = "parser, normalization, fail-closed input, and family fact extraction behavior"
+
+[[disposition]]
+name = "needs_family_runner_replay"
+expected_rows = 47
+meaning = "family runner fan-out, aggregation, and dispatch behavior"
+
+[[disposition]]
+name = "needs_validate_command_replay"
+expected_rows = 23
+meaning = "validate-command cargo gates, staged-path, family-selection, and execution behavior"
+
+[[disposition]]
+name = "needs_cli_contract_replay"
+expected_rows = 3
+meaning = "CLI parse, rejected argument, stdout, stderr, and exit behavior"
+
+[[disposition]]
+name = "needs_renderer_replay"
+expected_rows = 3
+meaning = "plain text report rendering behavior"
+
+[[disposition]]
+name = "keep_public_api_contract"
+expected_rows = 13
+meaning = "hook-contract public policy tests that remain compile/API contracts"
+
+[[verification]]
+command = "python3 scripts/behavior/classify-kept-test-dispositions.py --check"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-kept-test-dispositions.py"
+
+[[verification]]
+command = "scripts/behavior/verify-all.sh"
