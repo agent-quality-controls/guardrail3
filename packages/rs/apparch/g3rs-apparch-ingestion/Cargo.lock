@@ -206,6 +206,7 @@ name = "g3rs-apparch-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]

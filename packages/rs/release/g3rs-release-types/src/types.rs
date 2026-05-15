@@ -5,12 +5,13 @@ use std::collections::{BTreeMap, BTreeSet};
 use cargo_toml_parser::{types::CargoToml, types::WorkspacePackageSection};
 use cliff_toml_parser::types::CliffToml;
 use release_plz_toml_parser::types::ReleasePlzToml;
+use serde::Serialize;
 
 /// Mapping from a workflow matrix axis name to its declared values.
 pub(crate) type G3RsReleaseMatrixAxes = BTreeMap<String, Vec<String>>;
 
 /// Outcome of a release dry-run for a publishable crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsReleaseDryRunOutcome {
     /// Dry run succeeded.
     Passed,
@@ -19,7 +20,7 @@ pub enum G3RsReleaseDryRunOutcome {
 }
 
 /// Whether a path-dependency target lives inside or outside the workspace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsReleasePathTargetKind {
     /// Target lives inside the same workspace.
     InWorkspace,
@@ -28,7 +29,7 @@ pub enum G3RsReleasePathTargetKind {
 }
 
 /// A failure encountered while ingesting a release input file.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseInputFailure {
     /// Repo-relative path of the offending input.
     pub rel_path: String,
@@ -37,7 +38,7 @@ pub struct G3RsReleaseInputFailure {
 }
 
 /// A crate participating in release-family checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsReleaseConfigCrate {
     /// Crate name as declared in the manifest.
     pub name: String,
@@ -58,7 +59,7 @@ pub struct G3RsReleaseConfigCrate {
 }
 
 /// A single GitHub Actions workflow step.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseWorkflowStep {
     /// `uses:` action reference, if any.
     pub uses: Option<String>,
@@ -73,7 +74,7 @@ pub struct G3RsReleaseWorkflowStep {
 }
 
 /// A single GitHub Actions workflow job.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseWorkflowJob {
     /// Job identifier.
     pub id: String,
@@ -92,7 +93,7 @@ pub struct G3RsReleaseWorkflowJob {
 }
 
 /// Aggregated analysis of a single workflow file.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseWorkflowAnalysis {
     /// Top-level environment variable names referenced by the workflow.
     pub env_keys: Vec<String>,
@@ -105,7 +106,7 @@ pub struct G3RsReleaseWorkflowAnalysis {
 }
 
 /// A GitHub Actions workflow file with its analysis.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseWorkflow {
     /// Repo-relative path of the workflow file.
     pub rel_path: String,
@@ -114,7 +115,7 @@ pub struct G3RsReleaseWorkflow {
 }
 
 /// A dependency edge between two crates participating in release-family checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsReleaseConfigEdge {
     /// Source crate of the dependency edge.
     pub source: G3RsReleaseConfigCrate,
@@ -137,7 +138,7 @@ pub struct G3RsReleaseConfigEdge {
 }
 
 /// Workflow-presence flags for a release-config repo aggregate.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseConfigRepoWorkflowFlags {
     /// Whether a release-plz workflow is present.
     pub has_release_plz_workflow: bool,
@@ -148,7 +149,7 @@ pub struct G3RsReleaseConfigRepoWorkflowFlags {
 }
 
 /// Repo-level release configuration aggregate.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsReleaseConfigRepo {
     /// Repo-relative path of the workspace `Cargo.toml`.
     pub cargo_rel_path: String,
@@ -181,7 +182,7 @@ pub struct G3RsReleaseConfigRepo {
 }
 
 /// Aggregated input for release-family config checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsReleaseConfigChecksInput {
     /// Repo-level entries.
     pub repos: Vec<G3RsReleaseConfigRepo>,
@@ -194,7 +195,7 @@ pub struct G3RsReleaseConfigChecksInput {
 }
 
 /// File-tree-level repo aggregate for release checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseFileTreeRepo {
     /// Repo-relative path of the workspace `Cargo.toml`.
     pub cargo_rel_path: String,
@@ -213,7 +214,7 @@ pub struct G3RsReleaseFileTreeRepo {
 }
 
 /// File-tree-level README record for a publishable crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseFileTreeReadme {
     /// Crate name.
     pub crate_name: String,
@@ -230,7 +231,7 @@ pub struct G3RsReleaseFileTreeReadme {
 }
 
 /// Aggregated input for release-family file-tree checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseFileTreeChecksInput {
     /// Repo-level file-tree aggregate, when present.
     pub repo: Option<G3RsReleaseFileTreeRepo>,
@@ -241,7 +242,7 @@ pub struct G3RsReleaseFileTreeChecksInput {
 }
 
 /// Source-level README record for a publishable crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseSourceReadme {
     /// Crate name.
     pub crate_name: String,
@@ -254,7 +255,7 @@ pub struct G3RsReleaseSourceReadme {
 }
 
 /// Aggregated input for release-family source checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsReleaseSourceChecksInput {
     /// Per-crate README source records.
     pub readmes: Vec<G3RsReleaseSourceReadme>,

@@ -96,3 +96,4 @@ workspace = true
 [dependencies]
 g3rs-hooks-contract-types = { path = "../g3rs-hooks-contract-types", version = "0.1.0" }
 hook-shell-parser = { path = "../../../parsers/hook-shell-parser", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }

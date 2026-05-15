@@ -323,7 +323,7 @@ pub(crate) fn should_stop_at_nested_crate(
     if child_dir == root_dir {
         return false;
     }
-    crate_dirs.iter().any(|crate_dir| *crate_dir == child_dir)
+    crate_dirs.contains(&child_dir)
         || view.file_exists(&CrawlView::join_rel(child_dir, "Cargo.toml"))
 }
 

@@ -5,6 +5,7 @@ allowed_deps = [
   "cargo-toml-parser",
   "clippy-toml-parser",
   "g3rs-toml-parser",
+  "serde",
 ]
 
 [checks]

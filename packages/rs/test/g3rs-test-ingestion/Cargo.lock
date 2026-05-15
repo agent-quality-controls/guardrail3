@@ -275,6 +275,7 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -364,6 +365,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "id-arena"

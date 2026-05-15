@@ -1,7 +1,8 @@
 use cargo_toml_parser::types::CargoTomlDocument;
 use g3rs_toml_parser::types::RustProfile;
+use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum G3RsCargoPolicyRootKind {
     WorkspaceRoot,
     StandalonePackageRoot,
@@ -19,7 +20,7 @@ impl G3RsCargoPolicyRootKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoWaiver {
     pub rule: String,
     pub file: String,
@@ -27,7 +28,7 @@ pub struct G3RsCargoWaiver {
     pub reason: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsCargoRustPolicyState {
     Missing,
     Unreadable {
@@ -45,7 +46,7 @@ pub enum G3RsCargoRustPolicyState {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCargoPolicyRoot {
     pub kind: G3RsCargoPolicyRootKind,
     pub rel_dir: String,
@@ -54,7 +55,7 @@ pub struct G3RsCargoPolicyRoot {
     pub rust_policy: G3RsCargoRustPolicyState,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCargoWorkspaceMember {
     pub workspace_root_rel: String,
     pub member_rel: String,
@@ -62,29 +63,29 @@ pub struct G3RsCargoWorkspaceMember {
     pub cargo: CargoTomlDocument,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoMissingMember {
     pub workspace_root_rel: String,
     pub workspace_cargo_rel_path: String,
     pub member_rel: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoInputFailure {
     pub rel_path: String,
     pub message: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsCargoConfigChecksInput {
     pub root: G3RsCargoPolicyRoot,
     pub workspace_members: Vec<G3RsCargoWorkspaceMember>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoSourceChecksInput;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoFileTreeRoot {
     pub kind: Option<G3RsCargoPolicyRootKind>,
     pub rel_dir: String,
@@ -93,7 +94,7 @@ pub struct G3RsCargoFileTreeRoot {
     pub members_parse_error: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsCargoFileTreeChecksInput {
     pub root: G3RsCargoFileTreeRoot,
     pub missing_members: Vec<G3RsCargoMissingMember>,

@@ -1,2 +1,8 @@
-[rs]
 profile = "library"
+
+allowed_deps = [
+  "serde",
+]
+
+[checks]
+garde = false

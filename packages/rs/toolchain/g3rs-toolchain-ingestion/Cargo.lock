@@ -230,6 +230,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "rust-toolchain-toml-parser",
+ "serde",
 ]
 
 [[package]]

@@ -36,6 +36,9 @@ checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 [[package]]
 name = "g3rs-hooks-contract-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "g3rs-hooks-types"
@@ -43,6 +46,7 @@ version = "0.1.0"
 dependencies = [
  "g3rs-hooks-contract-types",
  "hook-shell-parser",
+ "serde",
 ]
 
 [[package]]
@@ -70,6 +74,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "indexmap"
@@ -147,6 +154,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]

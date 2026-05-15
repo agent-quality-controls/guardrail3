@@ -38,6 +38,7 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "serde",
 ]
 
 [[package]]

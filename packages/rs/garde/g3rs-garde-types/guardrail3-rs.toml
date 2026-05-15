@@ -3,6 +3,7 @@ profile = "library"
 allowed_deps = [
   "cargo-toml-parser",
   "clippy-toml-parser",
+  "serde",
 ]
 
 [checks]

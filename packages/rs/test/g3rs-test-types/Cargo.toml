@@ -97,3 +97,4 @@ workspace = true
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
 mutants-toml-parser = { path = "../../../parsers/mutants-toml-parser", version = "0.1.0" }
 nextest-toml-parser = { path = "../../../parsers/nextest-toml-parser", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }

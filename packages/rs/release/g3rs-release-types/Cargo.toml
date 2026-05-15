@@ -97,3 +97,4 @@ workspace = true
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
 cliff-toml-parser = { path = "../../../parsers/cliff-toml-parser", version = "0.1.0" }
 release-plz-toml-parser = { path = "../../../parsers/release-plz-toml-parser", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }

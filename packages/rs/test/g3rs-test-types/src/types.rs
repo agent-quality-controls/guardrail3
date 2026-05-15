@@ -12,8 +12,9 @@ use std::collections::BTreeSet;
 use cargo_toml_parser::types::CargoToml;
 use mutants_toml_parser::types::MutantsToml;
 use nextest_toml_parser::types::NextestToml;
+use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsTestConfigChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
@@ -31,7 +32,7 @@ pub struct G3RsTestConfigChecksInput {
     pub mutants_exists: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestSourceChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
@@ -40,7 +41,7 @@ pub struct G3RsTestSourceChecksInput {
     pub input_failures: Vec<G3RsTestSourceInputFailure>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestSourceFile {
     pub rel_path: String,
     pub kind: G3RsTestFileKind,
@@ -50,7 +51,7 @@ pub struct G3RsTestSourceFile {
     pub content: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsTestFileKind {
     Source,
     InternalSidecarMod,
@@ -61,7 +62,7 @@ pub enum G3RsTestFileKind {
     Other,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestComponentSourceFacts {
     pub rel_dir: String,
     pub runtime_rel_dir: String,
@@ -71,7 +72,7 @@ pub struct G3RsTestComponentSourceFacts {
     pub assertions_package_name: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestAnalyzedSourceFile {
     pub rel_path: String,
     pub kind: G3RsTestFileKind,
@@ -84,13 +85,13 @@ pub struct G3RsTestAnalyzedSourceFile {
     pub proof_bearing_assertion_functions: BTreeSet<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestSourceInputFailure {
     pub rel_path: String,
     pub message: String,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct ParsedTestFile {
     pub ignore_reasons: Vec<IgnoreReasonInfo>,
     pub modules: Vec<ModuleInfo>,
@@ -106,13 +107,13 @@ pub struct ParsedTestFile {
     pub macro_defined_proof_functions: BTreeSet<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ModuleInfo {
     pub line: usize,
     pub path_attr: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct CfgTestModuleInfo {
     pub line: usize,
     pub name: String,
@@ -120,7 +121,7 @@ pub struct CfgTestModuleInfo {
     pub path_attr: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct TestFunctionInfo {
     pub line: usize,
     pub name: String,
@@ -129,7 +130,7 @@ pub struct TestFunctionInfo {
     pub harness: TestHarnessFacts,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct FunctionInfo {
     pub line: usize,
     pub name: String,
@@ -141,7 +142,7 @@ pub struct FunctionInfo {
     pub string_literals: Vec<String>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct FunctionSignatureInfo {
     pub arg_count: usize,
     pub arg_names: BTreeSet<String>,
@@ -149,13 +150,13 @@ pub struct FunctionSignatureInfo {
     pub return_kind: ReturnKind,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct AssertionBodyInfo {
     pub has_assertion_macro: bool,
     pub has_failure_enforcement: bool,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct FunctionBodyFacts {
     pub call_paths: Vec<Vec<String>>,
     pub path_uses: Vec<Vec<String>>,
@@ -165,7 +166,7 @@ pub struct FunctionBodyFacts {
     pub shadowed_idents: BTreeSet<String>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct TestHarnessFacts {
     pub uses_tokio_test_attr: bool,
     pub method_receiver_paths: Vec<Vec<String>>,
@@ -175,7 +176,7 @@ pub struct TestHarnessFacts {
     pub weak_matches_lines: Vec<usize>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
 pub enum ReturnKind {
     #[default]
     None,
@@ -184,25 +185,25 @@ pub enum ReturnKind {
     PathLike,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct PublicValueInfo {
     pub line: usize,
     pub name: String,
     pub kind: PublicValueKind,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum PublicValueKind {
     Const,
     Static,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct FieldAccessInfo {
     pub name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct UseBinding {
     pub line: usize,
     pub path_segments: Vec<String>,
@@ -210,7 +211,7 @@ pub struct UseBinding {
     pub is_public: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct IgnoreReasonInfo {
     pub line: usize,
     pub reason: Option<String>,
@@ -224,7 +225,7 @@ pub mod ast {
     };
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestFileTreeChecksInput {
     pub root_rel_dir: String,
     pub cargo_rel_path: String,
@@ -238,7 +239,7 @@ pub struct G3RsTestFileTreeChecksInput {
     pub input_failures: Vec<G3RsTestFileTreeInputFailure>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestComponentFileTreeFacts {
     pub rel_dir: String,
     pub runtime_rel_dir: String,
@@ -260,13 +261,13 @@ pub struct G3RsTestComponentFileTreeFacts {
     pub assertions_module_files: Vec<G3RsTestAnalyzedSourceFile>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestOwnedSidecarFacts {
     pub mod_rel_path: String,
     pub assertions_module_rel_path: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsTestFileTreeInputFailure {
     pub rel_path: String,
     pub message: String,

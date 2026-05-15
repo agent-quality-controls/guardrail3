@@ -1,14 +1,15 @@
 use deny_toml_parser::types::DenyToml;
 use g3rs_toml_parser::types::RustProfile;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsDenyConfigChecksInput {
     pub deny_rel_path: String,
     pub deny: DenyToml,
     pub rust_policy: G3RsDenyRustPolicyState,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsDenyRustPolicyState {
     Missing,
     Unreadable {
@@ -25,17 +26,17 @@ pub enum G3RsDenyRustPolicyState {
     },
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsDenySourceChecksInput;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsDenyInputFailure {
     pub title: String,
     pub rel_path: String,
     pub message: String,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsDenyFileTreeChecksInput {
     pub selected_deny_rel_path: Option<String>,
     pub candidate_deny_rel_paths: Vec<String>,

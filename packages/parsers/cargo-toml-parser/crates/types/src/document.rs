@@ -3,23 +3,24 @@
     reason = "parser document model types intentionally include the parser domain (CargoToml) and document role"
 )]
 
+use serde::Serialize;
 use toml::Value;
 
 use crate::cargo_toml::{CargoToml, ToolLints};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct CargoTomlDocument {
     pub raw: Value,
     pub typed: CargoTomlParseState,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum CargoTomlParseState {
     Parsed(Box<CargoToml>),
     Invalid(String),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum CargoTomlDocumentKind {
     WorkspaceRoot,
     PackageRoot,
