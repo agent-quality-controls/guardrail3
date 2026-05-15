@@ -2,7 +2,7 @@ id = "L70-apparch-policy-violated"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "apparch", "--inventory", "--rules-only"],
+  ["validate", "workspace", "--path", ".", "--family", "apparch", "--inventory", "--rules-only"],
 ]
 expected_exit = "nonzero"
 level = "delegated_policy_valid_project_policy_violated"

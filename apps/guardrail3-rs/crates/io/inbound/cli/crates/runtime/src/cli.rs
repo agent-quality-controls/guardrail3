@@ -6,7 +6,30 @@ use guardrail3_rs_app_types::SupportedFamily;
 
 /// Top-level CLI parser for the guardrail3-rs binary.
 #[derive(Parser, Debug)]
-#[command(name = "guardrail3-rs")]
+#[command(
+    name = "g3rs",
+    after_help = "G3RS enforces Rust repo setup and Rust workspace guardrails.
+
+Start here:
+  g3rs init repo
+  g3rs init workspace --path <path>
+  g3rs validate repo
+  g3rs validate workspace --path <path>
+
+Concepts:
+  repo       Git repository surface: hooks, repo-level topology, marker pairs.
+  workspace  One adopted Rust unit: Cargo.toml plus guardrail3-rs.toml.
+
+Rules:
+  init writes setup.
+  validate only reports.
+  validate repo checks that Git will run G3RS.
+  validate workspace checks one Rust unit.
+
+Deleted command shapes:
+  g3rs validate-repo
+  g3rs validate --path <path>"
+)]
 pub struct Cli {
     /// Parsed subcommand payload.
     #[command(subcommand)]
@@ -16,8 +39,55 @@ pub struct Cli {
 /// Supported CLI subcommands.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Command {
-    /// Validates one workspace root against the selected families.
+    /// Writes repo or workspace setup.
+    Init {
+        #[command(subcommand)]
+        command: InitCommand,
+    },
+    /// Reports repo or workspace validation findings.
     Validate {
+        #[command(subcommand)]
+        command: ValidateCommand,
+    },
+}
+
+/// Supported init subcommands.
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
+pub enum InitCommand {
+    /// Bootstraps repo-level hook guardrails.
+    Repo {
+        /// Path inside the repo to initialize. Defaults to the current directory.
+        #[arg(long = "path", default_value = ".")]
+        path: PathBuf,
+        /// Allows bounded managed-file rewrites and managed-block insertion.
+        #[arg(long = "force", default_value_t = false)]
+        force: bool,
+    },
+    /// Bootstraps one adopted Rust workspace or package root.
+    Workspace {
+        /// Workspace root to initialize.
+        #[arg(long = "path")]
+        path: PathBuf,
+        /// Allows bounded managed-file rewrites.
+        #[arg(long = "force", default_value_t = false)]
+        force: bool,
+    },
+}
+
+/// Supported validate subcommands.
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
+pub enum ValidateCommand {
+    /// Validates repository-level guardrails.
+    Repo {
+        /// Path inside the repo to validate. Defaults to the current directory.
+        #[arg(long = "path", default_value = ".")]
+        path: PathBuf,
+        /// Includes inventory findings in the rendered output.
+        #[arg(long = "inventory", default_value_t = false)]
+        inventory: bool,
+    },
+    /// Validates one workspace root against the selected families.
+    Workspace {
         /// Workspace root to validate.
         #[arg(long = "path")]
         path: PathBuf,
@@ -33,15 +103,6 @@ pub enum Command {
         /// When set, runs only static rule families and skips cargo gates entirely.
         #[arg(long = "rules-only", default_value_t = false)]
         rules_only: bool,
-    },
-    /// Validates the repository as a whole: hook contents, tool presence, repo-wide topology, marker-pair completeness.
-    ValidateRepo {
-        /// Optional override for the repo root. Defaults to `git rev-parse --show-toplevel`.
-        #[arg(long = "repo-root")]
-        repo_root: Option<PathBuf>,
-        /// Includes inventory findings in the rendered output.
-        #[arg(long = "inventory", default_value_t = false)]
-        inventory: bool,
     },
 }
 

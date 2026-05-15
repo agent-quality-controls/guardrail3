@@ -4,7 +4,7 @@ run_from = "repo"
 git_init = true
 runner_mode = "path_without_delegated_tools"
 commands = [
-  ["validate-repo", "--repo-root", ".", "--inventory"],
+  ["validate", "repo", "--path", ".", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "repo_hooks_reachable_no_root_cargo"

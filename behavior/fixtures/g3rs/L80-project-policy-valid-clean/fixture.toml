@@ -2,7 +2,7 @@ id = "L80-project-policy-valid-clean"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--rules-only", "--inventory"],
 ]
 expected_exit = "zero"
 level = "project_policy_valid_clean"

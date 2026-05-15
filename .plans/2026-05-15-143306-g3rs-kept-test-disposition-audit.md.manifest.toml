@@ -1,7 +1,7 @@
 [disposition_audit]
 source_ledger = "behavior/migration/g3rs-test-fixture-ledger.toml"
 output_ledger = "behavior/migration/g3rs-kept-test-disposition.toml"
-kept_rows = 745
+kept_rows = 755
 
 [[disposition]]
 name = "needs_rule_fixture_or_golden_output"
@@ -10,7 +10,7 @@ meaning = "direct rule-sidecar behavior that should be moved to fixture or golde
 
 [[disposition]]
 name = "needs_serialized_ingestion_output"
-expected_rows = 420
+expected_rows = 421
 meaning = "parser, normalization, fail-closed input, and family fact extraction behavior captured by serializing owned Rust ingestion structs"
 
 [[disposition]]
@@ -25,12 +25,12 @@ meaning = "validate-command cargo gates, staged-path, family-selection, and exec
 
 [[disposition]]
 name = "needs_cli_output"
-expected_rows = 3
+expected_rows = 11
 meaning = "CLI parse, rejected argument, stdout, stderr, and exit behavior"
 
 [[disposition]]
 name = "needs_renderer_output"
-expected_rows = 3
+expected_rows = 4
 meaning = "plain text report rendering behavior"
 
 [[disposition]]

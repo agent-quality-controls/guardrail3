@@ -76,6 +76,25 @@ pub fn ingest_for_source_checks(
         });
     }
 
+    if let Some(dir) = upward::find_dir_entry(crawl, ".githooks/pre-commit.d") {
+        for fact in collect_direct_script_facts(crawl, &dir, ".githooks/pre-commit.d/")? {
+            if fact.rel_path != ".githooks/pre-commit.d/g3rs" {
+                continue;
+            }
+            let abs_path = crawl.root_abs_path.join(fact.rel_path.as_str());
+            let content = read_entry(abs_path.as_path())?;
+            inputs.push(G3RsHooksSourceChecksInput {
+                rel_path: fact.rel_path,
+                kind: G3RsHookScriptKind::Modular,
+                exists: true,
+                parsed: parse_script(&content),
+                has_modular_dir,
+                is_workspace_project,
+                requirements: Vec::new(),
+            });
+        }
+    }
+
     match upward::find_file_entry(crawl, "scripts/g3rs/verify") {
         Some(entry) => {
             if !entry.readable {

@@ -1,7 +1,7 @@
 use guardrail3_check_types::G3Severity;
 use guardrail3_rs_app_types::{
     FamilyRun, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRepoRequest, ValidateReport,
-    ValidateRequest, WorkspaceCrawlError, WorkspaceCrawler,
+    ValidateWorkspaceRequest, WorkspaceCrawlError, WorkspaceCrawler,
 };
 
 use crate::{
@@ -17,7 +17,7 @@ use crate::{
 ///
 /// Returns [`WorkspaceCrawlError`] when the workspace cannot be crawled.
 pub fn execute(
-    request: &ValidateRequest,
+    request: &ValidateWorkspaceRequest,
     crawler: &dyn WorkspaceCrawler,
     family_runner: &dyn FamilyRunner,
     renderer: &dyn ReportRenderer,
@@ -34,7 +34,7 @@ pub fn execute(
         }
     };
     let crawl = crawler.crawl(&request.workspace_root)?;
-    let mut report = ValidateReport::default();
+    let mut report = ValidateReport::scoped("workspace", request.workspace_root.clone());
     let mut family_errors = Vec::new();
 
     let families = selected_families_with_opt_out(request, &disabled);
@@ -132,7 +132,7 @@ pub fn execute_repo(
     renderer: &dyn ReportRenderer,
 ) -> Result<ExecutionOutcome, WorkspaceCrawlError> {
     let crawl = crawler.crawl_any(&request.repo_root)?;
-    let mut report = ValidateReport::default();
+    let mut report = ValidateReport::scoped("repo", request.repo_root.clone());
     let mut family_errors = Vec::new();
 
     let has_root_cargo_toml = request.repo_root.join("Cargo.toml").is_file();

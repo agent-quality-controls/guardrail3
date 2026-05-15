@@ -23,11 +23,14 @@ pub fn assert_validate_command_from<I, T>(
 
     match command {
         guardrail3_rs::Command::Validate {
-            path,
-            family,
-            inventory,
-            staged: _,
-            rules_only: _,
+            command:
+                guardrail3_rs::ValidateCommand::Workspace {
+                    path,
+                    family,
+                    inventory,
+                    staged: _,
+                    rules_only: _,
+                },
         } => {
             let actual_family = family
                 .iter()
@@ -59,8 +62,8 @@ pub fn assert_validate_command_from<I, T>(
                 "parsed inventory flag should match the expected CLI value"
             );
         }
-        guardrail3_rs::Command::ValidateRepo { .. } => {
-            unreachable!("expected validate command, got validate-repo");
+        other @ (guardrail3_rs::Command::Init { .. } | guardrail3_rs::Command::Validate { .. }) => {
+            unreachable!("expected validate workspace command, got {other:?}");
         }
     }
 }

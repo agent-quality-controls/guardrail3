@@ -10,15 +10,71 @@ reason = "CLI parse and run behavior should be captured by command stdout/stderr
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_repo"
+line = 20
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_workspace"
+line = 36
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_validate_repo"
+line = 52
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_init_workspace_profile"
+line = 100
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_path_shape"
+line = 92
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_repo_command"
+line = 84
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_removed_hexarch_family"
-line = 19
+line = 68
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_creates_managed_g3rs_hook_files"
+line = 111
+disposition = "needs_cli_output"
+reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_refuses_project_owned_hook_without_force"
+line = 142
 disposition = "needs_cli_output"
 reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
 test_name = "run_command_sends_failures_to_stderr"
-line = 66
+line = 83
 disposition = "needs_cli_output"
 reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
 
@@ -32,14 +88,21 @@ reason = "report formatting behavior should be captured by renderer output snaps
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_includes_rule_message"
-line = 61
+line = 63
+disposition = "needs_renderer_output"
+reason = "report formatting behavior should be captured by renderer output snapshots"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_includes_scope_and_root"
+line = 85
 disposition = "needs_renderer_output"
 reason = "report formatting behavior should be captured by renderer output snapshots"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_reports_no_findings_when_all_results_are_hidden"
-line = 37
+line = 38
 disposition = "needs_renderer_output"
 reason = "report formatting behavior should be captured by renderer output snapshots"
 
@@ -3714,42 +3777,42 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "nested_package_workspace_is_out_of_scope_for_repo_global_hooks"
-line = 921
+line = 955
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_honors_hooks_path_selected_hook_for_binary_requirements"
-line = 687
+line = 721
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_missing_g3rs_binary_when_required"
-line = 527
+line = 561
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_present_g3rs_and_cargo_dupes_binaries"
-line = 639
+line = 673
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_reports_tool_inventory_and_missing_cargo_dupes"
-line = 569
+line = 603
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_config_treats_path_qualified_tools_as_installed"
-line = 744
+line = 778
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -3763,49 +3826,49 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_keeps_hooks_path_compat_mode_free_of_git_hook_shadow_risk"
-line = 998
+line = 1032
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_existing_pre_commit_hook"
-line = 787
+line = 821
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_layout_stats_permissions_and_overrides"
-line = 1027
+line = 1061
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_missing_pre_commit_hook"
-line = 897
+line = 931
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_modular_inventory_for_hooks_compat_path"
-line = 849
+line = 883
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_reports_trust_risk"
-line = 964
+line = 998
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_file_tree_treats_non_compat_hooks_path_as_out_of_contract"
-line = 813
+line = 847
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -3826,7 +3889,14 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_keeps_inert_g3rs_text_quiet_when_wrapped_command_executes"
-line = 1419
+line = 1453
+disposition = "needs_serialized_ingestion_output"
+reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
+
+[[test]]
+test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
+test_name = "pipeline_reports_dispatcher_findings_for_managed_g3rs_hook_script"
+line = 493
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -3840,7 +3910,7 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_reports_fail_open_wrapper_on_called_function"
-line = 1443
+line = 1477
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -3903,56 +3973,56 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_runs_shared_source_checks_on_modular_scripts"
-line = 1152
+line = 1186
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_inert_text_false_pass_risk"
-line = 1342
+line = 1376
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_invalid_dispatcher_syntax"
-line = 1392
+line = 1426
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_inventory_for_normalized_wrapped_commands"
-line = 1215
+line = 1249
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_dispatcher_pattern_when_modular_dir_is_only_echoed"
-line = 493
+line = 527
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_rust_and_shell_steps"
-line = 1251
+line = 1285
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_missing_workspace_scope_for_workspace_project"
-line = 1368
+line = 1402
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "pipeline_source_reports_shell_safety_inventory_for_valid_hook"
-line = 1182
+line = 1216
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
@@ -3973,13 +4043,13 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/selection.rs"
 test_name = "emits_missing_g3rs_verifier_fact_without_ingesting_g3ts"
-line = 43
+line = 48
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-ingestion/crates/runtime/src/run_tests/selection.rs"
-test_name = "ingests_pre_commit_and_g3rs_verifier_only_for_source_checks"
+test_name = "ingests_pre_commit_modular_scripts_and_g3rs_verifier_for_source_checks"
 line = 6
 disposition = "needs_serialized_ingestion_output"
 reason = "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde"
@@ -4036,28 +4106,28 @@ reason = "ingestion behavior needs fixture output that serializes owned Rust ing
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "family_owned_commands_emit_inventory_when_hook_dispatches_validate_staged"
-line = 189
+line = 188
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "family_owned_commands_warn_when_hook_neither_delegates_nor_runs_them"
-line = 209
+line = 208
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "gitleaks_requirement_is_not_satisfied_by_validate_staged_delegation"
-line = 229
+line = 228
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "passes_all_rules_for_inline_synthesised_hook"
-line = 245
+line = 244
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
@@ -4071,28 +4141,28 @@ reason = "family run behavior needs runner-level output for dispatch, aggregatio
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_cargo_invocation_fires_no_toolchain_invocation"
-line = 119
+line = 121
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_dedup_stripped_fires_dedups"
-line = 81
+line = 83
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_gitleaks_stripped_fires_error"
-line = 133
+line = 132
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "real_repo_pre_commit_hook_with_marker_stripped_fires_error"
-line = 147
+line = 146
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 
@@ -4113,7 +4183,7 @@ reason = "family run behavior needs runner-level output for dispatch, aggregatio
 [[test]]
 test_path = "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/run_tests/cases.rs"
 test_name = "skip_guards_missing_fires_skips_when_no_owning_unit"
-line = 96
+line = 98
 disposition = "needs_family_runner_output"
 reason = "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior"
 

@@ -2,7 +2,7 @@ id = "L70-delegated-policy-valid-project-policy-violated"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "delegated_policy_valid_project_policy_violated"

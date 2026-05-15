@@ -64,7 +64,7 @@ expected_rows = 236
 
 [[disposition]]
 name = "needs_serialized_ingestion_output"
-expected_rows = 420
+expected_rows = 421
 
 [[disposition]]
 name = "needs_family_runner_output"
@@ -76,11 +76,11 @@ expected_rows = 23
 
 [[disposition]]
 name = "needs_cli_output"
-expected_rows = 3
+expected_rows = 11
 
 [[disposition]]
 name = "needs_renderer_output"
-expected_rows = 3
+expected_rows = 4
 
 [[disposition]]
 name = "keep_public_api_contract"

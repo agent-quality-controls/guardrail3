@@ -2,8 +2,8 @@ id = "R00-invalid-repo-root"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate-repo", "--repo-root", "missing", "--inventory"],
-  ["validate-repo", "--repo-root", "README.md", "--inventory"],
+  ["validate", "repo", "--path", "missing", "--inventory"],
+  ["validate", "repo", "--path", "README.md", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "repo_root_invalid"

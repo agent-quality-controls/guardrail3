@@ -8,7 +8,7 @@
       ],
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:f497c0fc48576d2fd9827ec0acc62daac1d48fdbf2c9055cb09cc6bacceea3b6",
+      "fixture_hash": "sha256:e46e25ca85e4171bcbac987c7a96b65ce6ea0c5c986ec877b921f893d75cf9df",
       "fixture_id": "L41-root-cargo-toml-invalid",
       "payload": {
         "config_checks": {
@@ -42,7 +42,7 @@
       ],
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:ac079ae6dd56380111308faa15afc800eedf9a29e447cd7ad3d172f2666e96cc",
+      "fixture_hash": "sha256:ff72ed43d32656c2514a6ddc6832af28b14dc895d5306b77a0c3c0aaede45642",
       "fixture_id": "L61-cargo-clippy-code-config-branches",
       "payload": {
         "config_checks": {

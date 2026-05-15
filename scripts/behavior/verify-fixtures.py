@@ -18,6 +18,7 @@ DEFAULT_MANIFEST_PATH = (
     / "2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
 )
 PRE_COMMIT_HOOK_PATH = REPO_ROOT / ".githooks" / "pre-commit"
+G3RS_PRE_COMMIT_HOOK_PATH = REPO_ROOT / ".githooks" / "pre-commit.d" / "g3rs"
 
 
 def load_toml(path: Path) -> dict:
@@ -172,19 +173,20 @@ def main() -> int:
 
     if not PRE_COMMIT_HOOK_PATH.is_file():
         failures.append("missing pre-commit hook")
+    if not G3RS_PRE_COMMIT_HOOK_PATH.is_file():
+        failures.append("missing managed g3rs pre-commit hook")
     else:
-        hook_lines = shell_assignment_lines(PRE_COMMIT_HOOK_PATH.read_text(encoding="utf-8"))
+        hook_lines = shell_assignment_lines(
+            G3RS_PRE_COMMIT_HOOK_PATH.read_text(encoding="utf-8")
+        )
         required_hook_assignments = [
-            ("VALIDATION_STAGED_FILES", 'grep -vE \'^behavior/fixtures/\''),
-            ("MIGRATION_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
-            ("STAGED_PACKAGE_JSON", '$(echo "$VALIDATION_STAGED_FILES"'),
-            ("RUST_RELEVANT_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
-            ("TS_RELEVANT_FILES", '$(echo "$VALIDATION_STAGED_FILES"'),
+            ("validation_staged_files", "grep -vE '^behavior/fixtures/'"),
+            ("rust_relevant_files", '$(echo "$validation_staged_files"'),
         ]
         for variable_name, required_fragment in required_hook_assignments:
             if not assignment_contains(hook_lines, variable_name, required_fragment):
                 failures.append(
-                    "pre-commit hook does not exclude behavior fixtures from validation routing: "
+                    "managed g3rs hook does not exclude behavior fixtures from validation routing: "
                     + variable_name
                 )
 

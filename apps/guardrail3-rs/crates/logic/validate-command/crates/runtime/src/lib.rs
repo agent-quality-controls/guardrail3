@@ -10,6 +10,9 @@ mod family_opt_out;
 /// Centralized filesystem boundary.
 #[cfg(feature = "api")]
 mod fs;
+/// Command execution flow for init requests.
+#[cfg(feature = "api")]
+mod init;
 /// Repo-wide marker-pair completeness check.
 #[cfg(feature = "api")]
 mod marker_pairs;
@@ -32,6 +35,8 @@ pub use cargo_gates::{
 pub use execute::{execute, execute_repo};
 #[cfg(feature = "api")]
 pub use family_opt_out::{DisabledFamilies, GuardrailConfigError, disabled_families};
+#[cfg(feature = "api")]
+pub use init::{execute_init_repo, execute_init_workspace};
 #[cfg(feature = "api")]
 pub use marker_pairs::check_repo as check_marker_pairs;
 #[cfg(feature = "api")]

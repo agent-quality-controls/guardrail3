@@ -78,7 +78,11 @@ fn delegates_to_g3rs_validate_staged(parsed: &hook_shell_parser::types::ParsedSh
         if args.first().map(String::as_str) != Some("validate") {
             return false;
         }
-        let tail = &args[1..];
+        let tail = if args.get(1).map(String::as_str) == Some("workspace") {
+            &args[2..]
+        } else {
+            &args[1..]
+        };
         let has_staged = tail.iter().any(|arg| arg == "--staged");
         let has_path = tail
             .iter()
@@ -86,20 +90,3 @@ fn delegates_to_g3rs_validate_staged(parsed: &hook_shell_parser::types::ParsedSh
         has_staged && has_path
     })
 }
-
-#[cfg(test)]
-pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let input = ExecutableCommandContextInput {
-        rel_path: ".githooks/pre-commit",
-        kind: crate::facts::HookScriptKind::PreCommit,
-        parsed: &parsed,
-    };
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    crate::compat::finish(results)
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

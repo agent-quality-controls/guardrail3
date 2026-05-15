@@ -2,7 +2,7 @@ id = "L70-workspace-package-policy-violated"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--inventory", "--rules-only"],
+  ["validate", "workspace", "--path", ".", "--inventory", "--rules-only"],
 ]
 expected_exit = "nonzero"
 level = "delegated_policy_valid_project_policy_violated"

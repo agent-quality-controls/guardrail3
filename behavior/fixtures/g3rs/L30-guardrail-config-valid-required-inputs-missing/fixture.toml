@@ -2,7 +2,7 @@ id = "L30-guardrail-config-valid-required-inputs-missing"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "cargo", "--family", "clippy", "--family", "deny", "--family", "deps", "--family", "fmt", "--family", "toolchain", "--family", "garde", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--family", "clippy", "--family", "deny", "--family", "deps", "--family", "fmt", "--family", "toolchain", "--family", "garde", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "guardrail_config_valid_required_inputs_missing"

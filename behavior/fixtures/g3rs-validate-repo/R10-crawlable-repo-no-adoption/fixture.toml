@@ -2,7 +2,7 @@ id = "R10-crawlable-repo-no-adoption"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate-repo", "--repo-root", ".", "--inventory"],
+  ["validate", "repo", "--path", ".", "--inventory"],
 ]
 expected_exit = "zero"
 level = "repo_root_crawlable_no_adoption"

@@ -27,6 +27,7 @@ fn renderer_hides_inventory_by_default() {
                 ),
             ],
         }],
+        ..ValidateReport::default()
     };
 
     let output = super::super::render_report(&report, false);
@@ -51,6 +52,7 @@ fn renderer_reports_no_findings_when_all_results_are_hidden() {
                 .into_inventory(),
             ],
         }],
+        ..ValidateReport::default()
     };
 
     let output = super::super::render_report(&report, false);
@@ -72,9 +74,22 @@ fn renderer_includes_rule_message() {
                 None,
             )],
         }],
+        ..ValidateReport::default()
     };
 
     let output = super::super::render_report(&report, false);
 
     assertions::assert_includes_rule_message(&output);
+}
+
+#[test]
+fn renderer_includes_scope_and_root() {
+    let report = ValidateReport::scoped("workspace", "/tmp/example".into());
+
+    let output = super::super::render_report(&report, false);
+
+    assert!(
+        output.starts_with("scope: workspace\nroot: /tmp/example\n\nNo findings."),
+        "{output}"
+    );
 }

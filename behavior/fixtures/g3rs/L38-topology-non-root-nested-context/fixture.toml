@@ -2,7 +2,7 @@ id = "L38-topology-non-root-nested-context"
 tool = "g3rs"
 run_from = "repo"
 commands = [
-  ["validate", "--path", "apps/outer", "--inventory"],
+  ["validate", "workspace", "--path", "apps/outer", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "guardrail_config_valid_required_inputs_missing"

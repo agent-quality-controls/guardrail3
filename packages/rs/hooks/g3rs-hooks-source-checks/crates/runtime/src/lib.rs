@@ -20,6 +20,8 @@ mod facts;
 mod gitleaks_step_present;
 /// `inputs` module.
 mod inputs;
+/// `managed_chain` module.
+mod managed_chain;
 /// `required_contract_command_present` module.
 mod required_contract_command_present;
 /// `routing` module.

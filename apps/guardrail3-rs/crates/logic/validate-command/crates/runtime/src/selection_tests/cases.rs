@@ -1,9 +1,9 @@
-use guardrail3_rs_app_types::{SupportedFamily, ValidateRequest};
+use guardrail3_rs_app_types::{SupportedFamily, ValidateWorkspaceRequest};
 use guardrail3_rs_validate_command_assertions::selection as assertions;
 
 #[test]
 fn selected_families_follow_canonical_order() {
-    let request = ValidateRequest {
+    let request = ValidateWorkspaceRequest {
         workspace_root: "ignored".into(),
         families: vec![
             SupportedFamily::Release,
