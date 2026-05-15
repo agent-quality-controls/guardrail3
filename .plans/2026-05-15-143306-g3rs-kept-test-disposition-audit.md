@@ -12,22 +12,22 @@ Audit every `kept_compile_contract` row in `behavior/migration/g3rs-test-fixture
 
 # Dispositions
 
-- `needs_fixture_or_golden_backfill`
+- `needs_rule_fixture_or_golden_output`
   - Direct rule sidecar tests that still need fixture or golden replay coverage.
   - These are not true compile/API contracts.
-- `needs_ingestion_replay`
+- `needs_serialized_ingestion_output`
   - Ingestion tests that validate parsing, normalization, fail-closed input handling, and family fact extraction.
-  - These need a replay harness that compares normalized family facts or integration output, not one direct `g3rs validate` finding.
-- `needs_family_runner_replay`
+  - These need fixture output that serializes the owned Rust ingestion structs with Serde, not a custom adapter layer.
+- `needs_family_runner_output`
   - Family runner and `run_tests` tests that validate fan-out and aggregation.
   - These need runner-level replay output or fixture states that prove dispatch.
-- `needs_validate_command_replay`
+- `needs_validate_command_output`
   - `validate-command` tests for cargo gates, staged paths, family selection, and command execution.
   - These need CLI command replay, not rule fixture output.
-- `needs_cli_contract_replay`
+- `needs_cli_output`
   - CLI parse/error behavior.
   - These need CLI stdout/stderr/exit snapshots.
-- `needs_renderer_replay`
+- `needs_renderer_output`
   - Plain text report rendering.
   - These need renderer snapshot replay.
 - `keep_public_api_contract`

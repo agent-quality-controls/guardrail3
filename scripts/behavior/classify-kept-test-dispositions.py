@@ -78,42 +78,42 @@ def classify_row(test_path: str) -> tuple[str, str]:
         )
     if test_path.startswith("apps/guardrail3-rs/crates/io/inbound/cli/"):
         return (
-            "needs_cli_contract_replay",
-            "CLI parse and run behavior should be captured by command stdout/stderr/exit replay",
+            "needs_cli_output",
+            "CLI parse and run behavior should be captured by command stdout/stderr/exit output",
         )
     if test_path.startswith("apps/guardrail3-rs/crates/io/outbound/report/"):
         return (
-            "needs_renderer_replay",
+            "needs_renderer_output",
             "report formatting behavior should be captured by renderer output snapshots",
         )
     if test_path.startswith("apps/guardrail3-rs/crates/logic/validate-command/"):
         return (
-            "needs_validate_command_replay",
-            "validate-command behavior needs CLI command replay for cargo gates, staged paths, and family selection",
+            "needs_validate_command_output",
+            "validate-command behavior needs CLI command output for cargo gates, staged paths, and family selection",
         )
     if test_path.startswith("apps/guardrail3-rs/crates/logic/family-runner-process/"):
         return (
-            "needs_family_runner_replay",
-            "family runner behavior needs runner-level replay for hook injection and family contract aggregation",
+            "needs_family_runner_output",
+            "family runner behavior needs runner-level output for hook injection and family contract aggregation",
         )
     if "/g3rs-" in test_path and "-ingestion/" in test_path:
         return (
-            "needs_ingestion_replay",
-            "ingestion behavior needs normalized family-fact replay rather than direct rule finding replay",
+            "needs_serialized_ingestion_output",
+            "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde",
         )
     if "/run_tests/" in test_path:
         return (
-            "needs_family_runner_replay",
-            "family run behavior needs runner-level replay for dispatch, aggregation, and inactive-family behavior",
+            "needs_family_runner_output",
+            "family run behavior needs runner-level output for dispatch, aggregation, and inactive-family behavior",
         )
     if is_rule_sidecar_behavior(test_path):
         return (
-            "needs_fixture_or_golden_backfill",
+            "needs_rule_fixture_or_golden_output",
             "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot",
         )
     return (
-        "needs_family_runner_replay",
-        "remaining non-ingestion test behavior is runner or aggregation behavior unless a narrower replay harness supersedes it",
+        "needs_family_runner_output",
+        "remaining non-ingestion test behavior is runner or aggregation behavior unless a narrower fixture output supersedes it",
     )
 
 
