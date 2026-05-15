@@ -15,8 +15,6 @@ pub use types::G3RsCodeExceptionComment;
 #[cfg(feature = "api")]
 pub use types::G3RsCodeFileTreeChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3RsCodeParsedSourceState;
-#[cfg(feature = "api")]
 pub use types::G3RsCodeSourceChecksInput;
 #[cfg(feature = "api")]
 pub use types::G3RsCodeStructuralCapRoot;

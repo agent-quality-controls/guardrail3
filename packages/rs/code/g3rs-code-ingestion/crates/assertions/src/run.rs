@@ -33,6 +33,6 @@ pub use crate::run_results::{
     assert_results_empty, assert_single_parse_failed_error, assert_single_unreadable_error,
 };
 pub use crate::run_source::{
-    assert_not_shared_crate, assert_shared_crate, assert_source_file, assert_source_parse_failure,
-    assert_source_waiver, require_source_file,
+    assert_not_shared_crate, assert_shared_crate, assert_source_file, assert_source_waiver,
+    require_source_file,
 };

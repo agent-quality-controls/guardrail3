@@ -1,6 +1,4 @@
-use g3rs_code_types::{
-    G3RsCodeParsedSourceState, G3RsCodeSourceChecksInput, G3RsCodeWaiver, G3RsSourceFile,
-};
+use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsCodeWaiver, G3RsSourceFile};
 
 /// Bundle of per-source-file metadata threaded into `assemble`.
 pub(crate) struct AssembleInputs {
@@ -8,8 +6,6 @@ pub(crate) struct AssembleInputs {
     pub(crate) rel_path: String,
     /// Raw file content as read from disk.
     pub(crate) content: String,
-    /// Parsed Rust syntax-tree state for the file.
-    pub(crate) parsed_source: G3RsCodeParsedSourceState,
     /// Whether the file belongs to a `[[test]]`/integration-test target.
     pub(crate) is_test: bool,
     /// Active rust policy profile name (`library`, `service`, ...) when known.
@@ -32,7 +28,6 @@ pub(crate) fn assemble(inputs: AssembleInputs) -> G3RsCodeSourceChecksInput {
             profile_name: inputs.profile_name,
             is_library_root: inputs.is_library_root,
         },
-        parsed_source: inputs.parsed_source,
         is_shared_crate: inputs.is_shared_crate,
         waivers: inputs.waivers,
     }

@@ -1,8 +1,8 @@
 use cargo_toml_parser::parse;
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_code_types::{
-    G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeParsedSourceState,
-    G3RsCodeSourceChecksInput, G3RsCodeStructuralCapRoot,
+    G3RsCodeConfigChecksInput, G3RsCodeFileTreeChecksInput, G3RsCodeSourceChecksInput,
+    G3RsCodeStructuralCapRoot,
 };
 
 /// Re-export of `G3RsCodeIngestionError` so the facade can reach it.
@@ -45,12 +45,9 @@ pub fn ingest_for_source_checks(
                         reason: err.to_string(),
                     }
                 })?;
-            let parsed_source = parse_rust_file(&content);
-
             Ok(crate::ingest::assemble(crate::ingest::AssembleInputs {
                 rel_path: selected.entry.path.rel_path.clone(),
                 content,
-                parsed_source,
                 is_test: selected.is_test,
                 profile_name: selected.profile_name,
                 is_library_root: selected.is_library_root,
@@ -59,16 +56,6 @@ pub fn ingest_for_source_checks(
             }))
         })
         .collect()
-}
-
-/// Implements `parse rust file`.
-fn parse_rust_file(content: &str) -> G3RsCodeParsedSourceState {
-    match syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content)) {
-        Ok(source) => G3RsCodeParsedSourceState::Parsed(source),
-        Err(error) => G3RsCodeParsedSourceState::Invalid {
-            message: format!("Failed to parse Rust source file: {error}"),
-        },
-    }
 }
 
 /// Implements this item.

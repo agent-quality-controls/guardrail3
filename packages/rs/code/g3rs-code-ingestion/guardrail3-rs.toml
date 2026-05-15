@@ -17,7 +17,6 @@ allowed_deps = [
   "g3rs-toml-parser",
   "rust-toolchain-toml-parser",
   "rustfmt-toml-parser",
-  "syn",
   "tempfile",
 ]
 

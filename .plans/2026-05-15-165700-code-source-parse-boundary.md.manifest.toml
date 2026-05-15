@@ -1,0 +1,27 @@
+[[public_type]]
+crate = "g3rs-code-types"
+type = "G3RsCodeSourceChecksInput"
+must_derive = ["Serialize"]
+must_not_contain_fields = ["parsed_source"]
+
+[[public_type]]
+crate = "g3rs-code-types"
+type = "G3RsCodeParsedSourceState"
+must_not_exist = true
+
+[[dependency]]
+crate = "g3rs-code-types"
+must_contain = ["serde"]
+must_not_contain = ["syn"]
+
+[[dependency]]
+crate = "g3rs-code-ingestion-runtime"
+must_not_contain = ["syn"]
+
+[[behavior]]
+crate = "g3rs-code-ingestion-runtime"
+claim = "source input assembly keeps raw Rust source content without parsing it"
+
+[[behavior]]
+crate = "g3rs-code-source-checks-runtime"
+claim = "source checks parse each source input before dispatch and route parse errors through g3rs-code/input-failures"

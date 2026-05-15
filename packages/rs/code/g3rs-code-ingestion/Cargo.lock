@@ -235,7 +235,6 @@ dependencies = [
  "guardrail3-check-types",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
- "syn",
  "tempfile",
 ]
 
@@ -273,7 +272,7 @@ dependencies = [
  "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
- "syn",
+ "serde",
 ]
 
 [[package]]
