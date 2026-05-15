@@ -2,6 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "g3rs-toml-parser",
+  "serde",
 ]
 
 [checks]

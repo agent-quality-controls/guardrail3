@@ -3,7 +3,9 @@
     reason = "shell_script module exposes ParsedShellScript whose name encodes the parsed-vs-raw distinction in this domain"
 )]
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum FailOpenWrapper {
     True,
     NoOp,
@@ -14,7 +16,7 @@ pub enum FailOpenWrapper {
     CommandSubstitutionAssignment(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ExecutableLine {
     pub line_no: usize,
     pub raw: String,
@@ -25,13 +27,13 @@ pub struct ExecutableLine {
     pub is_exit_zero: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct SourceLine {
     pub line_no: usize,
     pub raw: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ParsedShellScript {
     pub shebang: Option<String>,
     pub source_lines: Vec<SourceLine>,
@@ -39,7 +41,7 @@ pub struct ParsedShellScript {
     pub functions: Vec<ShellFunction>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ShellFunction {
     pub name: String,
     pub line_no: usize,

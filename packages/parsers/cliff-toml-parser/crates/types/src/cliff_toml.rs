@@ -3,11 +3,11 @@
 /// Unknown keys are captured in `extra` for forward compatibility.
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use toml::Value;
 
 /// Top-level `cliff.toml` configuration.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct CliffToml {
     /// Git configuration section.
@@ -20,7 +20,7 @@ pub struct CliffToml {
 }
 
 /// The `[git]` section of `cliff.toml`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct CliffGitSection {
     /// Whether to parse commits using the Conventional Commits spec.
@@ -35,7 +35,7 @@ pub struct CliffGitSection {
 }
 
 /// The `[changelog]` section of `cliff.toml`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct CliffChangelogSection {
     /// Header template for the changelog.
@@ -52,7 +52,7 @@ pub struct CliffChangelogSection {
 }
 
 /// A single commit parser rule in the `[[git.commit_parsers]]` array.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct CliffCommitParser {
     /// Regex pattern to match against commit messages.

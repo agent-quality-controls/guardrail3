@@ -61,6 +61,7 @@ dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
  "release-plz-toml-parser",
+ "serde",
 ]
 
 [[package]]

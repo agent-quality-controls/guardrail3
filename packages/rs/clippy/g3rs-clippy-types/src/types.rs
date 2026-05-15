@@ -2,15 +2,16 @@ use cargo_config_toml_parser::types::CargoConfigToml;
 use cargo_toml_parser::types::CargoTomlDocument;
 use clippy_toml_parser::types::ClippyTomlDocument;
 use g3rs_toml_parser::types::RustProfile;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsClippyConfigState {
     Unreadable { reason: String },
     ParseError { reason: String },
     Parsed(Box<ClippyTomlDocument>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsClippyRustPolicyState {
     Missing,
     Unreadable {
@@ -28,7 +29,7 @@ pub enum G3RsClippyRustPolicyState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsClippyCargoConfigState {
     Unreadable {
         rel_path: String,
@@ -44,7 +45,7 @@ pub enum G3RsClippyCargoConfigState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsClippyCargoRootState {
     Missing,
     Unreadable {
@@ -61,7 +62,7 @@ pub enum G3RsClippyCargoRootState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsClippyCargoMemberState {
     Unreadable {
         member_rel: String,
@@ -80,7 +81,7 @@ pub enum G3RsClippyCargoMemberState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsClippyWaiver {
     pub rule: String,
     pub file: String,
@@ -88,7 +89,7 @@ pub struct G3RsClippyWaiver {
     pub reason: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsClippyConfigChecksInput {
     pub clippy_rel_path: String,
     pub clippy: G3RsClippyConfigState,
@@ -99,13 +100,13 @@ pub struct G3RsClippyConfigChecksInput {
     pub waivers: Vec<G3RsClippyWaiver>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsClippyShadowedConfig {
     pub rel_path: String,
     pub preferred_rel_path: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsClippyFileTreeChecksInput {
     pub preferred_root_config_rel_path: Option<String>,
     pub shadowed_same_root_configs: Vec<G3RsClippyShadowedConfig>,

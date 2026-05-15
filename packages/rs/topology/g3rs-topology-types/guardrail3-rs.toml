@@ -2,6 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "cargo-toml-parser",
+  "serde",
 ]
 
 [checks]

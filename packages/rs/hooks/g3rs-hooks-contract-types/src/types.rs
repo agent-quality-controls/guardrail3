@@ -1,7 +1,9 @@
 //! Hooks contract types: requirements, trigger patterns, and command bindings.
 
+use serde::Serialize;
+
 /// A hook requirement describing what must run for a given trigger.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3HookRequirement {
     /// Stable identifier for the requirement.
     pub id: String,
@@ -16,7 +18,7 @@ pub struct G3HookRequirement {
 }
 
 /// A pattern used to match files that should activate a hook requirement.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3HookTriggerPattern {
     /// Exact repo-relative path match.
     ExactPath(String),
@@ -27,7 +29,7 @@ pub enum G3HookTriggerPattern {
 }
 
 /// A required cargo or external command identifier referenced by a hook.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3HookCommandRequirement {
     /// `cargo fmt --all -- --check`.
     CargoFmtCheck,
@@ -105,7 +107,7 @@ impl G3HookCommandRequirement {
 }
 
 /// Identifier of a critical command that must not fail open.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3HookCriticalCommand {
     /// External binary referenced by name.
     Binary(String),

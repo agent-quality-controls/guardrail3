@@ -29,7 +29,7 @@ impl ExportCounters {
     }
 
     /// Updates the counters for one observed `pub` export.
-    fn record(&mut self, feature_gate: Option<&str>, gated_on_all: bool) {
+    const fn record(&mut self, feature_gate: Option<&str>, gated_on_all: bool) {
         if feature_gate.is_none() {
             self.ungated = self.ungated.saturating_add(1);
         }

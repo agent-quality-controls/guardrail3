@@ -1,13 +1,14 @@
 use g3rs_hooks_contract_types::G3HookRequirement;
 use hook_shell_parser::types::ParsedShellScript;
+use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsHooksSelectedHookConfigFact {
     pub rel_path: String,
     pub parsed: ParsedShellScript,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsHooksConfigChecksInput {
     pub active: bool,
     pub selected_hook: Option<G3RsHooksSelectedHookConfigFact>,
@@ -15,14 +16,14 @@ pub struct G3RsHooksConfigChecksInput {
     pub requirements: Vec<G3HookRequirement>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum G3RsHookScriptKind {
     PreCommit,
     Modular,
     G3RsVerifier,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsHooksSourceChecksInput {
     pub rel_path: String,
     pub kind: G3RsHookScriptKind,
@@ -33,7 +34,7 @@ pub struct G3RsHooksSourceChecksInput {
     pub requirements: Vec<G3HookRequirement>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsHooksScriptFileFact {
     pub rel_path: String,
     pub line_count: usize,
@@ -41,7 +42,7 @@ pub struct G3RsHooksScriptFileFact {
     pub executable: Option<bool>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsHooksFileTreeChecksInput {
     pub active: bool,
     pub pre_commit: Option<G3RsHooksScriptFileFact>,

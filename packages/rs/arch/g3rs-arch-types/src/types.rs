@@ -1,4 +1,7 @@
-#[derive(Debug, Clone, PartialEq, Eq)]
+use g3rs_toml_parser::types::WaiverConfig;
+use serde::Serialize;
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[expect(
     clippy::struct_excessive_bools,
     reason = "each bool encodes an independent observable attribute of an arch crate node (Cargo `[package]` table presence, `[workspace]` table presence, `src/lib.rs` presence, `src/main.rs` presence, shared-marker); downstream rule packages (g3rs-arch-source-checks, g3rs-arch-ingestion) pattern-match these flags independently, so collapsing them into an enum would break out-of-scope callers"
@@ -19,7 +22,7 @@ pub struct G3RsArchCrateNode {
     pub cargo_parse_error: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFeatureContract {
     pub has_default_feature: bool,
     pub has_all_feature: bool,
@@ -27,13 +30,13 @@ pub struct G3RsArchFeatureContract {
     pub default_feature_deps: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchDependencyCounts {
     pub production: usize,
     pub dev: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFacadeItem {
     pub line: usize,
     pub kind: &'static str,
@@ -43,7 +46,7 @@ pub struct G3RsArchFacadeItem {
     pub gated_on_all: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFeatureExport {
     pub line: usize,
     pub name: String,
@@ -51,7 +54,7 @@ pub struct G3RsArchFeatureExport {
     pub gated_on_all: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFacadeSurface {
     pub rel_path: String,
     pub is_lib_rs: bool,
@@ -64,7 +67,7 @@ pub struct G3RsArchFacadeSurface {
     pub gated_on_all_count: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchModuleDir {
     pub dir_rel: String,
     pub mod_decl_file: String,
@@ -75,13 +78,13 @@ pub struct G3RsArchModuleDir {
     pub rs_file_count: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsArchBoundaryRef {
     RootWorkspace,
     Crate(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchDependencyEdge {
     pub source_rel_dir: String,
     pub source_cargo_rel: String,
@@ -95,19 +98,19 @@ pub struct G3RsArchDependencyEdge {
     pub target_shared: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchSourceCrate {
     pub rel_dir: String,
     pub lib_rs_rel: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchLibFacadeChecksInput {
     pub krate: G3RsArchSourceCrate,
     pub lib_surface: Option<G3RsArchFacadeSurface>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchPathAttrSite {
     pub rel_path: String,
     pub line: usize,
@@ -116,14 +119,14 @@ pub struct G3RsArchPathAttrSite {
     pub cfg_test_only: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchSourceChecksInput {
     pub lib_facade_checks: Vec<G3RsArchLibFacadeChecksInput>,
     pub mod_facade_surfaces: Vec<G3RsArchFacadeSurface>,
     pub path_attr_sites: Vec<G3RsArchPathAttrSite>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[expect(
     clippy::struct_excessive_bools,
     reason = "each bool encodes an independent observable attribute of an arch config crate (shared-marker, feature-contract requirement, presence of `default` feature, presence of `all` feature); downstream rule packages pattern-match these flags independently, so collapsing them would break out-of-scope callers"
@@ -141,14 +144,14 @@ pub struct G3RsArchConfigCrate {
     pub default_feature_deps: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsArchConfigChecksInput {
     pub crates: Vec<G3RsArchConfigCrate>,
     pub dependency_edges: Vec<G3RsArchDependencyEdge>,
     pub rust_policy: G3RsArchRustPolicyState,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFileTreeCrate {
     pub rel_dir: String,
     pub cargo_rel_path: String,
@@ -158,7 +161,7 @@ pub struct G3RsArchFileTreeCrate {
     pub cargo_parse_error: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsArchRustPolicyState {
     Missing,
     Unreadable {
@@ -175,10 +178,9 @@ pub enum G3RsArchRustPolicyState {
     },
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsArchFileTreeChecksInput {
     pub crates: Vec<G3RsArchFileTreeCrate>,
     pub module_dirs: Vec<G3RsArchModuleDir>,
     pub rust_policy: G3RsArchRustPolicyState,
 }
-use g3rs_toml_parser::types::WaiverConfig;

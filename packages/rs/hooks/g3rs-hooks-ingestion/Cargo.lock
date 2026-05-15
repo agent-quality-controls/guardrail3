@@ -277,6 +277,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -369,6 +370,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-contract-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "g3rs-hooks-file-tree-checks"
@@ -467,6 +471,7 @@ version = "0.1.0"
 dependencies = [
  "g3rs-hooks-contract-types",
  "hook-shell-parser",
+ "serde",
 ]
 
 [[package]]
@@ -579,6 +584,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "id-arena"

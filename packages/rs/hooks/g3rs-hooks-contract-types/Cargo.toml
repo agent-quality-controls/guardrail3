@@ -92,3 +92,6 @@ redundant_pub_crate = "allow"
 
 [lints]
 workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

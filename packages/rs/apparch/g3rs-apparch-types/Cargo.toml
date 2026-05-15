@@ -90,3 +90,4 @@ workspace = true
 
 [dependencies]
 g3rs-toml-parser = { path = "../../../parsers/g3rs-toml-parser", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }

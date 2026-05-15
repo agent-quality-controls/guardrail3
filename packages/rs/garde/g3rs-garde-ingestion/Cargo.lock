@@ -263,6 +263,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "serde",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use toml::Value;
 
 /// Parsed representation of a `release-plz.toml` configuration file.
@@ -8,7 +8,7 @@ use toml::Value;
 /// Known release-plz configuration keys are mapped to typed fields. Unknown keys
 /// are captured in [`extra`](Self::extra) via `#[serde(flatten)]` for forward
 /// compatibility.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct ReleasePlzToml {
     /// Workspace-level release-plz settings.
@@ -22,7 +22,7 @@ pub struct ReleasePlzToml {
 }
 
 /// Workspace-level release-plz configuration.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct ReleasePlzWorkspace {
     /// Path to a git-cliff configuration file for changelog generation.
@@ -37,7 +37,7 @@ pub struct ReleasePlzWorkspace {
 }
 
 /// Per-package release-plz configuration override.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct ReleasePlzPackage {
     /// The package name this override applies to.

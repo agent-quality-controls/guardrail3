@@ -1,7 +1,8 @@
 use g3rs_toml_parser::types::RustProfile;
+use serde::Serialize;
 
 /// Scope of one deps config input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum G3RsDepsConfigInputScope {
     /// One workspace-scoped tooling snapshot.
     WorkspaceTooling,
@@ -10,7 +11,7 @@ pub enum G3RsDepsConfigInputScope {
 }
 
 /// Normalized section kind for one dependency entry.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsDepsDependencySection {
     /// `[dependencies]` or `[target.*.dependencies]`
     Dependencies,
@@ -21,7 +22,7 @@ pub enum G3RsDepsDependencySection {
 }
 
 /// One normalized external dependency entry ready for config checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsDepsResolvedDependency {
     /// Canonical package identity used for allowlist and cap checks.
     pub package_name: String,
@@ -35,7 +36,7 @@ pub struct G3RsDepsResolvedDependency {
 ///
 /// Ingestion owns crawl selection, manifest parsing, workspace dependency
 /// resolution, and normalization into external dependency facts.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsDepsConfigChecksInput {
     /// Whether this input is workspace tooling or crate policy.
     pub scope: G3RsDepsConfigInputScope,
@@ -56,11 +57,11 @@ pub struct G3RsDepsConfigChecksInput {
 }
 
 /// Placeholder input contract for future deps source checks.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsDepsSourceChecksInput;
 
 /// Input contract for deps file-tree checks at one pointed workspace root.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsDepsFileTreeChecksInput {
     /// Workspace policy profile from `guardrail3-rs.toml`, when parseable.
     pub profile: Option<RustProfile>,

@@ -411,6 +411,7 @@ name = "g3rs-apparch-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -501,6 +502,7 @@ name = "g3rs-arch-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -583,6 +585,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -671,6 +674,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -861,6 +865,7 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -941,6 +946,7 @@ name = "g3rs-deps-types"
 version = "0.1.0"
 dependencies = [
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1033,6 +1039,7 @@ dependencies = [
  "cargo-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1132,6 +1139,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1162,6 +1170,9 @@ dependencies = [
 [[package]]
 name = "g3rs-hooks-contract-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "g3rs-hooks-file-tree-checks"
@@ -1242,6 +1253,7 @@ version = "0.1.0"
 dependencies = [
  "g3rs-hooks-contract-types",
  "hook-shell-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1388,6 +1400,7 @@ dependencies = [
  "cargo-toml-parser",
  "cliff-toml-parser",
  "release-plz-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1555,6 +1568,7 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1657,6 +1671,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "rust-toolchain-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -1724,6 +1739,7 @@ name = "g3rs-topology-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -2016,6 +2032,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "id-arena"

@@ -1,9 +1,10 @@
 //! Shared apparch types: layers, dependencies, crates, and check inputs.
 
 use g3rs_toml_parser::types::{RustProfile, WaiverConfig};
+use serde::Serialize;
 
 /// Architectural layer assigned to a crate within an apparch workspace.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsApparchLayer {
     /// Pure data types layer.
     Types,
@@ -16,7 +17,7 @@ pub enum G3RsApparchLayer {
 }
 
 /// Kind of cargo dependency edge between crates.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsApparchDependencyKind {
     /// Regular `[dependencies]` entry.
     Dependency,
@@ -54,7 +55,7 @@ impl G3RsApparchDependencyKind {
 }
 
 /// Kind of `[patch]` or `[replace]` table entry in a Cargo manifest.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsApparchPatchKind {
     /// `[patch.*]` table entry.
     Patch,
@@ -74,7 +75,7 @@ impl G3RsApparchPatchKind {
 }
 
 /// Parse state of the per-crate `guardrail3-rs.toml` rust policy file.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsApparchRustPolicyState {
     /// No rust policy file present.
     Missing,
@@ -106,7 +107,7 @@ pub enum G3RsApparchRustPolicyState {
 }
 
 /// A crate observed within an apparch workspace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchCrate {
     /// Crate name as declared in the manifest.
     pub crate_name: String,
@@ -119,7 +120,7 @@ pub struct G3RsApparchCrate {
 }
 
 /// A directed dependency edge between two crates within the workspace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchDependencyEdge {
     /// Source crate Cargo.toml path.
     pub from_cargo_rel_path: String,
@@ -132,7 +133,7 @@ pub struct G3RsApparchDependencyEdge {
 }
 
 /// A dependency on a crate outside the workspace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchExternalDependency {
     /// Cargo.toml path of the crate declaring the dependency.
     pub cargo_rel_path: String,
@@ -143,7 +144,7 @@ pub struct G3RsApparchExternalDependency {
 }
 
 /// A dependency edge resolved to its target crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchBoundDependency {
     /// Dependency entry name as declared.
     pub dep_name: String,
@@ -154,7 +155,7 @@ pub struct G3RsApparchBoundDependency {
 }
 
 /// A `[patch]` or `[replace]` entry observed in the workspace manifest.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchPatchBypass {
     /// Workspace Cargo.toml path declaring the bypass.
     pub cargo_rel_path: String,
@@ -171,7 +172,7 @@ pub struct G3RsApparchPatchBypass {
 }
 
 /// Kind of public item exposed by a crate's surface.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum G3RsApparchPublicItemKind {
     /// Public trait declaration.
     Trait,
@@ -182,7 +183,7 @@ pub enum G3RsApparchPublicItemKind {
 }
 
 /// A public item exposed from a crate's source tree.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchPublicItem {
     /// Cargo.toml path of the owning crate.
     pub cargo_rel_path: String,
@@ -197,7 +198,7 @@ pub struct G3RsApparchPublicItem {
 }
 
 /// Input for the io-traits source check on a single crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchIoTraitsSourceChecksInput {
     /// Crate under inspection.
     pub krate: G3RsApparchCrate,
@@ -206,7 +207,7 @@ pub struct G3RsApparchIoTraitsSourceChecksInput {
 }
 
 /// Input for the types-public-surface source check on a single crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchTypesPublicSurfaceChecksInput {
     /// Crate under inspection.
     pub krate: G3RsApparchCrate,
@@ -215,7 +216,7 @@ pub struct G3RsApparchTypesPublicSurfaceChecksInput {
 }
 
 /// Input for the crate-dependency check on a single crate.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchCrateDependencyChecksInput {
     /// Crate under inspection.
     pub krate: G3RsApparchCrate,
@@ -224,7 +225,7 @@ pub struct G3RsApparchCrateDependencyChecksInput {
 }
 
 /// Input for the crate-purity check on a single crate.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsApparchCratePurityChecksInput {
     /// Crate under inspection.
     pub krate: G3RsApparchCrate,
@@ -235,7 +236,7 @@ pub struct G3RsApparchCratePurityChecksInput {
 }
 
 /// Input for the patch-bypass check on a single bypass entry.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsApparchPatchBypassChecksInput {
     /// Bypass entry under inspection.
     pub patch: G3RsApparchPatchBypass,
@@ -244,7 +245,7 @@ pub struct G3RsApparchPatchBypassChecksInput {
 }
 
 /// A dependency edge between two crates assigned to the same layer.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchSameLayerDependencyEdge {
     /// Source crate.
     pub from: G3RsApparchCrate,
@@ -253,14 +254,14 @@ pub struct G3RsApparchSameLayerDependencyEdge {
 }
 
 /// Input for the same-layer cycles check across the workspace.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchSameLayerCyclesChecksInput {
     /// Same-layer dependency edges in the workspace.
     pub edges: Vec<G3RsApparchSameLayerDependencyEdge>,
 }
 
 /// Aggregated input for all apparch config checks.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct G3RsApparchConfigChecksInput {
     /// Per-crate dependency checks.
     pub crate_dependency_checks: Vec<G3RsApparchCrateDependencyChecksInput>,
@@ -273,7 +274,7 @@ pub struct G3RsApparchConfigChecksInput {
 }
 
 /// Aggregated input for all apparch source checks.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchSourceChecksInput {
     /// Per-crate io-traits source checks.
     pub io_traits_checks: Vec<G3RsApparchIoTraitsSourceChecksInput>,

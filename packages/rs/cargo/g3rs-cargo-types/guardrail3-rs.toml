@@ -3,6 +3,7 @@ profile = "library"
 allowed_deps = [
   "cargo-toml-parser",
   "g3rs-toml-parser",
+  "serde",
   "toml",
 ]
 

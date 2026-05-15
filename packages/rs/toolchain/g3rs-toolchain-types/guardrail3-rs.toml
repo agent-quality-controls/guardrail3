@@ -3,6 +3,7 @@ profile = "library"
 allowed_deps = [
   "cargo-toml-parser",
   "rust-toolchain-toml-parser",
+  "serde",
 ]
 
 [checks]

@@ -215,6 +215,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]

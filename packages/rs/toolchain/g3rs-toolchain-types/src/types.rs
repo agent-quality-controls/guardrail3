@@ -1,5 +1,6 @@
 use cargo_toml_parser::types::CargoToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
+use serde::Serialize;
 
 /// Input contract for extracted rust-toolchain config checks.
 ///
@@ -9,7 +10,7 @@ use rust_toolchain_toml_parser::types::RustToolchainToml;
 /// `cargo_rel_path` and `cargo_toml` are optional because a workspace may not
 /// have a `Cargo.toml` at the point of toolchain validation. When absent, the
 /// MSRV consistency check is skipped.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsToolchainConfigChecksInput {
     /// Repo-relative path to the active `rust-toolchain.toml`.
     pub toolchain_rel_path: String,
@@ -22,14 +23,14 @@ pub struct G3RsToolchainConfigChecksInput {
 }
 
 /// Placeholder input contract for future toolchain source checks.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsToolchainSourceChecksInput;
 
 /// Input contract for extracted rust-toolchain filetree checks.
 ///
 /// The package model validates one pointed workspace root. This input therefore
 /// only describes root-level toolchain file presence.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsToolchainFileTreeChecksInput {
     /// Repo-relative path to `rust-toolchain.toml`, when present at the root.
     pub toolchain_toml_rel_path: Option<String>,
