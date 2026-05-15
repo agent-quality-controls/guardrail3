@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-14T17-59-59.527729Z-6df8fd75",
-  "run_commit": "4f19cc635",
+  "run_id": "2026-05-15T13-03-15.569153Z-6df8fd75",
+  "run_commit": "da8c88bc5",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-14T17:59:59.527729Z",
-  "fixture_hash": "sha256:cfe93721f8570006c507a2e22f6e099e34f013790e16de0bbbdaf831d598e5ce",
+  "recorded_at": "2026-05-15T13:03:15.569153Z",
+  "fixture_hash": "sha256:a83a132a99e025ac6e73fa11609fb412a9dfe0253891c7d05c06f59d74251440",
   "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
@@ -42,6 +42,10 @@
     {
       "path": "behavior/fixtures/g3rs/L37-workspace-topology-input-conflicts/fixture.toml",
       "sha256": "sha256:36bb929ed03ca967a8a067ebaadd5f4fd7c767b806c83e521687a039b62d1dd5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L38-topology-non-root-nested-context/fixture.toml",
+      "sha256": "sha256:0e8dc422bed234fac2e832e726c88ac09dd6dba228a4c9c2747bfaca76f3ffac"
     },
     {
       "path": "behavior/fixtures/g3rs/L40-required-inputs-present-invalid/fixture.toml",
@@ -92,8 +96,28 @@
       "sha256": "sha256:91ca536c3c0d08c5bfce4cf12732e2bc69f576e31261b87372626ec1d458e63e"
     },
     {
+      "path": "behavior/fixtures/g3rs/L60-deny-missing-sections-policy-invalid/fixture.toml",
+      "sha256": "sha256:c2575926f910616204163ba6bb5bcbd653c3df82883706b8fa9abfbc2101a9b3"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-nonstricter-values-policy-invalid/fixture.toml",
+      "sha256": "sha256:7a7c8b2b0cf8b1a09fc7f030b04f0d5294343c6c9cc5196f79f30e4389b0257d"
+    },
+    {
       "path": "behavior/fixtures/g3rs/L60-deny-schema-invalid-policy-invalid/fixture.toml",
       "sha256": "sha256:14a70800f578522f33c567bbc24c8c0a467c6081aec51ba2933dc63a515e104a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-deny-wrong-values-policy-invalid/fixture.toml",
+      "sha256": "sha256:7c0120947339759108d9f2265d9a60fe638cebda86123305de722beceab04f43"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-fmt-package-edition-fallback-policy-invalid/fixture.toml",
+      "sha256": "sha256:1adb512b826ccfee78cb758cb6358b10f98014b23346988dafa31df49ba5d275"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L60-fmt-workspace-edition-precedence-policy-invalid/fixture.toml",
+      "sha256": "sha256:690d3822301a42331c99a50ad2cf02f6796c28228b9a6c1aa2f85dbfe9890910"
     },
     {
       "path": "behavior/fixtures/g3rs/L61-cargo-clippy-code-config-branches/fixture.toml",
@@ -132,5 +156,5 @@
       "sha256": "sha256:ca4d4b188d320d9bc6329df53c5c60f1b9d707f25e7ef8f650ce20bed9f8b4e0"
     }
   ],
-  "change_path": ".plans/2026-05-14-175946-g3rs-info-only-coverage-closure.md"
+  "change_path": ".plans/2026-05-15-133355-g3rs-unclassified-fixture-coverage.md"
 }

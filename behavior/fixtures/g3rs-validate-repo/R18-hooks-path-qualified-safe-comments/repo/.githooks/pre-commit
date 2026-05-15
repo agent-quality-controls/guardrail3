@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Escaped hash keeps bypass-looking text inside an executable shell word.
+cargo fmt --check \ # use git commit --no-verify if this gets in the way
+echo "# --no-verify stays inside quotes"
+# normal comment
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+grep -qE '^(<{7} |={7}$|>{7} )' .githooks/pre-commit 2>/dev/null || true
+bin/gitleaks protect --staged --no-banner
+
+while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    if git cat-file -e ":$file" 2>/dev/null; then
+        file_size=$(git cat-file -s ":$file")
+        [ "$file_size" -le 1048576 ]
+    fi
+done <<< "$STAGED_FILES"
+
+cargo metadata --locked --format-version 1
+cargo update --locked
+bin/g3rs validate-repo --repo-root .
+
+find_owning_unit() {
+    local start_dir="$1"
+    local dir="$start_dir"
+    while :; do
+        if [ -f "$dir/Cargo.toml" ] && [ -f "$dir/guardrail3-rs.toml" ]; then
+            echo "$dir"
+            return 0
+        fi
+        [ "$dir" = "." ] && return 1
+        dir=$(dirname "$dir")
+    done
+}
+
+RUST_RELEVANT_PATTERN='(\.rs$|(^|/)Cargo\.toml$|(^|/)Cargo\.lock$|(^|/)guardrail3-rs\.toml$)'
+RUST_RELEVANT_FILES=$(echo "$STAGED_FILES" | grep -E "$RUST_RELEVANT_PATTERN" || true)
+
+RUST_OWNING_UNITS=""
+while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    if unit=$(find_owning_unit "$(dirname "$file")"); then
+        RUST_OWNING_UNITS="${RUST_OWNING_UNITS}${unit}"$'\n'
+    fi
+done <<< "$RUST_RELEVANT_FILES"
+
+RUST_UNIQUE_UNITS=$(printf '%s' "$RUST_OWNING_UNITS" | sort -u)
+
+while IFS= read -r unit; do
+    [ -n "$unit" ] || continue
+    bin/g3rs validate --path "$unit" --staged
+done <<< "$RUST_UNIQUE_UNITS"
+
+echo "pnpm install --frozen-lockfile belongs to TypeScript hooks"
+cargo clippy --workspace --all-targets --all-features
+bin/cargo-dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests
+cargo test --workspace -- --test-threads=1
+bin/cargo-machete
+bin/cargo-deny check

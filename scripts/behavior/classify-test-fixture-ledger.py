@@ -85,6 +85,312 @@ REPLAY_SYSTEM_MARKERS = (
     "scripts/behavior/",
     "behavior/",
 )
+EXPLICIT_ROWS: dict[tuple[str, str], tuple[str, str, str | None, str, str | None, str | None]] = {
+    (
+        "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/many_use_imports/rule_tests/direct.rs",
+        "public_reexports_count_in_non_facade_source",
+    ): (
+        "covered_hit",
+        "L70-delegated-policy-valid-project-policy-violated",
+        "Warn",
+        "g3rs-code/many-use-imports",
+        "many use imports",
+        "src/many_use_imports.rs",
+    ),
+    (
+        "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/too_many_use_imports/rule_tests/direct.rs",
+        "public_reexports_count_in_non_facade_source",
+    ): (
+        "covered_hit",
+        "L70-delegated-policy-valid-project-policy-violated",
+        "Error",
+        "g3rs-code/too-many-use-imports",
+        "too many use imports",
+        "src/too_many_use_imports.rs",
+    ),
+    (
+        "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/direct.rs",
+        "inventories_crate_level_unused_crate_dependencies_allow",
+    ): (
+        "covered_hit",
+        "L70-delegated-policy-valid-project-policy-violated",
+        "Info",
+        "g3rs-code/unused-crate-dependencies-allow",
+        "unused_crate_dependencies exemption",
+        "src/code_policy.rs",
+    ),
+    (
+        "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/direct.rs",
+        "inventories_inline_module_unused_crate_dependencies_allow",
+    ): (
+        "covered_hit",
+        "L70-delegated-policy-valid-project-policy-violated",
+        "Info",
+        "g3rs-code/unused-crate-dependencies-allow",
+        "unused_crate_dependencies exemption",
+        "src/code_policy.rs",
+    ),
+    (
+        "packages/rs/code/g3rs-code-source-checks/crates/runtime/src/unused_crate_dependencies_allow/rule_tests/false_positives.rs",
+        "ignores_other_crate_level_allows",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-code/unused-crate-dependencies-allow", None, None),
+    (
+        "packages/rs/deps/g3rs-deps-config-checks/crates/runtime/src/build_dependencies_allowlisted/rule_tests/golden.rs",
+        "workspace_true_external_build_dependency_is_checked",
+    ): (
+        "covered_hit",
+        "L70-workspace-package-policy-violated",
+        "Error",
+        "g3rs-deps/build-dependencies-allowlisted",
+        "unauthorized build dependency",
+        "Cargo.toml",
+    ),
+    (
+        "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/package_edition.rs",
+        "uses_package_edition_fallback_when_workspace_package_edition_is_absent",
+    ): (
+        "covered_hit",
+        "L60-fmt-package-edition-fallback-policy-invalid",
+        "Warn",
+        "g3rs-fmt/edition-mismatch",
+        "rustfmt edition differs from Cargo edition",
+        "rustfmt.toml",
+    ),
+    (
+        "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/edition_mismatch/rule_tests/precedence.rs",
+        "prefers_workspace_package_edition_over_package_edition",
+    ): (
+        "covered_hit",
+        "L60-fmt-workspace-edition-precedence-policy-invalid",
+        "Warn",
+        "g3rs-fmt/edition-mismatch",
+        "rustfmt edition differs from Cargo edition",
+        "rustfmt.toml",
+    ),
+    (
+        "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/extra_settings/rule_tests/skip_macro_invocations.rs",
+        "inventories_empty_skip_macro_invocations",
+    ): (
+        "covered_hit",
+        "L60-fmt-package-edition-fallback-policy-invalid",
+        "Info",
+        "g3rs-fmt/rustfmt-extra-settings-inventory",
+        "rustfmt extra setting: skip_macro_invocations",
+        "rustfmt.toml",
+    ),
+    (
+        "packages/rs/fmt/g3rs-fmt-config-checks/crates/runtime/src/extra_settings/rule_tests/skip_macro_invocations.rs",
+        "inventories_nonempty_skip_macro_invocations",
+    ): (
+        "covered_hit",
+        "L60-fmt-workspace-edition-precedence-policy-invalid",
+        "Info",
+        "g3rs-fmt/rustfmt-extra-settings-inventory",
+        "rustfmt extra setting: skip_macro_invocations",
+        "rustfmt.toml",
+    ),
+    (
+        "packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/contract_required_tools_installed/rule_tests/golden.rs",
+        "path_qualified_machete_and_dupes_satisfy_contract",
+    ): (
+        "covered_hit",
+        "R18-hooks-path-qualified-safe-comments",
+        "Info",
+        "g3rs-hooks/contract-required-tools-installed",
+        "cargo-dupes installed for hook contract",
+        ".githooks/pre-commit",
+    ),
+    (
+        "packages/rs/hooks/g3rs-hooks-config-checks/crates/runtime/src/required_tools_installed/rule_tests/cases.rs",
+        "treats_path_qualified_tools_as_installed",
+    ): (
+        "covered_hit",
+        "R18-hooks-path-qualified-safe-comments",
+        "Info",
+        "g3rs-hooks/required-tools-installed",
+        "cargo-deny installed",
+        ".githooks/pre-commit",
+    ),
+    (
+        "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs",
+        "cargo_metadata_locked_satisfies_concrete_lockfile_contract",
+    ): (
+        "covered_hit",
+        "R18-hooks-path-qualified-safe-comments",
+        "Info",
+        "g3rs-hooks/required-contract-command-present",
+        "hook contract command is present",
+        ".githooks/pre-commit",
+    ),
+    (
+        "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/required_contract_command_present/rule_tests/golden.rs",
+        "cargo_update_locked_satisfies_concrete_lockfile_contract",
+    ): (
+        "covered_hit",
+        "R18-hooks-path-qualified-safe-comments",
+        "Info",
+        "g3rs-hooks/required-contract-command-present",
+        "hook contract command is present",
+        ".githooks/pre-commit",
+    ),
+    (
+        "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/declared_workspace_members_only/rule_tests/cases.rs",
+        "undeclared_issue_under_nested_workspace_mentions_parent_workspace",
+    ): (
+        "covered_hit",
+        "L38-topology-non-root-nested-context",
+        "Error",
+        "g3rs-topology/declared-workspace-members-only",
+        "Workspace child `crates/core` must be declared explicitly",
+        "crates/core/Cargo.toml",
+    ),
+    (
+        "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/member_paths_must_not_escape_root/rule_tests/cases.rs",
+        "escaping_member_under_nested_workspace_mentions_that_workspace",
+    ): (
+        "covered_hit",
+        "L38-topology-non-root-nested-context",
+        "Error",
+        "g3rs-topology/member-paths-must-not-escape-root",
+        "Workspace `.` uses escaping member path `../shared`",
+        "Cargo.toml",
+    ),
+    (
+        "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_guardrail3_rs_toml/rule_tests/cases.rs",
+        "nested_guardrail3_rs_toml_under_non_root_outer_mentions_that_outer",
+    ): (
+        "covered_hit",
+        "L38-topology-non-root-nested-context",
+        "Error",
+        "g3rs-topology/no-nested-guardrail3-rs-toml",
+        "Nested adopted Rust unit `inner` is forbidden",
+        "inner/guardrail3-rs.toml",
+    ),
+    (
+        "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/no_nested_workspaces/rule_tests/cases.rs",
+        "nested_workspace_under_non_root_parent_mentions_that_parent",
+    ): (
+        "covered_hit",
+        "L38-topology-non-root-nested-context",
+        "Error",
+        "g3rs-topology/no-nested-workspaces",
+        "Nested workspace `inner` is forbidden",
+        "inner/Cargo.toml",
+    ),
+    (
+        "packages/rs/topology/g3rs-topology-file-tree-checks/crates/runtime/src/workspace_local_file_placement/rule_tests/cases.rs",
+        "fmt_message_is_preserved_verbatim",
+    ): (
+        "covered_hit",
+        "L38-topology-non-root-nested-context",
+        "Error",
+        "g3rs-topology/workspace-local-file-placement",
+        "`fmt` file `crates/core/rustfmt.toml` is illegally placed",
+        "crates/core/rustfmt.toml",
+    ),
+}
+
+DENY_ROW_FIXTURES: dict[tuple[str, str], tuple[str, str, str | None, str, str | None, str | None]] = {
+    (
+        "advisories/advisories_baseline/rule_tests/missing_section.rs",
+        "no_advisories_section",
+    ): ("covered_hit", "L60-deny-missing-sections-policy-invalid", "Error", "g3rs-deny/advisories-baseline", "[advisories] section missing", "deny.toml"),
+    (
+        "advisories/deprecated_advisories/rule_tests/golden.rs",
+        "no_advisories_section",
+    ): ("covered_non_hit", "L60-deny-missing-sections-policy-invalid", None, "g3rs-deny/deprecated-advisories", None, None),
+    (
+        "advisories/deprecated_advisories/rule_tests/golden.rs",
+        "no_deprecated_fields",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/deprecated-advisories", None, None),
+    (
+        "advisories/deprecated_advisories/rule_tests/has_deprecated.rs",
+        "all_deprecated_fields_present",
+    ): ("covered_hit", "L60-deny-deprecated-advisories-policy-invalid", "Warn", "g3rs-deny/deprecated-advisories", "deprecated advisory field `vulnerability`", "deny.toml"),
+    (
+        "advisories/deprecated_advisories/rule_tests/has_deprecated.rs",
+        "notice_present",
+    ): ("covered_hit", "L60-deny-deprecated-advisories-policy-invalid", "Warn", "g3rs-deny/deprecated-advisories", "deprecated advisory field `notice`", "deny.toml"),
+    (
+        "advisories/deprecated_advisories/rule_tests/has_deprecated.rs",
+        "unsound_present",
+    ): ("covered_hit", "L60-deny-deprecated-advisories-policy-invalid", "Warn", "g3rs-deny/deprecated-advisories", "deprecated advisory field `unsound`", "deny.toml"),
+    (
+        "advisories/deprecated_advisories/rule_tests/has_deprecated.rs",
+        "vulnerability_present",
+    ): ("covered_hit", "L60-deny-deprecated-advisories-policy-invalid", "Warn", "g3rs-deny/deprecated-advisories", "deprecated advisory field `vulnerability`", "deny.toml"),
+    (
+        "advisories/graph_all_features/rule_tests/golden.rs",
+        "all_features_true",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/graph-all-features", None, None),
+    (
+        "advisories/graph_all_features/rule_tests/missing_section.rs",
+        "no_graph_section",
+    ): ("covered_hit", "L60-deny-missing-sections-policy-invalid", "Error", "g3rs-deny/graph-all-features", "[graph] section missing", "deny.toml"),
+    (
+        "advisories/graph_all_features/rule_tests/wrong_value.rs",
+        "all_features_false",
+    ): ("covered_hit", "L60-deny-wrong-values-policy-invalid", "Error", "g3rs-deny/graph-all-features", "graph all-features must be true", "deny.toml"),
+    (
+        "advisories/graph_no_default_features/rule_tests/golden.rs",
+        "no_default_features_false",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/graph-no-default-features", None, None),
+    (
+        "advisories/graph_no_default_features/rule_tests/missing_section.rs",
+        "no_graph_section",
+    ): ("covered_hit", "L60-deny-missing-sections-policy-invalid", "Error", "g3rs-deny/graph-no-default-features", "[graph] section missing", "deny.toml"),
+    (
+        "advisories/graph_no_default_features/rule_tests/wrong_value.rs",
+        "no_default_features_true",
+    ): ("covered_hit", "L60-deny-wrong-values-policy-invalid", "Error", "g3rs-deny/graph-no-default-features", "graph no-default-features must be false", "deny.toml"),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/golden.rs",
+        "matching_baseline",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/stricter-advisories-inventory", None, None),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/golden.rs",
+        "no_advisories_section",
+    ): ("covered_non_hit", "L60-deny-missing-sections-policy-invalid", None, "g3rs-deny/stricter-advisories-inventory", None, None),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/stricter.rs",
+        "unmaintained_all_is_stricter_than_workspace_baseline",
+    ): ("covered_hit", "L60-deny-wrong-values-policy-invalid", "Info", "g3rs-deny/stricter-advisories-inventory", "advisories `unmaintained` stricter than baseline", "deny.toml"),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/stricter.rs",
+        "unmaintained_transitive_is_not_stricter_than_workspace_baseline",
+    ): ("covered_non_hit", "L60-deny-nonstricter-values-policy-invalid", None, "g3rs-deny/stricter-advisories-inventory", None, None),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/stricter.rs",
+        "yanked_allow_is_not_stricter_than_warn_baseline",
+    ): ("covered_non_hit", "L60-deny-nonstricter-values-policy-invalid", None, "g3rs-deny/stricter-advisories-inventory", None, None),
+    (
+        "advisories/stricter_advisories_inventory/rule_tests/stricter.rs",
+        "yanked_deny",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/stricter-advisories-inventory", None, None),
+    (
+        "bans/extra_feature_bans_inventory/rule_tests/golden.rs",
+        "no_findings_when_only_tokio_entry",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/extra-feature-bans-inventory", None, None),
+    (
+        "bans/extra_feature_bans_inventory/rule_tests/missing_section.rs",
+        "no_findings_when_bans_section_missing",
+    ): ("covered_non_hit", "L60-deny-missing-sections-policy-invalid", None, "g3rs-deny/extra-feature-bans-inventory", None, None),
+    (
+        "bans/highlight_inventory/rule_tests/golden.rs",
+        "no_findings_when_highlight_matches_baseline",
+    ): ("covered_non_hit", "L80-project-policy-valid-clean", None, "g3rs-deny/highlight-inventory", None, None),
+    (
+        "bans/highlight_inventory/rule_tests/missing_section.rs",
+        "no_findings_when_bans_section_missing",
+    ): ("covered_non_hit", "L60-deny-missing-sections-policy-invalid", None, "g3rs-deny/highlight-inventory", None, None),
+}
+
+SAFE_HOOK_COMMENT_TESTS = {
+    "ignores_escaped_hash_when_comment_text_looks_like_bypass_instruction",
+    "ignores_escaped_space_before_hash_when_comment_text_looks_like_bypass_instruction",
+    "ignores_hash_inside_quotes",
+    "passes_when_no_no_verify_comment_exists",
+}
 
 
 @dataclass(frozen=True)
@@ -203,6 +509,10 @@ def classify_test(
 ) -> dict[str, Any]:
     test_path = str(test["test_path"])
     test_name = str(test["test_name"])
+    explicit = explicit_classification(test_path, test_name)
+    if explicit is not None:
+        return explicit
+
     rule = rule_for_test_path(test_path, rule_ids)
     name_kind = classify_name(test_name)
 
@@ -250,6 +560,52 @@ def classify_test(
         "status": "unclassified",
         "reason": "classifier could not map this test to fixture-backed behavior",
     }
+
+
+def explicit_classification(test_path: str, test_name: str) -> dict[str, Any] | None:
+    row = EXPLICIT_ROWS.get((test_path, test_name))
+    if row is not None:
+        return explicit_row(row)
+
+    deny_prefix = "packages/rs/deny/g3rs-deny-config-checks/crates/runtime/src/"
+    if test_path.startswith(deny_prefix):
+        suffix = test_path.removeprefix(deny_prefix)
+        deny_row = DENY_ROW_FIXTURES.get((suffix, test_name))
+        if deny_row is not None:
+            return explicit_row(deny_row)
+
+    hook_comment_path = (
+        "packages/rs/hooks/g3rs-hooks-source-checks/crates/runtime/src/"
+        "shell_safety/no_bypass_instructions/rule_tests/golden.rs"
+    )
+    if test_path == hook_comment_path and test_name in SAFE_HOOK_COMMENT_TESTS:
+        return explicit_row(
+            (
+                "covered_hit",
+                "R18-hooks-path-qualified-safe-comments",
+                "Info",
+                "g3rs-hooks/no-bypass-instructions",
+                "no hook bypass instructions",
+                ".githooks/pre-commit",
+            )
+        )
+    return None
+
+
+def explicit_row(row: tuple[str, str, str | None, str, str | None, str | None]) -> dict[str, Any]:
+    status, fixture, severity, rule, title, file_path = row
+    output: dict[str, Any] = {
+        "status": status,
+        "fixture": fixture,
+        "rule": rule,
+    }
+    if severity is not None:
+        output["severity"] = severity
+    if title is not None:
+        output["title"] = title
+    if file_path is not None:
+        output["file"] = file_path
+    return output
 
 
 def rule_for_test_path(test_path: str, rule_ids: dict[str, str]) -> str | None:
