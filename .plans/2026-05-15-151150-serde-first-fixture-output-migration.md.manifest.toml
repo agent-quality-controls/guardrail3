@@ -1,0 +1,68 @@
+[plan]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+
+[[approved_disposition]]
+name = "needs_serialized_ingestion_output"
+expected_rows = 420
+
+[[approved_disposition]]
+name = "needs_rule_fixture_or_golden_output"
+expected_rows = 236
+
+[[approved_disposition]]
+name = "needs_family_runner_output"
+expected_rows = 47
+
+[[approved_disposition]]
+name = "needs_validate_command_output"
+expected_rows = 23
+
+[[approved_disposition]]
+name = "needs_cli_output"
+expected_rows = 3
+
+[[approved_disposition]]
+name = "needs_renderer_output"
+expected_rows = 3
+
+[[approved_disposition]]
+name = "keep_public_api_contract"
+expected_rows = 13
+
+[[required_phrase]]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+text = "owned Rust output structs derive `serde::Serialize`"
+
+[[required_phrase]]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+text = "verifier commands serialize those structs with `serde_json`"
+
+[[required_phrase]]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+text = "Do not write per-family adapters."
+
+[[required_phrase]]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+text = "Do not write per-family exporters."
+
+[[required_phrase]]
+path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
+text = "If deriving `serde::Serialize` fails:"
+
+[[forbidden_phrase]]
+text = "ingestion suite"
+
+[[forbidden_phrase]]
+text = "replay suite"
+
+[[forbidden_phrase]]
+text = "replay record map"
+
+[[forbidden_phrase]]
+text = "canonical fact"
+
+[[forbidden_phrase]]
+text = "per-family adapter"
+
+[[forbidden_phrase]]
+text = "per-family exporter"
