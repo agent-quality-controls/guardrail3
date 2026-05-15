@@ -130,7 +130,8 @@ def verify_harness_outputs(rows: list[dict[str, str]]) -> list[str]:
         if not meta.is_file():
             failures.append(f"{row['name']}: approved metadata missing")
         data = json.loads(approved.read_text(encoding="utf-8"))
-        if data.get("schema_version") != "g3rs-replay-v1":
+        expected_schema_version = row.get("schema_version", "g3rs-replay-v1")
+        if data.get("schema_version") != expected_schema_version:
             failures.append(f"{row['name']}: schema_version mismatch")
         records = data.get("records")
         if not isinstance(records, list) or not records:

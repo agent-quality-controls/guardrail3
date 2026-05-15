@@ -1,0 +1,44 @@
+{
+  "suite": "g3rs-cli-output",
+  "kind": "approved",
+  "run_id": "2026-05-15T21-23-26.112572Z-552b50cc",
+  "run_commit": "925b1dffc",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-15T21:23:26.112572Z",
+  "fixture_hash": "sha256:3b747845ecd4c6e9fb1bdec8bd154c36c9e85719e2aa9696d66882e10247e278",
+  "manifest_hash": "sha256:bc81885aac6e7611923c4b00e06257412f55dae895261fab7f1b059b30ba9019",
+  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
+  "tool_version": "0.1.6",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C10-help-contract/fixture.toml",
+      "sha256": "sha256:3562c28825ee525a23a2b14ad492baeebfa0bba5313290d0494d8ccbb3dc1e8f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C20-reject-old-command-shapes/fixture.toml",
+      "sha256": "sha256:2a0383c4e2a08232972b82aea550976a9b6a13e168e5f21be2591eb9f983233d"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C30-init-repo-managed-hooks/fixture.toml",
+      "sha256": "sha256:f4fe199470679dfe06b4c3f629c6d8746c3745e6b875eb1f6419502b99c84b46"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C40-init-repo-refuses-owned-hook/fixture.toml",
+      "sha256": "sha256:678e1f29a3267e879faaf399b7c3381571caec979c6eaa3186e30715435ad3b3"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C50-workspace-command-shapes/fixture.toml",
+      "sha256": "sha256:b27ee9b7f3d18ba05290fb21e3b25e7fc254c8d741733df4969d4659535404bf"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C60-reject-removed-workspace-arguments/fixture.toml",
+      "sha256": "sha256:f8cb9f9d51026e9c255582f21cf67b7150fe6719319ad999e3ab1536aad98462"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-cli-output/C70-validate-repo-command-shape/fixture.toml",
+      "sha256": "sha256:aba14c1fadb6e36ec638b879f0d61fe8be442e24a3c1f7b88a7fb5b28c0d3b22"
+    }
+  ],
+  "change_path": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md"
+}

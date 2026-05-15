@@ -21,6 +21,7 @@ approved_dir = "behavior/golden/g3rs-validate"
 received_dir = ".fixture3/g3rs-validate"
 diff_dir = ".fixture3/g3rs-validate"
 runner = "scripts/behavior/fixture3-g3rs-replay.py"
+schema_version = "g3rs-replay-v1"
 
 [[fixture3_suite]]
 name = "g3rs-validate-repo"
@@ -29,6 +30,34 @@ approved_dir = "behavior/golden/g3rs-validate-repo"
 received_dir = ".fixture3/g3rs-validate-repo"
 diff_dir = ".fixture3/g3rs-validate-repo"
 runner = "scripts/behavior/fixture3-g3rs-replay.py"
+schema_version = "g3rs-replay-v1"
+
+[[fixture3_suite]]
+name = "g3rs-code-ingestion"
+manifest = "fixture3.yaml"
+approved_dir = "behavior/golden/g3rs-code-ingestion"
+received_dir = ".fixture3/g3rs-code-ingestion"
+diff_dir = ".fixture3/g3rs-code-ingestion"
+runner = "scripts/behavior/fixture3-g3rs-code-ingestion.py"
+schema_version = "g3rs-code-ingestion-replay-v1"
+
+[[fixture3_suite]]
+name = "g3rs-cli-output"
+manifest = "fixture3.yaml"
+approved_dir = "behavior/golden/g3rs-cli-output"
+received_dir = ".fixture3/g3rs-cli-output"
+diff_dir = ".fixture3/g3rs-cli-output"
+runner = "scripts/behavior/fixture3-g3rs-replay.py"
+schema_version = "g3rs-replay-v1"
+
+[[fixture3_suite]]
+name = "g3rs-report-output"
+manifest = "fixture3.yaml"
+approved_dir = "behavior/golden/g3rs-report-output"
+received_dir = ".fixture3/g3rs-report-output"
+diff_dir = ".fixture3/g3rs-report-output"
+runner = "scripts/behavior/fixture3-g3rs-report-output.py"
+schema_version = "g3rs-report-output-v1"
 
 [[forbidden_active_reference]]
 pattern = "goldencheck"

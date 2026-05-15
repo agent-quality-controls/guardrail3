@@ -5,106 +5,106 @@
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_accepts_family_and_inventory_flags"
 line = 1
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_accepts_init_repo"
 line = 20
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_accepts_init_workspace"
 line = 36
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_accepts_validate_repo"
 line = 52
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_init_workspace_profile"
 line = 100
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_old_validate_path_shape"
 line = 92
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_old_validate_repo_command"
 line = 84
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
 test_name = "parse_command_rejects_removed_hexarch_family"
 line = 68
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
 test_name = "run_command_init_repo_creates_managed_g3rs_hook_files"
 line = 111
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
 test_name = "run_command_init_repo_refuses_project_owned_hook_without_force"
 line = 142
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
 test_name = "run_command_sends_failures_to_stderr"
 line = 83
-disposition = "needs_cli_output"
-reason = "CLI parse and run behavior should be captured by command stdout/stderr/exit output"
+disposition = "covered_by_cli_output"
+reason = "CLI parse, rejected argument, stdout, stderr, and exit behavior is captured by the g3rs-cli-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_hides_inventory_by_default"
 line = 5
-disposition = "needs_renderer_output"
-reason = "report formatting behavior should be captured by renderer output snapshots"
+disposition = "covered_by_renderer_output"
+reason = "plain text report formatting behavior is captured by the g3rs-report-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_includes_rule_message"
 line = 63
-disposition = "needs_renderer_output"
-reason = "report formatting behavior should be captured by renderer output snapshots"
+disposition = "covered_by_renderer_output"
+reason = "plain text report formatting behavior is captured by the g3rs-report-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_includes_scope_and_root"
 line = 85
-disposition = "needs_renderer_output"
-reason = "report formatting behavior should be captured by renderer output snapshots"
+disposition = "covered_by_renderer_output"
+reason = "plain text report formatting behavior is captured by the g3rs-report-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
 test_name = "renderer_reports_no_findings_when_all_results_are_hidden"
 line = 38
-disposition = "needs_renderer_output"
-reason = "report formatting behavior should be captured by renderer output snapshots"
+disposition = "covered_by_renderer_output"
+reason = "plain text report formatting behavior is captured by the g3rs-report-output fixture3 suite"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/logic/family-runner-process/crates/runtime/src/run_tests/cases.rs"

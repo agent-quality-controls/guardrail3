@@ -1,0 +1,74 @@
+[fixture_set]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs-cli-output"
+goal = "snapshot new public G3RS CLI command output after init/validate command split"
+
+[[fixture]]
+id = "C10-help-contract"
+required_commands = [
+  ["--help"],
+  ["validate", "--help"],
+  ["init", "--help"],
+]
+
+[[fixture]]
+id = "C20-reject-old-command-shapes"
+required_commands = [
+  ["validate-repo"],
+  ["validate", "--path", "."],
+]
+
+[[fixture]]
+id = "C30-init-repo-managed-hooks"
+required_commands = [
+  ["init", "repo", "--path", "."],
+]
+
+[[fixture]]
+id = "C40-init-repo-refuses-owned-hook"
+required_commands = [
+  ["init", "repo", "--path", "."],
+]
+
+[[fixture]]
+id = "C50-workspace-command-shapes"
+required_commands = [
+  ["init", "workspace", "--path", "."],
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--inventory"],
+]
+
+[[fixture]]
+id = "C60-reject-removed-workspace-arguments"
+required_commands = [
+  ["init", "workspace", "--path", ".", "--profile", "library"],
+  ["validate", "workspace", "--path", ".", "--family", "hexarch"],
+]
+
+[[fixture]]
+id = "C70-validate-repo-command-shape"
+required_commands = [
+  ["validate", "repo", "--path", "."],
+]
+
+[report_fixture_set]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs-report-output"
+goal = "snapshot plain text report rendering through the existing report assertions package"
+fixture_binary = "apps/guardrail3-rs/crates/io/outbound/report/crates/assertions/src/report_fixture_output/main.rs"
+fixture3_command_wrapper = "scripts/behavior/fixture3-g3rs-report-output.py"
+
+[[report_fixture]]
+id = "P10-hidden-inventory-with-visible-warning"
+required_behavior = "inventory rows hidden by default while visible warning rows remain"
+
+[[report_fixture]]
+id = "P20-all-results-hidden"
+required_behavior = "report prints No findings. when all rows are hidden inventory"
+
+[[report_fixture]]
+id = "P30-rule-message"
+required_behavior = "severity, rule id, file, title, and message are rendered"
+
+[[report_fixture]]
+id = "P40-scope-root"
+required_behavior = "scope and root header are rendered"

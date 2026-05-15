@@ -1,0 +1,11 @@
+id = "C60-reject-removed-workspace-arguments"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+commands = [
+  ["init", "workspace", "--path", ".", "--profile", "library"],
+  ["validate", "workspace", "--path", ".", "--family", "hexarch"],
+]
+expected_exit = "nonzero"
+level = "cli_removed_workspace_arguments"
+

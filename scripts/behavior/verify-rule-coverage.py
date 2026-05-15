@@ -36,8 +36,11 @@ def main() -> int:
     matrix = load_toml(REPO_ROOT / plan_manifest["coverage_matrix"]["path"])
     rows = matrix["rule"]
     covered = sum(1 for row in rows if row["coverage_status"] == "covered")
-    planned = len(rows) - covered
-    print(f"behavior-rule-coverage: PASS source:{len(rows)} covered:{covered} planned:{planned}")
+    replaced = sum(1 for row in rows if row["coverage_status"] == "replaced_by_managed_hook")
+    planned = len(rows) - covered - replaced
+    print(
+        f"behavior-rule-coverage: PASS source:{len(rows)} covered:{covered} replaced:{replaced} planned:{planned}"
+    )
     return 0
 
 
@@ -88,6 +91,7 @@ def verify_rule_coverage(plan_manifest: dict[str, Any]) -> list[str]:
             required_results_by_fixture,
         )
     )
+    failures.extend(verify_replaced_rows(rows, source_ids, baseline_state))
     return failures
 
 
@@ -338,6 +342,36 @@ def verify_row_state(
             )
     if status != "covered" and not reason:
         failures.append(f"{rule_id}: non-covered row must include reason")
+    return failures
+
+
+def verify_replaced_rows(
+    rows: list[Any],
+    source_ids: set[str],
+    baseline_state: dict[str, set[str]],
+) -> list[str]:
+    replacement_rule_id = "g3rs-hooks/managed-g3rs-hook-chain"
+    replaced_rows = [
+        row
+        for row in rows
+        if isinstance(row, dict) and row.get("coverage_status") == "replaced_by_managed_hook"
+    ]
+    if not replaced_rows:
+        return []
+
+    failures: list[str] = []
+    if replacement_rule_id not in source_ids:
+        failures.append(f"{replacement_rule_id}: replacement rule ID is not active source")
+    if "error_or_warn" not in baseline_state.get(replacement_rule_id, set()):
+        failures.append(f"{replacement_rule_id}: replacement rule must emit Error/Warn in fixture output")
+
+    for row in replaced_rows:
+        rule_id = row.get("id")
+        reason = row.get("reason")
+        if not isinstance(reason, str) or replacement_rule_id not in reason:
+            failures.append(f"{rule_id}: replaced row reason must name {replacement_rule_id}")
+        if row.get("current_replay") != "absent":
+            failures.append(f"{rule_id}: replaced row current_replay must be absent")
     return failures
 
 
