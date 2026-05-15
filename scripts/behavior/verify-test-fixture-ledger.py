@@ -111,6 +111,8 @@ def verify(ledger_path: Path, strict: bool) -> list[str]:
             failures.extend(verify_fixture_row(row, fixture_ids, findings_by_fixture))
         if status == "not_cli_visible" and not non_empty_string(row.get("reason")):
             failures.append(f"{test_path}::{test_name}: not_cli_visible rows require reason")
+        if status in {"kept_compile_contract", "kept_replay_system"} and not non_empty_string(row.get("reason")):
+            failures.append(f"{test_path}::{test_name}: {status} rows require reason")
 
     duplicates = sorted(key for key, count in Counter(row_keys).items() if count > 1)
     for test_path, test_name in duplicates:
