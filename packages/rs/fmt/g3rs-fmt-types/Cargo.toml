@@ -92,3 +92,4 @@ workspace = true
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
 rust-toolchain-toml-parser = { path = "../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 rustfmt-toml-parser = { path = "../../../parsers/rustfmt-toml-parser", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }

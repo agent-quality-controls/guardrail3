@@ -3,9 +3,10 @@
 use cargo_toml_parser::types::CargoToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::types::RustfmtToml;
+use serde::Serialize;
 
 /// Parse state of a `rustfmt.toml` (or `.rustfmt.toml`) configuration file.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsFmtRustfmtConfigState {
     /// Rustfmt config parsed successfully.
     Parsed(Box<RustfmtToml>),
@@ -16,7 +17,7 @@ pub enum G3RsFmtRustfmtConfigState {
 }
 
 /// Parse state of a `Cargo.toml` manifest.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsFmtCargoState {
     /// Cargo manifest parsed successfully.
     Parsed(Box<CargoToml>),
@@ -29,7 +30,7 @@ pub enum G3RsFmtCargoState {
 }
 
 /// Parse state of a `rust-toolchain.toml` configuration file.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum G3RsFmtToolchainState {
     /// Toolchain config parsed successfully.
     Parsed(Box<RustToolchainToml>),
@@ -42,7 +43,7 @@ pub enum G3RsFmtToolchainState {
 }
 
 /// A waiver entry declared in the rust policy file.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsFmtWaiver {
     /// Rule identifier the waiver applies to.
     pub rule: String,
@@ -55,7 +56,7 @@ pub struct G3RsFmtWaiver {
 }
 
 /// Parse state of the per-workspace rust policy `guardrail3-rs.toml` file.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsFmtRustPolicyState {
     /// No rust policy file present.
     Missing,
@@ -83,7 +84,7 @@ pub enum G3RsFmtRustPolicyState {
 }
 
 /// Aggregated config-level inputs for fmt-family checks.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct G3RsFmtConfigChecksInput {
     /// Repo-relative path of the rustfmt config file.
     pub rustfmt_rel_path: String,
@@ -104,11 +105,11 @@ pub struct G3RsFmtConfigChecksInput {
 }
 
 /// Source-level input for fmt checks (currently empty; placeholder).
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsFmtSourceChecksInput;
 
 /// Kind of nested rustfmt config file detected in the file tree.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum G3RsFmtConfigFileKind {
     /// `rustfmt.toml` file.
     RustfmtToml,
@@ -117,7 +118,7 @@ pub enum G3RsFmtConfigFileKind {
 }
 
 /// A nested rustfmt config file discovered under the workspace root.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsFmtNestedConfigFile {
     /// Repo-relative path to the nested config file.
     pub rel_path: String,
@@ -126,7 +127,7 @@ pub struct G3RsFmtNestedConfigFile {
 }
 
 /// File-tree-level input for fmt checks.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 pub struct G3RsFmtFileTreeChecksInput {
     /// Repo-relative path of the root `rustfmt.toml`, if present.
     pub root_rustfmt_toml_rel_path: Option<String>,
