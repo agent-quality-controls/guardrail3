@@ -225,6 +225,7 @@ dependencies = [
  "cargo-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
+ "serde",
 ]
 
 [[package]]
