@@ -12,4 +12,5 @@ fixture3 check --all
 python3 "$HERE/verify-fixture3-migration.py"
 python3 "$HERE/verify-rule-coverage.py"
 python3 "$HERE/verify-ledger.py"
+python3 "$HERE/verify-test-fixture-ledger.py"
 python3 "$HERE/verify-test-deletion.py"
