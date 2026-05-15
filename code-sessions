@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+exec codex resume \
+  019d684b-742c-7483-a9a3-ebee4c79e991 \
+  -C "${repo_root}" \
+  --dangerously-bypass-approvals-and-sandbox
