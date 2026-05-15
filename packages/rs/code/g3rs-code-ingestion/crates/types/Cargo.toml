@@ -16,6 +16,9 @@ default = ["all"]
 all = ["api"]
 api = []
 
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
 [lints]
 workspace = true
 

@@ -1,0 +1,55 @@
+[[tree]]
+path = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output/Cargo.toml"
+
+[[tree]]
+path = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output/src/lib.rs"
+
+[[tree]]
+path = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output/src/run.rs"
+
+[[tree]]
+path = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output/src/main.rs"
+
+[[tree]]
+path = "scripts/behavior/fixture3-g3rs-code-ingestion.py"
+
+[[tree]]
+path = "behavior/golden/g3rs-code-ingestion/approved.normalized.json"
+
+[[tree]]
+path = "behavior/golden/g3rs-code-ingestion/approved.meta.json"
+
+[[public_api]]
+crate = "g3rs-code-ingestion-fixture-output"
+functions = ["run_from_env", "render_path"]
+types = ["FixtureOutputError"]
+
+[[serialized_type]]
+crate = "g3rs-code-ingestion-types"
+type = "G3RsCodeIngestionError"
+derive = "serde::Serialize"
+
+[[fixture3_suite]]
+name = "g3rs-code-ingestion"
+command = "scripts/behavior/fixture3-g3rs-code-ingestion.py"
+approved_dir = "behavior/golden/g3rs-code-ingestion"
+
+[[verification]]
+command = "cargo check --workspace --all-targets --all-features"
+cwd = "packages/rs/code/g3rs-code-ingestion"
+
+[[verification]]
+command = "cargo test --workspace --all-targets --all-features"
+cwd = "packages/rs/code/g3rs-code-ingestion"
+
+[[verification]]
+command = "g3rs validate --path packages/rs/code/g3rs-code-ingestion"
+cwd = "."
+
+[[verification]]
+command = "fixture3 check --suite g3rs-code-ingestion"
+cwd = "."
+
+[[verification]]
+command = "scripts/behavior/verify-all.sh"
+cwd = "."

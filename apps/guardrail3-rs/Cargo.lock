@@ -751,6 +751,9 @@ dependencies = [
 [[package]]
 name = "g3rs-code-ingestion-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "g3rs-code-source-checks"

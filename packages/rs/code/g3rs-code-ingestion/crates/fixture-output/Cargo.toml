@@ -1,0 +1,30 @@
+[package]
+name = "g3rs-code-ingestion-fixture-output"
+version = "0.1.0"
+edition = "2024"
+description = "Fixture output binary for g3rs code ingestion"
+license = "MIT OR Apache-2.0"
+rust-version = "1.85"
+repository = "https://github.com/ArcticLens/websmasher"
+keywords = ["guardrail3", "code", "ingestion", "rust"]
+categories = ["development-tools"]
+publish = false
+
+[dependencies]
+g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
+g3rs-code-ingestion = { path = "../..", version = "0.1.0", features = ["api"] }
+g3rs-code-ingestion-types = { path = "../types", version = "0.1.0" }
+g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = ["all"]
+all = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[lints]
+workspace = true

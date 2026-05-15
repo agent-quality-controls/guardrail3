@@ -36,3 +36,20 @@ suites:
       approved_dir: "behavior/golden/g3rs-validate-repo"
       received_dir: ".fixture3/g3rs-validate-repo"
       diff_dir: ".fixture3/g3rs-validate-repo"
+  g3rs-code-ingestion:
+    fixtures:
+      - "behavior/fixtures/g3rs/L41-root-cargo-toml-invalid/fixture.toml"
+      - "behavior/fixtures/g3rs/L61-cargo-clippy-code-config-branches/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/fixture3-g3rs-code-ingestion.py"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    output:
+      format: "json"
+    storage:
+      approved_dir: "behavior/golden/g3rs-code-ingestion"
+      received_dir: ".fixture3/g3rs-code-ingestion"
+      diff_dir: ".fixture3/g3rs-code-ingestion"

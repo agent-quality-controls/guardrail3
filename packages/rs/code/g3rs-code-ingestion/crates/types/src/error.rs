@@ -1,7 +1,9 @@
 use std::path::PathBuf;
 
+use serde::Serialize;
+
 /// Ingestion failure for `code`.
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub enum G3RsCodeIngestionError {
     /// A selected Rust source file exists but cannot be read.
     Unreadable {

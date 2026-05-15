@@ -1,0 +1,24 @@
+{
+  "suite": "g3rs-code-ingestion",
+  "kind": "approved",
+  "run_id": "2026-05-15T16-54-12.091739Z-d699e9c4",
+  "run_commit": "845f3dc85",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-15T16:54:12.091739Z",
+  "fixture_hash": "sha256:faea400e1c1ec44e4eab66086a40cdeaaeb77762d155f7b14ea52be759b385f4",
+  "manifest_hash": "sha256:2c44801464e945e48befe18734120020d5a4fc047180cd179f358747d5b3003d",
+  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
+  "tool_version": "0.1.6",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs/L41-root-cargo-toml-invalid/fixture.toml",
+      "sha256": "sha256:8dae5c195d6063a6bdb441a7203d1e706421bbd3fb6751099f457b2d85d190b2"
+    },
+    {
+      "path": "behavior/fixtures/g3rs/L61-cargo-clippy-code-config-branches/fixture.toml",
+      "sha256": "sha256:e9eed73eff7a0af48f04b9a05b0b1b8d2aa3ac8d84baf2c4e6d95f31d1b1dd00"
+    }
+  ],
+  "change_path": ".plans/2026-05-15-172324-code-ingestion-fixture-output.md"
+}

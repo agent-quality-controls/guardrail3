@@ -1,12 +1,12 @@
 {
   "suite": "g3rs-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-15T12-55-10.5333Z-6df8fd75",
-  "run_commit": "da8c88bc5",
+  "run_id": "2026-05-15T16-11-16.944083Z-6df8fd75",
+  "run_commit": "7961b9a05",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-15T12:55:10.5333Z",
+  "recorded_at": "2026-05-15T16:11:16.944083Z",
   "fixture_hash": "sha256:b44c5995c76fdd284fe94cb6c6ba37e5de4528ab9d3eb56a19d67f620649311a",
-  "manifest_hash": "sha256:6df8fd7512758101ef42127389990e4d450f06e415c4d871d0d1cc4b59c37094",
+  "manifest_hash": "sha256:2c44801464e945e48befe18734120020d5a4fc047180cd179f358747d5b3003d",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
   "output_schema_version": "1",
@@ -48,5 +48,5 @@
       "sha256": "sha256:042b108e6718650689d7a7c50b0fd8dda0ee5c80b021024ba20ae3ec3a36ecd0"
     }
   ],
-  "change_path": ".plans/2026-05-15-133355-g3rs-unclassified-fixture-coverage.md"
+  "change_path": ".plans/2026-05-15-172324-code-ingestion-fixture-output.md"
 }
