@@ -1080,149 +1080,6 @@ status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/forbid.rs"
-test_name = "inventories_when_disallowed_macros_is_forbidden"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/golden.rs"
-test_name = "inventories_when_disallowed_macros_is_denied"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/hybrid.rs"
-test_name = "inventories_when_hybrid_root_falls_back_to_package_disallowed_macros_lint"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/missing.rs"
-test_name = "errors_when_disallowed_macros_is_missing"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/standalone_package.rs"
-test_name = "inventories_when_standalone_package_has_disallowed_macros_denied"
-line = 13
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/wrong.rs"
-test_name = "errors_when_disallowed_macros_is_not_denied"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/disallowed-macros-deny"
-title = "disallowed macros lint weakened"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/golden.rs"
-test_name = "inventories_when_lint_levels_match_policy"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/hybrid.rs"
-test_name = "inventories_when_hybrid_root_falls_back_to_package_lint_levels"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/missing_lint_no_priority_error.rs"
-test_name = "no_priority_error_when_group_lint_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/required_allow.rs"
-test_name = "errors_when_required_allow_lint_is_set_to_deny"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/required_allow.rs"
-test_name = "passes_when_required_allow_lint_is_correctly_set"
-line = 18
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/weakens.rs"
-test_name = "errors_when_expected_deny_is_weakened"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/wrong_priority.rs"
-test_name = "errors_when_group_priority_is_wrong"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/lint-levels"
-title = "lint `warnings` weakens policy"
-file = "Cargo.toml"
-
-[[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "errors_when_member_edition_is_invalid"
 line = 65
@@ -1356,83 +1213,6 @@ status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/golden.rs"
-test_name = "inventories_when_specific_deny_lints_do_not_use_negative_priority"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-cargo/priority-order"
-title = "specific lint `unwrap_used` has negative priority"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/hybrid.rs"
-test_name = "inventories_when_hybrid_root_falls_back_to_package_clippy_priorities"
-line = 4
-status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
-severity = "Warn"
-rule = "g3rs-cargo/priority-order"
-title = "specific lint `unwrap_used` has negative priority"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/negative_priority.rs"
-test_name = "warns_when_specific_lint_uses_negative_priority"
-line = 4
-status = "covered_hit"
-fixture = "L61-cargo-clippy-code-config-branches"
-severity = "Warn"
-rule = "g3rs-cargo/priority-order"
-title = "specific lint `unwrap_used` has negative priority"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/quiet_when_target_lints_absent.rs"
-test_name = "stays_quiet_when_specific_target_lints_are_absent"
-line = 4
-status = "covered_non_hit"
-fixture = "L80-project-policy-valid-clean"
-severity = "Warn"
-rule = "g3rs-cargo/priority-order"
-title = "specific lint `unwrap_used` has negative priority"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/golden.rs"
-test_name = "inventories_when_workspace_resolver_is_supported"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/resolver"
-title = "unsupported workspace resolver"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/missing.rs"
-test_name = "errors_when_workspace_resolver_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/resolver"
-title = "unsupported workspace resolver"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/wrong.rs"
-test_name = "errors_when_workspace_resolver_is_unsupported"
-line = 4
-status = "covered_hit"
-fixture = "L60-delegated-tools-present-policy-invalid"
-severity = "Error"
-rule = "g3rs-cargo/resolver"
-title = "unsupported workspace resolver"
-file = "Cargo.toml"
-
-[[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "errors_when_library_profile_has_no_rust_version"
 line = 5
@@ -1531,72 +1311,6 @@ status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
 
 [[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/golden.rs"
-test_name = "inventories_when_required_lint_tables_are_present"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/hybrid.rs"
-test_name = "inventories_when_hybrid_root_falls_back_to_package_lint_tables"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_clippy.rs"
-test_name = "errors_when_clippy_lints_table_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_required_entry.rs"
-test_name = "errors_when_required_clippy_entry_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_rust.rs"
-test_name = "errors_when_rust_lints_table_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_unreachable_pub.rs"
-test_name = "errors_when_library_only_rust_lint_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L30-guardrail-config-valid-required-inputs-missing"
-severity = "Error"
-rule = "g3rs-cargo/workspace-lints"
-title = "rust lint table missing"
-file = "Cargo.toml"
-
-[[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints_inherited_tests/cases.rs"
 test_name = "errors_when_member_does_not_inherit_workspace_lints"
 line = 4
@@ -1616,72 +1330,6 @@ test_name = "inventories_when_member_inherits_workspace_lints"
 line = 21
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/golden.rs"
-test_name = "inventories_when_edition_is_supported"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/hybrid.rs"
-test_name = "inventories_when_hybrid_root_falls_back_to_package_edition"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/invalid.rs"
-test_name = "errors_when_edition_is_not_a_string"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/missing.rs"
-test_name = "errors_when_edition_is_missing"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/older.rs"
-test_name = "errors_when_edition_is_older_than_minimum"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
-
-[[test]]
-test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/unrecognized.rs"
-test_name = "errors_when_edition_is_unrecognized"
-line = 4
-status = "covered_hit"
-fixture = "L38-topology-non-root-nested-context"
-severity = "Error"
-rule = "g3rs-cargo/workspace-metadata"
-title = "edition missing"
-file = "Cargo.toml"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-filetree-checks/crates/runtime/src/run_tests/cases.rs"
@@ -14180,6 +13828,358 @@ test_name = "unreferenced_nested_workspace_still_fires_end_to_end"
 line = 105
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/forbid.rs"
+test_name = "inventories_when_disallowed_macros_is_forbidden"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/golden.rs"
+test_name = "inventories_when_disallowed_macros_is_denied"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/hybrid.rs"
+test_name = "inventories_when_hybrid_root_falls_back_to_package_disallowed_macros_lint"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/missing.rs"
+test_name = "errors_when_disallowed_macros_is_missing"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/standalone_package.rs"
+test_name = "inventories_when_standalone_package_has_disallowed_macros_denied"
+line = 13
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/disallowed_macros_deny/rule_tests/wrong.rs"
+test_name = "errors_when_disallowed_macros_is_not_denied"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/disallowed-macros-deny"
+title = "disallowed macros lint weakened"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/golden.rs"
+test_name = "inventories_when_lint_levels_match_policy"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/hybrid.rs"
+test_name = "inventories_when_hybrid_root_falls_back_to_package_lint_levels"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/missing_lint_no_priority_error.rs"
+test_name = "no_priority_error_when_group_lint_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/required_allow.rs"
+test_name = "errors_when_required_allow_lint_is_set_to_deny"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/required_allow.rs"
+test_name = "passes_when_required_allow_lint_is_correctly_set"
+line = 18
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/weakens.rs"
+test_name = "errors_when_expected_deny_is_weakened"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/lint_levels/rule_tests/wrong_priority.rs"
+test_name = "errors_when_group_priority_is_wrong"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/lint-levels"
+title = "lint `warnings` weakens policy"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/golden.rs"
+test_name = "inventories_when_specific_deny_lints_do_not_use_negative_priority"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Warn"
+rule = "g3rs-cargo/priority-order"
+title = "specific lint `unwrap_used` has negative priority"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/hybrid.rs"
+test_name = "inventories_when_hybrid_root_falls_back_to_package_clippy_priorities"
+line = 4
+status = "covered_hit"
+fixture = "L61-cargo-clippy-code-config-branches"
+severity = "Warn"
+rule = "g3rs-cargo/priority-order"
+title = "specific lint `unwrap_used` has negative priority"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/negative_priority.rs"
+test_name = "warns_when_specific_lint_uses_negative_priority"
+line = 4
+status = "covered_hit"
+fixture = "L61-cargo-clippy-code-config-branches"
+severity = "Warn"
+rule = "g3rs-cargo/priority-order"
+title = "specific lint `unwrap_used` has negative priority"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/priority_order/rule_tests/quiet_when_target_lints_absent.rs"
+test_name = "stays_quiet_when_specific_target_lints_are_absent"
+line = 4
+status = "covered_non_hit"
+fixture = "L80-project-policy-valid-clean"
+severity = "Warn"
+rule = "g3rs-cargo/priority-order"
+title = "specific lint `unwrap_used` has negative priority"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/golden.rs"
+test_name = "inventories_when_workspace_resolver_is_supported"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/resolver"
+title = "unsupported workspace resolver"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/missing.rs"
+test_name = "errors_when_workspace_resolver_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/resolver"
+title = "unsupported workspace resolver"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/resolver/rule_tests/wrong.rs"
+test_name = "errors_when_workspace_resolver_is_unsupported"
+line = 4
+status = "covered_hit"
+fixture = "L60-delegated-tools-present-policy-invalid"
+severity = "Error"
+rule = "g3rs-cargo/resolver"
+title = "unsupported workspace resolver"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/golden.rs"
+test_name = "inventories_when_required_lint_tables_are_present"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/hybrid.rs"
+test_name = "inventories_when_hybrid_root_falls_back_to_package_lint_tables"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_clippy.rs"
+test_name = "errors_when_clippy_lints_table_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_required_entry.rs"
+test_name = "errors_when_required_clippy_entry_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_rust.rs"
+test_name = "errors_when_rust_lints_table_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints/rule_tests/missing_unreachable_pub.rs"
+test_name = "errors_when_library_only_rust_lint_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L30-guardrail-config-valid-required-inputs-missing"
+severity = "Error"
+rule = "g3rs-cargo/workspace-lints"
+title = "rust lint table missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/golden.rs"
+test_name = "inventories_when_edition_is_supported"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/hybrid.rs"
+test_name = "inventories_when_hybrid_root_falls_back_to_package_edition"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/invalid.rs"
+test_name = "errors_when_edition_is_not_a_string"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/missing.rs"
+test_name = "errors_when_edition_is_missing"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/older.rs"
+test_name = "errors_when_edition_is_older_than_minimum"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
+
+[[test]]
+test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_metadata/rule_tests/unrecognized.rs"
+test_name = "errors_when_edition_is_unrecognized"
+line = 4
+status = "covered_hit"
+fixture = "L38-topology-non-root-nested-context"
+severity = "Error"
+rule = "g3rs-cargo/workspace-metadata"
+title = "edition missing"
+file = "Cargo.toml"
 
 [[test]]
 test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
