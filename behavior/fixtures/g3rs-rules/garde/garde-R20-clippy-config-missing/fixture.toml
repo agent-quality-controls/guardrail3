@@ -1,0 +1,22 @@
+id = "garde-R20-clippy-config-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "garde", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_breakage"
+
+rule_family = "garde"
+target_rules = [
+  "g3rs-garde/core-method-bans",
+  "g3rs-garde/extractor-type-bans",
+  "g3rs-garde/reqwest-json-ban",
+  "g3rs-garde/additional-method-bans",
+]
+expected_findings = [
+  "g3rs-garde/core-method-bans",
+  "g3rs-garde/extractor-type-bans",
+  "g3rs-garde/reqwest-json-ban",
+  "g3rs-garde/additional-method-bans",
+]

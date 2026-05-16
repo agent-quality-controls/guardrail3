@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "pre-commit.d directory exists, but this script never dispatches it"
+gitleaks protect --staged --no-banner
+g3rs validate-repo --repo-root .

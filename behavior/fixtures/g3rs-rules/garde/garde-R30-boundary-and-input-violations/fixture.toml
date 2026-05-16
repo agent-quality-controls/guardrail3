@@ -1,0 +1,30 @@
+id = "garde-R30-boundary-and-input-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "garde", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "garde"
+target_rules = [
+  "g3rs-garde/input-failures",
+  "g3rs-garde/struct-derive-validate",
+  "g3rs-garde/manual-deserialize-impl",
+  "g3rs-garde/enum-derive-validate",
+  "g3rs-garde/query-as-inventory",
+  "g3rs-garde/field-level-constraints",
+  "g3rs-garde/nested-validation-dive",
+  "g3rs-garde/context-validation-surface",
+]
+expected_findings = [
+  "g3rs-garde/input-failures",
+  "g3rs-garde/struct-derive-validate",
+  "g3rs-garde/manual-deserialize-impl",
+  "g3rs-garde/enum-derive-validate",
+  "g3rs-garde/query-as-inventory",
+  "g3rs-garde/field-level-constraints",
+  "g3rs-garde/nested-validation-dive",
+  "g3rs-garde/context-validation-surface",
+]

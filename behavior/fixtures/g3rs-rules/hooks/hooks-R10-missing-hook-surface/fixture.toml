@@ -1,0 +1,33 @@
+id = "hooks-R10-missing-hook-surface"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+commands = [
+  ["validate", "repo", "--path", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "hooks"
+target_rules = [
+  "g3rs-hooks/pre-commit-exists",
+  "g3rs-hooks/hooks-path-configured",
+  "g3rs-hooks/execution-trust",
+  "g3rs-hooks/pre-commit-executable",
+  "g3rs-hooks/dispatcher-pattern",
+  "g3rs-hooks/shell-error-handling",
+  "g3rs-hooks/valid-shebang",
+  "g3rs-hooks/no-unconditional-exit-zero",
+  "g3rs-hooks/required-contract-command-present",
+]
+expected_findings = [
+  "g3rs-hooks/pre-commit-exists",
+  "g3rs-hooks/hooks-path-configured",
+  "g3rs-hooks/execution-trust",
+  "g3rs-hooks/pre-commit-executable",
+  "g3rs-hooks/dispatcher-pattern",
+  "g3rs-hooks/shell-error-handling",
+  "g3rs-hooks/valid-shebang",
+  "g3rs-hooks/no-unconditional-exit-zero",
+  "g3rs-hooks/required-contract-command-present",
+]

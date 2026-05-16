@@ -1,0 +1,72 @@
+id = "code-R10-policy-and-input-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "code", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "code"
+target_rules = [
+  "g3rs-code/exception-comment-inventory",
+  "g3rs-code/unsafe-code-lint",
+  "g3rs-code/input-failures",
+  "g3rs-code/crate-level-allow",
+  "g3rs-code/item-level-allow-without-reason",
+  "g3rs-code/item-level-allow-with-reason",
+  "g3rs-code/garde-skip-without-comment",
+  "g3rs-code/garde-skip-with-comment",
+  "g3rs-code/cfg-attr-allow-inventory",
+  "g3rs-code/todo-macros",
+  "g3rs-code/direct-fs-usage",
+  "g3rs-code/panic-macro",
+  "g3rs-code/impl-allow-blast-radius",
+  "g3rs-code/always-true-cfg-attr-bypass",
+  "g3rs-code/large-type-inventory",
+  "g3rs-code/extern-allow",
+  "g3rs-code/fs-glob-import",
+  "g3rs-code/deny-forbid-without-reason",
+  "g3rs-code/include-bypass",
+  "g3rs-code/large-trait-surface",
+  "g3rs-code/public-struct-named-fields",
+  "g3rs-code/public-weak-error-forms",
+  "g3rs-code/generic-parameter-cap",
+  "g3rs-code/string-dispatch-cap",
+  "g3rs-code/test-expect-message-quality",
+  "g3rs-code/many-use-imports",
+  "g3rs-code/path-attr-with-reason",
+  "g3rs-code/too-many-effective-code-lines",
+  "g3rs-code/too-many-use-imports",
+]
+expected_findings = [
+  "g3rs-code/exception-comment-inventory",
+  "g3rs-code/unsafe-code-lint",
+  "g3rs-code/input-failures",
+  "g3rs-code/crate-level-allow",
+  "g3rs-code/item-level-allow-without-reason",
+  "g3rs-code/item-level-allow-with-reason",
+  "g3rs-code/garde-skip-without-comment",
+  "g3rs-code/garde-skip-with-comment",
+  "g3rs-code/cfg-attr-allow-inventory",
+  "g3rs-code/todo-macros",
+  "g3rs-code/direct-fs-usage",
+  "g3rs-code/panic-macro",
+  "g3rs-code/impl-allow-blast-radius",
+  "g3rs-code/always-true-cfg-attr-bypass",
+  "g3rs-code/large-type-inventory",
+  "g3rs-code/extern-allow",
+  "g3rs-code/fs-glob-import",
+  "g3rs-code/deny-forbid-without-reason",
+  "g3rs-code/include-bypass",
+  "g3rs-code/large-trait-surface",
+  "g3rs-code/public-struct-named-fields",
+  "g3rs-code/public-weak-error-forms",
+  "g3rs-code/generic-parameter-cap",
+  "g3rs-code/string-dispatch-cap",
+  "g3rs-code/test-expect-message-quality",
+  "g3rs-code/many-use-imports",
+  "g3rs-code/path-attr-with-reason",
+  "g3rs-code/too-many-effective-code-lines",
+  "g3rs-code/too-many-use-imports",
+]

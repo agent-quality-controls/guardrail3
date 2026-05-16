@@ -100,81 +100,95 @@ broken_fixtures = [
   "arch-R30-source-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "apparch"
 rule_count = 10
-fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
-planned_groups = [
-  "apparch-R00-clean-golden",
-  "apparch-R10-layer-boundary-violations",
-  "apparch-R20-surface-and-purity-violations",
+clean_fixture = "apparch-R00-clean-golden"
+broken_fixtures = [
+  "apparch-R10-policy-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "garde"
 rule_count = 13
-fixture_dir = "behavior/fixtures/g3rs-rules/garde"
-planned_groups = [
-  "garde-R00-clean-golden",
-  "garde-R10-config-and-dependency-violations",
-  "garde-R20-source-parse-failures",
-  "garde-R30-validation-shape-violations",
-  "garde-R40-boundary-bypass-violations",
+clean_fixture = "garde-R00-clean-golden"
+broken_fixtures = [
+  "garde-R10-dependency-missing",
+  "garde-R20-clippy-config-missing",
+  "garde-R30-boundary-and-input-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "test"
 rule_count = 19
-fixture_dir = "behavior/fixtures/g3rs-rules/test"
-planned_groups = [
-  "test-R00-clean-golden",
-  "test-R10-required-config-violations",
-  "test-R20-filetree-violations",
-  "test-R30-source-parse-failures",
-  "test-R40-test-body-violations",
-  "test-R50-proof-quality-violations",
+clean_fixture = "test-R00-clean-golden"
+broken_fixtures = [
+  "test-R10-nextest-missing",
+  "test-R20-mutation-required-inputs-missing",
+  "test-R21-mutants-config-invalid",
+  "test-R22-mutation-config-files-missing",
+  "test-R23-mutants-profile-missing",
+  "test-R30-source-and-filetree-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "release"
 rule_count = 33
-fixture_dir = "behavior/fixtures/g3rs-rules/release"
-planned_groups = [
-  "release-R00-clean-golden",
-  "release-R10-filetree-violations",
-  "release-R20-package-metadata-violations",
-  "release-R30-publish-policy-violations",
-  "release-R40-version-policy-violations",
-  "release-R50-workflow-violations",
-  "release-R60-source-quality-violations",
+clean_fixture = "release-R00-clean-golden"
+broken_fixtures = [
+  "release-R10-input-failures-and-workflow-missing",
+  "release-R20-semver-tool-missing",
+  "release-R30-semver-and-baseline-violations",
+  "release-R40-metadata-filetree-and-publish-violations",
+]
+inventory_only_rules = [
+  "g3rs-release/binary-release-workflow",
+  "g3rs-release/crate-inventory",
+  "g3rs-release/linux-release-target",
+  "g3rs-release/publish-status-inventory",
+  "g3rs-release/release-profile-inventory",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "code"
 rule_count = 30
-fixture_dir = "behavior/fixtures/g3rs-rules/code"
-planned_groups = [
-  "code-R00-clean-golden",
-  "code-R10-source-parse-failures",
-  "code-R20-allow-and-attribute-violations",
-  "code-R30-bypass-macro-violations",
-  "code-R40-shape-and-size-violations",
-  "code-R50-public-api-violations",
-  "code-R60-garde-and-test-message-violations",
+clean_fixture = "code-R00-clean-golden"
+broken_fixtures = [
+  "code-R10-policy-and-input-violations",
+]
+inventory_only_rules = [
+  "g3rs-code/unused-crate-dependencies-allow",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "hooks"
 rule_count = 36
-fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
-planned_groups = [
-  "hooks-R00-clean-golden",
-  "hooks-R10-filetree-violations",
-  "hooks-R20-shell-safety-violations",
-  "hooks-R30-command-context-violations",
-  "hooks-R40-routing-violations",
-  "hooks-R50-workflow-step-violations",
-  "hooks-R60-tool-inventory-violations",
+clean_fixture = "hooks-R00-clean-golden"
+broken_fixtures = [
+  "hooks-R10-missing-hook-surface",
+  "hooks-R20-weakened-required-tools",
+  "hooks-R30-invalid-modular-scripts",
+  "hooks-R40-inert-command-context",
+  "hooks-R50-managed-script-workflow-missing",
+]
+inventory_only_rules = [
+  "g3rs-hooks/local-override-inventory",
+  "g3rs-hooks/modular-directory-inventory",
+  "g3rs-hooks/modular-scripts-inventory",
+  "g3rs-hooks/no-bypass-instructions",
+  "g3rs-hooks/pre-commit-file-size-inventory",
+  "g3rs-hooks/script-stats-inventory",
+]
+cli_unreachable_rules = [
+  "g3rs-hooks/cargo-dupes-excludes",
+  "g3rs-hooks/clippy-denies-warnings",
+  "g3rs-hooks/contract-trigger-coverage",
+  "g3rs-hooks/gitleaks-step-present",
+  "g3rs-hooks/routing-discovers-marker-pair",
+  "g3rs-hooks/routing-no-env-override",
+  "g3rs-hooks/routing-no-upward-walk-from-units",
+  "g3rs-hooks/routing-scope-not-hardcoded-literal",
+  "g3rs-hooks/routing-staged-files-diff-filter-acm",
 ]
 
 [[verification]]

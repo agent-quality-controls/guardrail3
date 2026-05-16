@@ -1,0 +1,8 @@
+[package]
+name = "http-inbound"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+logic-service = { path = "../../logic/service", package = "logic-service" }
+types-core = { path = "../../types/core", package = "types-core" }

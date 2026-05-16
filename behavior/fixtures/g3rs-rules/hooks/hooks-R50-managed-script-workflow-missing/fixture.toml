@@ -1,0 +1,21 @@
+id = "hooks-R50-managed-script-workflow-missing"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+commands = [
+  ["validate", "repo", "--path", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "hooks"
+target_rules = [
+  "g3rs-hooks/merge-conflict-step-present",
+  "g3rs-hooks/file-size-step-present",
+  "g3rs-hooks/concrete-lockfile-command",
+]
+expected_findings = [
+  "g3rs-hooks/merge-conflict-step-present",
+  "g3rs-hooks/file-size-step-present",
+  "g3rs-hooks/concrete-lockfile-command",
+]

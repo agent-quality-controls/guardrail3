@@ -1,0 +1,16 @@
+id = "garde-R10-dependency-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "garde", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "garde"
+target_rules = [
+  "g3rs-garde/dependency-present",
+]
+expected_findings = [
+  "g3rs-garde/dependency-present",
+]

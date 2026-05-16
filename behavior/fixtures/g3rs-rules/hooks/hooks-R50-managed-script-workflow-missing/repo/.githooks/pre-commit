@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+for hook in .githooks/pre-commit.d/*; do
+  "$hook"
+done

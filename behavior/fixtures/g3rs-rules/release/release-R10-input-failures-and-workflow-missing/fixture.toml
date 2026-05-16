@@ -1,0 +1,26 @@
+id = "release-R10-input-failures-and-workflow-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "release", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "release"
+target_rules = [
+  "g3rs-release/config-input-failures",
+  "g3rs-release/filetree-input-failures",
+  "g3rs-release/source-input-failures",
+  "g3rs-release/release-plz-workflow",
+  "g3rs-release/publish-dry-run-workflow",
+  "g3rs-release/registry-token",
+]
+expected_findings = [
+  "g3rs-release/config-input-failures",
+  "g3rs-release/filetree-input-failures",
+  "g3rs-release/source-input-failures",
+  "g3rs-release/release-plz-workflow",
+  "g3rs-release/publish-dry-run-workflow",
+  "g3rs-release/registry-token",
+]

@@ -1,0 +1,56 @@
+id = "release-R40-metadata-filetree-and-publish-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "release", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "release"
+target_rules = [
+  "g3rs-release/description-present",
+  "g3rs-release/license-present",
+  "g3rs-release/repository-present",
+  "g3rs-release/keywords-present",
+  "g3rs-release/categories-present",
+  "g3rs-release/docs-rs-metadata",
+  "g3rs-release/binstall-metadata",
+  "g3rs-release/accidentally-publishable",
+  "g3rs-release/publish-dry-run",
+  "g3rs-release/include-exclude-inventory",
+  "g3rs-release/publish-must-be-explicit",
+  "g3rs-release/no-path-deps-to-unpublishable",
+  "g3rs-release/interdependent-version-consistency",
+  "g3rs-release/license-file",
+  "g3rs-release/release-plz-exists",
+  "g3rs-release/cliff-exists",
+  "g3rs-release/readme-exists",
+  "g3rs-release/readme-quality",
+  "g3rs-release/release-plz-workflow",
+  "g3rs-release/publish-dry-run-workflow",
+  "g3rs-release/registry-token",
+]
+expected_findings = [
+  "g3rs-release/description-present",
+  "g3rs-release/license-present",
+  "g3rs-release/repository-present",
+  "g3rs-release/keywords-present",
+  "g3rs-release/categories-present",
+  "g3rs-release/docs-rs-metadata",
+  "g3rs-release/binstall-metadata",
+  "g3rs-release/accidentally-publishable",
+  "g3rs-release/publish-dry-run",
+  "g3rs-release/include-exclude-inventory",
+  "g3rs-release/publish-must-be-explicit",
+  "g3rs-release/no-path-deps-to-unpublishable",
+  "g3rs-release/interdependent-version-consistency",
+  "g3rs-release/license-file",
+  "g3rs-release/release-plz-exists",
+  "g3rs-release/cliff-exists",
+  "g3rs-release/readme-exists",
+  "g3rs-release/readme-quality",
+  "g3rs-release/release-plz-workflow",
+  "g3rs-release/publish-dry-run-workflow",
+  "g3rs-release/registry-token",
+]

@@ -1,0 +1,17 @@
+profile = "library"
+allowed_deps = ["garde"]
+
+[checks]
+garde = true
+
+[[waivers]]
+rule = "g3rs-garde/query-as-inventory"
+file = "src/db.rs"
+selector = "qa@L4"
+reason = "Temporary SQLx row mapping until validated DTO extraction lands."
+
+[[waivers]]
+rule = "g3rs-garde/query-as-inventory"
+file = "src/db.rs"
+selector = "qa@L8"
+reason = "temporary"
