@@ -1,0 +1,8 @@
+[package]
+name = "cargo_invalid_edition"
+version = "0.1.0"
+edition = []
+publish = false
+
+[lints]
+workspace = true

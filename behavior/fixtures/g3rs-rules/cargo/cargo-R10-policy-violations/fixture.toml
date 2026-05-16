@@ -1,0 +1,42 @@
+id = "cargo-R10-policy-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "cargo"
+target_rules = [
+  "g3rs-cargo/lint-levels",
+  "g3rs-cargo/priority-order",
+  "g3rs-cargo/resolver",
+  "g3rs-cargo/disallowed-macros-deny",
+  "g3rs-cargo/approved-allow-inventory",
+  "g3rs-cargo/unapproved-allow-entries",
+  "g3rs-cargo/workspace-lints-inherited",
+  "g3rs-cargo/no-weakened-overrides",
+  "g3rs-cargo/member-edition-drift",
+  "g3rs-cargo/member-local-allows-forbidden",
+]
+intentionally_invalid = [
+  "cargo_lint_levels_weakened",
+  "cargo_resolver_unsupported",
+  "cargo_disallowed_macros_weakened",
+  "cargo_allow_reason_policy_invalid",
+  "cargo_member_lint_policy_invalid",
+  "cargo_member_edition_policy_invalid",
+]
+expected_findings = [
+  "g3rs-cargo/lint-levels",
+  "g3rs-cargo/priority-order",
+  "g3rs-cargo/resolver",
+  "g3rs-cargo/disallowed-macros-deny",
+  "g3rs-cargo/approved-allow-inventory",
+  "g3rs-cargo/unapproved-allow-entries",
+  "g3rs-cargo/workspace-lints-inherited",
+  "g3rs-cargo/no-weakened-overrides",
+  "g3rs-cargo/member-edition-drift",
+  "g3rs-cargo/member-local-allows-forbidden",
+]

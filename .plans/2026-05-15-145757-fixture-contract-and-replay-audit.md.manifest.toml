@@ -60,11 +60,11 @@ path = "scripts/behavior/classify-kept-test-dispositions.py"
 
 [[disposition]]
 name = "needs_rule_fixture_or_golden_output"
-expected_rows = 236
+expected_rows = 194
 
 [[disposition]]
 name = "keep_internal_unit_test"
-expected_rows = 421
+expected_rows = 437
 
 [[disposition]]
 name = "needs_family_runner_output"
@@ -76,7 +76,7 @@ expected_rows = 23
 
 [[disposition]]
 name = "covered_by_cli_output"
-expected_rows = 11
+expected_rows = 37
 
 [[disposition]]
 name = "covered_by_renderer_output"

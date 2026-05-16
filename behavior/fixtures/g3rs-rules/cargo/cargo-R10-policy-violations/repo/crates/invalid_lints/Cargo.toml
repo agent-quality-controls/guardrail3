@@ -1,0 +1,11 @@
+[package]
+name = "cargo_invalid_lints"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints]
+workspace = true
+
+[lints.rust]
+warnings = []

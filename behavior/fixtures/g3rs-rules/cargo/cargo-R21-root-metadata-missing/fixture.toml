@@ -1,0 +1,25 @@
+id = "cargo-R21-root-metadata-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_root_metadata_missing"
+
+rule_family = "cargo"
+target_rules = [
+  "g3rs-cargo/workspace-metadata",
+  "g3rs-cargo/rust-version-policy",
+  "g3rs-cargo/resolver",
+]
+intentionally_invalid = [
+  "cargo_root_edition_missing",
+  "cargo_root_rust_version_missing",
+  "cargo_workspace_resolver_missing",
+]
+expected_findings = [
+  "g3rs-cargo/workspace-metadata",
+  "g3rs-cargo/rust-version-policy",
+  "g3rs-cargo/resolver",
+]

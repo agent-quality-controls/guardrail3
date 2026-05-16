@@ -3,6 +3,7 @@ fixture_root = "behavior/fixtures/g3rs-rules"
 suite = "g3rs-validate"
 verifier = "scripts/behavior/verify-family-rule-fixtures.py"
 strategy = "replace_broad_composite_rule_fixtures"
+coverage_mode = "incremental"
 
 [[fixture_corpus]]
 path = "behavior/fixtures/g3rs"
@@ -24,6 +25,9 @@ name = "cargo"
 remaining_rule_rows = 42
 fixture_dir = "behavior/fixtures/g3rs-rules/cargo"
 first = true
+status = "completed"
+covered_by_cli_output = 26
+kept_internal_unit_tests = 16
 
 [[family]]
 name = "clippy"
@@ -113,3 +117,47 @@ command = "python3 scripts/behavior/verify-test-deletion.py"
 
 [[verification]]
 command = "bash scripts/behavior/verify-all.sh"
+
+[[fixture]]
+id = "cargo-R10-policy-violations"
+required_results = [
+  "Error|g3rs-cargo/lint-levels|lint `warnings` weakens policy|Cargo.toml",
+  "Error|g3rs-cargo/lint-levels|lint `dead_code` weakens policy|Cargo.toml",
+  "Error|g3rs-cargo/lint-levels|lint `unused_results` weakens policy|Cargo.toml",
+  "Error|g3rs-cargo/lint-levels|lint `redundant_pub_crate` must be allow|Cargo.toml",
+  "Warn|g3rs-cargo/priority-order|specific lint `unwrap_used` has negative priority|Cargo.toml",
+  "Error|g3rs-cargo/resolver|unsupported workspace resolver|Cargo.toml",
+  "Error|g3rs-cargo/disallowed-macros-deny|disallowed macros lint weakened|Cargo.toml",
+  "Error|g3rs-cargo/approved-allow-inventory|approved allow entry reason too weak|Cargo.toml",
+  "Error|g3rs-cargo/approved-allow-inventory|approved allow entry missing reason|Cargo.toml",
+  "Warn|g3rs-cargo/approved-allow-inventory|approved allow entry|Cargo.toml",
+  "Warn|g3rs-cargo/approved-allow-inventory|approved allow entry|Cargo.toml",
+  "Warn|g3rs-cargo/approved-allow-inventory|approved allow count|Cargo.toml",
+  "Error|g3rs-cargo/unapproved-allow-entries|unapproved allow entry missing reason|Cargo.toml",
+  "Error|g3rs-cargo/unapproved-allow-entries|unapproved allow entry reason too weak|Cargo.toml",
+  "Error|g3rs-cargo/unapproved-allow-entries|unapproved allow entry|Cargo.toml",
+  "Error|g3rs-cargo/unapproved-allow-entries|unapproved allow entry missing reason|Cargo.toml",
+  "Warn|g3rs-cargo/unapproved-allow-entries|unapproved allow count|Cargo.toml",
+  "Error|g3rs-cargo/workspace-lints-inherited|workspace lint inheritance invalid|crates/bad_lints/Cargo.toml",
+  "Error|g3rs-cargo/member-edition-drift|member edition invalid|crates/invalid_edition/Cargo.toml",
+  "Error|g3rs-cargo/no-weakened-overrides|invalid member rust override|crates/invalid_lints/Cargo.toml",
+  "Error|g3rs-cargo/member-local-allows-forbidden|member-local allow entry forbidden|crates/local_doc/Cargo.toml",
+  "Warn|g3rs-cargo/member-local-allows-forbidden|member-local allow count|crates/local_doc/Cargo.toml",
+  "Error|g3rs-cargo/member-local-allows-forbidden|member-local allow entry missing reason|crates/local_missing/Cargo.toml",
+  "Warn|g3rs-cargo/member-local-allows-forbidden|member-local allow count|crates/local_missing/Cargo.toml",
+  "Error|g3rs-cargo/member-local-allows-forbidden|member-local allow entry reason too weak|crates/local_weak/Cargo.toml",
+  "Warn|g3rs-cargo/member-local-allows-forbidden|member-local allow count|crates/local_weak/Cargo.toml",
+  "Error|g3rs-cargo/workspace-lints-inherited|workspace lints not inherited|crates/no_lints/Cargo.toml",
+  "Warn|g3rs-cargo/member-edition-drift|member edition older than workspace|crates/older_edition/Cargo.toml",
+  "Error|g3rs-cargo/member-edition-drift|member edition unrecognized|crates/unknown_edition/Cargo.toml",
+  "Error|g3rs-cargo/no-weakened-overrides|weakened member rust override|crates/weak_forbid/Cargo.toml",
+  "Error|g3rs-cargo/no-weakened-overrides|weakened member clippy override|crates/weak_warn/Cargo.toml",
+]
+
+[[fixture]]
+id = "cargo-R21-root-metadata-missing"
+required_results = [
+  "Error|g3rs-cargo/workspace-metadata|edition missing|Cargo.toml",
+  "Error|g3rs-cargo/resolver|workspace resolver missing|Cargo.toml",
+  "Error|g3rs-cargo/rust-version-policy|library rust-version missing|Cargo.toml",
+]

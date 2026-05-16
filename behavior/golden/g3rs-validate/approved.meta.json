@@ -1,14 +1,13 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-15T19-46-26.226243Z-2c448014",
-  "run_commit": "925b1dffc",
+  "run_id": "2026-05-16T18-36-17.22222Z-cfaf3bda",
+  "run_commit": "96fbc9e36",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-15T19:46:26.226243Z",
-  "fixture_hash": "sha256:427014332f1540b093c633678db65cc69d970300a0a6a54749445e68adebaa21",
-  "manifest_hash": "sha256:73618eb9c68bd6ed4e56112c868935983c78c11494a7ef0e513c778710498107",
-  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
-  "tool_version": "0.1.6",
+  "recorded_at": "2026-05-16T18:36:17.22222Z",
+  "fixture_hash": "sha256:20e5f03ce4aedfd3708be4f019ab27dc3cdd105b734875fa9c8a45fd98cb3aa8",
+  "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
+  "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -154,7 +153,19 @@
     {
       "path": "behavior/fixtures/g3rs/L80-project-policy-valid-clean/fixture.toml",
       "sha256": "sha256:e17b7c3c36f20c1d1069e05f910a642bf282e87eea978126575b05586988bcf1"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:15f67a7e0017c633004a8641b2660dfc6265d1361f36b728f5dca27c33b6ec66"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R10-policy-violations/fixture.toml",
+      "sha256": "sha256:4a584e6351447ba0728bff6d9274c776f226e56f4aa986d05516bbdb2e028f3a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R21-root-metadata-missing/fixture.toml",
+      "sha256": "sha256:453981555ec7321e35f2f5fc419b809b44e540d7d71536b0d80bdc66bc959578"
     }
   ],
-  "change_path": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md"
+  "comment": "Update cargo policy fixture coverage"
 }

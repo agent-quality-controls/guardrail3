@@ -3,6 +3,7 @@ suites:
   g3rs-validate:
     fixtures:
       - "behavior/fixtures/g3rs/*/fixture.toml"
+      - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
     command:
       argv:
         - "python3"

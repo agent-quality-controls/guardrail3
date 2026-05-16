@@ -1,0 +1,8 @@
+[package]
+name = "cargo_older_edition"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lints]
+workspace = true
