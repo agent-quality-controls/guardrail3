@@ -1,0 +1,34 @@
+id = "deny-R40-ban-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deny", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "deny"
+target_rules = [
+  "g3rs-deny/multiple-versions-floor",
+  "g3rs-deny/allow-wildcard-paths",
+  "g3rs-deny/wildcards-inventory",
+  "g3rs-deny/tokio-full-ban",
+  "g3rs-deny/duplicate-entries",
+  "g3rs-deny/skip-hygiene",
+  "g3rs-deny/ban-baseline-complete",
+  "g3rs-deny/allow-override-channel",
+  "g3rs-deny/extra-deny-bans-inventory",
+  "g3rs-deny/wrappers",
+]
+expected_findings = [
+  "g3rs-deny/multiple-versions-floor",
+  "g3rs-deny/allow-wildcard-paths",
+  "g3rs-deny/wildcards-inventory",
+  "g3rs-deny/tokio-full-ban",
+  "g3rs-deny/duplicate-entries",
+  "g3rs-deny/skip-hygiene",
+  "g3rs-deny/ban-baseline-complete",
+  "g3rs-deny/allow-override-channel",
+  "g3rs-deny/extra-deny-bans-inventory",
+  "g3rs-deny/wrappers",
+]

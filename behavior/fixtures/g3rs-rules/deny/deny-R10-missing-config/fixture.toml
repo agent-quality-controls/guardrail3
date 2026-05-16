@@ -1,0 +1,16 @@
+id = "deny-R10-missing-config"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deny", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "deny"
+target_rules = [
+  "g3rs-deny/coverage",
+]
+expected_findings = [
+  "g3rs-deny/coverage",
+]

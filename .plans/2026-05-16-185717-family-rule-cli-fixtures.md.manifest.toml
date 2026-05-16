@@ -41,6 +41,7 @@ kept_internal_unit_tests = 1
 name = "deny"
 remaining_rule_rows = 41
 fixture_dir = "behavior/fixtures/g3rs-rules/deny"
+status = "completed"
 
 [[family]]
 name = "apparch"
@@ -92,6 +93,21 @@ inventory_only_rules = [
 id = "g3rs-fmt/rustfmt-extra-settings-inventory"
 family = "fmt"
 reason = "The implementation emits Info inventory only for extra rustfmt settings; there is no Error or Warn branch to break through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-deny/extra-feature-bans-inventory"
+family = "deny"
+reason = "The implementation emits Info inventory only for extra cargo-deny feature bans beyond the managed tokio policy; there is no Error or Warn branch to break through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-deny/highlight-inventory"
+family = "deny"
+reason = "The implementation emits Info inventory only when cargo-deny highlight differs from the managed baseline; there is no Error or Warn branch to break through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-deny/stricter-advisories-inventory"
+family = "deny"
+reason = "The implementation emits Info inventory only when advisory policy is stricter than the managed baseline; there is no Error or Warn branch to break through the public CLI."
 
 [[cli_unreachable_rule]]
 id = "g3rs-clippy/policy-context-parseable"
@@ -318,4 +334,83 @@ id = "deps-R21-library-allowlist-missing"
 required_results = [
   "Warn|g3rs-deps/library-allowlist-present|dependency allowlist missing|Cargo.toml",
   "Error|g3rs-deps/direct-dependency-cap|too many direct dependencies|Cargo.toml",
+]
+
+[[fixture]]
+id = "deny-R10-missing-config"
+required_results = [
+  "Error|g3rs-deny/coverage|workspace root uncovered by deny config|-",
+]
+
+[[fixture]]
+id = "deny-R11-shadowing"
+required_results = [
+  "Error|g3rs-deny/shadowing|multiple deny configs at one policy root|.deny.toml",
+]
+
+[[fixture]]
+id = "deny-R20-advisory-graph-violations"
+required_results = [
+  "Warn|g3rs-deny/deprecated-advisories|deprecated advisory field `vulnerability`|deny.toml",
+  "Warn|g3rs-deny/deprecated-advisories|deprecated advisory field `notice`|deny.toml",
+  "Warn|g3rs-deny/deprecated-advisories|deprecated advisory field `unsound`|deny.toml",
+  "Error|g3rs-deny/advisories-baseline|advisories `unmaintained` has wrong value|deny.toml",
+  "Error|g3rs-deny/advisories-baseline|advisories `yanked` has wrong value|deny.toml",
+  "Error|g3rs-deny/graph-all-features|graph all-features must be true|deny.toml",
+  "Error|g3rs-deny/graph-no-default-features|graph no-default-features must be false|deny.toml",
+]
+
+[[fixture]]
+id = "deny-R30-license-violations"
+required_results = [
+  "Error|g3rs-deny/license-allow-baseline|baseline license missing|deny.toml",
+  "Error|g3rs-deny/license-allow-baseline|baseline license missing|deny.toml",
+  "Error|g3rs-deny/license-allow-baseline|unexpected allowed license|deny.toml",
+  "Error|g3rs-deny/license-allow-baseline|licenses.private.ignore must be true|deny.toml",
+  "Warn|g3rs-deny/confidence-threshold|confidence-threshold weaker than baseline|deny.toml",
+  "Warn|g3rs-deny/copyleft-allowlist|copyleft license allowed|deny.toml",
+  "Error|g3rs-deny/license-exceptions-inventory|license exception reason too weak|deny.toml",
+  "Warn|g3rs-deny/license-exceptions-inventory|license exception count|-",
+]
+
+[[fixture]]
+id = "deny-R40-ban-violations"
+required_results = [
+  "Warn|g3rs-deny/multiple-versions-floor|multiple-versions weaker than baseline|deny.toml",
+  "Error|g3rs-deny/allow-wildcard-paths|allow-wildcard-paths must be true|deny.toml",
+  "Warn|g3rs-deny/wildcards-inventory|wildcards differs from baseline|deny.toml",
+  "Warn|g3rs-deny/tokio-full-ban|tokio full feature not banned|deny.toml",
+  "Warn|g3rs-deny/tokio-full-ban|tokio allowed features changed|deny.toml",
+  "Warn|g3rs-deny/duplicate-entries|duplicate deny entry|deny.toml",
+  "Warn|g3rs-deny/duplicate-entries|duplicate skip entry|deny.toml",
+  "Error|g3rs-deny/skip-hygiene|skip entry reason too weak|deny.toml",
+  "Error|g3rs-deny/skip-hygiene|skip entry reason too weak|deny.toml",
+  "Warn|g3rs-deny/skip-hygiene|skip entry count|deny.toml",
+  "Error|g3rs-deny/ban-baseline-complete|missing canonical ban|deny.toml",
+  "Error|g3rs-deny/allow-override-channel|bans allow-list present|deny.toml",
+  "Error|g3rs-deny/allow-override-channel|allow-list overrides deny-list|deny.toml",
+  "Error|g3rs-deny/extra-deny-bans-inventory|deny ban entry malformed|deny.toml",
+  "Warn|g3rs-deny/wrappers|managed ban wrappers changed|deny.toml",
+]
+
+[[fixture]]
+id = "deny-R50-source-ignore-violations"
+required_results = [
+  "Error|g3rs-deny/unknown-sources-policy|sources `unknown-registry` has wrong value|deny.toml",
+  "Error|g3rs-deny/unknown-sources-policy|sources `unknown-git` has wrong value|deny.toml",
+  "Error|g3rs-deny/allow-registry-baseline|canonical registry missing|deny.toml",
+  "Error|g3rs-deny/allow-registry-baseline|unexpected registry allowed|deny.toml",
+  "Warn|g3rs-deny/allow-git-inventory|allow-git is non-empty|deny.toml",
+  "Error|g3rs-deny/allow-git-inventory|allow-git entry must be non-empty|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore must use table form|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Error|g3rs-deny/ignore-hygiene|advisory ignore reason too weak|deny.toml",
+  "Warn|g3rs-deny/ignore-hygiene|advisory ignore count|deny.toml",
+  "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
+  "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
+  "Warn|g3rs-deny/ignore-accumulation|advisory ignore list is large|deny.toml",
 ]

@@ -1,0 +1,22 @@
+id = "deny-R30-license-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deny", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "deny"
+target_rules = [
+  "g3rs-deny/license-allow-baseline",
+  "g3rs-deny/confidence-threshold",
+  "g3rs-deny/copyleft-allowlist",
+  "g3rs-deny/license-exceptions-inventory",
+]
+expected_findings = [
+  "g3rs-deny/license-allow-baseline",
+  "g3rs-deny/confidence-threshold",
+  "g3rs-deny/copyleft-allowlist",
+  "g3rs-deny/license-exceptions-inventory",
+]

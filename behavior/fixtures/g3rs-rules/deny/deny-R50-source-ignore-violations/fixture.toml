@@ -1,0 +1,26 @@
+id = "deny-R50-source-ignore-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deny", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "deny"
+target_rules = [
+  "g3rs-deny/unknown-sources-policy",
+  "g3rs-deny/allow-registry-baseline",
+  "g3rs-deny/allow-git-inventory",
+  "g3rs-deny/ignore-hygiene",
+  "g3rs-deny/unknown-keys",
+  "g3rs-deny/ignore-accumulation",
+]
+expected_findings = [
+  "g3rs-deny/unknown-sources-policy",
+  "g3rs-deny/allow-registry-baseline",
+  "g3rs-deny/allow-git-inventory",
+  "g3rs-deny/ignore-hygiene",
+  "g3rs-deny/unknown-keys",
+  "g3rs-deny/ignore-accumulation",
+]

@@ -63,18 +63,22 @@ cli_unreachable_rules = [
   "g3rs-clippy/policy-context-parseable",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "deny"
 rule_count = 29
-fixture_dir = "behavior/fixtures/g3rs-rules/deny"
-planned_groups = [
-  "deny-R00-clean-golden",
-  "deny-R10-filetree-violations",
-  "deny-R20-advisory-policy-violations",
-  "deny-R30-license-policy-violations",
-  "deny-R40-ban-policy-violations",
-  "deny-R50-source-policy-violations",
-  "deny-R60-inventory-only-policy",
+clean_fixture = "deny-R00-clean-golden"
+broken_fixtures = [
+  "deny-R10-missing-config",
+  "deny-R11-shadowing",
+  "deny-R20-advisory-graph-violations",
+  "deny-R30-license-violations",
+  "deny-R40-ban-violations",
+  "deny-R50-source-ignore-violations",
+]
+inventory_only_rules = [
+  "g3rs-deny/extra-feature-bans-inventory",
+  "g3rs-deny/highlight-inventory",
+  "g3rs-deny/stricter-advisories-inventory",
 ]
 
 [[planned_family]]
