@@ -58,6 +58,9 @@ fixture_dir = "behavior/fixtures/g3rs-rules/release"
 name = "toolchain"
 remaining_rule_rows = 5
 fixture_dir = "behavior/fixtures/g3rs-rules/toolchain"
+status = "completed"
+covered_by_cli_output = 5
+kept_internal_unit_tests = 0
 
 [[family]]
 name = "deps"
@@ -204,4 +207,18 @@ required_results = [
   "Warn|g3rs-fmt/ignore-escape-hatch|rustfmt ignore count|rustfmt.toml",
   "Error|g3rs-fmt/per-crate-override|Illegal nested rustfmt config|crates/member/rustfmt.toml",
   "Warn|g3rs-fmt/dual-file-conflict|Conflicting rustfmt config files|rustfmt.toml",
+]
+
+[[fixture]]
+id = "toolchain-R10-filetree-violations"
+required_results = [
+  "Error|g3rs-toolchain/exists|rust-toolchain.toml missing|rust-toolchain.toml",
+  "Warn|g3rs-toolchain/legacy-file|legacy rust-toolchain file present|rust-toolchain",
+]
+
+[[fixture]]
+id = "toolchain-R20-policy-violations"
+required_results = [
+  "Warn|g3rs-toolchain/channel-and-components|toolchain component `clippy` missing|rust-toolchain.toml",
+  "Error|g3rs-toolchain/msrv-consistency|Cargo rust-version is unparseable|Cargo.toml",
 ]

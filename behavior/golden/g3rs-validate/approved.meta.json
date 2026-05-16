@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-16T19-23-01.158256Z-cfaf3bda",
-  "run_commit": "1ae159775",
+  "run_id": "2026-05-16T19-49-17.857651Z-cfaf3bda",
+  "run_commit": "ae9a98b8f",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T19:23:01.158256Z",
-  "fixture_hash": "sha256:ff06dac5b0eb95c470d036dfdccd8973adb4ce68bc4c795fa2857dd3475f5ecf",
+  "recorded_at": "2026-05-16T19:49:17.857651Z",
+  "fixture_hash": "sha256:90b3f26f13226dc6c9348492e7eee3e62c0c0e65dcf96bc608068f244fe7ea69",
   "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
@@ -181,7 +181,19 @@
     {
       "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R20-policy-violations/fixture.toml",
       "sha256": "sha256:21d159179aa7bc05b943c53ec6583a51a80f33946cf7eeaa8a03b7777db3b8d1"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:a8d37eb150fdaffefb71061b72ece3597b055f30ec5583fe4f9b8df880c7db06"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R10-filetree-violations/fixture.toml",
+      "sha256": "sha256:f0b21409fd27596ed9b7be6a3a9762574b8ad2deba219d075c517b2c68a12e17"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:b49200398dd2758d417c57a48290e8b82f3350f66d827066f5db80f9ebd30c3e"
     }
   ],
-  "comment": "Add fmt family rule fixtures"
+  "comment": "Add toolchain family rule fixtures"
 }

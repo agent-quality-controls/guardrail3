@@ -1,0 +1,22 @@
+id = "toolchain-R20-policy-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "toolchain", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "toolchain"
+target_rules = [
+  "g3rs-toolchain/channel-and-components",
+  "g3rs-toolchain/msrv-consistency",
+]
+intentionally_invalid = [
+  "toolchain_clippy_component_missing",
+  "cargo_rust_version_unparseable",
+]
+expected_findings = [
+  "g3rs-toolchain/channel-and-components",
+  "g3rs-toolchain/msrv-consistency",
+]
