@@ -11,9 +11,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 LEDGER_PATH = REPO_ROOT / "behavior" / "migration" / "g3rs-test-fixture-ledger.toml"
+DISPOSITION_LEDGER_PATH = REPO_ROOT / "behavior" / "migration" / "g3rs-kept-test-disposition.toml"
 GOLDEN_OUTPUTS = (
     REPO_ROOT / "behavior" / "golden" / "g3rs-validate" / "approved.normalized.json",
     REPO_ROOT / "behavior" / "golden" / "g3rs-validate-repo" / "approved.normalized.json",
@@ -21,6 +27,8 @@ GOLDEN_OUTPUTS = (
 CLEAN_FIXTURE = "L80-project-policy-valid-clean"
 HOOK_FIXTURE = "R15-hooks-reachable-no-root-cargo"
 RULE_ID_RE = re.compile(r'g3rs-[a-z]+/[a-z0-9-]+')
+FIXTURE_COVERED_STATUSES = {"covered_hit", "covered_non_hit"}
+DISPOSITION_COVERED = {"covered_by_cli_output", "covered_by_renderer_output"}
 
 
 HIT_KEYWORDS = (
@@ -427,6 +435,7 @@ def main() -> int:
 
 def classify_rows() -> list[dict[str, Any]]:
     tests = load_active_tests()
+    active_keys = {(str(test["test_path"]), str(test["test_name"])) for test in tests}
     rule_ids = load_rule_ids()
     findings = load_findings()
     findings_by_rule: dict[str, list[Finding]] = defaultdict(list)
@@ -444,7 +453,64 @@ def classify_rows() -> list[dict[str, Any]]:
         }
         row.update(classify_test(test, rule_ids, findings_by_rule, findings_by_fixture_rule))
         rows.append(row)
+    rows.extend(existing_deleted_replacement_rows(active_keys))
     return rows
+
+
+def existing_deleted_replacement_rows(active_keys: set[tuple[str, str]]) -> list[dict[str, Any]]:
+    if not LEDGER_PATH.is_file():
+        return []
+    existing_rows = load_toml(LEDGER_PATH).get("test", [])
+    if not isinstance(existing_rows, list):
+        return []
+    disposition_by_key = load_dispositions()
+    preserved: list[dict[str, Any]] = []
+    for row in existing_rows:
+        if not isinstance(row, dict):
+            continue
+        key = row_key(row)
+        if key is None or key in active_keys:
+            continue
+        if row_can_stay_after_test_deletion(row, disposition_by_key.get(key)):
+            preserved.append(row)
+    return preserved
+
+
+def load_toml(path: Path) -> dict[str, Any]:
+    try:
+        with path.open("rb") as file:
+            return tomllib.load(file)
+    except FileNotFoundError:
+        return {}
+
+
+def load_dispositions() -> dict[tuple[str, str], str]:
+    rows = load_toml(DISPOSITION_LEDGER_PATH).get("test", [])
+    output: dict[tuple[str, str], str] = {}
+    if not isinstance(rows, list):
+        return output
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        key = row_key(row)
+        disposition = row.get("disposition")
+        if key is not None and isinstance(disposition, str):
+            output[key] = disposition
+    return output
+
+
+def row_key(row: dict[str, Any]) -> tuple[str, str] | None:
+    test_path = row.get("test_path")
+    test_name = row.get("test_name")
+    if not isinstance(test_path, str) or not isinstance(test_name, str):
+        return None
+    return (test_path, test_name)
+
+
+def row_can_stay_after_test_deletion(row: dict[str, Any], disposition: str | None) -> bool:
+    if row.get("status") in FIXTURE_COVERED_STATUSES:
+        return True
+    return row.get("status") == "kept_compile_contract" and disposition in DISPOSITION_COVERED
 
 
 def load_active_tests() -> list[dict[str, Any]]:
