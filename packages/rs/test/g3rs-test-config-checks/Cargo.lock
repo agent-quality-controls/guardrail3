@@ -51,12 +51,8 @@ dependencies = [
 name = "g3rs-test-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "cargo-toml-parser",
- "g3rs-test-config-checks-assertions",
  "g3rs-test-types",
  "guardrail3-check-types",
- "mutants-toml-parser",
- "nextest-toml-parser",
 ]
 
 [[package]]
@@ -73,6 +69,7 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "serde",
 ]
 
 [[package]]

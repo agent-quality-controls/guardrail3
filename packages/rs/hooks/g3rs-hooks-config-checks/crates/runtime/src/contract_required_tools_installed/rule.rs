@@ -107,23 +107,3 @@ fn add_critical_command_tools(tools: &mut BTreeSet<String>, command: &G3HookCrit
         },
     }
 }
-
-#[cfg(test)]
-fn run_case(
-    content: &str,
-    installed_tools: &[String],
-    requirements: &[G3HookRequirement],
-) -> Vec<G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let selected_hook = G3RsHooksSelectedHookConfigFact {
-        rel_path: ".githooks/pre-commit".to_owned(),
-        parsed,
-    };
-    let mut results = Vec::new();
-    check(&selected_hook, installed_tools, requirements, &mut results);
-    results
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

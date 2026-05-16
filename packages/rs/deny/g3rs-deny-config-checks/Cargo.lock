@@ -67,6 +67,7 @@ version = "0.1.0"
 dependencies = [
  "deny-toml-parser",
  "g3rs-toml-parser",
+ "serde",
 ]
 
 [[package]]

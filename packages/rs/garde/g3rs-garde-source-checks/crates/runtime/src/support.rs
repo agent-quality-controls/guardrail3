@@ -26,21 +26,6 @@ pub(crate) fn error(
     )
 }
 
-#[cfg(test)]
-pub(crate) const fn active_source_input() -> g3rs_garde_types::G3RsGardeSourceChecksInput {
-    g3rs_garde_types::G3RsGardeSourceChecksInput {
-        applicability: g3rs_garde_types::G3RsGardeApplicability::Active,
-        garde_dependency_present: true,
-        rust_policy: g3rs_garde_types::G3RsGardeRustPolicyInput::Missing,
-        input_failures: Vec::new(),
-        struct_targets: Vec::new(),
-        enum_targets: Vec::new(),
-        manual_deserialize_impls: Vec::new(),
-        boundary_fields: Vec::new(),
-        query_as_macros: Vec::new(),
-    }
-}
-
 /// Implements `warn`.
 pub(crate) fn warn(
     id: &str,

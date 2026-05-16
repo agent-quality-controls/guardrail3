@@ -79,7 +79,3 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

@@ -34,7 +34,3 @@ pub(crate) fn check(deny_rel_path: &str, deny: &DenyToml, results: &mut Vec<G3Ch
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

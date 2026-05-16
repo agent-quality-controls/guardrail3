@@ -79,7 +79,6 @@ dependencies = [
  "g3rs-garde-config-checks-assertions",
  "g3rs-garde-types",
  "guardrail3-check-types",
- "toml",
 ]
 
 [[package]]
@@ -95,6 +94,7 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
+ "serde",
 ]
 
 [[package]]

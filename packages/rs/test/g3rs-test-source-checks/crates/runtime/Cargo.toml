@@ -30,6 +30,3 @@ shared = true
 g3rs-test-types = { path = "../../../g3rs-test-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
 guardrail3-reason-policy = { path = "../../../../../shared/reason-policy", version = "0.0.0" }
-
-[dev-dependencies]
-g3rs-test-source-checks-assertions = { path = "../assertions", version = "0.1.0" }

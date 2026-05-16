@@ -35,7 +35,3 @@ pub(crate) fn check(hooks_path: Option<&str>, results: &mut Vec<G3CheckResult>) 
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

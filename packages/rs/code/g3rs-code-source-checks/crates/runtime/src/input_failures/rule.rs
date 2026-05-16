@@ -19,33 +19,3 @@ pub(crate) fn check(input: &CodeInputFailureRuleInput, results: &mut Vec<G3Check
         None,
     ));
 }
-
-#[cfg(test)]
-pub(super) fn check_broken_source(
-    rel_path: &str,
-    content: &str,
-    is_test: bool,
-    is_shared_crate: bool,
-) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = g3rs_code_types::G3RsCodeSourceChecksInput {
-        source_file: g3rs_code_types::G3RsSourceFile {
-            rel_path: rel_path.to_owned(),
-            content: content.to_owned(),
-            is_test,
-            profile_name: None,
-            is_library_root: false,
-        },
-        is_shared_crate,
-        waivers: Vec::new(),
-    };
-    let parse_failure = crate::support::parse_input(&input)
-        .err()
-        .expect("source fixture should report a parse failure");
-    let mut results = Vec::new();
-    check(&parse_failure, &mut results);
-    results
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

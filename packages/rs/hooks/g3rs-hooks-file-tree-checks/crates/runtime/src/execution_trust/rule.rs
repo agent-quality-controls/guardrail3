@@ -32,7 +32,3 @@ pub(crate) fn check(trust_risks: &[String], results: &mut Vec<G3CheckResult>) {
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

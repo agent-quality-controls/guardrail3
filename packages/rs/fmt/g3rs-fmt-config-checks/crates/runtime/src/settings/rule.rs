@@ -72,10 +72,6 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
     );
 }
 
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;
-
 /// Emits the blocker finding describing why the rustfmt config could not be read or parsed.
 /// Returns silently when the rustfmt state is `Parsed` (the caller would have early-returned).
 fn emit_rustfmt_state_blocker(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckResult>) {

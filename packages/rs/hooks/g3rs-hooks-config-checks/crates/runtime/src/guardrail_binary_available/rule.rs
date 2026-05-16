@@ -28,7 +28,3 @@ pub(crate) fn check(
         results,
     );
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

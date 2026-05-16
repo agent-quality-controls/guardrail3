@@ -33,7 +33,3 @@ pub(crate) fn check(local_override_scripts: &[String], results: &mut Vec<G3Check
         .into_inventory(),
     );
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

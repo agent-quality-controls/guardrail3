@@ -17,10 +17,6 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 /// `ID` constant.
 const ID: &str = "g3rs-test/owned-sidecar-shape";
 
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;
-
 /// `SidecarViolation` struct.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct SidecarViolation {

@@ -62,23 +62,3 @@ fn targets_pre_commit_dir(raw: &str) -> bool {
     let normalized = raw.replace(['"', '\''], "");
     normalized.contains("pre-commit.d/") || normalized.ends_with("pre-commit.d")
 }
-
-#[cfg(test)]
-pub(crate) fn run_case(
-    content: &str,
-    has_modular_dir: bool,
-) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let input = DispatcherSyntaxInput {
-        rel_path: ".githooks/pre-commit",
-        has_modular_dir,
-        parsed: &parsed,
-    };
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    crate::compat::finish(results)
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

@@ -69,6 +69,7 @@ name = "g3rs-topology-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
+ "serde",
 ]
 
 [[package]]

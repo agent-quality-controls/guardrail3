@@ -41,7 +41,3 @@ pub(crate) fn check_unverifiable(
         clippy_rel_path,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

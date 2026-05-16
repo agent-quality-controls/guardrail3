@@ -1,0 +1,88 @@
+[gate]
+fixture_rows = 1577
+initial_active_tests = 1530
+initial_active_replaceable_tests = 790
+final_active_tests = 740
+final_replaceable_rows = 837
+final_kept_rows = 740
+candidate_files = 346
+
+[[batch]]
+workspace = "packages/rs/code/g3rs-code-source-checks"
+tests = 173
+
+[[batch]]
+workspace = "packages/rs/deny/g3rs-deny-config-checks"
+tests = 130
+
+[[batch]]
+workspace = "packages/rs/hooks/g3rs-hooks-source-checks"
+tests = 109
+
+[[batch]]
+workspace = "packages/rs/test/g3rs-test-file-tree-checks"
+tests = 60
+
+[[batch]]
+workspace = "packages/rs/test/g3rs-test-source-checks"
+tests = 55
+
+[[batch]]
+workspace = "packages/rs/release/g3rs-release-config-checks"
+tests = 35
+
+[[batch]]
+workspace = "packages/rs/fmt/g3rs-fmt-config-checks"
+tests = 27
+
+[[batch]]
+workspace = "packages/rs/topology/g3rs-topology-file-tree-checks"
+tests = 27
+
+[[batch]]
+workspace = "packages/rs/clippy/g3rs-clippy-config-checks"
+tests = 25
+
+[[batch]]
+workspace = "packages/rs/deps/g3rs-deps-config-checks"
+tests = 24
+
+[[batch]]
+workspace = "packages/rs/garde/g3rs-garde-source-checks"
+tests = 23
+
+[[batch]]
+workspace = "packages/rs/hooks/g3rs-hooks-config-checks"
+tests = 21
+
+[[batch]]
+workspace = "packages/rs/hooks/g3rs-hooks-file-tree-checks"
+tests = 19
+
+[[batch]]
+workspace = "packages/rs/toolchain/g3rs-toolchain-config-checks"
+tests = 17
+
+[[batch]]
+workspace = "packages/rs/test/g3rs-test-config-checks"
+tests = 13
+
+[[batch]]
+workspace = "packages/rs/garde/g3rs-garde-config-checks"
+tests = 10
+
+[[batch]]
+workspace = "packages/rs/fmt/g3rs-fmt-filetree-checks"
+tests = 7
+
+[[batch]]
+workspace = "packages/rs/release/g3rs-release-repo-root-checks"
+tests = 6
+
+[[batch]]
+workspace = "packages/rs/code/g3rs-code-config-checks"
+tests = 5
+
+[[batch]]
+workspace = "packages/rs/clippy/g3rs-clippy-filetree-checks"
+tests = 4

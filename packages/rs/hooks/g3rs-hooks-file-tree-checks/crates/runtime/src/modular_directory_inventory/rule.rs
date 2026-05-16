@@ -31,7 +31,3 @@ pub(crate) fn check(has_modular_dir: bool, results: &mut Vec<G3CheckResult>) {
         .into_inventory(),
     );
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

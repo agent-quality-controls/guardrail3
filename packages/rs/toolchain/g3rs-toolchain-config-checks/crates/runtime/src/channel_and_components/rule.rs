@@ -242,7 +242,3 @@ fn check_components(toolchain: &ToolchainSection, rel: &str, results: &mut Vec<G
         }
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

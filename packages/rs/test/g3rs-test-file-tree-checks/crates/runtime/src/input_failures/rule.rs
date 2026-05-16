@@ -3,10 +3,6 @@ use guardrail3_check_types::{G3CheckResult, G3Severity};
 /// `ID` constant.
 const ID: &str = "g3rs-test/filetree-input-failures";
 
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;
-
 /// `check` function.
 pub(crate) fn check(
     _root_rel_dir: &str,
