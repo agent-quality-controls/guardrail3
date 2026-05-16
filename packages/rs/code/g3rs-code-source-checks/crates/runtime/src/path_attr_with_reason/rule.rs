@@ -97,31 +97,3 @@ fn is_exact_owned_test_sidecar(rel_path: &str, module_name: &str, path_value: &s
     let expected_module_name = format!("{stem}_tests");
     module_name == expected_module_name && path_value == format!("{expected_module_name}/mod.rs")
 }
-
-#[cfg(test)]
-pub(super) fn check_source(
-    rel_path: &str,
-    content: &str,
-    is_test: bool,
-) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let source = crate::parse::parse_rust_file(content)
-        .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
-    let parsed = crate::support::G3RsCodeSourceFileAst {
-        source_file: g3rs_code_types::G3RsSourceFile {
-            rel_path: rel_path.to_owned(),
-            content: content.to_owned(),
-            is_test,
-            profile_name: None,
-            is_library_root: false,
-        },
-        source,
-    };
-    let input = crate::support::CodeSourceRuleInput::from(&parsed);
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    results
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

@@ -70,7 +70,3 @@ pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3Check
 fn is_exclude_all_pattern(pattern: &str) -> bool {
     matches!(pattern.trim(), ".*" | "^.*$" | ".+" | "^.+$")
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

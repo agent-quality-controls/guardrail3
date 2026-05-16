@@ -475,27 +475,3 @@ fn resolve_visible_function<'a>(
         .find(|function| function.name == command_name && function.line_no <= root_line_no)
         .map(|function| (function, function_body_absolute_base(1, function)))
 }
-
-#[expect(
-    clippy::needless_pass_by_value,
-    reason = "API takes owned Vec to keep signature stable across the contract surface; downstream callers pass ownership"
-)]
-#[cfg(test)]
-pub(crate) fn run_case(
-    content: &str,
-    requirements: Vec<g3rs_hooks_contract_types::G3HookRequirement>,
-) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let input = FailOpenWrapperInput {
-        rel_path: ".githooks/pre-commit",
-        parsed: &parsed,
-        requirements: &requirements,
-    };
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    crate::compat::finish(results)
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

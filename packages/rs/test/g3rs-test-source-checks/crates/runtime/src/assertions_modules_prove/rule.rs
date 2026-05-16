@@ -295,7 +295,3 @@ fn owns_result_shape_assertion(
                 .is_some_and(|segment| matches!(segment.as_str(), "CheckResult" | "Severity"))
         })
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

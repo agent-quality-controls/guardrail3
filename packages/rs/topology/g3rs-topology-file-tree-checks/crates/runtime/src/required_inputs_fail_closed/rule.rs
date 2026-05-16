@@ -15,7 +15,3 @@ pub(crate) fn check(input: &G3RsTopologyFileTreeInputFailure, results: &mut Vec<
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

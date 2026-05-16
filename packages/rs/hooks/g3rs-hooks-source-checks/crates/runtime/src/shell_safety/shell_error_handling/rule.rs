@@ -111,20 +111,3 @@ fn short_option_cluster(token: &str) -> Option<(bool, &str)> {
         _ => None,
     }
 }
-
-#[cfg(test)]
-pub(crate) fn run_case(content: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let parsed = hook_shell_parser::parse_script(content);
-    let input = ExecutableCommandContextInput {
-        rel_path: ".githooks/pre-commit",
-        kind: crate::facts::HookScriptKind::PreCommit,
-        parsed: &parsed,
-    };
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    crate::compat::finish(results)
-}
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

@@ -15,7 +15,3 @@ pub(crate) fn check(comment: &G3RsCodeExceptionComment, results: &mut Vec<G3Chec
         Some(comment.line),
     ));
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

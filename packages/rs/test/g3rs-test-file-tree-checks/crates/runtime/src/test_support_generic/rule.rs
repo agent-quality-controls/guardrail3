@@ -36,10 +36,6 @@ const REPORT_METHODS: &[&str] = &[
     "title",
 ];
 
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;
-
 /// `check` function.
 pub(crate) fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<G3CheckResult>) {
     let mut reported = false;

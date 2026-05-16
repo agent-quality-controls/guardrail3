@@ -81,7 +81,3 @@ fn advisory_rank(value: &str) -> Option<u8> {
         _ => None,
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

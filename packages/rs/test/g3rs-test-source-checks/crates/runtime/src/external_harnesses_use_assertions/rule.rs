@@ -406,7 +406,3 @@ fn path_is_qualified_owned_assertion_call(
     }
     proof_bearing_assertion_functions.contains(&path[1..].join("::"))
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

@@ -158,7 +158,6 @@ dependencies = [
 name = "g3rs-test-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-test-source-checks-assertions",
  "g3rs-test-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -178,6 +177,7 @@ dependencies = [
  "cargo-toml-parser",
  "mutants-toml-parser",
  "nextest-toml-parser",
+ "serde",
 ]
 
 [[package]]
@@ -239,6 +239,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "ignore"

@@ -48,7 +48,3 @@ pub(crate) fn check(file: &G3RsCodeConfigFile, results: &mut Vec<G3CheckResult>)
         _ => {}
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

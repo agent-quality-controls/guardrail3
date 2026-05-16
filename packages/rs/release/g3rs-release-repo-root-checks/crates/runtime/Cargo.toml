@@ -31,5 +31,4 @@ g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
 [dev-dependencies]
-cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-release-repo-root-checks-assertions = { path = "../assertions" }

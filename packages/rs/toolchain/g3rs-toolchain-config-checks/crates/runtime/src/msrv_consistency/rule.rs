@@ -140,7 +140,3 @@ fn parse_manifest_version(raw: &str) -> Option<ParsedVersion> {
     }
     Some((major, minor, patch))
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;

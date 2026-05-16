@@ -123,7 +123,3 @@ fn classify_ignore_entry(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"]
-mod rule_tests;

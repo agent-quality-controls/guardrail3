@@ -101,28 +101,3 @@ pub(crate) fn check(
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "rule_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rule_tests;
-
-#[cfg(test)]
-pub(crate) fn run_check(cliff_toml: &str) -> Vec<guardrail3_check_types::G3CheckResult> {
-    let input = crate::test_support::config_input_for_repo(None, Some(cliff_toml));
-    let mut results = Vec::new();
-    crate::cliff_baseline::check(
-        input
-            .repos
-            .first()
-            .expect("test fixture must include a repo"),
-        &input.crates,
-        &mut results,
-    );
-    results
-}
-
-#[cfg(test)]
-pub(crate) const GOLDEN: &str = include_str!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/src/fixtures/golden_cliff.toml"
-));
