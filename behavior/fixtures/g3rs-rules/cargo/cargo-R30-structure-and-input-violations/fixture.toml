@@ -1,0 +1,25 @@
+id = "cargo-R30-structure-and-input-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_structure_and_input_invalid"
+
+rule_family = "cargo"
+target_rules = [
+  "g3rs-cargo/workspace-lints",
+  "g3rs-cargo/missing-member-cargo",
+  "g3rs-cargo/input-failures",
+]
+intentionally_invalid = [
+  "cargo_workspace_rust_lints_missing",
+  "cargo_declared_member_missing_cargo_toml",
+  "cargo_declared_member_cargo_toml_malformed",
+]
+expected_findings = [
+  "g3rs-cargo/workspace-lints",
+  "g3rs-cargo/missing-member-cargo",
+  "g3rs-cargo/input-failures",
+]

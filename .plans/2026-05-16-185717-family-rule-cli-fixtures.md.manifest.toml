@@ -161,3 +161,11 @@ required_results = [
   "Error|g3rs-cargo/resolver|workspace resolver missing|Cargo.toml",
   "Error|g3rs-cargo/rust-version-policy|library rust-version missing|Cargo.toml",
 ]
+
+[[fixture]]
+id = "cargo-R30-structure-and-input-violations"
+required_results = [
+  "Error|g3rs-cargo/workspace-lints|rust lint table missing|Cargo.toml",
+  "Warn|g3rs-cargo/missing-member-cargo|declared workspace member missing Cargo.toml|Cargo.toml",
+  "Error|g3rs-cargo/input-failures|failed to read Cargo configuration|crates/bad_parse/Cargo.toml",
+]
