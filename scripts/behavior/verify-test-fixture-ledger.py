@@ -17,6 +17,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_LEDGER_PATH = REPO_ROOT / "behavior" / "migration" / "g3rs-test-fixture-ledger.toml"
+DEFAULT_DISPOSITION_LEDGER = REPO_ROOT / "behavior" / "migration" / "g3rs-kept-test-disposition.toml"
 DEFAULT_FIXTURE_MANIFESTS = (
     REPO_ROOT / ".plans" / "2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml",
     REPO_ROOT / ".plans" / "2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml",
@@ -35,6 +36,7 @@ ALLOWED_STATUSES = {
     "unclassified",
 }
 FINDING_STATUSES = {"covered_hit", "covered_non_hit"}
+DISPOSITION_COVERED = {"covered_by_cli_output", "covered_by_renderer_output"}
 
 
 def main() -> int:
@@ -83,7 +85,9 @@ def verify(ledger_path: Path, strict: bool) -> list[str]:
 
     fixture_ids = load_fixture_ids()
     findings_by_fixture = load_findings_by_fixture()
+    disposition_by_key = load_dispositions()
     row_keys: list[tuple[str, str]] = []
+    rows_by_key: dict[tuple[str, str], dict[str, Any]] = {}
     unclassified = 0
 
     for index, row in enumerate(rows):
@@ -100,6 +104,7 @@ def verify(ledger_path: Path, strict: bool) -> list[str]:
             failures.append(f"{test_path}: test_name must be a non-empty string")
             continue
         row_keys.append((test_path, test_name))
+        rows_by_key[(test_path, test_name)] = row
         if Path(test_path).is_absolute() or ".." in Path(test_path).parts:
             failures.append(f"{test_path}::{test_name}: test_path must be repo-relative")
         if status not in ALLOWED_STATUSES:
@@ -122,12 +127,39 @@ def verify(ledger_path: Path, strict: bool) -> list[str]:
     for test_path, test_name in sorted(active_tests - row_key_set):
         failures.append(f"{test_path}::{test_name}: active test missing from ledger")
     for test_path, test_name in sorted(row_key_set - active_tests):
-        failures.append(f"{test_path}::{test_name}: ledger row has no active test")
+        row = rows_by_key[(test_path, test_name)]
+        if not row_can_stay_after_test_deletion(row, disposition_by_key.get((test_path, test_name))):
+            failures.append(f"{test_path}::{test_name}: ledger row has no active test")
 
     if strict and unclassified:
         failures.append(f"strict mode forbids unclassified rows: {unclassified}")
 
     return failures
+
+
+def load_dispositions() -> dict[tuple[str, str], str]:
+    if not DEFAULT_DISPOSITION_LEDGER.is_file():
+        return {}
+    ledger = load_toml(DEFAULT_DISPOSITION_LEDGER)
+    rows = ledger.get("test", [])
+    if not isinstance(rows, list):
+        return {}
+    output: dict[tuple[str, str], str] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        test_path = row.get("test_path")
+        test_name = row.get("test_name")
+        disposition = row.get("disposition")
+        if isinstance(test_path, str) and isinstance(test_name, str) and isinstance(disposition, str):
+            output[(test_path, test_name)] = disposition
+    return output
+
+
+def row_can_stay_after_test_deletion(row: dict[str, Any], disposition: str | None) -> bool:
+    if row.get("status") in FINDING_STATUSES:
+        return True
+    return row.get("status") == "kept_compile_contract" and disposition in DISPOSITION_COVERED
 
 
 def active_test_keys() -> set[tuple[str, str]]:

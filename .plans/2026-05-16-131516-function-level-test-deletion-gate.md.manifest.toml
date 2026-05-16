@@ -1,0 +1,67 @@
+[gate]
+name = "function-level-test-deletion"
+verifier = "scripts/behavior/verify-test-deletion.py"
+classifier = "scripts/behavior/classify-test-fixture-ledger.py"
+fixture_ledger_verifier = "scripts/behavior/verify-test-fixture-ledger.py"
+fixture_ledger = "behavior/migration/g3rs-test-fixture-ledger.toml"
+disposition_ledger = "behavior/migration/g3rs-kept-test-disposition.toml"
+active_test_inventory = "scripts/behavior/list-rust-tests.py --format json"
+expected_rows = 1577
+
+[[deletion_rule]]
+status = "covered_hit"
+missing_test_allowed = true
+proof = "fixture ledger row contains fixture-backed hit behavior"
+
+[[deletion_rule]]
+status = "covered_non_hit"
+missing_test_allowed = true
+proof = "fixture ledger row contains fixture-backed non-hit behavior"
+
+[[deletion_rule]]
+status = "kept_compile_contract"
+missing_test_allowed = true
+required_dispositions = ["covered_by_cli_output", "covered_by_renderer_output"]
+proof = "kept disposition names a fixture3 output suite"
+
+[[deletion_rule]]
+status = "kept_compile_contract"
+missing_test_allowed = false
+required_dispositions = [
+  "keep_public_api_contract",
+  "needs_family_runner_output",
+  "needs_rule_fixture_or_golden_output",
+  "needs_serialized_ingestion_output",
+  "needs_validate_command_output",
+]
+proof = "behavior is not yet fixture-replaced"
+
+[[deletion_rule]]
+status = "kept_replay_system"
+missing_test_allowed = false
+proof = "replay-system tests are not product guardrail behavior fixtures"
+
+[[deletion_rule]]
+status = "not_cli_visible"
+missing_test_allowed = false
+proof = "not-cli-visible is not fixture replacement proof"
+
+[[deletion_rule]]
+status = "unclassified"
+missing_test_allowed = false
+proof = "unclassified rows cannot be deleted"
+
+[[verification]]
+command = "python3 -m py_compile scripts/behavior/verify-test-deletion.py scripts/behavior/verify-test-fixture-ledger.py scripts/behavior/classify-test-fixture-ledger.py"
+
+[[verification]]
+command = "python3 scripts/behavior/classify-test-fixture-ledger.py --check"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-fixture-ledger.py --strict"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-deletion.py"
+
+[[verification]]
+command = "bash scripts/behavior/verify-all.sh"
