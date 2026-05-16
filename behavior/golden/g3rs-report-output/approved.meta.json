@@ -1,14 +1,13 @@
 {
   "suite": "g3rs-report-output",
   "kind": "approved",
-  "run_id": "2026-05-15T21-31-11.147912Z-b29dbf2b",
-  "run_commit": "925b1dffc",
+  "run_id": "2026-05-16T18-42-39.625662Z-cfaf3bda",
+  "run_commit": "96fbc9e36",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-15T21:31:11.147912Z",
+  "recorded_at": "2026-05-16T18:42:39.625662Z",
   "fixture_hash": "sha256:0be691abe14b090095b0063490560e3e34dde7e2e972016750fb433f8e598a25",
-  "manifest_hash": "sha256:73618eb9c68bd6ed4e56112c868935983c78c11494a7ef0e513c778710498107",
-  "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
-  "tool_version": "0.1.6",
+  "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
+  "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -28,5 +27,5 @@
       "sha256": "sha256:e7b48c58db89e0cd95f9741620c0abf4d6a89cfa3e771fdaa6e0a360d872212a"
     }
   ],
-  "change_path": ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md"
+  "comment": "Refresh fixture3 manifest metadata"
 }

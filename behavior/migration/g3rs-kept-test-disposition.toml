@@ -1041,295 +1041,295 @@ reason = "family run behavior needs runner-level output for dispatch, aggregatio
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "errors_when_approved_allow_reason_is_too_weak"
 line = 77
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "inventories_documented_approved_allow_entries"
 line = 5
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "inventories_hybrid_root_package_approved_allow_entries"
 line = 41
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_is_unreadable"
 line = 145
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy unreadable is an ingestion-state branch, not distinguishable through family-rule CLI output without replacing the user-facing config error"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_parse_error_blocks_waiver_resolution"
 line = 125
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy parse error is an ingestion-state branch, not a cargo rule finding through the CLI"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/approved_allow_inventory_tests/cases.rs"
 test_name = "stays_quiet_when_clippy_table_shape_is_invalid"
 line = 105
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "wrong-type Cargo lint tables fail before this rule can produce a cargo rule finding through the CLI"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "errors_when_member_edition_is_invalid"
 line = 65
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "errors_when_member_edition_is_unrecognized"
 line = 96
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "inventories_when_member_inherits_workspace_edition"
 line = 35
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "stays_quiet_when_workspace_edition_shape_is_invalid_even_if_package_has_valid_fallback"
 line = 155
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "wrong-type workspace edition fails Cargo TOML parsing before member edition drift can produce a CLI finding"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "stays_quiet_when_workspace_has_no_edition_policy"
 line = 127
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "non-hit member edition drift behavior is internal unless the CLI exposes absent-findings assertions"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_edition_drift_tests/cases.rs"
 test_name = "warns_when_member_edition_is_older_than_workspace"
 line = 4
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "errors_on_documented_member_local_allow_entries"
 line = 41
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "errors_on_member_local_allow_entries"
 line = 4
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "errors_when_member_local_allow_reason_is_too_weak"
 line = 123
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "inventories_when_member_has_no_local_allow_entries"
 line = 86
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_is_unreadable"
 line = 271
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy unreadable is an ingestion-state branch, not distinguishable through family-rule CLI output without replacing the user-facing config error"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_parse_error_blocks_member_reason_resolution"
 line = 234
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy parse error is an ingestion-state branch, not a cargo rule finding through the CLI"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "stays_quiet_when_member_override_shape_is_invalid"
 line = 168
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "member-local allow classification intentionally stands down behind no-weakened-overrides on malformed member lint tables"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/member_local_allows_forbidden_tests/cases.rs"
 test_name = "stays_quiet_when_workspace_policy_is_incomplete"
 line = 203
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "workspace-policy-incomplete non-hit behavior is internal unless the CLI exposes absent-findings assertions"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/no_weakened_overrides_tests/cases.rs"
 test_name = "errors_when_member_lint_table_shape_is_invalid"
 line = 75
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/no_weakened_overrides_tests/cases.rs"
 test_name = "errors_when_member_weakens_forbid_to_deny"
 line = 112
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/no_weakened_overrides_tests/cases.rs"
 test_name = "errors_when_member_weakens_workspace_lints"
 line = 4
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/no_weakened_overrides_tests/cases.rs"
 test_name = "inventories_when_member_does_not_weaken_workspace_lints"
 line = 38
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/no_weakened_overrides_tests/cases.rs"
 test_name = "stays_quiet_when_workspace_policy_is_incomplete"
 line = 149
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "workspace-policy-incomplete non-hit behavior is internal unless the CLI exposes absent-findings assertions"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "errors_when_library_profile_has_no_rust_version"
 line = 5
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R21-root-metadata-missing"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "errors_when_rust_version_shape_is_invalid"
 line = 40
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "wrong-type rust-version fails Cargo TOML parsing before rust-version-policy can produce a CLI finding"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "errors_when_workspace_root_rust_version_shape_is_invalid"
 line = 95
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "wrong-type workspace rust-version fails Cargo TOML parsing before rust-version-policy can produce a CLI finding"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "inventories_when_library_profile_declares_rust_version"
 line = 22
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "inventories_when_non_library_omits_rust_version"
 line = 58
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "service-profile non-hit behavior needs a second clean profile fixture, which is not part of the one-golden-per-family corpus"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/rust_version_policy_tests/cases.rs"
 test_name = "inventories_when_workspace_root_library_declares_rust_version"
 line = 75
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "errors_on_documented_unapproved_allow_entries"
 line = 55
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "errors_on_hybrid_root_package_allow_entries"
 line = 24
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "errors_on_unapproved_allow_entries"
 line = 4
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "errors_when_unapproved_allow_reason_is_too_weak"
 line = 106
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "inventories_when_no_unapproved_allow_entries_exist"
 line = 83
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_is_unreadable"
 line = 174
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy unreadable is an ingestion-state branch, not distinguishable through family-rule CLI output without replacing the user-facing config error"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "stands_down_when_rust_policy_parse_error_blocks_reason_resolution"
 line = 154
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy parse error is an ingestion-state branch, not a cargo rule finding through the CLI"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/unapproved_allow_entries_tests/cases.rs"
 test_name = "stays_quiet_when_rust_policy_parse_error_suppresses_clean_inventory"
 line = 134
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "rust policy parse error is an ingestion-state branch, not a cargo rule finding through the CLI"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints_inherited_tests/cases.rs"
 test_name = "errors_when_member_does_not_inherit_workspace_lints"
 line = 4
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints_inherited_tests/cases.rs"
 test_name = "errors_when_workspace_lint_inheritance_shape_is_invalid"
 line = 41
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R10-policy-violations"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-config-checks/crates/runtime/src/workspace_lints_inherited_tests/cases.rs"
 test_name = "inventories_when_member_inherits_workspace_lints"
 line = 21
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture cargo-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/cargo/g3rs-cargo-filetree-checks/crates/runtime/src/run_tests/cases.rs"

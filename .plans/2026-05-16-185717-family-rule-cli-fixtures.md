@@ -239,6 +239,10 @@ The verifier must:
 
 This verifier does not decide whether a fixture's contents are minimal. It verifies declared coverage.
 
+During incremental migration, the verifier must fail on malformed family-rule fixture metadata and unknown rule IDs for every fixture that exists. It must not fail just because an unimplemented family has no `g3rs-rules/<family>` folder yet.
+
+For test-disposition coverage, the verifier must only require rows for families listed as completed in the manifest. A family is completed only after its fixture set covers all CLI-exposable rows for that family and non-CLI-exposable rows have been reclassified to `keep_internal_unit_test`.
+
 ## Ledger Update Rule
 
 When a family-rule fixture proves a row:
@@ -257,6 +261,12 @@ Use this order:
    - 42 rows
    - highest count
    - mostly config-policy findings
+   - implemented with 3 fixtures:
+     - `cargo-R00-clean-golden`
+     - `cargo-R10-policy-violations`
+     - `cargo-R21-root-metadata-missing`
+   - 26 rows are covered by CLI output
+   - 16 rows stay as internal unit tests because the CLI cannot expose them as cargo-rule findings without first failing Cargo TOML or guardrail config ingestion
 2. `clippy`
    - 43 rows
    - validates dense config fixtures and file-tree fixture edge cases
