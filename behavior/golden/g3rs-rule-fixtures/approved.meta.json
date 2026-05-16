@@ -1,0 +1,99 @@
+{
+  "suite": "g3rs-rule-fixtures",
+  "kind": "approved",
+  "run_id": "2026-05-16T20-52-57.805196Z-078cb096",
+  "run_commit": "5a07e8a51",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-16T20:52:57.805196Z",
+  "fixture_hash": "sha256:bb935fb5232d0ee8a0c9132b259dacc0ba1c13dbde564b9b367f9465dd3bdea1",
+  "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
+  "tool_version": "0.1.7",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:5f073788afc869f22e9704829f9c311f82bdf8f7e0c69acbcf73eef5b62e344c"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R10-policy-violations/fixture.toml",
+      "sha256": "sha256:00f95cae96f1a47513d9057cb8c78a642b7741e6c3ab1ccc2eb7fbb9772f0501"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R21-root-metadata-missing/fixture.toml",
+      "sha256": "sha256:3f0f89c580b0058c16827abd7dcc49fdc1ad569661f8e25ae6baa4c18b91c362"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R30-structure-and-input-violations/fixture.toml",
+      "sha256": "sha256:3c4515db4ab174dd9ccfa01ef8ce1665760c715edeb8df03820466aa50667d9d"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:900ba9970dff224d502ae0d96f8d4e977cde4c48496e8311b1cc32ac88bbddad"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R10-config-missing/fixture.toml",
+      "sha256": "sha256:7b35f458e01805999aa1b0b9cc6846bbab394b5c548334a4945cae30fcff7715"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R11-config-conflict-and-parse-failures/fixture.toml",
+      "sha256": "sha256:77f1cc2c8536271e6872b4ec964d40b0f73e36c5b043377a69bfcffc3ccaea58"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:c0be13abc6b2ab1a053e971dd637bd70e1f69f9c757f8aacaff7b66649c0f4d9"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R21-threshold-and-setting-violations/fixture.toml",
+      "sha256": "sha256:97c004c6352f26ba35b0a4ba6af8254343ca3453f24c0ee21065cadc6386570a"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R22-malformed-ban-sections/fixture.toml",
+      "sha256": "sha256:ae32f4b6b2e76f41b27c46df72c0d4cfa93a2f8199d38044ace0df9ca0df6844"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/clippy/clippy-R23-unknown-key/fixture.toml",
+      "sha256": "sha256:1eee004d1163b221bda4bd8098a3087a5a8ec3cf04528cf47f3f3777cd76509f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deps/deps-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:502bf93d179c251468a07b8cc0697c8f6b9e8e05eb03fd8f2be4fdd9405af7a7"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deps/deps-R10-required-files-and-tools/fixture.toml",
+      "sha256": "sha256:df6a13630a0705b9eb8254a88097c67eae68d26bb5cd26b62deba2d60e4cc29d"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deps/deps-R20-allowlist-and-count-violations/fixture.toml",
+      "sha256": "sha256:086e4cea8a7cfe7152410d3cec61eeecc538fe86b8667fb5acaea5615c903bb8"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deps/deps-R21-library-allowlist-missing/fixture.toml",
+      "sha256": "sha256:c57746f054de1296eb4f36f3736cb4d1ec8e94f6252b333301efce8578f597db"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:adebb10f0071bee476e2bdfc9a9938499c8d7d173e673ac47c3d30cc4c241e0b"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R10-filetree-violations/fixture.toml",
+      "sha256": "sha256:058fe02d249d53966ab09c5c91f0094095d964628cfcfca0fc46fe1d35ce9f96"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:21d159179aa7bc05b943c53ec6583a51a80f33946cf7eeaa8a03b7777db3b8d1"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:a8d37eb150fdaffefb71061b72ece3597b055f30ec5583fe4f9b8df880c7db06"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R10-filetree-violations/fixture.toml",
+      "sha256": "sha256:f0b21409fd27596ed9b7be6a3a9762574b8ad2deba219d075c517b2c68a12e17"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:b49200398dd2758d417c57a48290e8b82f3350f66d827066f5db80f9ebd30c3e"
+    }
+  ],
+  "comment": "Add clippy family rule fixtures"
+}

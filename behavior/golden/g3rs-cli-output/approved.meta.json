@@ -1,12 +1,12 @@
 {
   "suite": "g3rs-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-16T18-42-30.492399Z-cfaf3bda",
-  "run_commit": "96fbc9e36",
+  "run_id": "2026-05-16T20-59-24.515124Z-078cb096",
+  "run_commit": "5a07e8a51",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T18:42:30.492399Z",
+  "recorded_at": "2026-05-16T20:59:24.515124Z",
   "fixture_hash": "sha256:3b747845ecd4c6e9fb1bdec8bd154c36c9e85719e2aa9696d66882e10247e278",
-  "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
+  "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
@@ -39,5 +39,5 @@
       "sha256": "sha256:aba14c1fadb6e36ec638b879f0d61fe8be442e24a3c1f7b88a7fb5b28c0d3b22"
     }
   ],
-  "comment": "Refresh fixture3 manifest metadata"
+  "comment": "Refresh fixture manifest metadata after suite split"
 }

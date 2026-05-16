@@ -1,6 +1,6 @@
 [target]
 fixture_root = "behavior/fixtures/g3rs-rules"
-suite = "g3rs-validate"
+suite = "g3rs-rule-fixtures"
 verifier = "scripts/behavior/verify-family-rule-fixtures.py"
 strategy = "replace_broad_composite_rule_fixtures"
 coverage_mode = "incremental"
@@ -33,6 +33,9 @@ kept_internal_unit_tests = 16
 name = "clippy"
 remaining_rule_rows = 43
 fixture_dir = "behavior/fixtures/g3rs-rules/clippy"
+status = "completed"
+covered_by_cli_output = 42
+kept_internal_unit_tests = 1
 
 [[family]]
 name = "deny"
@@ -90,6 +93,11 @@ id = "g3rs-fmt/rustfmt-extra-settings-inventory"
 family = "fmt"
 reason = "The implementation emits Info inventory only for extra rustfmt settings; there is no Error or Warn branch to break through the public CLI."
 
+[[cli_unreachable_rule]]
+id = "g3rs-clippy/policy-context-parseable"
+family = "clippy"
+reason = "The Error branch requires invalid guardrail3-rs.toml, but the public CLI rejects invalid guardrail config before the clippy family runs. The clean fixture still inventories the parseable policy context."
+
 [[required_fixture_field]]
 name = "rule_family"
 
@@ -123,7 +131,7 @@ kind = "serialized_ingestion_suite"
 suite_name_pattern = "g3rs-*-ingestion"
 
 [[verification]]
-command = "fixture3 check --suite g3rs-validate"
+command = "fixture3 check --suite g3rs-rule-fixtures"
 
 [[verification]]
 command = "python3 scripts/behavior/verify-family-rule-fixtures.py"
@@ -235,6 +243,66 @@ required_results = [
   "Error|g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
   "Error|g3rs-deps/cargo-lock-present|Cargo.lock missing|Cargo.lock",
   "Error|g3rs-deps/gitignore-not-ignoring-cargo-lock|Cargo.lock ignored in gitignore|.gitignore",
+]
+
+[[fixture]]
+id = "clippy-R10-config-missing"
+required_results = [
+  "Error|g3rs-clippy/coverage-exists|workspace root uncovered by clippy config|clippy.toml",
+]
+
+[[fixture]]
+id = "clippy-R11-config-conflict-and-parse-failures"
+required_results = [
+  "Warn|g3rs-clippy/same-root-conflict|Shadowed clippy config|clippy.toml",
+  "Error|g3rs-clippy/config-parseable|clippy.toml parse error|.clippy.toml",
+  "Error|g3rs-clippy/forbid-clippy-conf-dir-override|CLIPPY_CONF_DIR override forbidden|.cargo/config.toml",
+]
+
+[[fixture]]
+id = "clippy-R20-policy-violations"
+required_results = [
+  "Warn|g3rs-clippy/avoid-breaking-exported-api|avoid-breaking-exported-api enabled|.clippy.toml",
+  "Error|g3rs-clippy/ban-reason-quality|ban entry missing reason|.clippy.toml",
+  "Warn|g3rs-clippy/duplicate-bans|duplicate ban entry|.clippy.toml",
+  "Error|g3rs-clippy/library-global-state|library clippy.toml missing global-state type ban|.clippy.toml",
+  "Error|g3rs-clippy/macro-bans|missing macro ban|.clippy.toml",
+  "Error|g3rs-clippy/missing-method-ban|missing method ban|.clippy.toml",
+  "Error|g3rs-clippy/missing-type-ban|missing type ban|.clippy.toml",
+  "Warn|g3rs-clippy/unknown-keys|unrecognized clippy.toml key|.clippy.toml",
+]
+
+[[fixture]]
+id = "clippy-R21-threshold-and-setting-violations"
+required_results = [
+  "Error|g3rs-clippy/type-complexity-threshold|type-complexity-threshold wrong value|.clippy.toml",
+  "Error|g3rs-clippy/max-fn-params-bools|max-fn-params-bools wrong value|.clippy.toml",
+  "Error|g3rs-clippy/cognitive-complexity-threshold|cognitive-complexity-threshold wrong value|.clippy.toml",
+  "Error|g3rs-clippy/excessive-nesting-threshold|excessive-nesting-threshold wrong value|.clippy.toml",
+  "Error|g3rs-clippy/test-relaxations|clippy test relaxation policy mismatch|.clippy.toml",
+  "Error|g3rs-clippy/too-many-arguments-threshold|too-many-arguments-threshold wrong value|.clippy.toml",
+  "Warn|g3rs-clippy/avoid-breaking-exported-api|avoid-breaking-exported-api enabled|.clippy.toml",
+  "Error|g3rs-clippy/max-struct-bools|max-struct-bools wrong value|.clippy.toml",
+  "Error|g3rs-clippy/too-many-lines-threshold|too-many-lines-threshold wrong value|.clippy.toml",
+]
+
+[[fixture]]
+id = "clippy-R22-malformed-ban-sections"
+required_results = [
+  "Error|g3rs-clippy/missing-type-ban|disallowed-types section malformed|.clippy.toml",
+  "Warn|g3rs-clippy/duplicate-bans|ban section malformed|.clippy.toml",
+  "Error|g3rs-clippy/library-global-state|disallowed-types section malformed|.clippy.toml",
+  "Error|g3rs-clippy/macro-bans|disallowed-macros section malformed|.clippy.toml",
+  "Error|g3rs-clippy/ban-reason-quality|ban section malformed|.clippy.toml",
+  "Error|g3rs-clippy/extra-type-ban|disallowed-types section malformed|.clippy.toml",
+  "Error|g3rs-clippy/missing-method-ban|disallowed-methods section malformed|.clippy.toml",
+  "Error|g3rs-clippy/extra-method-ban|disallowed-methods section malformed|.clippy.toml",
+]
+
+[[fixture]]
+id = "clippy-R23-unknown-key"
+required_results = [
+  "Warn|g3rs-clippy/unknown-keys|unrecognized clippy.toml key|.clippy.toml",
 ]
 
 [[fixture]]

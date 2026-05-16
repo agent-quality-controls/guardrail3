@@ -1,12 +1,12 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-16T20-17-12.715206Z-cfaf3bda",
-  "run_commit": "17bebf1b6",
+  "run_id": "2026-05-16T20-44-20.284376Z-078cb096",
+  "run_commit": "5a07e8a51",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T20:17:12.715206Z",
-  "fixture_hash": "sha256:3735e0dcab0a11eb1d3c311c8a52b2483729dd691ea08b04941cff3cf83b9202",
-  "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
+  "recorded_at": "2026-05-16T20:44:20.284376Z",
+  "fixture_hash": "sha256:427014332f1540b093c633678db65cc69d970300a0a6a54749445e68adebaa21",
+  "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
@@ -153,63 +153,7 @@
     {
       "path": "behavior/fixtures/g3rs/L80-project-policy-valid-clean/fixture.toml",
       "sha256": "sha256:e17b7c3c36f20c1d1069e05f910a642bf282e87eea978126575b05586988bcf1"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:5f073788afc869f22e9704829f9c311f82bdf8f7e0c69acbcf73eef5b62e344c"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R10-policy-violations/fixture.toml",
-      "sha256": "sha256:00f95cae96f1a47513d9057cb8c78a642b7741e6c3ab1ccc2eb7fbb9772f0501"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R21-root-metadata-missing/fixture.toml",
-      "sha256": "sha256:3f0f89c580b0058c16827abd7dcc49fdc1ad569661f8e25ae6baa4c18b91c362"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R30-structure-and-input-violations/fixture.toml",
-      "sha256": "sha256:3c4515db4ab174dd9ccfa01ef8ce1665760c715edeb8df03820466aa50667d9d"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/deps/deps-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:502bf93d179c251468a07b8cc0697c8f6b9e8e05eb03fd8f2be4fdd9405af7a7"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/deps/deps-R10-required-files-and-tools/fixture.toml",
-      "sha256": "sha256:df6a13630a0705b9eb8254a88097c67eae68d26bb5cd26b62deba2d60e4cc29d"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/deps/deps-R20-allowlist-and-count-violations/fixture.toml",
-      "sha256": "sha256:086e4cea8a7cfe7152410d3cec61eeecc538fe86b8667fb5acaea5615c903bb8"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/deps/deps-R21-library-allowlist-missing/fixture.toml",
-      "sha256": "sha256:c57746f054de1296eb4f36f3736cb4d1ec8e94f6252b333301efce8578f597db"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:adebb10f0071bee476e2bdfc9a9938499c8d7d173e673ac47c3d30cc4c241e0b"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R10-filetree-violations/fixture.toml",
-      "sha256": "sha256:058fe02d249d53966ab09c5c91f0094095d964628cfcfca0fc46fe1d35ce9f96"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/fmt/fmt-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:21d159179aa7bc05b943c53ec6583a51a80f33946cf7eeaa8a03b7777db3b8d1"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:a8d37eb150fdaffefb71061b72ece3597b055f30ec5583fe4f9b8df880c7db06"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R10-filetree-violations/fixture.toml",
-      "sha256": "sha256:f0b21409fd27596ed9b7be6a3a9762574b8ad2deba219d075c517b2c68a12e17"
-    },
-    {
-      "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:b49200398dd2758d417c57a48290e8b82f3350f66d827066f5db80f9ebd30c3e"
     }
   ],
-  "comment": "Add deps family rule fixtures"
+  "comment": "Split family rule fixtures into separate suite"
 }

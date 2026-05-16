@@ -1553,273 +1553,273 @@ test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avo
 test_name = "inventories_enabled_setting_for_published_library_policy"
 line = 32
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avoid_breaking_exported_api_tests/cases.rs"
 test_name = "inventories_enabled_setting_for_published_workspace_member_library"
 line = 63
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avoid_breaking_exported_api_tests/cases.rs"
 test_name = "inventories_explicit_false_setting"
 line = 104
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avoid_breaking_exported_api_tests/cases.rs"
 test_name = "warns_when_enabled_for_non_library_policy"
 line = 8
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avoid_breaking_exported_api_tests/cases.rs"
 test_name = "warns_when_setting_has_wrong_type"
 line = 152
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/avoid_breaking_exported_api_tests/cases.rs"
 test_name = "warns_when_setting_is_missing"
 line = 128
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/ban_reason_quality_tests/cases.rs"
 test_name = "errors_on_malformed_macro_ban_sections"
 line = 45
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/ban_reason_quality_tests/cases.rs"
 test_name = "errors_on_plain_string_ban_entries_without_reason"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/ban_reason_quality_tests/cases.rs"
 test_name = "inventories_reasoned_table_ban_entries"
 line = 25
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/config_parseable_tests/cases.rs"
 test_name = "errors_on_raw_toml_parse_failures"
 line = 31
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/config_parseable_tests/cases.rs"
 test_name = "errors_on_typed_parse_failures"
 line = 22
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/config_parseable_tests/cases.rs"
 test_name = "inventories_parseable_clippy_toml"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/duplicate_bans_tests/cases.rs"
 test_name = "inventories_duplicate_free_ban_sections"
 line = 25
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/duplicate_bans_tests/cases.rs"
 test_name = "warns_on_duplicate_ban_entries"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/duplicate_bans_tests/cases.rs"
 test_name = "warns_on_duplicate_method_bans"
 line = 42
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/extra_method_ban_tests/cases.rs"
 test_name = "inventories_clean_state_when_no_extra_method_bans_exist"
 line = 25
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/extra_method_ban_tests/cases.rs"
 test_name = "inventories_extra_method_ban"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/extra_type_ban_tests/cases.rs"
 test_name = "inventories_clean_state_when_no_extra_type_bans_exist"
 line = 25
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/extra_type_ban_tests/cases.rs"
 test_name = "inventories_extra_type_ban"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/extra_type_ban_tests/cases.rs"
 test_name = "reports_malformed_type_sections"
 line = 42
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/forbid_clippy_conf_dir_override_tests/cases.rs"
 test_name = "errors_on_malformed_override_surface"
 line = 49
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/forbid_clippy_conf_dir_override_tests/cases.rs"
 test_name = "errors_on_override_surface"
 line = 22
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/forbid_clippy_conf_dir_override_tests/cases.rs"
 test_name = "inventories_clean_state_when_no_overrides_exist"
 line = 6
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/library_global_state_tests/cases.rs"
 test_name = "inventories_complete_library_global_state_bans"
 line = 34
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/library_global_state_tests/cases.rs"
 test_name = "reports_missing_library_global_state_bans"
 line = 17
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/macro_bans_tests/cases.rs"
 test_name = "inventories_full_macro_baseline"
 line = 23
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/macro_bans_tests/cases.rs"
 test_name = "reports_malformed_macro_sections"
 line = 14
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/macro_bans_tests/cases.rs"
 test_name = "reports_missing_macro_bans"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_method_ban_tests/cases.rs"
 test_name = "drops_garde_owned_method_bans_when_garde_is_disabled"
 line = 53
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_method_ban_tests/cases.rs"
 test_name = "reports_malformed_method_section"
 line = 33
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_method_ban_tests/cases.rs"
 test_name = "reports_missing_baseline_method_ban"
 line = 7
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_method_ban_tests/cases.rs"
 test_name = "stands_down_when_policy_context_is_invalid"
 line = 17
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_type_ban_tests/cases.rs"
 test_name = "drops_garde_owned_type_bans_when_garde_is_disabled"
 line = 32
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_type_ban_tests/cases.rs"
 test_name = "reports_library_profile_specific_missing_type_ban"
 line = 16
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/missing_type_ban_tests/cases.rs"
 test_name = "reports_missing_baseline_type_ban"
 line = 6
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/policy_context_parseable_tests/cases.rs"
 test_name = "inventories_parseable_policy_context"
 line = 32
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "covered_by_cli_output"
+reason = "covered by g3rs-validate family-rule fixture clippy-R00-clean-golden"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/policy_context_parseable_tests/cases.rs"
 test_name = "reports_policy_context_parse_errors"
 line = 8
-disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+disposition = "keep_internal_unit_test"
+reason = "the Error branch requires invalid guardrail3-rs.toml, but the public CLI rejects invalid guardrail config before clippy family checks run"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/unknown_keys_tests/cases.rs"
 test_name = "stays_quiet_for_benign_near_miss_keys"
 line = 22
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-config-checks/crates/runtime/src/unknown_keys_tests/cases.rs"
 test_name = "warns_on_managed_key_typos"
 line = 5
 disposition = "needs_rule_fixture_or_golden_output"
-reason = "direct rule-sidecar behavior should be represented by fixture output or a rule-level golden snapshot"
+reason = "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output"
 
 [[test]]
 test_path = "packages/rs/clippy/g3rs-clippy-filetree-checks/crates/runtime/src/run/rule_tests/cases.rs"

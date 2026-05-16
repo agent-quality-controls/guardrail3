@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo, fmt, toolchain, and deps are complete under the new standard.
+Cargo, fmt, toolchain, deps, and clippy are complete under the new standard.
 
 Cargo currently has:
 
@@ -72,6 +72,23 @@ Those four fixtures cover all 11 active deps rule IDs:
 - one clean golden fixture exits 0
 - three broken fixtures make every deps rule emit `Error` or `Warn`
 - `deps-R21-library-allowlist-missing` pairs the warning-only missing allowlist rule with direct dependency cap because they coexist without hiding each other
+
+Clippy currently has:
+
+- `clippy-R00-clean-golden`
+- `clippy-R10-config-missing`
+- `clippy-R11-config-conflict-and-parse-failures`
+- `clippy-R20-policy-violations`
+- `clippy-R21-threshold-and-setting-violations`
+- `clippy-R22-malformed-ban-sections`
+- `clippy-R23-unknown-key`
+
+Those seven fixtures cover 22 of 23 active clippy rule IDs:
+
+- one clean golden fixture exits 0
+- six broken fixtures make 22 clippy rules emit `Error` or `Warn`
+- `g3rs-clippy/policy-context-parseable` is not externally breakable through the CLI because invalid `guardrail3-rs.toml` is rejected before clippy runs
+- the clean fixture still inventories `g3rs-clippy/policy-context-parseable`
 
 ## Global Fixture Contract
 
@@ -281,18 +298,19 @@ Rules:
 - `g3rs-clippy/type-complexity-threshold`
 - `g3rs-clippy/unknown-keys`
 
-Fixture groups to attempt:
+Implemented fixture groups:
 
-- `clippy-R00-clean-golden`: valid `clippy.toml`, no shadow config, covered workspace.
-- `clippy-R10-config-missing-or-shadowed`: missing coverage, same-root conflict, forbidden `.cargo` override.
-- `clippy-R20-config-parse-failures`: malformed config and policy-context parse failures.
-- `clippy-R30-threshold-policy-violations`: threshold values and avoid-breaking-exported-api policy.
-- `clippy-R40-ban-list-violations`: missing bans, extra bans, duplicate bans, weak ban reasons, macro bans, global-state bans.
-- `clippy-R50-unknown-and-test-relaxations`: unknown keys and invalid test relaxations.
+- `clippy-R00-clean-golden`: valid `.clippy.toml`, no shadow config, no `CLIPPY_CONF_DIR` override.
+- `clippy-R10-config-missing`: missing root clippy config.
+- `clippy-R11-config-conflict-and-parse-failures`: same-root config conflict, malformed preferred config, forbidden `.cargo` override.
+- `clippy-R20-policy-violations`: weak ban entries, duplicate bans, missing bans, global-state missing bans, avoid-breaking-exported-api warning.
+- `clippy-R21-threshold-and-setting-violations`: wrong thresholds, wrong test relaxation settings, avoid-breaking-exported-api warning.
+- `clippy-R22-malformed-ban-sections`: malformed ban sections for method/type/macro rules.
+- `clippy-R23-unknown-key`: suspicious managed-key typo.
 
-Expected risk:
+CLI-unreachable rule:
 
-- Malformed `clippy.toml` can hide semantic config rules. Parse failures need a separate fixture from policy-value failures.
+- `g3rs-clippy/policy-context-parseable` has an Error branch only when `guardrail3-rs.toml` is invalid, but the public CLI rejects invalid guardrail config before clippy family checks run.
 
 ### code
 

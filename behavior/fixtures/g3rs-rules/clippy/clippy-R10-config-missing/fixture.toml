@@ -1,0 +1,16 @@
+id = "clippy-R10-config-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "clippy"
+target_rules = [
+  "g3rs-clippy/coverage-exists",
+]
+expected_findings = [
+  "g3rs-clippy/coverage-exists",
+]

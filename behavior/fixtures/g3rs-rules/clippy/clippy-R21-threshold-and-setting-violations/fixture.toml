@@ -1,0 +1,32 @@
+id = "clippy-R21-threshold-and-setting-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "clippy"
+target_rules = [
+  "g3rs-clippy/type-complexity-threshold",
+  "g3rs-clippy/max-fn-params-bools",
+  "g3rs-clippy/cognitive-complexity-threshold",
+  "g3rs-clippy/excessive-nesting-threshold",
+  "g3rs-clippy/test-relaxations",
+  "g3rs-clippy/too-many-arguments-threshold",
+  "g3rs-clippy/avoid-breaking-exported-api",
+  "g3rs-clippy/max-struct-bools",
+  "g3rs-clippy/too-many-lines-threshold",
+]
+expected_findings = [
+  "g3rs-clippy/type-complexity-threshold",
+  "g3rs-clippy/max-fn-params-bools",
+  "g3rs-clippy/cognitive-complexity-threshold",
+  "g3rs-clippy/excessive-nesting-threshold",
+  "g3rs-clippy/test-relaxations",
+  "g3rs-clippy/too-many-arguments-threshold",
+  "g3rs-clippy/avoid-breaking-exported-api",
+  "g3rs-clippy/max-struct-bools",
+  "g3rs-clippy/too-many-lines-threshold",
+]
