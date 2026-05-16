@@ -118,6 +118,20 @@ Those three fixtures cover all 6 active topology rule IDs:
 - one structural broken fixture covers membership, escaping member paths, nested workspace, nested guardrail config, and illegal workspace-local file placement
 - one input-failure fixture covers fail-closed required input behavior
 
+Arch currently has:
+
+- `arch-R00-clean-golden`
+- `arch-R10-package-contract-violations`
+- `arch-R20-filetree-violations`
+- `arch-R30-source-violations`
+
+Those four fixtures cover all 10 active arch rule IDs:
+
+- one clean golden fixture exits 0
+- one config-graph fixture covers dependency count split, missing feature contract, boundary crossing, and missing shared flag
+- one file-tree fixture covers missing crate facade and missing module `mod.rs`
+- one source fixture covers non-facade lib exports, ungated facade exports, non-facade `mod.rs` bodies, and forbidden `#[path]`
+
 ## Global Fixture Contract
 
 Each family fixture file must define:

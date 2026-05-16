@@ -1,0 +1,13 @@
+[package]
+name = "arch_filetree_bad"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[package.metadata.guardrail3]
+shared = true
+
+[workspace]
+members = ["crates/worker"]
+resolver = "3"

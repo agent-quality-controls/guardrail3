@@ -1,0 +1,18 @@
+id = "arch-R20-filetree-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "arch"
+target_rules = [
+  "g3rs-arch/crate-has-facade",
+  "g3rs-arch/mod-rs-required",
+]
+expected_findings = [
+  "g3rs-arch/crate-has-facade",
+  "g3rs-arch/mod-rs-required",
+]
