@@ -1205,6 +1205,86 @@
         "--path",
         ".",
         "--family",
+        "deps",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:9e19e7ecd3961f6da7c96a7efa8ca3a2f6efa4f6f058890cc95a099994ea4744",
+      "fixture_id": "deps-R00-clean-golden",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Info] g3rs-deps/dependencies-allowlisted Cargo.toml dependency allowlisted\n  Dependency `serde` in `[dependencies]` is allowlisted for crate `deps_clean`.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `deps_clean` has an `allowed_deps` policy.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock committed\n  Workspace root has `Cargo.lock` committed.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deps",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:b43df25c413aa6a13a21ef2c3b10da251d3382e3aad7feae718ceffbe0ad309a",
+      "fixture_id": "deps-R10-required-files-and-tools",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Error] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny missing\n  `cargo-deny` was not found on PATH. Install with `cargo install cargo-deny`.\n[Error] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete missing\n  `cargo-machete` was not found on PATH. Install with `cargo install cargo-machete`.\n[Warn] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes missing\n  `cargo-dupes` was not found on PATH. Install with `cargo install cargo-dupes`.\n[Error] g3rs-deps/gitleaks-installed Cargo.toml gitleaks missing\n  `gitleaks` was not found on PATH. Install with `brew install gitleaks` or download from GitHub.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `deps_required_invalid` has an `allowed_deps` policy.\n[Error] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock missing\n  `Cargo.lock` is missing. Run `cargo generate-lockfile` and commit the result.\n[Error] g3rs-deps/gitignore-not-ignoring-cargo-lock .gitignore Cargo.lock ignored in gitignore\n  `.gitignore` ignores `Cargo.lock`. Remove the line ignoring `Cargo.lock` from this `.gitignore`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deps",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:a263722e5b49d166ac84156e2e9bfac912fd5f371ed0e002ec030897c4db86c9",
+      "fixture_id": "deps-R20-allowlist-and-count-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Error] g3rs-deps/dependencies-allowlisted Cargo.toml unauthorized dependency\n  Dependency `unauthorized_dependency` in `[dependencies]` is not allowlisted for crate `deps_policy_invalid`. Add it to the dependency allowlist or remove the dependency.\n[Error] g3rs-deps/build-dependencies-allowlisted Cargo.toml unauthorized build dependency\n  Build dependency `unauthorized_build` in `[build-dependencies]` is not allowlisted for crate `deps_policy_invalid`. Add it to the dependency allowlist or remove the dependency.\n[Warn] g3rs-deps/dev-dependencies-allowlisted Cargo.toml unauthorized dev dependency\n  Dev dependency `unauthorized_dev` in `[dev-dependencies]` is not allowlisted for crate `deps_policy_invalid`. Add it to the dependency allowlist or remove the dependency.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `deps_policy_invalid` has an `allowed_deps` policy.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock committed\n  Workspace root has `Cargo.lock` committed.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deps",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:ab32e0133b87f72e78f9c570baf8ad33f4929adcffa322e506ebf11fe87bb449",
+      "fixture_id": "deps-R21-library-allowlist-missing",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Warn] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist missing\n  Crate `deps_allowlist_missing` has no `allowed_deps` policy. Add an `allowed_deps` list in guardrail3-rs.toml.\n[Error] g3rs-deps/direct-dependency-cap Cargo.toml too many direct dependencies\n  Crate `deps_allowlist_missing` has 26 unique direct dependencies (max 25). Reduce direct dependencies by consolidating or splitting the crate.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock committed\n  Workspace root has `Cargo.lock` committed.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
         "fmt",
         "--rules-only",
         "--inventory"

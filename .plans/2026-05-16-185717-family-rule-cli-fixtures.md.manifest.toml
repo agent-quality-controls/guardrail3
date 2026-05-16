@@ -66,6 +66,9 @@ kept_internal_unit_tests = 0
 name = "deps"
 remaining_rule_rows = 3
 fixture_dir = "behavior/fixtures/g3rs-rules/deps"
+status = "completed"
+covered_by_cli_output = 3
+kept_internal_unit_tests = 0
 
 [[family]]
 name = "hooks"
@@ -221,4 +224,30 @@ id = "toolchain-R20-policy-violations"
 required_results = [
   "Warn|g3rs-toolchain/channel-and-components|toolchain component `clippy` missing|rust-toolchain.toml",
   "Error|g3rs-toolchain/msrv-consistency|Cargo rust-version is unparseable|Cargo.toml",
+]
+
+[[fixture]]
+id = "deps-R10-required-files-and-tools"
+required_results = [
+  "Error|g3rs-deps/cargo-deny-installed|cargo-deny missing|Cargo.toml",
+  "Error|g3rs-deps/cargo-machete-installed|cargo-machete missing|Cargo.toml",
+  "Warn|g3rs-deps/cargo-dupes-installed|cargo-dupes missing|Cargo.toml",
+  "Error|g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
+  "Error|g3rs-deps/cargo-lock-present|Cargo.lock missing|Cargo.lock",
+  "Error|g3rs-deps/gitignore-not-ignoring-cargo-lock|Cargo.lock ignored in gitignore|.gitignore",
+]
+
+[[fixture]]
+id = "deps-R20-allowlist-and-count-violations"
+required_results = [
+  "Error|g3rs-deps/dependencies-allowlisted|unauthorized dependency|Cargo.toml",
+  "Error|g3rs-deps/build-dependencies-allowlisted|unauthorized build dependency|Cargo.toml",
+  "Warn|g3rs-deps/dev-dependencies-allowlisted|unauthorized dev dependency|Cargo.toml",
+]
+
+[[fixture]]
+id = "deps-R21-library-allowlist-missing"
+required_results = [
+  "Warn|g3rs-deps/library-allowlist-present|dependency allowlist missing|Cargo.toml",
+  "Error|g3rs-deps/direct-dependency-cap|too many direct dependencies|Cargo.toml",
 ]

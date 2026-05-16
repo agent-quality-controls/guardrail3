@@ -1,0 +1,13 @@
+id = "deps-R00-clean-golden"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deps", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_clean_golden"
+
+rule_family = "deps"
+target_rules = []
+expected_findings = []

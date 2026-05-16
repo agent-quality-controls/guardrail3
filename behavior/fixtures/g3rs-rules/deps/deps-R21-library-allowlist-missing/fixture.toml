@@ -1,0 +1,23 @@
+id = "deps-R21-library-allowlist-missing"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deps", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "deps"
+target_rules = [
+  "g3rs-deps/library-allowlist-present",
+  "g3rs-deps/direct-dependency-cap",
+]
+intentionally_invalid = [
+  "library_profile_allowlist_missing",
+  "direct_dependency_count_above_cap",
+]
+expected_findings = [
+  "g3rs-deps/library-allowlist-present",
+  "g3rs-deps/direct-dependency-cap",
+]

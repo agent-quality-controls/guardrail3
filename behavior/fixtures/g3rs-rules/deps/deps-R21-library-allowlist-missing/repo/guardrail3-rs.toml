@@ -1,0 +1,4 @@
+profile = "library"
+
+[checks]
+garde = false
