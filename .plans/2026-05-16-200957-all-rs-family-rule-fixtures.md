@@ -132,6 +132,16 @@ Those four fixtures cover all 10 active arch rule IDs:
 - one file-tree fixture covers missing crate facade and missing module `mod.rs`
 - one source fixture covers non-facade lib exports, ungated facade exports, non-facade `mod.rs` bodies, and forbidden `#[path]`
 
+Apparch currently has:
+
+- `apparch-R00-clean-golden`
+- `apparch-R10-policy-violations`
+
+Those two fixtures cover all 10 active apparch rule IDs:
+
+- one clean golden fixture exits 0
+- one broken fixture covers dependency direction, dev-dependency direction, layer purity, patch bypass, same-layer cycles, IO trait leakage, and types public surface leakage
+
 ## Global Fixture Contract
 
 Each family fixture file must define:
@@ -814,6 +824,135 @@ Minimization result:
 
 - Membership, escaping member path, nesting, and illegal local file placement can coexist without hiding each other.
 - Required input failure stays separate because malformed input creates a different filetree fact and should not be mixed with normal topology structure failures.
+
+### garde
+
+Rule count: 13.
+
+Status: complete.
+
+Fixtures:
+
+- `garde-R00-clean-golden`: valid project, no garde findings.
+- `garde-R10-dependency-missing`: missing `garde` dependency.
+- `garde-R20-clippy-config-missing`: garde dependency present, but the delegated clippy ban config is missing.
+- `garde-R30-boundary-and-input-violations`: malformed Rust source plus validation-boundary bypasses.
+
+Minimization result:
+
+- Missing `garde` hides source checks, so it stays separate.
+- Missing clippy config emits only delegated-config warnings and does not cover source rules.
+- Garde source parse failure can coexist with boundary validation failures without hiding them.
+
+### test
+
+Rule count: 19.
+
+Status: complete.
+
+Fixtures:
+
+- `test-R00-clean-golden`: mutation config and hook wiring present.
+- `test-R10-nextest-missing`: async test surface without nextest timeout config.
+- `test-R20-mutation-required-inputs-missing`: `cargo-mutants` unavailable.
+- `test-R21-mutants-config-invalid`: malformed mutation policy values.
+- `test-R22-mutation-config-files-missing`: missing `.cargo/mutants.toml` and mutation hook step.
+- `test-R23-mutants-profile-missing`: missing `[profile.mutants]`.
+- `test-R30-source-and-filetree-violations`: malformed test inputs plus sidecar, assertion, ignore, panic, proof, and external harness violations.
+
+Minimization result:
+
+- Missing mutation files hide mutation value checks, so config-file absence and invalid config stay separate.
+- Source parse and filetree input failures do not hide source-quality violations, so they live in the source fixture.
+
+### release
+
+Rule count: 33.
+
+Status: complete.
+
+Fixtures:
+
+- `release-R00-clean-golden`: valid release workflow and package metadata.
+- `release-R10-input-failures-and-workflow-missing`: malformed release inputs plus missing workflow/token checks.
+- `release-R20-semver-tool-missing`: `cargo-semver-checks` unavailable.
+- `release-R30-semver-and-baseline-violations`: invalid semver and release-plz/cliff baseline drift.
+- `release-R40-metadata-filetree-and-publish-violations`: package metadata, publish, license, README, release-plz, cliff, path dependency, and interdependent version violations.
+
+Inventory-only release rules:
+
+- `g3rs-release/binary-release-workflow`
+- `g3rs-release/crate-inventory`
+- `g3rs-release/linux-release-target`
+- `g3rs-release/publish-status-inventory`
+- `g3rs-release/release-profile-inventory`
+
+Minimization result:
+
+- Semver tool absence depends on PATH isolation, so it stays separate.
+- Invalid semver stays separate from metadata because it covers baseline drift and dry-run failure without hiding metadata checks.
+- Filetree removals are folded into metadata because they do not hide root README quality or package metadata violations.
+
+### code
+
+Rule count: 30.
+
+Status: complete.
+
+Fixtures:
+
+- `code-R00-clean-golden`: valid source and config.
+- `code-R10-policy-and-input-violations`: unsafe lint weakening, source parse failure, lint escape hatches, filesystem bypasses, macro bypasses, size/surface violations, weak public errors, weak test messages, and import-count violations.
+
+Inventory-only code rules:
+
+- `g3rs-code/unused-crate-dependencies-allow`
+
+Minimization result:
+
+- Code parse failure can coexist with source policy violations without hiding them.
+- `unused_crate_dependencies` exemptions are approved inventory, not a broken branch.
+
+### hooks
+
+Rule count: 36.
+
+Status: complete.
+
+Fixtures:
+
+- `hooks-R00-clean-golden`: repo validation exits cleanly.
+- `hooks-R10-missing-hook-surface`: missing or non-executable selected hook surface.
+- `hooks-R20-weakened-required-tools`: required hook tools missing and fail-open command context.
+- `hooks-R30-invalid-modular-scripts`: invalid modular hook script wiring.
+- `hooks-R40-inert-command-context`: required commands appear only in inert text.
+- `hooks-R50-managed-script-workflow-missing`: managed script missing merge-conflict, file-size, and lockfile checks.
+
+Inventory-only hook rules:
+
+- `g3rs-hooks/local-override-inventory`
+- `g3rs-hooks/modular-directory-inventory`
+- `g3rs-hooks/modular-scripts-inventory`
+- `g3rs-hooks/no-bypass-instructions`
+- `g3rs-hooks/pre-commit-file-size-inventory`
+- `g3rs-hooks/script-stats-inventory`
+
+CLI-unreachable hook rules:
+
+- `g3rs-hooks/cargo-dupes-excludes`
+- `g3rs-hooks/clippy-denies-warnings`
+- `g3rs-hooks/contract-trigger-coverage`
+- `g3rs-hooks/gitleaks-step-present`
+- `g3rs-hooks/routing-discovers-marker-pair`
+- `g3rs-hooks/routing-no-env-override`
+- `g3rs-hooks/routing-no-upward-walk-from-units`
+- `g3rs-hooks/routing-scope-not-hardcoded-literal`
+- `g3rs-hooks/routing-staged-files-diff-filter-acm`
+
+Minimization result:
+
+- Repo-level hooks cannot use the workspace-family command shape, so hook fixtures run `g3rs validate repo`.
+- Several hook source rules exist in code but are not reachable from current public repo validation because hook contract requirements are not passed into source checks. They are recorded as CLI-unreachable rather than covered by internal fixtures.
 
 ## Build Order
 

@@ -1,0 +1,34 @@
+id = "apparch-R10-policy-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "apparch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "apparch"
+target_rules = [
+  "g3rs-apparch/io-outbound-dependency-direction",
+  "g3rs-apparch/logic-dependency-direction",
+  "g3rs-apparch/dev-dependency-direction",
+  "g3rs-apparch/types-dependency-direction",
+  "g3rs-apparch/logic-purity",
+  "g3rs-apparch/types-purity",
+  "g3rs-apparch/patch-replace-bypass",
+  "g3rs-apparch/same-layer-cycles",
+  "g3rs-apparch/io-traits-in-types",
+  "g3rs-apparch/types-public-surface",
+]
+expected_findings = [
+  "g3rs-apparch/io-outbound-dependency-direction",
+  "g3rs-apparch/logic-dependency-direction",
+  "g3rs-apparch/dev-dependency-direction",
+  "g3rs-apparch/types-dependency-direction",
+  "g3rs-apparch/logic-purity",
+  "g3rs-apparch/types-purity",
+  "g3rs-apparch/patch-replace-bypass",
+  "g3rs-apparch/same-layer-cycles",
+  "g3rs-apparch/io-traits-in-types",
+  "g3rs-apparch/types-public-surface",
+]

@@ -1,0 +1,7 @@
+[package]
+name = "db-outbound"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+types-core = { path = "../../types/core", package = "types-core" }

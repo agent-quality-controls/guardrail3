@@ -1,0 +1,20 @@
+id = "apparch-R00-clean-golden"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "apparch", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_clean_golden"
+
+rule_family = "apparch"
+target_rules = []
+expected_findings = [
+  "g3rs-apparch/io-outbound-dependency-direction",
+  "g3rs-apparch/logic-dependency-direction",
+  "g3rs-apparch/types-dependency-direction",
+  "g3rs-apparch/logic-purity",
+  "g3rs-apparch/types-purity",
+  "g3rs-apparch/io-traits-in-types",
+  "g3rs-apparch/types-public-surface",
+]

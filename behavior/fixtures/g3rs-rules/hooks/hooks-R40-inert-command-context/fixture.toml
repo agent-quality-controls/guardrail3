@@ -1,0 +1,18 @@
+id = "hooks-R40-inert-command-context"
+tool = "g3rs"
+run_from = "repo"
+git_init = true
+runner_mode = "path_without_delegated_tools"
+commands = [
+  ["validate", "repo", "--path", ".", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "hooks"
+target_rules = [
+  "g3rs-hooks/executable-command-context-only",
+]
+expected_findings = [
+  "g3rs-hooks/executable-command-context-only",
+]

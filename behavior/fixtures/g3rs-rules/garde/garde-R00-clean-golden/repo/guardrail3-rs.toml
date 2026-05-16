@@ -1,0 +1,16 @@
+profile = "library"
+
+allowed_deps = [
+  "deny-toml-parser",
+  "g3rs-deny-config-checks-assertions",
+  "g3rs-deny-config-checks-runtime",
+  "g3rs-deny-types",
+  "guardrail3-check-types",
+  "guardrail3-reason-policy",
+  "g3rs-toml-parser",
+  "test_support",
+  "toml",
+]
+
+[checks]
+garde = false

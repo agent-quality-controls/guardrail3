@@ -1,0 +1,19 @@
+id = "test-R22-mutation-config-files-missing"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "test"
+target_rules = [
+  "g3rs-test/mutants-toml-exists",
+  "g3rs-test/mutation-hook-present",
+]
+expected_findings = [
+  "g3rs-test/mutants-toml-exists",
+  "g3rs-test/mutation-hook-present",
+]

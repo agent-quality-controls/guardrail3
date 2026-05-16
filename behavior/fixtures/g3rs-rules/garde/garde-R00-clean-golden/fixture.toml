@@ -1,0 +1,12 @@
+id = "garde-R00-clean-golden"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "garde", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_clean_golden"
+
+rule_family = "garde"
+target_rules = []
+expected_findings = []

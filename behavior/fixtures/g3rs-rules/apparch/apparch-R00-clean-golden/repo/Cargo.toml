@@ -1,0 +1,8 @@
+[workspace]
+members = [
+  "types/core",
+  "logic/service",
+  "io/outbound/db",
+  "io/inbound/http",
+]
+resolver = "2"

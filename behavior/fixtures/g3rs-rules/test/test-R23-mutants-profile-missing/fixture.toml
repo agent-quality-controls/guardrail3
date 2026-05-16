@@ -1,0 +1,17 @@
+id = "test-R23-mutants-profile-missing"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "test"
+target_rules = [
+  "g3rs-test/mutants-profile-present",
+]
+expected_findings = [
+  "g3rs-test/mutants-profile-present",
+]

@@ -1,0 +1,18 @@
+id = "test-R20-mutation-required-inputs-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+runner_mode = "path_without_delegated_tools"
+blocked_cargo_subcommands = ["mutants"]
+
+rule_family = "test"
+target_rules = [
+  "g3rs-test/cargo-mutants-installed",
+]
+expected_findings = [
+  "g3rs-test/cargo-mutants-installed",
+]

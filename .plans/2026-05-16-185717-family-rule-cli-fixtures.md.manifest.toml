@@ -53,6 +53,9 @@ status = "completed"
 name = "apparch"
 remaining_rule_rows = 44
 fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
+status = "completed"
+covered_by_cli_output = 44
+kept_internal_unit_tests = 0
 
 [[family]]
 name = "arch"
@@ -66,6 +69,7 @@ kept_internal_unit_tests = 0
 name = "release"
 remaining_rule_rows = 24
 fixture_dir = "behavior/fixtures/g3rs-rules/release"
+status = "completed"
 
 [[family]]
 name = "toolchain"
@@ -87,6 +91,7 @@ kept_internal_unit_tests = 0
 name = "hooks"
 remaining_rule_rows = 2
 fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
+status = "completed"
 
 [[family]]
 name = "fmt"
@@ -97,6 +102,30 @@ covered_by_cli_output = 1
 inventory_only_rules = [
   "g3rs-fmt/rustfmt-extra-settings-inventory",
 ]
+
+[[family]]
+name = "garde"
+remaining_rule_rows = 0
+fixture_dir = "behavior/fixtures/g3rs-rules/garde"
+status = "completed"
+covered_by_cli_output = 13
+kept_internal_unit_tests = 0
+
+[[family]]
+name = "test"
+remaining_rule_rows = 0
+fixture_dir = "behavior/fixtures/g3rs-rules/test"
+status = "completed"
+covered_by_cli_output = 19
+kept_internal_unit_tests = 0
+
+[[family]]
+name = "code"
+remaining_rule_rows = 0
+fixture_dir = "behavior/fixtures/g3rs-rules/code"
+status = "completed"
+covered_by_cli_output = 29
+kept_internal_unit_tests = 1
 
 [[inventory_only_rule]]
 id = "g3rs-fmt/rustfmt-extra-settings-inventory"
@@ -122,6 +151,111 @@ reason = "The implementation emits Info inventory only when advisory policy is s
 id = "g3rs-clippy/policy-context-parseable"
 family = "clippy"
 reason = "The Error branch requires invalid guardrail3-rs.toml, but the public CLI rejects invalid guardrail config before the clippy family runs. The clean fixture still inventories the parseable policy context."
+
+[[inventory_only_rule]]
+id = "g3rs-code/unused-crate-dependencies-allow"
+family = "code"
+reason = "The implementation emits Info inventory only for approved unused_crate_dependencies exemptions; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-release/binary-release-workflow"
+family = "release"
+reason = "The implementation emits Info inventory only for binary workflow presence or absence; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-release/crate-inventory"
+family = "release"
+reason = "The implementation emits Info inventory only for publishable crate counts; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-release/linux-release-target"
+family = "release"
+reason = "The implementation emits Info inventory only for Linux release target presence or absence; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-release/publish-status-inventory"
+family = "release"
+reason = "The implementation emits Info inventory only for Cargo publish status; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-release/release-profile-inventory"
+family = "release"
+reason = "The implementation emits Info inventory only for release profile settings; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/local-override-inventory"
+family = "hooks"
+reason = "The implementation emits Info inventory only for local hook override files; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/modular-directory-inventory"
+family = "hooks"
+reason = "The implementation emits Info inventory only for modular hook directory presence; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/modular-scripts-inventory"
+family = "hooks"
+reason = "The implementation emits Info inventory only for modular hook script inventory; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/no-bypass-instructions"
+family = "hooks"
+reason = "The implementation emits Info inventory only for absence or presence of hook bypass text; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/pre-commit-file-size-inventory"
+family = "hooks"
+reason = "The implementation emits Info inventory only for pre-commit hook file size; there is no Error or Warn branch through the public CLI."
+
+[[inventory_only_rule]]
+id = "g3rs-hooks/script-stats-inventory"
+family = "hooks"
+reason = "The implementation emits Info inventory only for hook script statistics; there is no Error or Warn branch through the public CLI."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/cargo-dupes-excludes"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not pass hook contract requirements into source checks, so no CLI fixture can make this rule emit."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/clippy-denies-warnings"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not pass hook contract requirements into source checks, so no CLI fixture can make this rule emit."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/contract-trigger-coverage"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not pass hook contract requirements into source checks, so no CLI fixture can make this rule emit."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/gitleaks-step-present"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not pass hook contract requirements into source checks, so no CLI fixture can make this rule emit."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/routing-discovers-marker-pair"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not expose routing contract checks through the CLI."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/routing-no-env-override"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not expose routing contract checks through the CLI."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/routing-no-upward-walk-from-units"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not expose routing contract checks through the CLI."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/routing-scope-not-hardcoded-literal"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not expose routing contract checks through the CLI."
+
+[[cli_unreachable_rule]]
+id = "g3rs-hooks/routing-staged-files-diff-filter-acm"
+family = "hooks"
+reason = "The source rule exists, but current public repo validation does not expose routing contract checks through the CLI."
 
 [[required_fixture_field]]
 name = "rule_family"
@@ -166,6 +300,21 @@ command = "python3 scripts/behavior/verify-test-deletion.py"
 
 [[verification]]
 command = "bash scripts/behavior/verify-all.sh"
+
+[[fixture]]
+id = "apparch-R10-policy-violations"
+required_results = [
+  "Error|g3rs-apparch/io-outbound-dependency-direction|io/outbound crate `db-outbound` depends on forbidden crate `http-inbound`|io/outbound/db/Cargo.toml",
+  "Error|g3rs-apparch/logic-dependency-direction|logic crate `logic-service` depends on forbidden crate `http-inbound`|logic/service/Cargo.toml",
+  "Warn|g3rs-apparch/dev-dependency-direction|dev-dependency direction violation|logic/service/Cargo.toml",
+  "Error|g3rs-apparch/types-dependency-direction|types crate `types-core` depends on forbidden crate `logic-service`|types/core/Cargo.toml",
+  "Error|g3rs-apparch/logic-purity|logic crate `logic-service` depends on impure external crate `reqwest`|logic/service/Cargo.toml",
+  "Error|g3rs-apparch/types-purity|types crate `types-core` depends on impure external crate `regex`|types/core/Cargo.toml",
+  "Error|g3rs-apparch/patch-replace-bypass|patch bypass `patch.crates-io.serde` missing waiver|Cargo.toml",
+  "Error|g3rs-apparch/same-layer-cycles|same-layer logic dependency cycle|-",
+  "Error|g3rs-apparch/io-traits-in-types|io crate `http-inbound` defines public trait `InboundTrait`|io/inbound/http/src/lib.rs",
+  "Error|g3rs-apparch/types-public-surface|types crate `types-core` exposes behavioral API|types/core/src/lib.rs",
+]
 
 [[fixture]]
 id = "arch-R10-package-contract-violations"

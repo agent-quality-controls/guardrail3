@@ -1,0 +1,22 @@
+id = "release-R30-semver-and-baseline-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "release", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "release"
+target_rules = [
+  "g3rs-release/valid-semver",
+  "g3rs-release/publish-dry-run",
+  "g3rs-release/release-plz-baseline",
+  "g3rs-release/cliff-baseline",
+]
+expected_findings = [
+  "g3rs-release/valid-semver",
+  "g3rs-release/publish-dry-run",
+  "g3rs-release/release-plz-baseline",
+  "g3rs-release/cliff-baseline",
+]

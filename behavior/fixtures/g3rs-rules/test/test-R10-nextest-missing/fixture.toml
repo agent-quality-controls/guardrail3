@@ -1,0 +1,16 @@
+id = "test-R10-nextest-missing"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "test"
+target_rules = [
+  "g3rs-test/nextest-timeouts",
+]
+expected_findings = [
+  "g3rs-test/nextest-timeouts",
+]

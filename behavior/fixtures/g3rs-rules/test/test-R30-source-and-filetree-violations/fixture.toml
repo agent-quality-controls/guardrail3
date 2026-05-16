@@ -1,0 +1,40 @@
+id = "test-R30-source-and-filetree-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "test", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "test"
+target_rules = [
+  "g3rs-test/filetree-input-failures",
+  "g3rs-test/source-input-failures",
+  "g3rs-test/owned-sidecar-shape",
+  "g3rs-test/runtime-assertions-split",
+  "g3rs-test/test-support-generic",
+  "g3rs-test/assertions-modules-prove",
+  "g3rs-test/inline-test-bodies",
+  "g3rs-test/ignore-reason",
+  "g3rs-test/should-panic-expected",
+  "g3rs-test/real-proof-site",
+  "g3rs-test/tautological-assertions",
+  "g3rs-test/weak-matches-assert",
+  "g3rs-test/external-harnesses-use-assertions",
+]
+expected_findings = [
+  "g3rs-test/filetree-input-failures",
+  "g3rs-test/source-input-failures",
+  "g3rs-test/owned-sidecar-shape",
+  "g3rs-test/runtime-assertions-split",
+  "g3rs-test/test-support-generic",
+  "g3rs-test/assertions-modules-prove",
+  "g3rs-test/inline-test-bodies",
+  "g3rs-test/ignore-reason",
+  "g3rs-test/should-panic-expected",
+  "g3rs-test/real-proof-site",
+  "g3rs-test/tautological-assertions",
+  "g3rs-test/weak-matches-assert",
+  "g3rs-test/external-harnesses-use-assertions",
+]

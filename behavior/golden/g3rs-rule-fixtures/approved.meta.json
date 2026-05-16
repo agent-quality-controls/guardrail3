@@ -1,15 +1,23 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-16T22-15-16.475624Z-078cb096",
-  "run_commit": "0d2a51922",
+  "run_id": "2026-05-16T22-59-25.41451Z-078cb096",
+  "run_commit": "036047f5f",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T22:15:16.475624Z",
-  "fixture_hash": "sha256:9a1b0beb929dbb351d06c35b574e94b3a9cdcfe072fb89b3958c2c4267a84def",
+  "recorded_at": "2026-05-16T22:59:25.41451Z",
+  "fixture_hash": "sha256:9a5be37fef37566b050edc6a1312c14f6fb954ba218a92c73ec0342f716db7bb",
   "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-rules/apparch/apparch-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:bf8e83e7a577616428a55c1f76b27c9049c3d8dac34c0e6e0660ef918919acf5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/apparch/apparch-R10-policy-violations/fixture.toml",
+      "sha256": "sha256:9bce23db3c9de89318c59784ab1045a228560e5c15f68b40eb86c619d859ecec"
+    },
     {
       "path": "behavior/fixtures/g3rs-rules/arch/arch-R00-clean-golden/fixture.toml",
       "sha256": "sha256:7e58f608bf880fd815f2a4d874acabca6c638f3fb4a2e3aca627a93e60327acf"
@@ -71,6 +79,14 @@
       "sha256": "sha256:1eee004d1163b221bda4bd8098a3087a5a8ec3cf04528cf47f3f3777cd76509f"
     },
     {
+      "path": "behavior/fixtures/g3rs-rules/code/code-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:4aca7df9108efbfc46b5f08ed638497b9bf2bc5fee7290644e09bd9cd77f1935"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/code/code-R10-policy-and-input-violations/fixture.toml",
+      "sha256": "sha256:e77940eecb1e750f449abd3ccb4e7e041235b2a7145ae05626a1eff05212b5bf"
+    },
+    {
       "path": "behavior/fixtures/g3rs-rules/deny/deny-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f4e3d52b2586134a1edd17dbc73c55176a94cf3e70b2c520812fe936958a7c64"
     },
@@ -127,6 +143,94 @@
       "sha256": "sha256:21d159179aa7bc05b943c53ec6583a51a80f33946cf7eeaa8a03b7777db3b8d1"
     },
     {
+      "path": "behavior/fixtures/g3rs-rules/garde/garde-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:30f4749dbcf743591859fa6ea85cd4fcb8179edb54bd7b7fbc8e5f3b514e3cc7"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/garde/garde-R10-dependency-missing/fixture.toml",
+      "sha256": "sha256:5a81ad1af7bfff5ae6dbcd70d20f3ac788ce44b320fdecb0bf9797f544f185e0"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/garde/garde-R20-clippy-config-missing/fixture.toml",
+      "sha256": "sha256:dec0488370724e3aee662ebb27c034d2f544b3ee50ddd372958bdbab819dec2d"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/garde/garde-R30-boundary-and-input-violations/fixture.toml",
+      "sha256": "sha256:f8a7b19909bc54e9a081c436a7a8f0a902a6c4461718cddfdc4da8f97a021c0d"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:0be17d4048c81c2d54a41f2ca939ae1ea7b36ac2574589d985edc710fecac2e7"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R10-missing-hook-surface/fixture.toml",
+      "sha256": "sha256:c916e537119b492c0f6b864355b1bfb6f4593782a50e988f9fed6c2d67880e9b"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R20-weakened-required-tools/fixture.toml",
+      "sha256": "sha256:3383836ab226aba2145427e307dd9464c6563cd281efbd98855d3781eafd2980"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R30-invalid-modular-scripts/fixture.toml",
+      "sha256": "sha256:a2a65a83c411d1545b9ea4b307bf7392b2b1797c3123edbad74886ab909a44db"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R40-inert-command-context/fixture.toml",
+      "sha256": "sha256:9102859c74a6825e4287931ea7c6f036e2ac681c7f9dfbd4ca40ff3e5a90c2dc"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/hooks/hooks-R50-managed-script-workflow-missing/fixture.toml",
+      "sha256": "sha256:2a880c58ff9c5a9c3389f80591133dfc976963fbe25fabb052a1c39979cd96d2"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/release/release-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:69c8d6664c38ef792616013db303f4db6ea46e8fd007cc4588c316fd5a96d31c"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/release/release-R10-input-failures-and-workflow-missing/fixture.toml",
+      "sha256": "sha256:cc2e4cf269420e585a420db0c12c60bbddfe3a249136a6e6b68ba048c407d7bf"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/release/release-R20-semver-tool-missing/fixture.toml",
+      "sha256": "sha256:14250c93c958259ae69fa67c1fa17b18f94f5a2fc53bdfe535ea0c3abba8d21e"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/release/release-R30-semver-and-baseline-violations/fixture.toml",
+      "sha256": "sha256:5492a71f7f4205dae64f60d0efea995ef56b51d90dd26d89f04e30af79ab051f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/release/release-R40-metadata-filetree-and-publish-violations/fixture.toml",
+      "sha256": "sha256:e557a8edfb9abb9da0395bce0fe1114baab99f1efa643ac0ff7712d0bb856000"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:ca03696d3970e71970ccb38236049b3ecfa046b95be5d49dd5aa77c68438a5b6"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R10-nextest-missing/fixture.toml",
+      "sha256": "sha256:adf02fb443b270554621907a3954274ca0c5f5b01e084c3275137678310ce052"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R20-mutation-required-inputs-missing/fixture.toml",
+      "sha256": "sha256:867632efa4a52aa4325d79174284d0c94954eff1dabf3f0f491b7d498504a248"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R21-mutants-config-invalid/fixture.toml",
+      "sha256": "sha256:b274bcfd80981c9d54785ed0cd968af647a113e188d6cf668da3789e63b97691"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R22-mutation-config-files-missing/fixture.toml",
+      "sha256": "sha256:86b3aab1b464dfe10a28ddfa1179d482f855b0893129d56fef5bb755aa6a09d3"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R23-mutants-profile-missing/fixture.toml",
+      "sha256": "sha256:4fca1467872ad4f2371f2ca3f50163a86ed1eb28d01615124581d97f5e260d6c"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/test/test-R30-source-and-filetree-violations/fixture.toml",
+      "sha256": "sha256:4529d6c03d810f718bbd87e9adfec20ea6c85b966a78a59a071d940608d5bfd3"
+    },
+    {
       "path": "behavior/fixtures/g3rs-rules/toolchain/toolchain-R00-clean-golden/fixture.toml",
       "sha256": "sha256:a8d37eb150fdaffefb71061b72ece3597b055f30ec5583fe4f9b8df880c7db06"
     },
@@ -151,5 +255,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Add arch family rule fixtures"
+  "comment": "Normalize remaining Rust family fixture files"
 }
