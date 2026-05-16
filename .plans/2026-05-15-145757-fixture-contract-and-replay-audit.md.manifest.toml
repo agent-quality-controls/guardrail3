@@ -63,7 +63,7 @@ name = "needs_rule_fixture_or_golden_output"
 expected_rows = 236
 
 [[disposition]]
-name = "needs_serialized_ingestion_output"
+name = "keep_internal_unit_test"
 expected_rows = 421
 
 [[disposition]]

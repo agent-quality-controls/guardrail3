@@ -6,7 +6,7 @@
   "working_tree": "dirty",
   "recorded_at": "2026-05-15T21:23:26.112572Z",
   "fixture_hash": "sha256:3b747845ecd4c6e9fb1bdec8bd154c36c9e85719e2aa9696d66882e10247e278",
-  "manifest_hash": "sha256:bc81885aac6e7611923c4b00e06257412f55dae895261fab7f1b059b30ba9019",
+  "manifest_hash": "sha256:73618eb9c68bd6ed4e56112c868935983c78c11494a7ef0e513c778710498107",
   "normalizer_hash": "sha256:c219507b61710f3b35350618b95d841c65b681fbeb96caf8ae69c0af301f4d2f",
   "tool_version": "0.1.6",
   "output_schema_version": "1",

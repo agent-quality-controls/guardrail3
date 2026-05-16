@@ -98,8 +98,8 @@ def classify_row(test_path: str) -> tuple[str, str]:
         )
     if "/g3rs-" in test_path and "-ingestion/" in test_path:
         return (
-            "needs_serialized_ingestion_output",
-            "ingestion behavior needs fixture output that serializes owned Rust ingestion structs with Serde",
+            "keep_internal_unit_test",
+            "ingestion crates are internal module-boundary packages; keep current unit coverage until the behavior is replaced by a user-visible CLI fixture or deleted as internal-shape-only",
         )
     if "/run_tests/" in test_path:
         return (

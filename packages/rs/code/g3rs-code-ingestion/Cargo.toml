@@ -33,7 +33,6 @@ all-features = true
 [workspace]
 members = [
     "crates/assertions",
-    "crates/fixture-output",
     "crates/runtime",
     "crates/types",
 ]

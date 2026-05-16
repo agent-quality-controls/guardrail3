@@ -1,3 +1,8 @@
+# Superseded
+
+This plan is superseded by `.plans/2026-05-16-182952-cli-boundary-fixture-target-state.md`.
+Do not add serialized-ingestion fixture-output crates across families.
+
 # All Rust Ingestion Serialized Fixtures
 
 ## Goal
@@ -330,4 +335,3 @@ Deletion is a separate step after:
 - the ledger row disposition changes from `needs_serialized_ingestion_output` to a replaceable disposition
 - `python3 scripts/behavior/verify-test-deletion.py` passes
 - deleting the test file does not remove tests that still have non-replaceable rows
-

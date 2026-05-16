@@ -9,9 +9,9 @@ expected_rows = 236
 meaning = "direct rule-sidecar behavior that should be moved to fixture or golden replay"
 
 [[disposition]]
-name = "needs_serialized_ingestion_output"
+name = "keep_internal_unit_test"
 expected_rows = 421
-meaning = "parser, normalization, fail-closed input, and family fact extraction behavior captured by serializing owned Rust ingestion structs"
+meaning = "internal ingestion package behavior kept as unit tests until each row is replaced by user-visible CLI fixtures or deleted as internal-shape-only"
 
 [[disposition]]
 name = "needs_family_runner_output"
