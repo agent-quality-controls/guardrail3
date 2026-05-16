@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo and fmt are complete under the new standard.
+Cargo, fmt, and toolchain are complete under the new standard.
 
 Cargo currently has:
 
@@ -48,6 +48,17 @@ Those three fixtures cover all 8 active fmt rule IDs:
 - one clean golden fixture exits 0
 - two broken fixtures make 7 fmt rules emit `Error` or `Warn`
 - `g3rs-fmt/rustfmt-extra-settings-inventory` is explicit Info-only inventory because the implementation has no `Error` or `Warn` branch
+
+Toolchain currently has:
+
+- `toolchain-R00-clean-golden`
+- `toolchain-R10-filetree-violations`
+- `toolchain-R20-policy-violations`
+
+Those three fixtures cover all 4 active toolchain rule IDs:
+
+- one clean golden fixture exits 0
+- two broken fixtures make every toolchain rule emit `Error` or `Warn`
 
 ## Global Fixture Contract
 
@@ -659,6 +670,8 @@ Expected risk:
 
 Rule count: 4.
 
+Status: complete.
+
 Target fixture directory:
 
 ```text
@@ -672,13 +685,13 @@ Rules:
 - `g3rs-toolchain/legacy-file`
 - `g3rs-toolchain/msrv-consistency`
 
-Fixture groups to attempt:
+Fixtures:
 
 - `toolchain-R00-clean-golden`: valid `rust-toolchain.toml`, no legacy file, MSRV aligned.
 - `toolchain-R10-filetree-violations`: missing `rust-toolchain.toml`, legacy `rust-toolchain` file.
-- `toolchain-R20-policy-violations`: wrong channel/components and MSRV older than package policy.
+- `toolchain-R20-policy-violations`: missing required component and unparseable Cargo MSRV.
 
-Expected risk:
+Minimization result:
 
 - Missing `rust-toolchain.toml` hides channel and MSRV checks. Keep missing-file fixture separate from wrong-value fixture.
 

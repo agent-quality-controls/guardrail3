@@ -1,0 +1,22 @@
+id = "toolchain-R10-filetree-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "toolchain", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree_invalid"
+
+rule_family = "toolchain"
+target_rules = [
+  "g3rs-toolchain/exists",
+  "g3rs-toolchain/legacy-file",
+]
+intentionally_invalid = [
+  "modern_toolchain_missing",
+  "legacy_toolchain_file_present",
+]
+expected_findings = [
+  "g3rs-toolchain/exists",
+  "g3rs-toolchain/legacy-file",
+]

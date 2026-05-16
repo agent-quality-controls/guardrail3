@@ -1256,6 +1256,66 @@
       "fixture_id": "fmt-R20-policy-violations",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== fmt ==\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt edition wrong\n  edition = 2021 but expected 2024. Update edition in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt style_edition wrong\n  style_edition = 2021 but expected 2024. Update style_edition in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt max_width wrong\n  max_width = 80 but expected 100. Update max_width in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt tab_spaces wrong\n  tab_spaces = 2 but expected 4. Update tab_spaces in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt use_field_init_shorthand wrong\n  use_field_init_shorthand = false but expected true. Update use_field_init_shorthand in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt use_try_shorthand wrong\n  use_try_shorthand = false but expected true. Update use_try_shorthand in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt reorder_imports wrong\n  reorder_imports = false but expected true. Update reorder_imports in rustfmt.toml.\n[Warn] g3rs-fmt/rustfmt-required-settings rustfmt.toml rustfmt reorder_modules wrong\n  reorder_modules = false but expected true. Update reorder_modules in rustfmt.toml.\n[Info] g3rs-fmt/rustfmt-extra-settings-inventory rustfmt.toml rustfmt extra setting: group_imports\n  `group_imports` in `rustfmt.toml` is not part of the standard rustfmt baseline. Verify it is intentional.\n[Warn] g3rs-fmt/nightly-keys-on-stable rustfmt.toml nightly-only rustfmt setting `group_imports` on stable\n  `group_imports` is nightly-only, but rust-toolchain.toml uses `stable`. Either remove `group_imports` from rustfmt.toml or switch the toolchain channel to nightly.\n[Warn] g3rs-fmt/edition-mismatch rustfmt.toml rustfmt edition differs from Cargo edition\n  rustfmt edition `2021` differs from Cargo edition `2024`. Update `edition` in rustfmt.toml to `2024`.\n[Error] g3rs-fmt/ignore-escape-hatch rustfmt.toml rustfmt ignore missing reason\n  `rustfmt.toml` uses `ignore = [\"generated\"]` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml with rule = \"g3rs-fmt/ignore-escape-hatch\", file = \"rustfmt.toml\", selector = \"ignore\", and a reason explaining why these paths are excluded.\n[Warn] g3rs-fmt/ignore-escape-hatch rustfmt.toml rustfmt ignore count\n  `rustfmt.toml` has 1 rustfmt ignore waiver.\n[Error] g3rs-fmt/per-crate-override crates/member/rustfmt.toml Illegal nested rustfmt config\n  `rustfmt.toml` below repository root is forbidden; rustfmt policy is root-only. Delete this file and ensure all formatting settings are in the root `rustfmt.toml`.\n[Warn] g3rs-fmt/dual-file-conflict rustfmt.toml Conflicting rustfmt config files\n  Both `rustfmt.toml` and `.rustfmt.toml` exist in `.`. Delete `.rustfmt.toml` and keep `rustfmt.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "toolchain",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:461b8a76ecd24a09aaf3377635d178e4583def00f0a70ef6d47ed70a8b106466",
+      "fixture_id": "toolchain-R00-clean-golden",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== toolchain ==\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain channel is pinned\n  Pinned channel `1.85.0` is acceptable.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `clippy` present\n  `clippy` is listed in `components`.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `rustfmt` present\n  `rustfmt` is listed in `components`.\n[Info] g3rs-toolchain/msrv-consistency rust-toolchain.toml pinned toolchain satisfies MSRV\n  Pinned toolchain `1.85.0` is compatible with Cargo rust-version `1.85`.\n[Info] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml exists\n  Found rust-toolchain.toml at workspace root.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "toolchain",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:9c49cf782a08ec1b81c8f6330a1fbf301268a48bf6186f26de6ef73c66a33b3f",
+      "fixture_id": "toolchain-R10-filetree-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== toolchain ==\n[Error] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml missing\n  Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.\n[Warn] g3rs-toolchain/legacy-file rust-toolchain legacy rust-toolchain file present\n  Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "toolchain",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:23e8b747630b2c36c74ab68efcaf3eae5652eb4495986c186221f7c3466e8613",
+      "fixture_id": "toolchain-R20-policy-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== toolchain ==\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain channel is pinned\n  Pinned channel `1.84.0` is acceptable.\n[Warn] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `clippy` missing\n  Add `clippy` to `[toolchain].components`.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `rustfmt` present\n  `rustfmt` is listed in `components`.\n[Error] g3rs-toolchain/msrv-consistency Cargo.toml Cargo rust-version is unparseable\n  Cannot compare pinned toolchain against invalid Cargo rust-version `not-a-version`.\n[Info] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml exists\n  Found rust-toolchain.toml at workspace root.\n"
     }
   ],
   "schema_version": "g3rs-replay-v1",
