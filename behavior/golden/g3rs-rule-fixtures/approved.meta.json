@@ -1,15 +1,31 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-16T21-26-21.41241Z-078cb096",
-  "run_commit": "e5454bd9e",
+  "run_id": "2026-05-16T22-15-16.475624Z-078cb096",
+  "run_commit": "0d2a51922",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T21:26:21.41241Z",
-  "fixture_hash": "sha256:653a1ece073005759929a877d2e488f77e2da0c1b68403d572e6d5d4e6568f03",
+  "recorded_at": "2026-05-16T22:15:16.475624Z",
+  "fixture_hash": "sha256:9a1b0beb929dbb351d06c35b574e94b3a9cdcfe072fb89b3958c2c4267a84def",
   "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
   "fixtures": [
+    {
+      "path": "behavior/fixtures/g3rs-rules/arch/arch-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:7e58f608bf880fd815f2a4d874acabca6c638f3fb4a2e3aca627a93e60327acf"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/arch/arch-R10-package-contract-violations/fixture.toml",
+      "sha256": "sha256:0a1151bfef49e34f7ed5d9b71fc477b4810cd52956c40e7e9a18be2300e2856f"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/arch/arch-R20-filetree-violations/fixture.toml",
+      "sha256": "sha256:48165579b4137c9ef5ec97ab8e5a90398dbd40c637ced5f153211153b830006e"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/arch/arch-R30-source-violations/fixture.toml",
+      "sha256": "sha256:682899cfa224dc944a9e8b7da4ddd4addf50f1e55b0485a90c45e16d95a56e6f"
+    },
     {
       "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R00-clean-golden/fixture.toml",
       "sha256": "sha256:5f073788afc869f22e9704829f9c311f82bdf8f7e0c69acbcf73eef5b62e344c"
@@ -135,5 +151,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Add topology family rule fixtures"
+  "comment": "Add arch family rule fixtures"
 }

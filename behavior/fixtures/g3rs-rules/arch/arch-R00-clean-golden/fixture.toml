@@ -1,0 +1,19 @@
+id = "arch-R00-clean-golden"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_clean_golden"
+
+rule_family = "arch"
+target_rules = []
+expected_findings = [
+  "g3rs-arch/feature-contract",
+  "g3rs-arch/crate-has-facade",
+  "g3rs-arch/mod-rs-required",
+  "g3rs-arch/lib-facade-only",
+  "g3rs-arch/feature-gated-exports",
+  "g3rs-arch/mod-facade-only",
+]

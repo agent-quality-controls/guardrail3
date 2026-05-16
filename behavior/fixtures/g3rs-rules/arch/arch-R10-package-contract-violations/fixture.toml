@@ -1,0 +1,22 @@
+id = "arch-R10-package-contract-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "arch"
+target_rules = [
+  "g3rs-arch/dependency-count-split",
+  "g3rs-arch/feature-contract",
+  "g3rs-arch/no-boundary-crossing",
+  "g3rs-arch/shared-flag-required",
+]
+expected_findings = [
+  "g3rs-arch/dependency-count-split",
+  "g3rs-arch/feature-contract",
+  "g3rs-arch/no-boundary-crossing",
+  "g3rs-arch/shared-flag-required",
+]

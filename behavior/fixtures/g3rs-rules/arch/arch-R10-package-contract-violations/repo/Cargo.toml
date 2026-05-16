@@ -1,0 +1,31 @@
+[package]
+name = "arch_package_bad"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[package.metadata.guardrail3]
+shared = true
+
+[workspace]
+members = ["crates/runtime", "crates/assertions"]
+resolver = "3"
+
+[dependencies]
+dep01 = "1"
+dep02 = "1"
+dep03 = "1"
+dep04 = "1"
+dep05 = "1"
+dep06 = "1"
+dep07 = "1"
+dep08 = "1"
+dep09 = "1"
+dep10 = "1"
+dep11 = "1"
+dep12 = "1"
+dep13 = "1"

@@ -90,12 +90,11 @@ broken_fixtures = [
   "topology-R20-input-failure",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "arch"
 rule_count = 10
-fixture_dir = "behavior/fixtures/g3rs-rules/arch"
-planned_groups = [
-  "arch-R00-clean-golden",
+clean_fixture = "arch-R00-clean-golden"
+broken_fixtures = [
   "arch-R10-package-contract-violations",
   "arch-R20-filetree-violations",
   "arch-R30-source-violations",

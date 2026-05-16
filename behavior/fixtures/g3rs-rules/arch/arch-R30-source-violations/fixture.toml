@@ -1,0 +1,22 @@
+id = "arch-R30-source-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_breakage"
+
+rule_family = "arch"
+target_rules = [
+  "g3rs-arch/lib-facade-only",
+  "g3rs-arch/feature-gated-exports",
+  "g3rs-arch/mod-facade-only",
+  "g3rs-arch/no-path-attr",
+]
+expected_findings = [
+  "g3rs-arch/lib-facade-only",
+  "g3rs-arch/feature-gated-exports",
+  "g3rs-arch/mod-facade-only",
+  "g3rs-arch/no-path-attr",
+]

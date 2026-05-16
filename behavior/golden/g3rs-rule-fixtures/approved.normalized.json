@@ -9,6 +9,86 @@
         "--path",
         ".",
         "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:f87adf1453c6e25e473fde288ca6b5fcf04186c9a41e30ae74ac899855e9f8ac",
+      "fixture_id": "arch-R00-clean-golden",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== arch ==\n[Info] g3rs-arch/feature-contract Cargo.toml feature contract supports facade exports\n  Crate `` has facade exports with a valid named-feature contract.\n[Info] g3rs-arch/crate-has-facade Cargo.toml crate has facade entry point\n  Crate `` has a facade entry point (lib.rs).\n[Info] g3rs-arch/mod-rs-required src/api/mod.rs module directory has mod.rs\n  Module directory `src/api` has a proper mod.rs facade.\n[Info] g3rs-arch/lib-facade-only src/lib.rs lib.rs is facade-only\n  lib.rs in `` contains only facade declarations.\n[Info] g3rs-arch/feature-gated-exports src/lib.rs facade exports properly feature-gated\n  lib.rs in `` has all exports behind named features.\n[Info] g3rs-arch/mod-facade-only src/api/mod.rs mod.rs is facade-only\n  mod.rs at `src/api/mod.rs` contains only facade declarations.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:c03fd970cd2d0c831b6d5ee0bd53d076ee014ec40d22a59ac38b01fe3103cef5",
+      "fixture_id": "arch-R10-package-contract-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== arch ==\n[Error] g3rs-arch/dependency-count-split Cargo.toml crate has too many production dependencies, must split\n  Crate `` has 13 production dependencies in `[dependencies]` and `[build-dependencies]` (max 12). Move related code behind smaller crate boundaries so the runtime crate carries fewer direct production links.\n[Error] g3rs-arch/feature-contract Cargo.toml missing `default` feature\n  Crate `` has facade exports but no `default` feature in [features]. Add `default = [\"feature1\", \"feature2\", ...]` so the facade has an explicit feature contract.\n[Error] g3rs-arch/no-boundary-crossing crates/runtime/Cargo.toml dependency crosses crate boundary\n  `crates/runtime` depends on `crates/assertions` (via `arch_assertions`), but this crosses the boundary of the root workspace. Depending on internal crates couples you to another package's structure. Depend on the root workspace's facade crate instead.\n[Error] g3rs-arch/shared-flag-required crates/runtime/Cargo.toml non-child dependency requires shared flag\n  `crates/runtime` depends on `crates/assertions` (via `arch_assertions`), but `crates/assertions` is not marked as shared. Dependencies on non-child crates are forbidden by default to prevent coupling. If this crate is genuinely a shared dependency (types, contracts, utilities), add `shared = true` under `[package.metadata.guardrail3]` in its Cargo.toml. Otherwise, depend on the parent facade instead.\n[Info] g3rs-arch/crate-has-facade Cargo.toml crate has facade entry point\n  Crate `` has a facade entry point (lib.rs).\n[Info] g3rs-arch/crate-has-facade crates/assertions/Cargo.toml crate has facade entry point\n  Crate `crates/assertions` has a facade entry point (lib.rs).\n[Info] g3rs-arch/crate-has-facade crates/runtime/Cargo.toml crate has facade entry point\n  Crate `crates/runtime` has a facade entry point (lib.rs).\n[Info] g3rs-arch/mod-rs-required src/api/mod.rs module directory has mod.rs\n  Module directory `src/api` has a proper mod.rs facade.\n[Info] g3rs-arch/lib-facade-only src/lib.rs lib.rs is facade-only\n  lib.rs in `` contains only facade declarations.\n[Info] g3rs-arch/feature-gated-exports src/lib.rs facade exports properly feature-gated\n  lib.rs in `` has all exports behind named features.\n[Info] g3rs-arch/lib-facade-only crates/assertions/src/lib.rs lib.rs is facade-only\n  lib.rs in `crates/assertions` contains only facade declarations.\n[Info] g3rs-arch/lib-facade-only crates/runtime/src/lib.rs lib.rs is facade-only\n  lib.rs in `crates/runtime` contains only facade declarations.\n[Info] g3rs-arch/mod-facade-only src/api/mod.rs mod.rs is facade-only\n  mod.rs at `src/api/mod.rs` contains only facade declarations.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:74569c6d70262ac9f87a15f0a6cb5f88aec74b8d3df8a15d3e80672be0814d7a",
+      "fixture_id": "arch-R20-filetree-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== arch ==\n[Error] g3rs-arch/crate-has-facade Cargo.toml crate missing facade entry point\n  Crate `` has no lib.rs or main.rs. Every crate must have a facade entry point. Create `src/lib.rs` or `src/main.rs` and re-export only the crate's intended public API.\n[Info] g3rs-arch/crate-has-facade crates/worker/Cargo.toml crate has facade entry point\n  Crate `crates/worker` has a facade entry point (lib.rs).\n[Error] g3rs-arch/mod-rs-required crates/worker/src/lib.rs module directory uses foo.rs convention\n  Module directory `crates/worker/src/nested` uses the foo.rs-alongside-foo/ convention. Use `crates/worker/src/nested/mod.rs` instead. The module facade must live inside the module directory.\n[Info] g3rs-arch/lib-facade-only crates/worker/src/lib.rs lib.rs is facade-only\n  lib.rs in `crates/worker` contains only facade declarations.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:532f47b68ea66535438d1fd69cda978e540763acb362b8d2d0d5a0f01e026ad6",
+      "fixture_id": "arch-R30-source-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== arch ==\n[Info] g3rs-arch/feature-contract Cargo.toml feature contract supports facade exports\n  Crate `` has facade exports with a valid named-feature contract.\n[Info] g3rs-arch/crate-has-facade Cargo.toml crate has facade entry point\n  Crate `` has a facade entry point (lib.rs).\n[Info] g3rs-arch/mod-rs-required src/api/mod.rs module directory has mod.rs\n  Module directory `src/api` has a proper mod.rs facade.\n[Error] g3rs-arch/lib-facade-only src/lib.rs lib.rs must be facade-only\n  lib.rs contains function `leaked`. Move it to a submodule. lib.rs must only contain mod/use declarations and re-exports.\n[Error] g3rs-arch/feature-gated-exports src/lib.rs facade exports not feature-gated\n  lib.rs in `` has 1 ungated pub exports: `api`. Every pub mod/use in lib.rs must be behind #[cfg(feature = \"...\")].\n[Error] g3rs-arch/mod-facade-only src/api/mod.rs mod.rs must be facade-only\n  mod.rs contains function `leaked_mod`. Move it to a sibling .rs file in the same directory. mod.rs must only contain mod/use declarations and re-exports.\n[Error] g3rs-arch/no-path-attr src/lib.rs #[path] attribute forbidden\n  `#[path = \"hidden.rs\"]` on `mod hidden` bypasses the module facade. Use standard module resolution with mod.rs instead. Every module directory must have a mod.rs that serves as its facade.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
         "cargo",
         "--rules-only",
         "--inventory"

@@ -58,6 +58,9 @@ fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
 name = "arch"
 remaining_rule_rows = 31
 fixture_dir = "behavior/fixtures/g3rs-rules/arch"
+status = "completed"
+covered_by_cli_output = 31
+kept_internal_unit_tests = 0
 
 [[family]]
 name = "release"
@@ -163,6 +166,31 @@ command = "python3 scripts/behavior/verify-test-deletion.py"
 
 [[verification]]
 command = "bash scripts/behavior/verify-all.sh"
+
+[[fixture]]
+id = "arch-R10-package-contract-violations"
+required_results = [
+  "Error|g3rs-arch/dependency-count-split|crate has too many production dependencies, must split|Cargo.toml",
+  "Error|g3rs-arch/feature-contract|missing `default` feature|Cargo.toml",
+  "Error|g3rs-arch/no-boundary-crossing|dependency crosses crate boundary|crates/runtime/Cargo.toml",
+  "Error|g3rs-arch/shared-flag-required|non-child dependency requires shared flag|crates/runtime/Cargo.toml",
+]
+
+[[fixture]]
+id = "arch-R20-filetree-violations"
+required_results = [
+  "Error|g3rs-arch/crate-has-facade|crate missing facade entry point|Cargo.toml",
+  "Error|g3rs-arch/mod-rs-required|module directory uses foo.rs convention|crates/worker/src/lib.rs",
+]
+
+[[fixture]]
+id = "arch-R30-source-violations"
+required_results = [
+  "Error|g3rs-arch/lib-facade-only|lib.rs must be facade-only|src/lib.rs",
+  "Error|g3rs-arch/feature-gated-exports|facade exports not feature-gated|src/lib.rs",
+  "Error|g3rs-arch/mod-facade-only|mod.rs must be facade-only|src/api/mod.rs",
+  "Error|g3rs-arch/no-path-attr|#[path] attribute forbidden|src/lib.rs",
+]
 
 [[fixture]]
 id = "cargo-R10-policy-violations"

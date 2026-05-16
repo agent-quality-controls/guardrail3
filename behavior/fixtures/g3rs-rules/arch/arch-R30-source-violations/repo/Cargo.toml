@@ -1,0 +1,20 @@
+[package]
+name = "arch_source_bad"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = ["api"]
+api = []
+
+[package.metadata.guardrail3]
+shared = true
+
+[workspace]
+members = []
+resolver = "3"
