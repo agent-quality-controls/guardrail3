@@ -1798,7 +1798,6 @@ dependencies = [
  "clap",
  "g3-workspace-crawl",
  "guardrail3-rs-app-types",
- "guardrail3-rs-assertions",
  "guardrail3-rs-family-runner-policy",
  "guardrail3-rs-family-runner-process",
  "guardrail3-rs-family-runner-quality",
@@ -1808,7 +1807,6 @@ dependencies = [
  "guardrail3-rs-packages",
  "guardrail3-rs-report",
  "guardrail3-rs-validate-command",
- "tempfile",
 ]
 
 [[package]]
@@ -1958,9 +1956,7 @@ dependencies = [
 name = "guardrail3-rs-report"
 version = "0.1.0"
 dependencies = [
- "guardrail3-check-types",
  "guardrail3-rs-app-types",
- "guardrail3-rs-report-assertions",
 ]
 
 [[package]]
