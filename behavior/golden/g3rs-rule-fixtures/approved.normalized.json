@@ -560,6 +560,66 @@
       "fixture_id": "toolchain-R20-policy-violations",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== toolchain ==\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain channel is pinned\n  Pinned channel `1.84.0` is acceptable.\n[Warn] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `clippy` missing\n  Add `clippy` to `[toolchain].components`.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `rustfmt` present\n  `rustfmt` is listed in `components`.\n[Error] g3rs-toolchain/msrv-consistency Cargo.toml Cargo rust-version is unparseable\n  Cannot compare pinned toolchain against invalid Cargo rust-version `not-a-version`.\n[Info] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml exists\n  Found rust-toolchain.toml at workspace root.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "topology",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:8c8d55dff430ef81dec760a201645cf616c29aafdea02c274fbf0a91b1714390",
+      "fixture_id": "topology-R00-clean-golden",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\nNo findings.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "topology",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:791233023b7ee55733f425da0efd041b9d320fb869ea8563941acba0fc9f2862",
+      "fixture_id": "topology-R10-structure-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== topology ==\n[Error] g3rs-topology/no-nested-workspaces crates/core/nested/Cargo.toml Nested workspace `crates/core/nested` is forbidden\n  `crates/core/nested/Cargo.toml` declares a nested workspace under `.`. Cargo does not support nested workspaces. Remove the `[workspace]` section from this Cargo.toml, or move it so it is not nested under `.`.\n[Error] g3rs-topology/no-nested-guardrail3-rs-toml crates/core/inner/guardrail3-rs.toml Nested adopted Rust unit `crates/core/inner` is forbidden\n  `crates/core/inner/guardrail3-rs.toml` declares a nested adopted Rust unit under `.`. Nested guardrail3 adoption breaks ownership routing. Remove `crates/core/inner/guardrail3-rs.toml`, or move the inner unit so it is not nested under `.`.\n[Error] g3rs-topology/declared-workspace-members-only Cargo.toml Workspace `.` has extra member `crates/ghost`\n  `Cargo.toml` declares workspace member `crates/ghost`, but it does not match a real owned child Rust root. Workspace membership must exactly match real child Rust roots. Remove `crates/ghost` from `[workspace] members`, or create the missing crate.\n[Error] g3rs-topology/declared-workspace-members-only crates/extra/Cargo.toml Workspace child `crates/extra` must be declared explicitly\n  `crates/extra/Cargo.toml` sits under workspace `.`, but it is not a declared workspace member. Workspace membership must exactly match real child Rust roots. Add this crate's path to `[workspace] members` in `./Cargo.toml`.\n[Error] g3rs-topology/member-paths-must-not-escape-root Cargo.toml Workspace `.` uses escaping member path `../shared`\n  `Cargo.toml` declares member pattern `../shared`, which points outside the workspace directory. Workspace members must be relative subdirectory paths inside the workspace root, not absolute paths or `..` escapes. Change the pattern to a relative subdirectory path, or move the target crate inside the workspace.\n[Error] g3rs-topology/workspace-local-file-placement crates/core/rustfmt.toml `fmt` file `crates/core/rustfmt.toml` is illegally placed\n  fmt files must live at the validation root, not inside a workspace member or nested subdirectory.\n[Error] g3rs-topology/workspace-local-file-placement crates/core/inner/guardrail3-rs.toml `cargo` file `crates/core/inner/guardrail3-rs.toml` is illegally placed\n  `crates/core/inner/guardrail3-rs.toml` is nested under `crates/core/inner`. Workspace-local `cargo` files must live directly at the workspace root `.` rather than in nested subdirectories.\n[Error] g3rs-topology/workspace-local-file-placement crates/core/inner/guardrail3-rs.toml `deps` file `crates/core/inner/guardrail3-rs.toml` is illegally placed\n  `crates/core/inner/guardrail3-rs.toml` is nested under `crates/core/inner`. Workspace-local `deps` files must live directly at the workspace root `.` rather than in nested subdirectories.\n[Error] g3rs-topology/workspace-local-file-placement crates/core/inner/guardrail3-rs.toml `garde` file `crates/core/inner/guardrail3-rs.toml` is illegally placed\n  `crates/core/inner/guardrail3-rs.toml` is nested under `crates/core/inner`. Workspace-local `garde` files must live directly at the workspace root `.` rather than in nested subdirectories.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "topology",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:e973310a6cbcd58b927ef5663d70d34e42864d5b7b5cefd0918ff9af3322c348",
+      "fixture_id": "topology-R20-input-failure",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== topology ==\n[Error] g3rs-topology/required-inputs-fail-closed bad/Cargo.toml Rust topology required input failed closed\n  invalid Cargo.toml: TOML parse error at line 1, column 9\n  |\n1 | [package\n  |         ^\ninvalid table header\nexpected `.`, `]`\n\n"
     }
   ],
   "schema_version": "g3rs-replay-v1",

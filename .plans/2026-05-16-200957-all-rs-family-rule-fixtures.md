@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo, fmt, toolchain, deps, clippy, and deny are complete under the new standard.
+Cargo, fmt, toolchain, deps, clippy, deny, and topology are complete under the new standard.
 
 Cargo currently has:
 
@@ -105,6 +105,18 @@ Those seven fixtures cover 26 of 29 active deny rule IDs:
 - one clean golden fixture exits 0
 - six broken fixtures make 26 deny rules emit `Error` or `Warn`
 - `g3rs-deny/extra-feature-bans-inventory`, `g3rs-deny/highlight-inventory`, and `g3rs-deny/stricter-advisories-inventory` are explicit Info-only inventory rules
+
+Topology currently has:
+
+- `topology-R00-clean-golden`
+- `topology-R10-structure-violations`
+- `topology-R20-input-failure`
+
+Those three fixtures cover all 6 active topology rule IDs:
+
+- one clean golden fixture exits 0
+- one structural broken fixture covers membership, escaping member paths, nested workspace, nested guardrail config, and illegal workspace-local file placement
+- one input-failure fixture covers fail-closed required input behavior
 
 ## Global Fixture Contract
 
@@ -761,6 +773,8 @@ Minimization result:
 
 Rule count: 6.
 
+Status: complete.
+
 Target fixture directory:
 
 ```text
@@ -776,16 +790,16 @@ Rules:
 - `g3rs-topology/required-inputs-fail-closed`
 - `g3rs-topology/workspace-local-file-placement`
 
-Fixture groups to attempt:
+Fixtures:
 
 - `topology-R00-clean-golden`: valid workspace topology and local file placement.
-- `topology-R10-workspace-membership-violations`: undeclared member, missing declared member, escaping member path.
-- `topology-R20-nesting-and-placement-violations`: nested workspace, nested guardrail config, illegal workspace-local files.
-- `topology-R30-input-failure-violations`: malformed required input that must fail closed.
+- `topology-R10-structure-violations`: undeclared member, missing declared member, escaping member path, nested workspace, nested guardrail config, illegal workspace-local files.
+- `topology-R20-input-failure`: malformed descendant Cargo input that must fail closed.
 
-Expected risk:
+Minimization result:
 
-- Malformed root Cargo input can hide membership rules. Keep required input failure separate.
+- Membership, escaping member path, nesting, and illegal local file placement can coexist without hiding each other.
+- Required input failure stays separate because malformed input creates a different filetree fact and should not be mixed with normal topology structure failures.
 
 ## Build Order
 
