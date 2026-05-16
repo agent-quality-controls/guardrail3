@@ -1,0 +1,16 @@
+id = "topology-R20-input-failure"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "topology", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "topology"
+target_rules = [
+  "g3rs-topology/required-inputs-fail-closed",
+]
+expected_findings = [
+  "g3rs-topology/required-inputs-fail-closed",
+]

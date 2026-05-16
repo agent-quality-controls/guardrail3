@@ -81,15 +81,13 @@ inventory_only_rules = [
   "g3rs-deny/stricter-advisories-inventory",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "topology"
 rule_count = 6
-fixture_dir = "behavior/fixtures/g3rs-rules/topology"
-planned_groups = [
-  "topology-R00-clean-golden",
-  "topology-R10-workspace-membership-violations",
-  "topology-R20-nesting-and-placement-violations",
-  "topology-R30-input-failure-violations",
+clean_fixture = "topology-R00-clean-golden"
+broken_fixtures = [
+  "topology-R10-structure-violations",
+  "topology-R20-input-failure",
 ]
 
 [[planned_family]]

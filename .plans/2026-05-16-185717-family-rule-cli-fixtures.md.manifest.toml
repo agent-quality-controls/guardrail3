@@ -44,6 +44,12 @@ fixture_dir = "behavior/fixtures/g3rs-rules/deny"
 status = "completed"
 
 [[family]]
+name = "topology"
+remaining_rule_rows = 6
+fixture_dir = "behavior/fixtures/g3rs-rules/topology"
+status = "completed"
+
+[[family]]
 name = "apparch"
 remaining_rule_rows = 44
 fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
@@ -413,4 +419,24 @@ required_results = [
   "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
   "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
   "Warn|g3rs-deny/ignore-accumulation|advisory ignore list is large|deny.toml",
+]
+
+[[fixture]]
+id = "topology-R10-structure-violations"
+required_results = [
+  "Error|g3rs-topology/no-nested-workspaces|Nested workspace `crates/core/nested` is forbidden|crates/core/nested/Cargo.toml",
+  "Error|g3rs-topology/no-nested-guardrail3-rs-toml|Nested adopted Rust unit `crates/core/inner` is forbidden|crates/core/inner/guardrail3-rs.toml",
+  "Error|g3rs-topology/declared-workspace-members-only|Workspace `.` has extra member `crates/ghost`|Cargo.toml",
+  "Error|g3rs-topology/declared-workspace-members-only|Workspace child `crates/extra` must be declared explicitly|crates/extra/Cargo.toml",
+  "Error|g3rs-topology/member-paths-must-not-escape-root|Workspace `.` uses escaping member path `../shared`|Cargo.toml",
+  "Error|g3rs-topology/workspace-local-file-placement|`fmt` file `crates/core/rustfmt.toml` is illegally placed|crates/core/rustfmt.toml",
+  "Error|g3rs-topology/workspace-local-file-placement|`cargo` file `crates/core/inner/guardrail3-rs.toml` is illegally placed|crates/core/inner/guardrail3-rs.toml",
+  "Error|g3rs-topology/workspace-local-file-placement|`deps` file `crates/core/inner/guardrail3-rs.toml` is illegally placed|crates/core/inner/guardrail3-rs.toml",
+  "Error|g3rs-topology/workspace-local-file-placement|`garde` file `crates/core/inner/guardrail3-rs.toml` is illegally placed|crates/core/inner/guardrail3-rs.toml",
+]
+
+[[fixture]]
+id = "topology-R20-input-failure"
+required_results = [
+  "Error|g3rs-topology/required-inputs-fail-closed|Rust topology required input failed closed|bad/Cargo.toml",
 ]
