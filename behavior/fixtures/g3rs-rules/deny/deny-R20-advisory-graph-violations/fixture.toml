@@ -1,0 +1,22 @@
+id = "deny-R20-advisory-graph-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deny", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "deny"
+target_rules = [
+  "g3rs-deny/deprecated-advisories",
+  "g3rs-deny/advisories-baseline",
+  "g3rs-deny/graph-all-features",
+  "g3rs-deny/graph-no-default-features",
+]
+expected_findings = [
+  "g3rs-deny/deprecated-advisories",
+  "g3rs-deny/advisories-baseline",
+  "g3rs-deny/graph-all-features",
+  "g3rs-deny/graph-no-default-features",
+]

@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo, fmt, toolchain, deps, and clippy are complete under the new standard.
+Cargo, fmt, toolchain, deps, clippy, and deny are complete under the new standard.
 
 Cargo currently has:
 
@@ -89,6 +89,22 @@ Those seven fixtures cover 22 of 23 active clippy rule IDs:
 - six broken fixtures make 22 clippy rules emit `Error` or `Warn`
 - `g3rs-clippy/policy-context-parseable` is not externally breakable through the CLI because invalid `guardrail3-rs.toml` is rejected before clippy runs
 - the clean fixture still inventories `g3rs-clippy/policy-context-parseable`
+
+Deny currently has:
+
+- `deny-R00-clean-golden`
+- `deny-R10-missing-config`
+- `deny-R11-shadowing`
+- `deny-R20-advisory-graph-violations`
+- `deny-R30-license-violations`
+- `deny-R40-ban-violations`
+- `deny-R50-source-ignore-violations`
+
+Those seven fixtures cover 26 of 29 active deny rule IDs:
+
+- one clean golden fixture exits 0
+- six broken fixtures make 26 deny rules emit `Error` or `Warn`
+- `g3rs-deny/extra-feature-bans-inventory`, `g3rs-deny/highlight-inventory`, and `g3rs-deny/stricter-advisories-inventory` are explicit Info-only inventory rules
 
 ## Global Fixture Contract
 
@@ -373,6 +389,8 @@ Expected risk:
 
 Rule count: 29.
 
+Status: complete.
+
 Target fixture directory:
 
 ```text
@@ -411,19 +429,27 @@ Rules:
 - `g3rs-deny/wildcards-inventory`
 - `g3rs-deny/wrappers`
 
-Fixture groups to attempt:
+Fixtures:
 
 - `deny-R00-clean-golden`: valid `deny.toml` placement and strict policy.
-- `deny-R10-filetree-violations`: missing coverage and shadowing.
-- `deny-R20-advisory-policy-violations`: advisory baseline, deprecated advisory handling, graph feature checks.
-- `deny-R30-license-policy-violations`: license baseline, confidence threshold, copyleft allowlist, exceptions.
-- `deny-R40-ban-policy-violations`: baseline completeness, duplicate entries, wildcards, tokio full, wrappers, multiple version floor.
-- `deny-R50-source-policy-violations`: unknown sources, registry/git allow inventory, skip/ignore hygiene and accumulation.
-- `deny-R60-inventory-only-policy`: highlight, extra deny bans, extra feature bans, stricter advisories inventory.
+- `deny-R10-missing-config`: missing root deny config.
+- `deny-R11-shadowing`: duplicate root deny configs.
+- `deny-R20-advisory-graph-violations`: advisory baseline, deprecated advisory handling, graph feature checks.
+- `deny-R30-license-violations`: license baseline, confidence threshold, copyleft allowlist, exceptions.
+- `deny-R40-ban-violations`: baseline completeness, duplicate entries, wildcards, tokio full, wrappers, multiple version floor, skip hygiene.
+- `deny-R50-source-ignore-violations`: unknown sources, registry/git allow inventory, ignore hygiene, ignore accumulation, unknown keys.
 
-Expected risk:
+Inventory-only rules:
 
-- Deny config parse failure is likely already covered by global invalid-input fixtures. If a deny rule cannot break through family CLI without replacing config parse errors, keep that test internal.
+- `g3rs-deny/extra-feature-bans-inventory`
+- `g3rs-deny/highlight-inventory`
+- `g3rs-deny/stricter-advisories-inventory`
+
+Minimization result:
+
+- Missing deny config must stay separate because it prevents config checks from running.
+- Shadowing must stay separate because it requires a valid selected root deny config.
+- Advisory, license, ban, and source fixtures each break independent config sections without causing deny TOML parse failure.
 
 ### deps
 

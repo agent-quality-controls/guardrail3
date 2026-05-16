@@ -229,6 +229,146 @@
         "--path",
         ".",
         "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:069c0f09f223f5e7ef1f6690e538dc1e3de6b441ac18756b6833271f13028b8a",
+      "fixture_id": "deny-R00-clean-golden",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:ef8931a986f6a29784aadaa3aeeec752657d07c4d4a3f154b2cfd2c60773fa8c",
+      "fixture_id": "deny-R10-missing-config",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Error] g3rs-deny/coverage - workspace root uncovered by deny config\n  workspace root `.` is not covered by any allowed deny config.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:1fbe2d527b23bc7614cc9ef3e24d868c4b0a3eec8113b43c2048f0251ef1ba2d",
+      "fixture_id": "deny-R11-shadowing",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n[Error] g3rs-deny/shadowing .deny.toml multiple deny configs at one policy root\n  `.` has multiple accepted deny configs: .deny.toml, deny.toml.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:b247e9cd3ca92b92f29472a93008baeb902c9a3cda0bc9883a446f206f262249",
+      "fixture_id": "deny-R20-advisory-graph-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Warn] g3rs-deny/deprecated-advisories deny.toml deprecated advisory field `vulnerability`\n  `deny.toml` uses deprecated `[advisories].vulnerability`.\n[Warn] g3rs-deny/deprecated-advisories deny.toml deprecated advisory field `notice`\n  `deny.toml` uses deprecated `[advisories].notice`.\n[Warn] g3rs-deny/deprecated-advisories deny.toml deprecated advisory field `unsound`\n  `deny.toml` uses deprecated `[advisories].unsound`.\n[Error] g3rs-deny/advisories-baseline deny.toml advisories `unmaintained` has wrong value\n  `deny.toml` must set `[advisories].unmaintained = \"workspace\"`, found `all`.\n[Error] g3rs-deny/advisories-baseline deny.toml advisories `yanked` has wrong value\n  `deny.toml` must set `[advisories].yanked = \"deny\"`, found `warn`.\n[Info] g3rs-deny/stricter-advisories-inventory deny.toml advisories `unmaintained` stricter than baseline\n  `deny.toml` sets `[advisories].unmaintained = \"all\"`.\n[Error] g3rs-deny/graph-all-features deny.toml graph all-features must be true\n  `deny.toml` must set `[graph].all-features = true`.\n[Error] g3rs-deny/graph-no-default-features deny.toml graph no-default-features must be false\n  `deny.toml` must set `[graph].no-default-features = false`.\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:9b8d1c0530982f77f0b98afd9370fe1d24b9b20eaae606ec8491bfda373e8a2a",
+      "fixture_id": "deny-R30-license-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Error] g3rs-deny/license-allow-baseline deny.toml baseline license missing\n  `deny.toml` is missing allowed license `MIT`.\n[Error] g3rs-deny/license-allow-baseline deny.toml baseline license missing\n  `deny.toml` is missing allowed license `MPL-2.0`.\n[Error] g3rs-deny/license-allow-baseline deny.toml unexpected allowed license\n  `deny.toml` allows unexpected license `GPL-3.0-only`.\n[Error] g3rs-deny/license-allow-baseline deny.toml licenses.private.ignore must be true\n  `deny.toml` must set `[licenses.private].ignore = true`.\n[Warn] g3rs-deny/confidence-threshold deny.toml confidence-threshold weaker than baseline\n  `deny.toml` sets `confidence-threshold = 0.5`.\n[Warn] g3rs-deny/copyleft-allowlist deny.toml copyleft license allowed\n  `deny.toml` allows copyleft license `GPL-3.0-only`.\n[Error] g3rs-deny/license-exceptions-inventory deny.toml license exception reason too weak\n  `deny.toml` has license exception `bad` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Warn] g3rs-deny/license-exceptions-inventory - license exception count\n  `deny.toml` has 1 license exceptions (0 documented, 0 missing or invalid reasons, 1 weak reasons).\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:f6271dabb9af206498eee01f7202e3bb34531b069590643db7c1e82c5d851074",
+      "fixture_id": "deny-R40-ban-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Warn] g3rs-deny/multiple-versions-floor deny.toml multiple-versions weaker than baseline\n  `deny.toml` sets `[bans].multiple-versions = \"warn\"`.\n[Info] g3rs-deny/highlight-inventory deny.toml highlight differs from baseline\n  `deny.toml` sets `[bans].highlight = simplest`.\n[Error] g3rs-deny/allow-wildcard-paths deny.toml allow-wildcard-paths must be true\n  `deny.toml` must set `[bans].allow-wildcard-paths = true`.\n[Warn] g3rs-deny/wildcards-inventory deny.toml wildcards differs from baseline\n  `deny.toml` sets `[bans].wildcards = deny`.\n[Warn] g3rs-deny/tokio-full-ban deny.toml tokio full feature not banned\n  `deny.toml` must ban `tokio` feature `full` under `[[bans.features]]`.\n[Warn] g3rs-deny/tokio-full-ban deny.toml tokio allowed features changed\n  `deny.toml` must keep `tokio` allowed features `bytes, default, io-util, macros, net, rt-multi-thread, signal, sync, time`.\n[Info] g3rs-deny/extra-feature-bans-inventory deny.toml extra feature ban\n  `deny.toml` has extra feature-ban entry for `serde`.\n[Warn] g3rs-deny/duplicate-entries deny.toml duplicate deny entry\n  `deny.toml` has duplicate deny entry `json5`.\n[Warn] g3rs-deny/duplicate-entries deny.toml duplicate skip entry\n  `deny.toml` has duplicate skip entry `skip-one@*`.\n[Error] g3rs-deny/skip-hygiene deny.toml skip entry reason too weak\n  `deny.toml` skips `skip-one` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/skip-hygiene deny.toml skip entry reason too weak\n  `deny.toml` skips `skip-one` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Warn] g3rs-deny/skip-hygiene deny.toml skip entry count\n  `deny.toml` has 2 skip entries (0 documented, 0 missing reasons, 2 weak reasons).\n[Error] g3rs-deny/ban-baseline-complete deny.toml missing canonical ban\n  `deny.toml` is missing deny ban `simd-json`.\n[Error] g3rs-deny/allow-override-channel deny.toml bans allow-list present\n  `deny.toml` has non-empty `[bans].allow`: json5, serde.\n[Error] g3rs-deny/allow-override-channel deny.toml allow-list overrides deny-list\n  `deny.toml` allows `json5` even though it is banned.\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml extra deny ban\n  `deny.toml` adds deny ban `custom-extra` beyond the managed baseline.\n[Error] g3rs-deny/extra-deny-bans-inventory deny.toml deny ban entry malformed\n  `deny.toml` has `[bans].deny` entry without a usable `name` or `crate`.\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml extra deny ban count\n  `deny.toml` has 1 deny bans beyond the managed baseline.\n[Warn] g3rs-deny/wrappers deny.toml managed ban wrappers changed\n  `deny.toml` ban `json5` adds local wrappers `serde_json`.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
+        "deny",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:c322fccaa65bfcc1977d24381e3ab2e698c3b5c39aaed88c3fcef2b321d0f7e6",
+      "fixture_id": "deny-R50-source-ignore-violations",
+      "stderr": "",
+      "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Error] g3rs-deny/unknown-sources-policy deny.toml sources `unknown-registry` has wrong value\n  `deny.toml` must set `[sources].unknown-registry = \"deny\"`.\n[Error] g3rs-deny/unknown-sources-policy deny.toml sources `unknown-git` has wrong value\n  `deny.toml` must set `[sources].unknown-git = \"deny\"`.\n[Error] g3rs-deny/allow-registry-baseline deny.toml canonical registry missing\n  `deny.toml` must allow registry `sparse+https://index.crates.io/`.\n[Error] g3rs-deny/allow-registry-baseline deny.toml unexpected registry allowed\n  `deny.toml` allows unexpected registry `https://example.com/index`.\n[Warn] g3rs-deny/allow-git-inventory deny.toml allow-git is non-empty\n  `deny.toml` has non-empty `[sources].allow-git`.\n[Error] g3rs-deny/allow-git-inventory deny.toml allow-git entry must be non-empty\n  `deny.toml` has blank `[sources].allow-git` entry.\n[Info] g3rs-deny/allow-git-inventory deny.toml allow-git entry\n  `deny.toml` allows git source `https://github.com/example/repo`.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore must use table form\n  `deny.toml` has `[advisories].ignore` string entry `RUSTSEC-0000-0001`; use table form with a `reason`.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0002` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0003` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0004` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0005` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0006` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Error] g3rs-deny/ignore-hygiene deny.toml advisory ignore reason too weak\n  `deny.toml` ignores `RUSTSEC-0000-0007` with a weak `reason`: reason must be at least 12 characters; found 3.\n[Warn] g3rs-deny/ignore-hygiene deny.toml advisory ignore count\n  `deny.toml` has 7 advisory ignores (0 documented, 1 missing reasons, 6 weak reasons).\n[Warn] g3rs-deny/unknown-keys deny.toml unknown sources key\n  `deny.toml` uses unknown `[sources].extra`.\n[Warn] g3rs-deny/unknown-keys deny.toml unknown sources key\n  `deny.toml` uses unknown `[sources].unknown-top-level`.\n[Warn] g3rs-deny/ignore-accumulation deny.toml advisory ignore list is large\n  `deny.toml` has 7 `[advisories].ignore` entries (threshold: 5).\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
+    },
+    {
+      "command": [
+        "g3rs",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
         "deps",
         "--rules-only",
         "--inventory"

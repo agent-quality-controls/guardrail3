@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-16T20-52-57.805196Z-078cb096",
-  "run_commit": "5a07e8a51",
+  "run_id": "2026-05-16T21-15-37.345549Z-078cb096",
+  "run_commit": "4443053bc",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T20:52:57.805196Z",
-  "fixture_hash": "sha256:bb935fb5232d0ee8a0c9132b259dacc0ba1c13dbde564b9b367f9465dd3bdea1",
+  "recorded_at": "2026-05-16T21:15:37.345549Z",
+  "fixture_hash": "sha256:9f80d495899c02303db8ac38bb6e91d2bff76123ffaf5f1ba2e6e4f05487c4ac",
   "manifest_hash": "sha256:078cb096fbc3d000e2a899408bd233d1c8a633335c3f41af839fa6d9e441d0a2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
@@ -55,6 +55,34 @@
       "sha256": "sha256:1eee004d1163b221bda4bd8098a3087a5a8ec3cf04528cf47f3f3777cd76509f"
     },
     {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:f4e3d52b2586134a1edd17dbc73c55176a94cf3e70b2c520812fe936958a7c64"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R10-missing-config/fixture.toml",
+      "sha256": "sha256:1db373092658fb51c14d3c6e332791ed9ee639c805280ae9ddb679cc3a7f4a0b"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R11-shadowing/fixture.toml",
+      "sha256": "sha256:23089e5d08908d173612baab0fa60eace51d6bbf954140e28efdf75ef32360a5"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R20-advisory-graph-violations/fixture.toml",
+      "sha256": "sha256:7b5c04a2751689d01f307907c4958715c05cff6db89b80135ea97cef972166b9"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R30-license-violations/fixture.toml",
+      "sha256": "sha256:7732576c4fa175f49bd742c0c2b8528b54a3559ea4f2da485ed4f5a5a78f6c98"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R40-ban-violations/fixture.toml",
+      "sha256": "sha256:59081a261ebc890f5225be85ea0d3ec5a21f576f6ff8d652e86603734a2842bc"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/deny/deny-R50-source-ignore-violations/fixture.toml",
+      "sha256": "sha256:dce8866638880c85b98914cf388774c0e9dd9743a6bb03b9eecc37d8beb10acd"
+    },
+    {
       "path": "behavior/fixtures/g3rs-rules/deps/deps-R00-clean-golden/fixture.toml",
       "sha256": "sha256:502bf93d179c251468a07b8cc0697c8f6b9e8e05eb03fd8f2be4fdd9405af7a7"
     },
@@ -95,5 +123,5 @@
       "sha256": "sha256:b49200398dd2758d417c57a48290e8b82f3350f66d827066f5db80f9ebd30c3e"
     }
   ],
-  "comment": "Add clippy family rule fixtures"
+  "comment": "Add deny family rule fixtures"
 }
