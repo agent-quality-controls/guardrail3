@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo, fmt, and toolchain are complete under the new standard.
+Cargo, fmt, toolchain, and deps are complete under the new standard.
 
 Cargo currently has:
 
@@ -60,6 +60,19 @@ Those three fixtures cover all 4 active toolchain rule IDs:
 - one clean golden fixture exits 0
 - two broken fixtures make every toolchain rule emit `Error` or `Warn`
 
+Deps currently has:
+
+- `deps-R00-clean-golden`
+- `deps-R10-required-files-and-tools`
+- `deps-R20-allowlist-and-count-violations`
+- `deps-R21-library-allowlist-missing`
+
+Those four fixtures cover all 11 active deps rule IDs:
+
+- one clean golden fixture exits 0
+- three broken fixtures make every deps rule emit `Error` or `Warn`
+- `deps-R21-library-allowlist-missing` pairs the warning-only missing allowlist rule with direct dependency cap because they coexist without hiding each other
+
 ## Global Fixture Contract
 
 Each family fixture file must define:
@@ -84,7 +97,8 @@ Clean golden fixture requirements:
 
 Broken fixture requirements:
 
-- `expected_exit = "nonzero"`
+- `expected_exit = "nonzero"` when any targeted rule emits `Error`
+- `expected_exit = "zero"` is allowed when all targeted rules emit only `Warn`
 - every `target_rules` entry must emit `Error` or `Warn`
 - every `target_rules` entry must appear in `expected_findings`
 - every intentional `Error` or `Warn` row that defines the fixture purpose must be pinned in the plan manifest `required_results`
@@ -100,7 +114,7 @@ Broken fixture requirements:
 - every fixture `expected_findings` entry is a known active rule ID
 - every fixture appears in `behavior/golden/g3rs-validate/approved.normalized.json`
 - clean fixtures exit 0
-- broken fixtures exit nonzero
+- broken fixtures exit according to `expected_exit`
 - broken fixtures make every `target_rules` entry emit `Error` or `Warn`
 - completed families have every active rule ID broken by at least one broken fixture
 - completed families may exclude a rule only if that rule has a kept-test ledger row explaining why CLI replay cannot expose it
@@ -397,6 +411,8 @@ Expected risk:
 
 Rule count: 11.
 
+Status: complete.
+
 Target fixture directory:
 
 ```text
@@ -417,15 +433,17 @@ Rules:
 - `g3rs-deps/gitleaks-installed`
 - `g3rs-deps/library-allowlist-present`
 
-Fixture groups to attempt:
+Fixtures:
 
 - `deps-R00-clean-golden`: lockfile present, tools installed, allowlists valid, dependency count valid.
-- `deps-R10-required-files-and-tools`: missing lockfile, ignored lockfile, missing delegated tools, missing allowlist.
-- `deps-R20-allowlist-and-count-violations`: dependencies, dev-dependencies, build-dependencies, direct dependency cap.
+- `deps-R10-required-files-and-tools`: missing lockfile, ignored lockfile, missing delegated tools.
+- `deps-R20-allowlist-and-count-violations`: dependencies, dev-dependencies, build-dependencies.
+- `deps-R21-library-allowlist-missing`: library profile with missing `allowed_deps`, plus direct dependency cap.
 
-Expected risk:
+Minimization result:
 
 - Missing allowlist can hide allowlist member checks. If so, split required-file/tool failures from dependency policy failures.
+- Missing `Cargo.lock` only emits `Error` outside library profile, while missing `allowed_deps` only emits `Warn` inside library profile. These require separate fixtures.
 
 ### fmt
 

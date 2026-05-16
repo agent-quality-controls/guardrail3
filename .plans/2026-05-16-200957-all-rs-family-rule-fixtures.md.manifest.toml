@@ -36,14 +36,14 @@ broken_fixtures = [
   "toolchain-R20-policy-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "deps"
 rule_count = 11
-fixture_dir = "behavior/fixtures/g3rs-rules/deps"
-planned_groups = [
-  "deps-R00-clean-golden",
+clean_fixture = "deps-R00-clean-golden"
+broken_fixtures = [
   "deps-R10-required-files-and-tools",
   "deps-R20-allowlist-and-count-violations",
+  "deps-R21-library-allowlist-missing",
 ]
 
 [[planned_family]]

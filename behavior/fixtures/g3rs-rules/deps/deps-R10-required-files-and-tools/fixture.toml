@@ -1,0 +1,32 @@
+id = "deps-R10-required-files-and-tools"
+tool = "g3rs"
+run_from = "repo"
+runner_mode = "path_without_delegated_tools"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deps", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_required_inputs_invalid"
+
+rule_family = "deps"
+target_rules = [
+  "g3rs-deps/cargo-lock-present",
+  "g3rs-deps/gitignore-not-ignoring-cargo-lock",
+  "g3rs-deps/cargo-deny-installed",
+  "g3rs-deps/cargo-machete-installed",
+  "g3rs-deps/cargo-dupes-installed",
+  "g3rs-deps/gitleaks-installed",
+]
+intentionally_invalid = [
+  "service_profile_lockfile_missing",
+  "gitignore_masks_cargo_lock",
+  "delegated_dependency_tools_absent_from_path",
+]
+expected_findings = [
+  "g3rs-deps/cargo-lock-present",
+  "g3rs-deps/gitignore-not-ignoring-cargo-lock",
+  "g3rs-deps/cargo-deny-installed",
+  "g3rs-deps/cargo-machete-installed",
+  "g3rs-deps/cargo-dupes-installed",
+  "g3rs-deps/gitleaks-installed",
+]

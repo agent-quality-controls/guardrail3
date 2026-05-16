@@ -1,0 +1,26 @@
+id = "deps-R20-allowlist-and-count-violations"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deps", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "deps"
+target_rules = [
+  "g3rs-deps/dependencies-allowlisted",
+  "g3rs-deps/build-dependencies-allowlisted",
+  "g3rs-deps/dev-dependencies-allowlisted",
+]
+intentionally_invalid = [
+  "normal_dependency_not_allowlisted",
+  "build_dependency_not_allowlisted",
+  "dev_dependency_not_allowlisted",
+]
+expected_findings = [
+  "g3rs-deps/dependencies-allowlisted",
+  "g3rs-deps/build-dependencies-allowlisted",
+  "g3rs-deps/dev-dependencies-allowlisted",
+]
