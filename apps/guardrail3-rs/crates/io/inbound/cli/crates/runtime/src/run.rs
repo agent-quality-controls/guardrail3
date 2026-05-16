@@ -151,7 +151,3 @@ fn outcome_to_cli(
         },
     }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

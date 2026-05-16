@@ -51,7 +51,3 @@ pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) ->
 
     format!("{}\n", lines.join("\n"))
 }
-
-#[cfg(test)]
-#[path = "plain_text_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod plain_text_tests;

@@ -2,111 +2,6 @@
 # Rows with status = "unclassified" still require manual or stricter fixture evidence.
 
 [[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_accepts_family_and_inventory_flags"
-line = 1
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_accepts_init_repo"
-line = 20
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_accepts_init_workspace"
-line = 36
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_accepts_validate_repo"
-line = 52
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_rejects_init_workspace_profile"
-line = 100
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_rejects_old_validate_path_shape"
-line = 92
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_rejects_old_validate_repo_command"
-line = 84
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
-test_name = "parse_command_rejects_removed_hexarch_family"
-line = 68
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
-test_name = "run_command_init_repo_creates_managed_g3rs_hook_files"
-line = 111
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
-test_name = "run_command_init_repo_refuses_project_owned_hook_without_force"
-line = 142
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
-test_name = "run_command_sends_failures_to_stderr"
-line = 83
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
-test_name = "renderer_hides_inventory_by_default"
-line = 5
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
-test_name = "renderer_includes_rule_message"
-line = 63
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
-test_name = "renderer_includes_scope_and_root"
-line = 85
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
-test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
-test_name = "renderer_reports_no_findings_when_all_results_are_hidden"
-line = 38
-status = "kept_compile_contract"
-reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
-
-[[test]]
 test_path = "apps/guardrail3-rs/crates/logic/family-runner-process/crates/runtime/src/run_tests/cases.rs"
 test_name = "hooks_runner_injects_family_contracts_into_source_checks"
 line = 14
@@ -14283,5 +14178,110 @@ reason = "test validates parser, ingestion, CLI, renderer, or orchestration beha
 test_path = "packages/rs/topology/g3rs-topology-ingestion/crates/runtime/src/run_tests/pipeline.rs"
 test_name = "unreferenced_nested_workspace_still_fires_end_to_end"
 line = 105
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_family_and_inventory_flags"
+line = 1
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_repo"
+line = 20
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_init_workspace"
+line = 36
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_accepts_validate_repo"
+line = 52
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_init_workspace_profile"
+line = 100
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_path_shape"
+line = 92
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_old_validate_repo_command"
+line = 84
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli_tests/cases.rs"
+test_name = "parse_command_rejects_removed_hexarch_family"
+line = 68
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_creates_managed_g3rs_hook_files"
+line = 111
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_init_repo_refuses_project_owned_hook_without_force"
+line = 142
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run_tests/cases.rs"
+test_name = "run_command_sends_failures_to_stderr"
+line = 83
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_hides_inventory_by_default"
+line = 5
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_includes_rule_message"
+line = 63
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_includes_scope_and_root"
+line = 85
+status = "kept_compile_contract"
+reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"
+
+[[test]]
+test_path = "apps/guardrail3-rs/crates/io/outbound/report/crates/runtime/src/plain_text_tests/cases.rs"
+test_name = "renderer_reports_no_findings_when_all_results_are_hidden"
+line = 38
 status = "kept_compile_contract"
 reason = "test validates parser, ingestion, CLI, renderer, or orchestration behavior not represented as one fixture finding"

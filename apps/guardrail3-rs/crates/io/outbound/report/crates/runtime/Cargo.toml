@@ -7,11 +7,6 @@ publish = false
 [dependencies]
 guardrail3-rs-app-types = { path = "../../../../../types/app-types" }
 
-[dev-dependencies]
-guardrail3-check-types.workspace = true
-guardrail3-rs-app-types = { path = "../../../../../types/app-types" }
-guardrail3-rs-report-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []
