@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-validate",
   "kind": "approved",
-  "run_id": "2026-05-16T18-36-17.22222Z-cfaf3bda",
-  "run_commit": "96fbc9e36",
+  "run_id": "2026-05-16T19-04-11.710616Z-cfaf3bda",
+  "run_commit": "1dc6a5cbc",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T18:36:17.22222Z",
-  "fixture_hash": "sha256:20e5f03ce4aedfd3708be4f019ab27dc3cdd105b734875fa9c8a45fd98cb3aa8",
+  "recorded_at": "2026-05-16T19:04:11.710616Z",
+  "fixture_hash": "sha256:4e07204fadb4a00b4071e15bc38c448f5af51f4e1226c1bcff6aef9aaf0b16fd",
   "manifest_hash": "sha256:cfaf3bda447017913a3b6cd9e35f48395828ba60e40495fe656f42a799ee53e2",
   "tool_version": "0.1.7",
   "output_schema_version": "1",
@@ -156,16 +156,20 @@
     },
     {
       "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:15f67a7e0017c633004a8641b2660dfc6265d1361f36b728f5dca27c33b6ec66"
+      "sha256": "sha256:5f073788afc869f22e9704829f9c311f82bdf8f7e0c69acbcf73eef5b62e344c"
     },
     {
       "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R10-policy-violations/fixture.toml",
-      "sha256": "sha256:4a584e6351447ba0728bff6d9274c776f226e56f4aa986d05516bbdb2e028f3a"
+      "sha256": "sha256:00f95cae96f1a47513d9057cb8c78a642b7741e6c3ab1ccc2eb7fbb9772f0501"
     },
     {
       "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R21-root-metadata-missing/fixture.toml",
-      "sha256": "sha256:453981555ec7321e35f2f5fc419b809b44e540d7d71536b0d80bdc66bc959578"
+      "sha256": "sha256:3f0f89c580b0058c16827abd7dcc49fdc1ad569661f8e25ae6baa4c18b91c362"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rules/cargo/cargo-R30-structure-and-input-violations/fixture.toml",
+      "sha256": "sha256:3c4515db4ab174dd9ccfa01ef8ce1665760c715edeb8df03820466aa50667d9d"
     }
   ],
-  "comment": "Update cargo policy fixture coverage"
+  "comment": "Add cargo structure and input rule fixture"
 }

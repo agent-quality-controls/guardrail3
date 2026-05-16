@@ -156,6 +156,27 @@ def verify_approved_record(
     for rule_id in string_list_field(row, "expected_findings", failures):
         if rule_id not in stdout:
             failures.append(f"{path}: approved output missing expected finding {rule_id}")
+    if row.get("level") != "family_rule_clean_golden":
+        verify_target_rules_are_broken(row, stdout, failures)
+
+
+def verify_target_rules_are_broken(
+    row: dict[str, Any],
+    stdout: str,
+    failures: list[str],
+) -> None:
+    path = str(row.get("_path"))
+    broken_rule_ids = {
+        match.group("rule_id")
+        for match in re.finditer(
+            r"^\[(?:Error|Warn)\] (?P<rule_id>g3rs-[^ ]+)",
+            stdout,
+            flags=re.MULTILINE,
+        )
+    }
+    for rule_id in string_list_field(row, "target_rules", failures):
+        if rule_id not in broken_rule_ids:
+            failures.append(f"{path}: target rule {rule_id} did not emit Error or Warn")
 
 
 def verify_completed_family_ledger_coverage(
