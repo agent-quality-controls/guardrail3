@@ -28,10 +28,10 @@ proof = "kept disposition names a fixture3 output suite"
 status = "kept_compile_contract"
 missing_test_allowed = false
 required_dispositions = [
+  "keep_internal_unit_test",
   "keep_public_api_contract",
   "needs_family_runner_output",
   "needs_rule_fixture_or_golden_output",
-  "needs_serialized_ingestion_output",
   "needs_validate_command_output",
 ]
 proof = "behavior is not yet fixture-replaced"

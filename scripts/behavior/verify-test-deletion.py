@@ -26,10 +26,10 @@ DEFAULT_PLAN_MANIFEST = (
 FIXTURE_COVERED_STATUSES = {"covered_hit", "covered_non_hit"}
 DISPOSITION_COVERED = {"covered_by_cli_output", "covered_by_renderer_output"}
 KNOWN_KEPT_DISPOSITIONS = {
+    "keep_internal_unit_test",
     "keep_public_api_contract",
     "needs_family_runner_output",
     "needs_rule_fixture_or_golden_output",
-    "needs_serialized_ingestion_output",
     "needs_validate_command_output",
 }
 

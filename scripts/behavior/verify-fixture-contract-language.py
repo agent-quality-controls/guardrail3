@@ -14,7 +14,6 @@ except ModuleNotFoundError:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFESTS = [
     REPO_ROOT / ".plans" / "2026-05-15-145757-fixture-contract-and-replay-audit.md.manifest.toml",
-    REPO_ROOT / ".plans" / "2026-05-15-151150-serde-first-fixture-output-migration.md.manifest.toml",
 ]
 KEPT_MANIFEST = REPO_ROOT / ".plans" / "2026-05-15-143306-g3rs-kept-test-disposition-audit.md.manifest.toml"
 

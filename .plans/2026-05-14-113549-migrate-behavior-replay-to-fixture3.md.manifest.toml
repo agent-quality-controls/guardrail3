@@ -33,15 +33,6 @@ runner = "scripts/behavior/fixture3-g3rs-replay.py"
 schema_version = "g3rs-replay-v1"
 
 [[fixture3_suite]]
-name = "g3rs-code-ingestion"
-manifest = "fixture3.yaml"
-approved_dir = "behavior/golden/g3rs-code-ingestion"
-received_dir = ".fixture3/g3rs-code-ingestion"
-diff_dir = ".fixture3/g3rs-code-ingestion"
-runner = "scripts/behavior/fixture3-g3rs-code-ingestion.py"
-schema_version = "g3rs-code-ingestion-replay-v1"
-
-[[fixture3_suite]]
 name = "g3rs-cli-output"
 manifest = "fixture3.yaml"
 approved_dir = "behavior/golden/g3rs-cli-output"

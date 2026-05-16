@@ -2,7 +2,7 @@
 path = ".plans/2026-05-15-151150-serde-first-fixture-output-migration.md"
 
 [[approved_disposition]]
-name = "needs_serialized_ingestion_output"
+name = "keep_internal_unit_test"
 expected_rows = 421
 
 [[approved_disposition]]

@@ -1,3 +1,8 @@
+# Superseded
+
+This plan is superseded by `.plans/2026-05-16-182952-cli-boundary-fixture-target-state.md`.
+Durable fixtures should target CLI/report boundaries, not serialized internal ingestion structs.
+
 # Goal
 
 Add fixture3 coverage that compares serialized code-family ingestion data, not only `g3rs validate` text output.

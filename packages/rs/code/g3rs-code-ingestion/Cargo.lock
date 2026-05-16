@@ -218,18 +218,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-code-ingestion-fixture-output"
-version = "0.1.0"
-dependencies = [
- "g3-workspace-crawl",
- "g3rs-code-ingestion",
- "g3rs-code-ingestion-types",
- "g3rs-code-types",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "g3rs-code-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
