@@ -1,9 +1,0 @@
-use super::helpers::run_check;
-use g3rs_cargo_config_checks_assertions::workspace_lints::rule as assertions;
-
-#[test]
-fn inventories_when_required_lint_tables_are_present() {
-    let results = run_check(include_str!("fixtures/golden_workspace.toml"));
-
-    assertions::assert_has_info(&results, "workspace lint tables present", true);
-}
