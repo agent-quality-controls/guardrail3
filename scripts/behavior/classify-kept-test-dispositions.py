@@ -63,6 +63,14 @@ CARGO_INTERNAL_ONLY_REASONS = {
     "stays_quiet_when_rust_policy_parse_error_suppresses_clean_inventory": "rust policy parse error is an ingestion-state branch, not a cargo rule finding through the CLI",
 }
 
+CLIPPY_CLI_COVERED_FIXTURES = {
+    "inventories_parseable_policy_context": "clippy-R00-clean-golden",
+}
+
+CLIPPY_INTERNAL_ONLY_REASONS = {
+    "reports_policy_context_parse_errors": "the Error branch requires invalid guardrail3-rs.toml, but the public CLI rejects invalid guardrail config before clippy family checks run",
+}
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -148,6 +156,8 @@ def classify_row(test_path: str, test_name: str) -> tuple[str, str]:
         )
     if test_path.startswith("packages/rs/cargo/g3rs-cargo-config-checks/"):
         return classify_cargo_config_row(test_name)
+    if test_path.startswith("packages/rs/clippy/g3rs-clippy-config-checks/"):
+        return classify_clippy_config_row(test_name)
     if "/run_tests/" in test_path:
         return (
             "needs_family_runner_output",
@@ -179,6 +189,24 @@ def classify_cargo_config_row(test_name: str) -> tuple[str, str]:
     return (
         "needs_rule_fixture_or_golden_output",
         "direct cargo rule-sidecar behavior should be represented by family-rule CLI fixture output",
+    )
+
+
+def classify_clippy_config_row(test_name: str) -> tuple[str, str]:
+    if test_name in CLIPPY_CLI_COVERED_FIXTURES:
+        fixture = CLIPPY_CLI_COVERED_FIXTURES[test_name]
+        return (
+            "covered_by_cli_output",
+            f"covered by g3rs-validate family-rule fixture {fixture}",
+        )
+    if test_name in CLIPPY_INTERNAL_ONLY_REASONS:
+        return (
+            "keep_internal_unit_test",
+            CLIPPY_INTERNAL_ONLY_REASONS[test_name],
+        )
+    return (
+        "needs_rule_fixture_or_golden_output",
+        "direct clippy rule-sidecar behavior should be represented by family-rule CLI fixture output",
     )
 
 

@@ -1,0 +1,30 @@
+id = "clippy-R20-policy-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "clippy"
+target_rules = [
+  "g3rs-clippy/missing-type-ban",
+  "g3rs-clippy/duplicate-bans",
+  "g3rs-clippy/library-global-state",
+  "g3rs-clippy/macro-bans",
+  "g3rs-clippy/ban-reason-quality",
+  "g3rs-clippy/unknown-keys",
+  "g3rs-clippy/missing-method-ban",
+  "g3rs-clippy/avoid-breaking-exported-api",
+]
+expected_findings = [
+  "g3rs-clippy/missing-type-ban",
+  "g3rs-clippy/duplicate-bans",
+  "g3rs-clippy/library-global-state",
+  "g3rs-clippy/macro-bans",
+  "g3rs-clippy/ban-reason-quality",
+  "g3rs-clippy/unknown-keys",
+  "g3rs-clippy/missing-method-ban",
+  "g3rs-clippy/avoid-breaking-exported-api",
+]

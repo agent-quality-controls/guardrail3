@@ -1,0 +1,20 @@
+id = "clippy-R11-config-conflict-and-parse-failures"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "clippy"
+target_rules = [
+  "g3rs-clippy/same-root-conflict",
+  "g3rs-clippy/config-parseable",
+  "g3rs-clippy/forbid-clippy-conf-dir-override",
+]
+expected_findings = [
+  "g3rs-clippy/same-root-conflict",
+  "g3rs-clippy/config-parseable",
+  "g3rs-clippy/forbid-clippy-conf-dir-override",
+]

@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / ".plans" / "2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml"
-APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3rs-validate" / "approved.normalized.json"
+APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3rs-rule-fixtures" / "approved.normalized.json"
 DISPOSITION_PATH = REPO_ROOT / "behavior" / "migration" / "g3rs-kept-test-disposition.toml"
 RULE_ID_RE = re.compile(r'const ID: &str = "([^"]+)";')
 
@@ -234,8 +234,15 @@ def verify_completed_family_rule_breakage(
         for row in manifest.get("inventory_only_rule", [])
         if isinstance(row, dict) and isinstance(row.get("id"), str)
     }
+    cli_unreachable = {
+        row["id"]
+        for row in manifest.get("cli_unreachable_rule", [])
+        if isinstance(row, dict) and isinstance(row.get("id"), str)
+    }
     for rule_id in sorted(inventory_only - rule_ids):
         failures.append(f"inventory-only rule {rule_id} is not an active rule ID")
+    for rule_id in sorted(cli_unreachable - rule_ids):
+        failures.append(f"CLI-unreachable rule {rule_id} is not an active rule ID")
     broken_by_family: dict[str, set[str]] = defaultdict(set)
     for row in rows:
         if row.get("level") == "family_rule_clean_golden":
@@ -252,7 +259,7 @@ def verify_completed_family_rule_breakage(
             rule_id
             for rule_id in rule_ids
             if rule_id.startswith(f"g3rs-{family}/")
-        } - inventory_only
+        } - inventory_only - cli_unreachable
         missing = sorted(expected - broken_by_family.get(family, set()))
         for rule_id in missing:
             failures.append(f"{family}: completed family rule {rule_id} is not broken by any fixture")

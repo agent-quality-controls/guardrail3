@@ -1,0 +1,31 @@
+too-many-lnes-threshold = 75
+too-many-lines-threshold = 76
+cognitive-complexity-threshold = 16
+too-many-arguments-threshold = 8
+type-complexity-threshold = 76
+max-struct-bools = 4
+max-fn-params-bools = 4
+excessive-nesting-threshold = 5
+avoid-breaking-exported-api = true
+allow-dbg-in-tests = true
+allow-expect-in-tests = false
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-unwrap-in-tests = true
+
+disallowed-methods = [
+  { path = "std::env::var" },
+  { path = "std::env::var" },
+  { path = "custom::extra_method", reason = "bad" },
+]
+
+disallowed-types = [
+  { path = "std::collections::HashMap" },
+  { path = "std::collections::HashMap" },
+  { path = "custom::ExtraType", reason = "bad" },
+]
+
+disallowed-macros = [
+  { path = "std::println" },
+  { path = "std::println" },
+]

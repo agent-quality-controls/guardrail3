@@ -1,6 +1,7 @@
 [target]
 fixture_root = "behavior/fixtures/g3rs-rules"
 suite = "g3rs-validate"
+rule_fixture_suite = "g3rs-rule-fixtures"
 verifier = "scripts/behavior/verify-family-rule-fixtures.py"
 mode = "one_clean_golden_plus_minimal_broken_fixtures_per_family"
 active_rule_count = 247
@@ -46,17 +47,20 @@ broken_fixtures = [
   "deps-R21-library-allowlist-missing",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "clippy"
 rule_count = 23
-fixture_dir = "behavior/fixtures/g3rs-rules/clippy"
-planned_groups = [
-  "clippy-R00-clean-golden",
-  "clippy-R10-config-missing-or-shadowed",
-  "clippy-R20-config-parse-failures",
-  "clippy-R30-threshold-policy-violations",
-  "clippy-R40-ban-list-violations",
-  "clippy-R50-unknown-and-test-relaxations",
+clean_fixture = "clippy-R00-clean-golden"
+broken_fixtures = [
+  "clippy-R10-config-missing",
+  "clippy-R11-config-conflict-and-parse-failures",
+  "clippy-R20-policy-violations",
+  "clippy-R21-threshold-and-setting-violations",
+  "clippy-R22-malformed-ban-sections",
+  "clippy-R23-unknown-key",
+]
+cli_unreachable_rules = [
+  "g3rs-clippy/policy-context-parseable",
 ]
 
 [[planned_family]]
@@ -173,7 +177,7 @@ planned_groups = [
 ]
 
 [[verification]]
-command = "fixture3 check --suite g3rs-validate"
+command = "fixture3 check --suite g3rs-rule-fixtures"
 
 [[verification]]
 command = "python3 scripts/behavior/verify-family-rule-fixtures.py"

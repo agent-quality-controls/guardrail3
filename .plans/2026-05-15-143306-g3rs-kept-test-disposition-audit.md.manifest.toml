@@ -5,12 +5,12 @@ kept_rows = 755
 
 [[disposition]]
 name = "needs_rule_fixture_or_golden_output"
-expected_rows = 194
+expected_rows = 192
 meaning = "direct rule-sidecar behavior that should be moved to fixture or golden replay"
 
 [[disposition]]
 name = "keep_internal_unit_test"
-expected_rows = 437
+expected_rows = 438
 meaning = "internal ingestion package behavior kept as unit tests until each row is replaced by user-visible CLI fixtures or deleted as internal-shape-only"
 
 [[disposition]]
@@ -25,7 +25,7 @@ meaning = "validate-command cargo gates, staged-path, family-selection, and exec
 
 [[disposition]]
 name = "covered_by_cli_output"
-expected_rows = 37
+expected_rows = 38
 meaning = "CLI parse, rejected argument, stdout, stderr, and exit behavior covered by the g3rs-cli-output fixture3 suite"
 
 [[disposition]]

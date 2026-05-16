@@ -1,0 +1,2 @@
+[env]
+CLIPPY_CONF_DIR = "config/clippy"

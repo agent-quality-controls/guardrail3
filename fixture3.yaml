@@ -3,7 +3,6 @@ suites:
   g3rs-validate:
     fixtures:
       - "behavior/fixtures/g3rs/*/fixture.toml"
-      - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
     command:
       argv:
         - "python3"
@@ -17,6 +16,22 @@ suites:
       approved_dir: "behavior/golden/g3rs-validate"
       received_dir: ".fixture3/g3rs-validate"
       diff_dir: ".fixture3/g3rs-validate"
+  g3rs-rule-fixtures:
+    fixtures:
+      - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/fixture3-g3rs-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    storage:
+      approved_dir: "behavior/golden/g3rs-rule-fixtures"
+      received_dir: ".fixture3/g3rs-rule-fixtures"
+      diff_dir: ".fixture3/g3rs-rule-fixtures"
   g3rs-validate-repo:
     fixtures:
       - "behavior/fixtures/g3rs-validate-repo/*/fixture.toml"

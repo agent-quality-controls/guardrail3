@@ -1,0 +1,16 @@
+id = "clippy-R23-unknown-key"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "clippy", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_break"
+
+rule_family = "clippy"
+target_rules = [
+  "g3rs-clippy/unknown-keys",
+]
+expected_findings = [
+  "g3rs-clippy/unknown-keys",
+]
