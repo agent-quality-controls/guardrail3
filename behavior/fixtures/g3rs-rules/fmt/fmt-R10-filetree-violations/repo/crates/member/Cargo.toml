@@ -1,0 +1,4 @@
+[package]
+name = "fmt_filetree_invalid_member"
+version = "0.1.0"
+publish = false

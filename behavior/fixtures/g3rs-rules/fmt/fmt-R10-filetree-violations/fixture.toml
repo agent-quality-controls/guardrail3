@@ -1,0 +1,19 @@
+id = "fmt-R10-filetree-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree_invalid"
+
+rule_family = "fmt"
+target_rules = [
+  "g3rs-fmt/rustfmt-config-exists",
+]
+intentionally_invalid = [
+  "fmt_root_rustfmt_config_missing",
+]
+expected_findings = [
+  "g3rs-fmt/rustfmt-config-exists",
+]

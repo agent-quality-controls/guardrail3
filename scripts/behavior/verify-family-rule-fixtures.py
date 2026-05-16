@@ -30,7 +30,8 @@ def main() -> int:
 
     verify_one_clean_golden_per_family(fixture_rows, failures)
     verify_fixture_rows(fixture_rows, rule_ids, approved_records, failures)
-    verify_completed_family_ledger_coverage(manifest, fixture_rows, failures)
+    verify_completed_family_rule_breakage(manifest, fixture_rows, approved_records, rule_ids, failures)
+    verify_completed_family_ledger_coverage(manifest, fixture_rows, rule_ids, failures)
 
     if failures:
         print("family-rule-fixtures: FAIL")
@@ -121,7 +122,7 @@ def verify_fixture_rows(
         if fixture_id in seen_ids:
             failures.append(f"{path}: duplicate fixture id {fixture_id}")
         seen_ids.add(fixture_id)
-        if family and f"g3rs-{family}/" not in "\n".join(target_rules):
+        if family and target_rules and f"g3rs-{family}/" not in "\n".join(target_rules):
             failures.append(f"{path}: target_rules must contain g3rs-{family}/ rule IDs")
         missing_from_expected = sorted(set(target_rules) - set(expected_findings))
         for rule_id in missing_from_expected:
@@ -182,6 +183,7 @@ def verify_target_rules_are_broken(
 def verify_completed_family_ledger_coverage(
     manifest: dict[str, Any],
     rows: list[dict[str, Any]],
+    rule_ids: set[str],
     failures: list[str],
 ) -> None:
     completed = {
@@ -206,9 +208,54 @@ def verify_completed_family_ledger_coverage(
         rule_id = rule_id_for_test_row(row)
         if rule_id is None:
             continue
+        if rule_id not in rule_ids:
+            continue
         family = rule_id.split("/", maxsplit=1)[0].removeprefix("g3rs-")
         if family in completed and rule_id not in targeted:
             failures.append(f"{row.get('test_path')}::{row.get('test_name')}: no fixture targets {rule_id}")
+
+
+def verify_completed_family_rule_breakage(
+    manifest: dict[str, Any],
+    rows: list[dict[str, Any]],
+    approved_records: dict[str, dict[str, Any]],
+    rule_ids: set[str],
+    failures: list[str],
+) -> None:
+    completed = {
+        family["name"]
+        for family in manifest.get("family", [])
+        if isinstance(family, dict) and family.get("status") == "completed"
+    }
+    if not completed:
+        return
+    inventory_only = {
+        row["id"]
+        for row in manifest.get("inventory_only_rule", [])
+        if isinstance(row, dict) and isinstance(row.get("id"), str)
+    }
+    for rule_id in sorted(inventory_only - rule_ids):
+        failures.append(f"inventory-only rule {rule_id} is not an active rule ID")
+    broken_by_family: dict[str, set[str]] = defaultdict(set)
+    for row in rows:
+        if row.get("level") == "family_rule_clean_golden":
+            continue
+        fixture_id = str(row.get("id"))
+        record = approved_records.get(fixture_id)
+        if record is None or not isinstance(record.get("stdout"), str):
+            continue
+        for rule_id in broken_rule_ids(record["stdout"]):
+            family = rule_id.split("/", maxsplit=1)[0].removeprefix("g3rs-")
+            broken_by_family[family].add(rule_id)
+    for family in sorted(completed):
+        expected = {
+            rule_id
+            for rule_id in rule_ids
+            if rule_id.startswith(f"g3rs-{family}/")
+        } - inventory_only
+        missing = sorted(expected - broken_by_family.get(family, set()))
+        for rule_id in missing:
+            failures.append(f"{family}: completed family rule {rule_id} is not broken by any fixture")
 
 
 def rule_id_for_test_row(row: dict[str, Any]) -> str | None:
@@ -223,6 +270,17 @@ def rule_id_for_test_row(row: dict[str, Any]) -> str | None:
     if not test_dir.endswith("_tests"):
         return None
     return f"g3rs-{family}/{test_dir.removesuffix('_tests').replace('_', '-')}"
+
+
+def broken_rule_ids(stdout: str) -> set[str]:
+    return {
+        match.group("rule_id")
+        for match in re.finditer(
+            r"^\[(?:Error|Warn)\] (?P<rule_id>g3rs-[^ ]+)",
+            stdout,
+            flags=re.MULTILINE,
+        )
+    }
 
 
 def string_field(row: dict[str, Any], name: str, failures: list[str]) -> str:

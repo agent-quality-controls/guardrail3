@@ -1,0 +1,10 @@
+edition = "2021"
+style_edition = "2021"
+max_width = 80
+tab_spaces = 2
+use_field_init_shorthand = false
+use_try_shorthand = false
+reorder_imports = false
+reorder_modules = false
+ignore = ["generated"]
+group_imports = "StdExternalCrate"

@@ -23,7 +23,7 @@ If a rule cannot be broken through that CLI surface, it is not covered by a fami
 
 ## Current State
 
-Cargo is complete under the new standard.
+Cargo and fmt are complete under the new standard.
 
 Cargo currently has:
 
@@ -36,6 +36,18 @@ Those four fixtures cover all 15 active Cargo rule IDs:
 
 - one clean golden fixture exits 0
 - three broken fixtures make every Cargo rule emit `Error` or `Warn`
+
+Fmt currently has:
+
+- `fmt-R00-clean-golden`
+- `fmt-R10-filetree-violations`
+- `fmt-R20-policy-violations`
+
+Those three fixtures cover all 8 active fmt rule IDs:
+
+- one clean golden fixture exits 0
+- two broken fixtures make 7 fmt rules emit `Error` or `Warn`
+- `g3rs-fmt/rustfmt-extra-settings-inventory` is explicit Info-only inventory because the implementation has no `Error` or `Warn` branch
 
 ## Global Fixture Contract
 
@@ -425,15 +437,17 @@ Rules:
 - `g3rs-fmt/rustfmt-extra-settings-inventory`
 - `g3rs-fmt/rustfmt-required-settings`
 
-Fixture groups to attempt:
+Status: complete.
+
+Fixtures:
 
 - `fmt-R00-clean-golden`: valid `rustfmt.toml` with required settings and no nested overrides.
-- `fmt-R10-filetree-violations`: missing rustfmt config, dual config files, per-crate override.
+- `fmt-R10-filetree-violations`: missing rustfmt config.
 - `fmt-R20-policy-violations`: wrong required settings, edition mismatch, nightly keys on stable, ignored paths without reason, extra settings inventory.
 
-Expected risk:
+Inventory-only rule:
 
-- Missing rustfmt config hides policy-value rules. Keep missing-file fixture separate from invalid-value fixture.
+- `g3rs-fmt/rustfmt-extra-settings-inventory`
 
 ### garde
 
@@ -702,19 +716,18 @@ Expected risk:
 
 Implement in this order:
 
-1. `fmt`
-2. `toolchain`
-3. `deps`
-4. `clippy`
-5. `deny`
-6. `topology`
-7. `arch`
-8. `apparch`
-9. `garde`
-10. `test`
-11. `release`
-12. `code`
-13. `hooks`
+1. `toolchain`
+2. `deps`
+3. `clippy`
+4. `deny`
+5. `topology`
+6. `arch`
+7. `apparch`
+8. `garde`
+9. `test`
+10. `release`
+11. `code`
+12. `hooks`
 
 Cargo is already complete and stays as the reference implementation.
 

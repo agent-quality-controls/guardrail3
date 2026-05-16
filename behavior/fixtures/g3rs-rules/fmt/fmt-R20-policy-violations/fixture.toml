@@ -1,0 +1,34 @@
+id = "fmt-R20-policy-violations"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "fmt"
+target_rules = [
+  "g3rs-fmt/rustfmt-required-settings",
+  "g3rs-fmt/nightly-keys-on-stable",
+  "g3rs-fmt/edition-mismatch",
+  "g3rs-fmt/ignore-escape-hatch",
+  "g3rs-fmt/per-crate-override",
+  "g3rs-fmt/dual-file-conflict",
+]
+intentionally_invalid = [
+  "fmt_required_settings_wrong",
+  "fmt_nightly_key_on_stable",
+  "fmt_edition_mismatch",
+  "fmt_ignore_without_waiver",
+  "fmt_nested_config_present",
+  "fmt_root_dual_config_present",
+]
+expected_findings = [
+  "g3rs-fmt/rustfmt-required-settings",
+  "g3rs-fmt/nightly-keys-on-stable",
+  "g3rs-fmt/edition-mismatch",
+  "g3rs-fmt/ignore-escape-hatch",
+  "g3rs-fmt/per-crate-override",
+  "g3rs-fmt/dual-file-conflict",
+]
