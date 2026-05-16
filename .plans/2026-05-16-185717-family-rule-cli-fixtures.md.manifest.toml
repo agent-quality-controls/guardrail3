@@ -1,0 +1,92 @@
+[target]
+fixture_root = "behavior/fixtures/g3rs-rules"
+suite = "g3rs-validate"
+verifier = "scripts/behavior/verify-family-rule-fixtures.py"
+
+[[family]]
+name = "cargo"
+remaining_rule_rows = 42
+fixture_dir = "behavior/fixtures/g3rs-rules/cargo"
+first = true
+
+[[family]]
+name = "clippy"
+remaining_rule_rows = 43
+fixture_dir = "behavior/fixtures/g3rs-rules/clippy"
+
+[[family]]
+name = "deny"
+remaining_rule_rows = 41
+fixture_dir = "behavior/fixtures/g3rs-rules/deny"
+
+[[family]]
+name = "apparch"
+remaining_rule_rows = 44
+fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
+
+[[family]]
+name = "arch"
+remaining_rule_rows = 31
+fixture_dir = "behavior/fixtures/g3rs-rules/arch"
+
+[[family]]
+name = "release"
+remaining_rule_rows = 24
+fixture_dir = "behavior/fixtures/g3rs-rules/release"
+
+[[family]]
+name = "toolchain"
+remaining_rule_rows = 5
+fixture_dir = "behavior/fixtures/g3rs-rules/toolchain"
+
+[[family]]
+name = "deps"
+remaining_rule_rows = 3
+fixture_dir = "behavior/fixtures/g3rs-rules/deps"
+
+[[family]]
+name = "hooks"
+remaining_rule_rows = 2
+fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
+
+[[family]]
+name = "fmt"
+remaining_rule_rows = 1
+fixture_dir = "behavior/fixtures/g3rs-rules/fmt"
+
+[[required_fixture_field]]
+name = "rule_family"
+
+[[required_fixture_field]]
+name = "target_rules"
+
+[[required_fixture_field]]
+name = "expected_findings"
+
+[[suite_fixture_glob]]
+suite = "g3rs-validate"
+glob = "behavior/fixtures/g3rs/*/fixture.toml"
+
+[[suite_fixture_glob]]
+suite = "g3rs-validate"
+glob = "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+
+[[forbidden]]
+kind = "fixture_output_crate"
+path_glob = "packages/rs/**/crates/fixture-output"
+
+[[forbidden]]
+kind = "serialized_ingestion_suite"
+suite_name_pattern = "g3rs-*-ingestion"
+
+[[verification]]
+command = "fixture3 check --suite g3rs-validate"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-family-rule-fixtures.py"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-deletion.py"
+
+[[verification]]
+command = "bash scripts/behavior/verify-all.sh"
