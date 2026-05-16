@@ -73,6 +73,16 @@ fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
 name = "fmt"
 remaining_rule_rows = 1
 fixture_dir = "behavior/fixtures/g3rs-rules/fmt"
+status = "completed"
+covered_by_cli_output = 1
+inventory_only_rules = [
+  "g3rs-fmt/rustfmt-extra-settings-inventory",
+]
+
+[[inventory_only_rule]]
+id = "g3rs-fmt/rustfmt-extra-settings-inventory"
+family = "fmt"
+reason = "The implementation emits Info inventory only for extra rustfmt settings; there is no Error or Warn branch to break through the public CLI."
 
 [[required_fixture_field]]
 name = "rule_family"
@@ -168,4 +178,30 @@ required_results = [
   "Error|g3rs-cargo/workspace-lints|rust lint table missing|Cargo.toml",
   "Warn|g3rs-cargo/missing-member-cargo|declared workspace member missing Cargo.toml|Cargo.toml",
   "Error|g3rs-cargo/input-failures|failed to read Cargo configuration|crates/bad_parse/Cargo.toml",
+]
+
+[[fixture]]
+id = "fmt-R10-filetree-violations"
+required_results = [
+  "Error|g3rs-fmt/rustfmt-config-exists|rustfmt config missing|rustfmt.toml",
+]
+
+[[fixture]]
+id = "fmt-R20-policy-violations"
+required_results = [
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt edition wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt style_edition wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt max_width wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt tab_spaces wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt use_field_init_shorthand wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt use_try_shorthand wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt reorder_imports wrong|rustfmt.toml",
+  "Warn|g3rs-fmt/rustfmt-required-settings|rustfmt reorder_modules wrong|rustfmt.toml",
+  "Info|g3rs-fmt/rustfmt-extra-settings-inventory|rustfmt extra setting: group_imports|rustfmt.toml",
+  "Warn|g3rs-fmt/nightly-keys-on-stable|nightly-only rustfmt setting `group_imports` on stable|rustfmt.toml",
+  "Warn|g3rs-fmt/edition-mismatch|rustfmt edition differs from Cargo edition|rustfmt.toml",
+  "Error|g3rs-fmt/ignore-escape-hatch|rustfmt ignore missing reason|rustfmt.toml",
+  "Warn|g3rs-fmt/ignore-escape-hatch|rustfmt ignore count|rustfmt.toml",
+  "Error|g3rs-fmt/per-crate-override|Illegal nested rustfmt config|crates/member/rustfmt.toml",
+  "Warn|g3rs-fmt/dual-file-conflict|Conflicting rustfmt config files|rustfmt.toml",
 ]

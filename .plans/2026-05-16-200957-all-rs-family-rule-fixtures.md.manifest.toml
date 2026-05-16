@@ -15,14 +15,16 @@ broken_fixtures = [
   "cargo-R30-structure-and-input-violations",
 ]
 
-[[planned_family]]
+[[completed_family]]
 name = "fmt"
 rule_count = 8
-fixture_dir = "behavior/fixtures/g3rs-rules/fmt"
-planned_groups = [
-  "fmt-R00-clean-golden",
+clean_fixture = "fmt-R00-clean-golden"
+broken_fixtures = [
   "fmt-R10-filetree-violations",
   "fmt-R20-policy-violations",
+]
+inventory_only_rules = [
+  "g3rs-fmt/rustfmt-extra-settings-inventory",
 ]
 
 [[planned_family]]
