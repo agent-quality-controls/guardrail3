@@ -1,0 +1,70 @@
+[[keep_suite]]
+name = "g3rs-validate"
+reason = "runs client-facing validation command"
+
+[[keep_suite]]
+name = "g3rs-validate-repo"
+reason = "runs client-facing repo validation command"
+
+[[keep_suite]]
+name = "g3rs-cli-output"
+reason = "checks client-facing CLI command shape and errors"
+
+[[keep_suite]]
+name = "g3rs-report-output"
+reason = "checks rendered report output"
+
+[[remove_suite]]
+name = "g3rs-code-ingestion"
+reason = "serializes internal ingestion structs"
+
+[[remove_path]]
+path = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output"
+
+[[remove_path]]
+path = "scripts/behavior/fixture3-g3rs-code-ingestion.py"
+
+[[remove_path]]
+path = "behavior/golden/g3rs-code-ingestion"
+
+[[retire_plan]]
+path = ".plans/2026-05-15-172324-code-ingestion-fixture-output.md"
+
+[[retire_plan]]
+path = ".plans/2026-05-15-172324-code-ingestion-fixture-output.md.manifest.toml"
+
+[[retire_plan]]
+path = ".plans/2026-05-16-173104-all-ingestion-serialized-fixtures.md"
+
+[[retire_plan]]
+path = ".plans/2026-05-16-173104-all-ingestion-serialized-fixtures.md.manifest.toml"
+
+[[forbidden_disposition]]
+name = "needs_serialized_ingestion_output"
+
+[[allowed_disposition]]
+name = "needs_cli_fixture"
+
+[[allowed_disposition]]
+name = "covered_by_cli_output"
+
+[[allowed_disposition]]
+name = "needs_rule_fixture_or_golden_output"
+
+[[allowed_disposition]]
+name = "keep_internal_unit_test"
+
+[[allowed_disposition]]
+name = "delete_internal_assertion"
+
+[[verify]]
+command = "fixture3 check --all"
+
+[[verify]]
+command = "python3 scripts/behavior/verify-test-deletion.py"
+
+[[verify]]
+command = "bash scripts/behavior/verify-all.sh"
+
+[[verify]]
+command = "g3rs validate repo --path \"$PWD\""
