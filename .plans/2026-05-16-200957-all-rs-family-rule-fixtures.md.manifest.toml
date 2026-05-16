@@ -1,0 +1,193 @@
+[target]
+fixture_root = "behavior/fixtures/g3rs-rules"
+suite = "g3rs-validate"
+verifier = "scripts/behavior/verify-family-rule-fixtures.py"
+mode = "one_clean_golden_plus_minimal_broken_fixtures_per_family"
+active_rule_count = 247
+
+[[completed_family]]
+name = "cargo"
+rule_count = 15
+clean_fixture = "cargo-R00-clean-golden"
+broken_fixtures = [
+  "cargo-R10-policy-violations",
+  "cargo-R21-root-metadata-missing",
+  "cargo-R30-structure-and-input-violations",
+]
+
+[[planned_family]]
+name = "fmt"
+rule_count = 8
+fixture_dir = "behavior/fixtures/g3rs-rules/fmt"
+planned_groups = [
+  "fmt-R00-clean-golden",
+  "fmt-R10-filetree-violations",
+  "fmt-R20-policy-violations",
+]
+
+[[planned_family]]
+name = "toolchain"
+rule_count = 4
+fixture_dir = "behavior/fixtures/g3rs-rules/toolchain"
+planned_groups = [
+  "toolchain-R00-clean-golden",
+  "toolchain-R10-filetree-violations",
+  "toolchain-R20-policy-violations",
+]
+
+[[planned_family]]
+name = "deps"
+rule_count = 11
+fixture_dir = "behavior/fixtures/g3rs-rules/deps"
+planned_groups = [
+  "deps-R00-clean-golden",
+  "deps-R10-required-files-and-tools",
+  "deps-R20-allowlist-and-count-violations",
+]
+
+[[planned_family]]
+name = "clippy"
+rule_count = 23
+fixture_dir = "behavior/fixtures/g3rs-rules/clippy"
+planned_groups = [
+  "clippy-R00-clean-golden",
+  "clippy-R10-config-missing-or-shadowed",
+  "clippy-R20-config-parse-failures",
+  "clippy-R30-threshold-policy-violations",
+  "clippy-R40-ban-list-violations",
+  "clippy-R50-unknown-and-test-relaxations",
+]
+
+[[planned_family]]
+name = "deny"
+rule_count = 29
+fixture_dir = "behavior/fixtures/g3rs-rules/deny"
+planned_groups = [
+  "deny-R00-clean-golden",
+  "deny-R10-filetree-violations",
+  "deny-R20-advisory-policy-violations",
+  "deny-R30-license-policy-violations",
+  "deny-R40-ban-policy-violations",
+  "deny-R50-source-policy-violations",
+  "deny-R60-inventory-only-policy",
+]
+
+[[planned_family]]
+name = "topology"
+rule_count = 6
+fixture_dir = "behavior/fixtures/g3rs-rules/topology"
+planned_groups = [
+  "topology-R00-clean-golden",
+  "topology-R10-workspace-membership-violations",
+  "topology-R20-nesting-and-placement-violations",
+  "topology-R30-input-failure-violations",
+]
+
+[[planned_family]]
+name = "arch"
+rule_count = 10
+fixture_dir = "behavior/fixtures/g3rs-rules/arch"
+planned_groups = [
+  "arch-R00-clean-golden",
+  "arch-R10-package-contract-violations",
+  "arch-R20-filetree-violations",
+  "arch-R30-source-violations",
+]
+
+[[planned_family]]
+name = "apparch"
+rule_count = 10
+fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
+planned_groups = [
+  "apparch-R00-clean-golden",
+  "apparch-R10-layer-boundary-violations",
+  "apparch-R20-surface-and-purity-violations",
+]
+
+[[planned_family]]
+name = "garde"
+rule_count = 13
+fixture_dir = "behavior/fixtures/g3rs-rules/garde"
+planned_groups = [
+  "garde-R00-clean-golden",
+  "garde-R10-config-and-dependency-violations",
+  "garde-R20-source-parse-failures",
+  "garde-R30-validation-shape-violations",
+  "garde-R40-boundary-bypass-violations",
+]
+
+[[planned_family]]
+name = "test"
+rule_count = 19
+fixture_dir = "behavior/fixtures/g3rs-rules/test"
+planned_groups = [
+  "test-R00-clean-golden",
+  "test-R10-required-config-violations",
+  "test-R20-filetree-violations",
+  "test-R30-source-parse-failures",
+  "test-R40-test-body-violations",
+  "test-R50-proof-quality-violations",
+]
+
+[[planned_family]]
+name = "release"
+rule_count = 33
+fixture_dir = "behavior/fixtures/g3rs-rules/release"
+planned_groups = [
+  "release-R00-clean-golden",
+  "release-R10-filetree-violations",
+  "release-R20-package-metadata-violations",
+  "release-R30-publish-policy-violations",
+  "release-R40-version-policy-violations",
+  "release-R50-workflow-violations",
+  "release-R60-source-quality-violations",
+]
+
+[[planned_family]]
+name = "code"
+rule_count = 30
+fixture_dir = "behavior/fixtures/g3rs-rules/code"
+planned_groups = [
+  "code-R00-clean-golden",
+  "code-R10-source-parse-failures",
+  "code-R20-allow-and-attribute-violations",
+  "code-R30-bypass-macro-violations",
+  "code-R40-shape-and-size-violations",
+  "code-R50-public-api-violations",
+  "code-R60-garde-and-test-message-violations",
+]
+
+[[planned_family]]
+name = "hooks"
+rule_count = 36
+fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
+planned_groups = [
+  "hooks-R00-clean-golden",
+  "hooks-R10-filetree-violations",
+  "hooks-R20-shell-safety-violations",
+  "hooks-R30-command-context-violations",
+  "hooks-R40-routing-violations",
+  "hooks-R50-workflow-step-violations",
+  "hooks-R60-tool-inventory-violations",
+]
+
+[[verification]]
+command = "fixture3 check --suite g3rs-validate"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-family-rule-fixtures.py"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-rule-coverage.py"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-kept-test-dispositions.py"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-deletion.py"
+
+[[verification]]
+command = "bash scripts/behavior/verify-all.sh"
+
+[[verification]]
+command = "g3rs validate repo --path \"$PWD\""
