@@ -2,7 +2,7 @@
 
 ## Goal
 
-Replace remaining rule-level unit tests with family-scoped CLI fixtures.
+Replace remaining rule-level unit tests with minimized family-scoped CLI fixtures.
 
 The fixture design is:
 
@@ -31,6 +31,10 @@ Current client-facing fixture suites:
 - `g3rs-cli-output`
 - `g3rs-report-output`
 
+Current `behavior/fixtures/g3rs/*` fixtures are broad layered/composite fixtures.
+
+They were designed to expose many guardrail layers at once. That is useful for early CLI replay coverage, but it is not the final rule-coverage corpus because the fixtures are not minimized around one family and their intended rule coverage is not explicit.
+
 Current rule rows not yet fixture-replaced:
 
 - total: 236
@@ -57,6 +61,31 @@ Current internal rows that stay as unit tests for now:
 - `keep_internal_unit_test`: 421
 
 Those are not part of this plan.
+
+## Target Fixture Split
+
+Final fixture ownership:
+
+- `behavior/fixtures/g3rs-global/*`
+  - global CLI/adoption/gating states
+  - examples: workspace root missing, guardrail config missing, guardrail config invalid, required inputs missing, clean baseline
+- `behavior/fixtures/g3rs-rules/<family>/*`
+  - minimized rule fixtures for one family
+  - each fixture triggers the maximum compatible set of rules inside that family
+- `behavior/fixtures/g3rs-validate-repo/*`
+  - repo-level adoption and hook behavior
+- `behavior/fixtures/g3rs-cli-output/*`
+  - command shape, help, rejected arguments, init behavior
+- `behavior/fixtures/g3rs-report-output/*`
+  - report renderer behavior
+
+Migration rule:
+
+- Existing `behavior/fixtures/g3rs/*` remains temporarily as a broad safety corpus.
+- Do not treat broad `g3rs/*` fixtures as the final rule coverage design.
+- For each completed family, move rule coverage into `g3rs-rules/<family>`.
+- After a family is covered by minimized family-rule fixtures, remove or reduce old broad fixtures whose only remaining purpose was that family's rule coverage.
+- Keep only truly global fixtures in the global corpus.
 
 ## Fixture Folder Model
 
@@ -158,7 +187,7 @@ Split fixtures when:
 
 ## Suite Wiring
 
-Add the family-rule fixtures to the existing `g3rs-validate` suite.
+Add the family-rule fixtures to the existing `g3rs-validate` suite while the migration is in progress.
 
 `fixture3.yaml` should contain both:
 
@@ -169,6 +198,23 @@ fixtures:
 ```
 
 Do not create one suite per family unless fixture3 output becomes too large to review. The product boundary is still the same CLI command.
+
+Final `g3rs-validate` fixture input should be:
+
+```yaml
+fixtures:
+  - "behavior/fixtures/g3rs-global/*/fixture.toml"
+  - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+```
+
+The old glob is transitional:
+
+```yaml
+fixtures:
+  - "behavior/fixtures/g3rs/*/fixture.toml"
+```
+
+Remove it after global fixtures are renamed/reduced and family-rule coverage has replaced the broad composite rule fixtures.
 
 ## Coverage Verification
 
@@ -250,6 +296,7 @@ Process:
 7. Approve output only after verifying target findings appear.
 8. Update the ledger for covered cargo rows.
 9. Delete cargo unit tests only after the deletion verifier allows it.
+10. Identify any old `behavior/fixtures/g3rs/*` fixtures whose only remaining purpose was cargo rule coverage and either remove them or reduce them to global behavior only.
 
 ## Verification Commands
 
@@ -282,4 +329,3 @@ Do not:
 - preserve unit tests only because they existed
 - create one fixture per rule when rules can be grouped without hiding output
 - create family-specific fixture3 suites unless one shared `g3rs-validate` suite becomes unreviewable
-
