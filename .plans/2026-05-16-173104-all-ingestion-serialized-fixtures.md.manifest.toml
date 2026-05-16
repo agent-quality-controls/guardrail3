@@ -1,0 +1,141 @@
+[[family]]
+name = "g3rs-apparch-ingestion"
+path = "packages/rs/apparch/g3rs-apparch-ingestion"
+remaining_rows = 25
+entrypoints = ["ingest_for_config_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/apparch/g3rs-apparch-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-apparch-ingestion"
+
+[[family]]
+name = "g3rs-arch-ingestion"
+path = "packages/rs/arch/g3rs-arch-ingestion"
+remaining_rows = 16
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/arch/g3rs-arch-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-arch-ingestion"
+
+[[family]]
+name = "g3rs-cargo-ingestion"
+path = "packages/rs/cargo/g3rs-cargo-ingestion"
+remaining_rows = 27
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/cargo/g3rs-cargo-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-cargo-ingestion"
+
+[[family]]
+name = "g3rs-clippy-ingestion"
+path = "packages/rs/clippy/g3rs-clippy-ingestion"
+remaining_rows = 26
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks"]
+fixture_output_crate = "packages/rs/clippy/g3rs-clippy-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-clippy-ingestion"
+
+[[family]]
+name = "g3rs-code-ingestion"
+path = "packages/rs/code/g3rs-code-ingestion"
+remaining_rows = 49
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/code/g3rs-code-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-code-ingestion"
+status = "fixture_output_exists_but_fixture_set_incomplete"
+
+[[family]]
+name = "g3rs-deny-ingestion"
+path = "packages/rs/deny/g3rs-deny-ingestion"
+remaining_rows = 23
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/deny/g3rs-deny-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-deny-ingestion"
+
+[[family]]
+name = "g3rs-deps-ingestion"
+path = "packages/rs/deps/g3rs-deps-ingestion"
+remaining_rows = 26
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/deps/g3rs-deps-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-deps-ingestion"
+
+[[family]]
+name = "g3rs-fmt-ingestion"
+path = "packages/rs/fmt/g3rs-fmt-ingestion"
+remaining_rows = 39
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/fmt/g3rs-fmt-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-fmt-ingestion"
+
+[[family]]
+name = "g3rs-garde-ingestion"
+path = "packages/rs/garde/g3rs-garde-ingestion"
+remaining_rows = 30
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/garde/g3rs-garde-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-garde-ingestion"
+
+[[family]]
+name = "g3rs-hooks-ingestion"
+path = "packages/rs/hooks/g3rs-hooks-ingestion"
+remaining_rows = 50
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/hooks/g3rs-hooks-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-hooks-ingestion"
+
+[[family]]
+name = "g3rs-release-ingestion"
+path = "packages/rs/release/g3rs-release-ingestion"
+remaining_rows = 17
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_repo_root_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/release/g3rs-release-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-release-ingestion"
+
+[[family]]
+name = "g3rs-test-ingestion"
+path = "packages/rs/test/g3rs-test-ingestion"
+remaining_rows = 21
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/test/g3rs-test-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-test-ingestion"
+
+[[family]]
+name = "g3rs-toolchain-ingestion"
+path = "packages/rs/toolchain/g3rs-toolchain-ingestion"
+remaining_rows = 31
+entrypoints = ["ingest_for_config_checks", "ingest_for_file_tree_checks", "ingest_for_source_checks"]
+fixture_output_crate = "packages/rs/toolchain/g3rs-toolchain-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-toolchain-ingestion"
+
+[[family]]
+name = "g3rs-topology-ingestion"
+path = "packages/rs/topology/g3rs-topology-ingestion"
+remaining_rows = 41
+entrypoints = ["ingest_for_file_tree_checks"]
+fixture_output_crate = "packages/rs/topology/g3rs-topology-ingestion/crates/fixture-output"
+fixture3_suite = "g3rs-topology-ingestion"
+
+[[required_fixture_output_file]]
+relative_path = "crates/fixture-output/Cargo.toml"
+
+[[required_fixture_output_file]]
+relative_path = "crates/fixture-output/src/lib.rs"
+
+[[required_fixture_output_file]]
+relative_path = "crates/fixture-output/src/main.rs"
+
+[[required_fixture_output_file]]
+relative_path = "crates/fixture-output/src/run.rs"
+
+[[forbidden_pattern]]
+description = "Python fixture scripts must not map family-specific Rust fields"
+glob = "scripts/behavior/fixture3-g3rs-*-ingestion.py"
+patterns = ["source_checks[", "config_checks[", "file_tree_checks[", "repo_root_checks["]
+
+[[verification]]
+command = "fixture3 check --suite g3rs-<family>-ingestion"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-test-deletion.py"
+
+[[verification]]
+command = "bash scripts/behavior/verify-all.sh"
+
+[[verification]]
+command = "g3rs validate repo --path \"$PWD\""
