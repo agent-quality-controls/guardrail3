@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-17T16-17-19.707985Z-9a2e74a6",
-  "run_commit": "5ab595eb5",
+  "run_id": "2026-05-17T16-31-22.477123Z-9a2e74a6",
+  "run_commit": "1a5b09a9e",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T16:17:19.707985Z",
+  "recorded_at": "2026-05-17T16:31:22.477123Z",
   "fixture_hash": "sha256:9a5be37fef37566b050edc6a1312c14f6fb954ba218a92c73ec0342f716db7bb",
   "manifest_hash": "sha256:9a2e74a675e4d91068521c3ba11aeae7cca32394223a361d108605ff6575f618",
   "tool_version": "0.1.8",
@@ -255,5 +255,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Approve behavior-preserving deep fixture reduction"
+  "comment": "Restore unreduced clean golden fixtures"
 }

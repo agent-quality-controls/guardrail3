@@ -16,7 +16,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:be4f3a7063e6a44f679e2408024c24df0cd0a6d5fb98086d7e7ea802154e9fee",
+      "fixture_hash": "sha256:5a4cb0ca4311ac053e2b34ed879ce548b9c4ebc551d80941c42f509b9072004a",
       "fixture_id": "apparch-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== apparch ==\n[Info] g3rs-apparch/io-outbound-dependency-direction io/outbound/db/Cargo.toml io/outbound crate `db-outbound` depends only on allowed layers\n  io/outbound crate `db-outbound` has no workspace-internal dependencies on forbidden apparch layers.\n[Info] g3rs-apparch/logic-dependency-direction logic/service/Cargo.toml logic crate `logic-service` depends only on allowed layers\n  Logic crate `logic-service` has no workspace-internal dependencies on forbidden apparch layers.\n[Info] g3rs-apparch/types-dependency-direction types/core/Cargo.toml types crate `types-core` depends only on allowed layers\n  Types crate `types-core` has no workspace-internal dependencies on other apparch layers.\n[Info] g3rs-apparch/logic-purity logic/service/Cargo.toml logic crate `logic-service` stays pure\n  Logic crate `logic-service` uses only built-in pure dependencies or explicitly allowlisted externals.\n[Info] g3rs-apparch/types-purity types/core/Cargo.toml types crate `types-core` stays pure\n  Types crate `types-core` uses only built-in pure dependencies or explicitly allowlisted externals.\n[Info] g3rs-apparch/io-traits-in-types io/inbound/http/Cargo.toml io crate `http-inbound` defines no public traits\n  io crate `http-inbound` keeps trait contracts out of the io layer.\n[Info] g3rs-apparch/io-traits-in-types io/outbound/db/Cargo.toml io crate `db-outbound` defines no public traits\n  io crate `db-outbound` keeps trait contracts out of the io layer.\n[Info] g3rs-apparch/types-public-surface types/core/Cargo.toml types crate `types-core` keeps public behavior out of its surface\n  Types crate `types-core` exposes no public free functions or public inherent methods on concrete types.\n"
@@ -56,7 +56,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:73f90a89a68592dac76a2cf74346c3f9998784a3328de8133a76b931b647ed05",
+      "fixture_hash": "sha256:f87adf1453c6e25e473fde288ca6b5fcf04186c9a41e30ae74ac899855e9f8ac",
       "fixture_id": "arch-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== arch ==\n[Info] g3rs-arch/feature-contract Cargo.toml feature contract supports facade exports\n  Crate `` has facade exports with a valid named-feature contract.\n[Info] g3rs-arch/crate-has-facade Cargo.toml crate has facade entry point\n  Crate `` has a facade entry point (lib.rs).\n[Info] g3rs-arch/mod-rs-required src/api/mod.rs module directory has mod.rs\n  Module directory `src/api` has a proper mod.rs facade.\n[Info] g3rs-arch/lib-facade-only src/lib.rs lib.rs is facade-only\n  lib.rs in `` contains only facade declarations.\n[Info] g3rs-arch/feature-gated-exports src/lib.rs facade exports properly feature-gated\n  lib.rs in `` has all exports behind named features.\n[Info] g3rs-arch/mod-facade-only src/api/mod.rs mod.rs is facade-only\n  mod.rs at `src/api/mod.rs` contains only facade declarations.\n"
@@ -216,7 +216,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:7f038bdec03bd88422599220fae870119e50f29811058fd73b8c674a8167965c",
+      "fixture_hash": "sha256:eceec2db8a4317d615aa79c158f8cb68f19a0bc0be03d632b1a6baebbbb99d8d",
       "fixture_id": "clippy-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== clippy ==\n[Info] g3rs-clippy/max-struct-bools .clippy.toml max-struct-bools correct\n  max-struct-bools = 3\n[Info] g3rs-clippy/max-fn-params-bools .clippy.toml max-fn-params-bools correct\n  max-fn-params-bools = 3\n[Info] g3rs-clippy/too-many-lines-threshold .clippy.toml too-many-lines-threshold correct\n  too-many-lines-threshold = 75\n[Info] g3rs-clippy/too-many-arguments-threshold .clippy.toml too-many-arguments-threshold correct\n  too-many-arguments-threshold = 7\n[Info] g3rs-clippy/excessive-nesting-threshold .clippy.toml excessive-nesting-threshold correct\n  excessive-nesting-threshold = 4\n[Info] g3rs-clippy/test-relaxations .clippy.toml clippy test relaxation policy exact\n  Managed test relaxation keys match the expected clippy policy.\n[Info] g3rs-clippy/cognitive-complexity-threshold .clippy.toml cognitive-complexity-threshold correct\n  cognitive-complexity-threshold = 15\n[Info] g3rs-clippy/type-complexity-threshold .clippy.toml type-complexity-threshold correct\n  type-complexity-threshold = 75\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::env::var` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::env::var_os` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::env::vars` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::env::set_var` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::env::remove_var` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::process::exit` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::process::abort` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::process::Command::new` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::thread::sleep` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::read_to_string` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::read` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::read_dir` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::read_link` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::write` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::remove_file` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::remove_dir_all` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::create_dir_all` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::rename` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::copy` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::metadata` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::symlink_metadata` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::canonicalize` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::set_permissions` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `std::fs::hard_link` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `reqwest::Client::new` is banned.\n[Info] g3rs-clippy/missing-method-ban .clippy.toml method ban present\n  `reqwest::Client::builder` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::collections::HashMap` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::collections::HashSet` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::sync::Mutex` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::sync::RwLock` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::fs::File` is banned.\n[Info] g3rs-clippy/missing-type-ban .clippy.toml type ban present\n  `std::any::Any` is banned.\n[Info] g3rs-clippy/extra-method-ban .clippy.toml no extra method bans\n  No additional method bans beyond the managed baseline.\n[Info] g3rs-clippy/extra-type-ban .clippy.toml no extra type bans\n  No additional type bans beyond the managed baseline.\n[Info] g3rs-clippy/ban-reason-quality .clippy.toml ban entries use reasoned table format\n  All managed ban entries use table format with a `reason` field.\n[Info] g3rs-clippy/library-global-state .clippy.toml library global-state bans present\n  Library profile includes all managed global-state type bans.\n[Info] g3rs-clippy/avoid-breaking-exported-api .clippy.toml avoid-breaking-exported-api explicitly false\n  `avoid-breaking-exported-api = false` is set.\n[Info] g3rs-clippy/duplicate-bans .clippy.toml ban entries are duplicate-free\n  Managed ban sections contain no duplicate paths.\n[Info] g3rs-clippy/unknown-keys .clippy.toml no suspicious managed-key typos\n  No top-level keys look like typos of guardrail-managed clippy keys.\n[Info] g3rs-clippy/macro-bans .clippy.toml macro ban present\n  `println!` is banned.\n[Info] g3rs-clippy/macro-bans .clippy.toml macro ban present\n  `eprintln!` is banned.\n[Info] g3rs-clippy/macro-bans .clippy.toml macro ban present\n  `dbg!` is banned.\n[Info] g3rs-clippy/macro-bans .clippy.toml macro ban present\n  `todo!` is banned.\n[Info] g3rs-clippy/macro-bans .clippy.toml macro ban present\n  `unimplemented!` is banned.\n[Info] g3rs-clippy/policy-context-parseable guardrail3-rs.toml clippy rust policy parseable\n  Active `guardrail3-rs.toml` parsed successfully for clippy policy context.\n[Info] g3rs-clippy/forbid-clippy-conf-dir-override - no clippy config dir overrides found\n  No applicable cargo config surfaces set `CLIPPY_CONF_DIR`.\n[Info] g3rs-clippy/config-parseable .clippy.toml clippy.toml parseable\n  `.clippy.toml` parsed successfully.\n[Info] g3rs-clippy/coverage-exists .clippy.toml workspace root covered by clippy config\n  Workspace root is covered by `.clippy.toml`.\n"
@@ -356,7 +356,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:6202a72dbc67b980c3646461cbe35b0f6f99e23ee8975001fa54a969cfbb6369",
+      "fixture_hash": "sha256:6b47ac42c0ad3344a6a800484fe0a96ba3b5a7c3a5eb9d7d9d1cf1301af54be1",
       "fixture_id": "code-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== code ==\n[Info] g3rs-code/unsafe-code-lint Cargo.toml unsafe_code = forbid\n  unsafe_code is set to forbid in workspace lints.\n"
@@ -396,7 +396,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:0dbad5bd43c4bd6f8eb5b4f1d1ef23c288bf991bab32bf85aca09483904dfaf7",
+      "fixture_hash": "sha256:069c0f09f223f5e7ef1f6690e538dc1e3de6b441ac18756b6833271f13028b8a",
       "fixture_id": "deny-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== deny ==\n[Info] g3rs-deny/extra-deny-bans-inventory deny.toml no extra deny bans\n  `deny.toml` has 0 deny bans beyond the managed baseline.\n[Info] g3rs-deny/coverage deny.toml workspace root covered by deny config\n  workspace root `.` is covered by `deny.toml`.\n"
@@ -536,10 +536,10 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:dd82ddd68e02000c91eefe5157d9a559fd16e6dd7ad93a6e449db0c5782f09d7",
+      "fixture_hash": "sha256:9e19e7ecd3961f6da7c96a7efa8ca3a2f6efa4f6f058890cc95a099994ea4744",
       "fixture_id": "deps-R00-clean-golden",
       "stderr": "",
-      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Info] g3rs-deps/dependencies-allowlisted Cargo.toml dependency allowlisted\n  Dependency `serde` in `[dependencies]` is allowlisted for crate `deps_clean`.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `deps_clean` has an `allowed_deps` policy.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock missing\n  Library-profile workspace is missing `Cargo.lock`.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n"
+      "stdout": "scope: workspace\nroot: .\n\n== deps ==\n[Info] g3rs-deps/cargo-deny-installed Cargo.toml cargo-deny installed\n  `cargo-deny` is available on PATH.\n[Info] g3rs-deps/cargo-machete-installed Cargo.toml cargo-machete installed\n  `cargo-machete` is available on PATH.\n[Info] g3rs-deps/cargo-dupes-installed Cargo.toml cargo-dupes installed\n  `cargo-dupes` is available on PATH.\n[Info] g3rs-deps/gitleaks-installed Cargo.toml gitleaks installed\n  `gitleaks` is available on PATH.\n[Info] g3rs-deps/dependencies-allowlisted Cargo.toml dependency allowlisted\n  Dependency `serde` in `[dependencies]` is allowlisted for crate `deps_clean`.\n[Info] g3rs-deps/library-allowlist-present Cargo.toml dependency allowlist present\n  Crate `deps_clean` has an `allowed_deps` policy.\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock committed\n  Workspace root has `Cargo.lock` committed.\n[Info] g3rs-deps/gitignore-not-ignoring-cargo-lock Cargo.lock Cargo.lock tracked by git\n  No relevant `.gitignore` masks `Cargo.lock` at the workspace root.\n"
     },
     {
       "command": [
@@ -616,7 +616,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:7cf06f01144c344126ecf2b6bf247d47ddd2434983edaa796ab2e03a9720740f",
+      "fixture_hash": "sha256:b7d731d8b6c8631f5656b881c6e0fc62dbfe191cbde9cbca8b49102172107695",
       "fixture_id": "fmt-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\nNo findings.\n"
@@ -676,7 +676,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:8d8a7cf39c72921fcef0008a687cb7e15f91c3d876c0151c67dccea9d9a6ef6d",
+      "fixture_hash": "sha256:c11b5fbf75d53368f59529afb73ed5547e00a3b778718cb22971b631e1544fd5",
       "fixture_id": "garde-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\nNo findings.\n"
@@ -858,7 +858,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:2e355dfd8d73007b6229ccc45876f59964e35951e3313f1ee0234cfe6e2d26d6",
+      "fixture_hash": "sha256:c6ab015347759ec1220f56f878f2a0934f73bff768e5c4895411b440f327ce7b",
       "fixture_id": "release-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== release ==\n[Info] g3rs-release/release-plz-workflow .github/workflows/release.yml Release-plz workflow present\n  \n[Info] g3rs-release/publish-dry-run-workflow .github/workflows/release.yml Publish dry-run workflow present\n  \n[Info] g3rs-release/registry-token .github/workflows/release.yml CARGO_REGISTRY_TOKEN wired in workflow\n  \n"
@@ -958,7 +958,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:65506a3b0be92adf1d8d9e7876f6c2d2d84acc88c1b237db8704d0a0ed8ad568",
+      "fixture_hash": "sha256:ee88767b94fc3b606d9f7638315442381c12331d18007fdffbecf5b88a05b04b",
       "fixture_id": "test-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== test ==\n[Info] g3rs-test/cargo-mutants-installed Cargo.toml cargo-mutants installed\n  `cargo-mutants` is available on PATH.\n[Info] g3rs-test/mutants-toml-exists .cargo/mutants.toml mutants config exists\n  Found `.cargo/mutants.toml`.\n[Info] g3rs-test/mutants-profile-present Cargo.toml profile.mutants configured\n  `Cargo.toml` defines `[profile.mutants]`.\n[Info] g3rs-test/mutation-hook-present .githooks/pre-commit mutation hook step present\n  `.githooks/pre-commit` contains an executable mutation-testing command.\n[Info] g3rs-test/mutants-config-sane .cargo/mutants.toml mutants config looks sane\n  `.cargo/mutants.toml` avoids the known fake-mutation configurations this family bans.\n[Info] g3rs-test/ignore-reason src/lib.rs ignored tests have reasons\n  This file has no ignored tests, or every `#[ignore]` is paired with a strong reason.\n"
@@ -1098,7 +1098,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:43bd6bb6dc4d74e48ac9d6d4b25394a858942ab525b1bee29ddde1432901f223",
+      "fixture_hash": "sha256:461b8a76ecd24a09aaf3377635d178e4583def00f0a70ef6d47ed70a8b106466",
       "fixture_id": "toolchain-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\n== toolchain ==\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain channel is pinned\n  Pinned channel `1.85.0` is acceptable.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `clippy` present\n  `clippy` is listed in `components`.\n[Info] g3rs-toolchain/channel-and-components rust-toolchain.toml toolchain component `rustfmt` present\n  `rustfmt` is listed in `components`.\n[Info] g3rs-toolchain/msrv-consistency rust-toolchain.toml pinned toolchain satisfies MSRV\n  Pinned toolchain `1.85.0` is compatible with Cargo rust-version `1.85`.\n[Info] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml exists\n  Found rust-toolchain.toml at workspace root.\n"
@@ -1158,7 +1158,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:5de80c051b157cf0dea94e692b8d40a59ec357e261a0aa77fd0ba07a5893a488",
+      "fixture_hash": "sha256:8c8d55dff430ef81dec760a201645cf616c29aafdea02c274fbf0a91b1714390",
       "fixture_id": "topology-R00-clean-golden",
       "stderr": "",
       "stdout": "scope: workspace\nroot: .\n\nNo findings.\n"
