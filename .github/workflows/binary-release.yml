@@ -53,6 +53,6 @@ jobs:
           cd ../../..
 
       - name: Upload
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: guardrail3-${{ matrix.target }}.tar.gz
