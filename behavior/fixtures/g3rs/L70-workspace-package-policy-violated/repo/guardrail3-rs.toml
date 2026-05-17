@@ -1,5 +1,0 @@
-profile = "library"
-allowed_deps = ["anyhow", "camino", "indexmap", "itertools", "once_cell", "regex", "semver", "serde_json", "thiserror", "toml", "url", "walkdir", "bytes", "chrono", "time", "uuid", "glob", "memchr", "log", "smallvec", "hashbrown", "parking_lot", "strum"]
-
-[checks]
-garde = false

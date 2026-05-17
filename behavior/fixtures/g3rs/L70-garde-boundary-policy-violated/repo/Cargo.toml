@@ -1,9 +1,0 @@
-[package]
-name = "garde_fixture"
-version = "0.1.0"
-edition = "2024"
-rust-version = "1.85"
-publish = false
-
-[dependencies]
-garde = { version = "0.22", features = ["derive"] }

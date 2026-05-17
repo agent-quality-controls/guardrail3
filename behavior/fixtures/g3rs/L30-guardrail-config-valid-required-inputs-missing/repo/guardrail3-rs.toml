@@ -1,5 +1,0 @@
-profile = "service"
-allowed_deps = ["garde"]
-
-[checks]
-garde = true

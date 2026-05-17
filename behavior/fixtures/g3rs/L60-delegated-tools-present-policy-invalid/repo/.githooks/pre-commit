@@ -1,2 +1,0 @@
-#!/bin/sh
-cargo mutants --profile mutants

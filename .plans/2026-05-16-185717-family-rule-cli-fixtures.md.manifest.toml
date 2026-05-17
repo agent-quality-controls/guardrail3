@@ -6,16 +6,6 @@ strategy = "replace_broad_composite_rule_fixtures"
 coverage_mode = "incremental"
 
 [[fixture_corpus]]
-path = "behavior/fixtures/g3rs"
-status = "transitional_broad_composite"
-action = "reduce_or_remove_after_family_rule_coverage_replaces_it"
-
-[[fixture_corpus]]
-path = "behavior/fixtures/g3rs-global"
-status = "target_global_cli_gating"
-action = "create_by_renaming_or_reducing_global-only fixtures from behavior/fixtures/g3rs"
-
-[[fixture_corpus]]
 path = "behavior/fixtures/g3rs-rules"
 status = "target_family_rule_coverage"
 action = "build minimized family fixtures"
@@ -267,17 +257,7 @@ name = "target_rules"
 name = "expected_findings"
 
 [[suite_fixture_glob]]
-suite = "g3rs-validate"
-glob = "behavior/fixtures/g3rs/*/fixture.toml"
-status = "transitional"
-
-[[suite_fixture_glob]]
-suite = "g3rs-validate"
-glob = "behavior/fixtures/g3rs-global/*/fixture.toml"
-status = "target"
-
-[[suite_fixture_glob]]
-suite = "g3rs-validate"
+suite = "g3rs-rule-fixtures"
 glob = "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
 status = "target"
 
