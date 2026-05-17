@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "scripts": {
+    "typecov": "echo typecov",
+    "validate": "type-coverage --at-least 100"
+  },
+  "devDependencies": {}
+}

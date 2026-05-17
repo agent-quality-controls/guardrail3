@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "validate": "echo ok"
+  },
+  "devDependencies": {
+    "type-coverage": "2.29.7"
+  }
+}

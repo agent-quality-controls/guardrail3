@@ -1,0 +1,20 @@
+id = "typecov-R20-policy-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "typecov", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "typecov"
+target_rules = [
+  "g3ts-typecov/package-present",
+  "g3ts-typecov/threshold-fail-closed",
+  "g3ts-typecov/syncpack-type-coverage-pin"
+]
+expected_findings = [
+  "g3ts-typecov/package-present",
+  "g3ts-typecov/threshold-fail-closed",
+  "g3ts-typecov/syncpack-type-coverage-pin"
+]

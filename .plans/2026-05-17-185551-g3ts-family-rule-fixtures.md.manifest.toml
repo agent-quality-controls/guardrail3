@@ -79,6 +79,14 @@ reason = "extra npmrc settings are intentional inventory and emit Info, not Erro
 id = "g3ts-fmt/hook-contract"
 reason = "fmt hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family fmt"
 
+[[cli_unreachable_rule]]
+id = "g3ts-spelling/hook-contract"
+reason = "spelling hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family spelling"
+
+[[cli_unreachable_rule]]
+id = "g3ts-typecov/hook-contract"
+reason = "typecov hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family typecov"
+
 [[family]]
 name = "package"
 rule_count = 10
@@ -119,13 +127,13 @@ status = "completed"
 name = "spelling"
 rule_count = 8
 fixture_dir = "behavior/fixtures/g3ts-rule/spelling"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "typecov"
 rule_count = 7
 fixture_dir = "behavior/fixtures/g3ts-rule/typecov"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "style"

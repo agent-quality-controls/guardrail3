@@ -1,0 +1,20 @@
+id = "spelling-R30-script-not-wired"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "spelling", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "spelling"
+target_rules = [
+  "g3ts-spelling/spellcheck-script",
+  "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/validate-runs-spellcheck"
+]
+expected_findings = [
+  "g3ts-spelling/spellcheck-script",
+  "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/validate-runs-spellcheck"
+]

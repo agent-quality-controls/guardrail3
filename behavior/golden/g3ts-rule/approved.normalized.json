@@ -331,6 +331,82 @@
         "--path",
         ".",
         "--family",
+        "spelling",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:42be657e35351f5d738feaf788bc17472139d6262c38ac9934216c6580b6a5c8",
+      "fixture_id": "spelling-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== spelling ==\n[Info] g3ts-spelling/cspell-package-present package.json cspell package is installed\n  `package.json` directly installs `cspell`.\n[Info] g3ts-spelling/cspell-config-present cspell.json cspell config is present\n  `cspell.json` defines the local spelling policy.\n[Info] g3ts-spelling/spellcheck-script package.json Spellcheck script is configured\n  `package.json` defines a parseable `spellcheck` script.\n[Info] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is fail-closed\n  `package.json` defines `spellcheck` with a fail-closed `cspell` invocation.\n[Info] g3ts-spelling/validate-runs-spellcheck package.json Validate script runs spellcheck\n  `package.json` defines a fail-closed `validate` script that reaches `spellcheck` or direct `cspell`.\n[Info] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell is pinned by Syncpack\n  `.syncpackrc` pins `cspell` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "spelling",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:bfd9980425e0a4589f50952659b5688665a910e75f516422cf7c5a5e1545be3b",
+      "fixture_id": "spelling-R10-policy-root-missing",
+      "stderr": "",
+      "stdout": "== spelling ==\n[Error] g3ts-spelling/policy-configured - Spelling policy root is missing\n  `package.json` must exist so G3TS can evaluate spelling policy for this app/package root.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "spelling",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:c0d6db69bb0db0c040991d24343b4313427c5879eaab463870b4d16bd1cff591",
+      "fixture_id": "spelling-R20-policy-violations",
+      "stderr": "",
+      "stdout": "== spelling ==\n[Error] g3ts-spelling/cspell-package-present package.json cspell package is missing\n  `package.json` must install `cspell` directly so spelling is reproducible for this app/package root.\n[Error] g3ts-spelling/cspell-config-present cspell.config.* cspell config is missing\n  `cspell.config.*` must exist. Add a local cspell config instead of relying on implicit spelling defaults.\n[Info] g3ts-spelling/spellcheck-script package.json Spellcheck script is configured\n  `package.json` defines a parseable `spellcheck` script.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Info] g3ts-spelling/validate-runs-spellcheck package.json Validate script runs spellcheck\n  `package.json` defines a fail-closed `validate` script that reaches `spellcheck` or direct `cspell`.\n[Error] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell is not pinned by Syncpack\n  `.syncpackrc` must pin `cspell` in a non-ignored Syncpack version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "spelling",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:8d2f26c0a84e0d346533412916a5afe71a839dc269bb5b17175d620b85952a45",
+      "fixture_id": "spelling-R30-script-not-wired",
+      "stderr": "",
+      "stdout": "== spelling ==\n[Info] g3ts-spelling/cspell-package-present package.json cspell package is installed\n  `package.json` directly installs `cspell`.\n[Info] g3ts-spelling/cspell-config-present cspell.json cspell config is present\n  `cspell.json` defines the local spelling policy.\n[Error] g3ts-spelling/spellcheck-script package.json Spellcheck script is missing or unparseable\n  `package.json` must define `spellcheck` as `cspell ...`.\n[Error] g3ts-spelling/spellcheck-fail-closed package.json Spellcheck script is not fail-closed\n  `package.json` must define `spellcheck` as a fail-closed `cspell ...` invocation without `||` fallback.\n[Error] g3ts-spelling/validate-runs-spellcheck package.json Validate script does not run spellcheck\n  `package.json` must define a fail-closed `validate` script that invokes `spellcheck` through a package-manager run command or directly invokes `cspell`.\n[Info] g3ts-spelling/syncpack-cspell-pin .syncpackrc cspell is pinned by Syncpack\n  `.syncpackrc` pins `cspell` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "tsconfig",
         "--rules-only",
         "--inventory"
@@ -418,6 +494,82 @@
       "fixture_id": "tsconfig-R40-strict-baseline-violations",
       "stderr": "",
       "stdout": "== tsconfig ==\n[Info] g3ts-tsconfig/exists tsconfig.json tsconfig exists\n  Found root TypeScript config `tsconfig.json`.\n[Info] g3ts-tsconfig/parseable tsconfig.json tsconfig parseable\n  `tsconfig.json` parsed successfully as tsconfig JSONC.\n[Info] g3ts-tsconfig/extends-chain-resolves tsconfig.json tsconfig extends chain resolved\n  All local `extends` entries resolved to parseable tsconfig files.\n[Error] g3ts-tsconfig/extends-or-inline tsconfig.json standalone tsconfig misses inline strict baseline\n  Root `tsconfig.json` does not use `extends`, so it must carry the strict baseline inline. Missing or invalid flags: noImplicitReturns, noUnusedLocals, noUnusedParameters, noUncheckedIndexedAccess, exactOptionalPropertyTypes, noPropertyAccessFromIndexSignature, noImplicitOverride, noFallthroughCasesInSwitch, forceConsistentCasingInFileNames, allowUnreachableCode, allowUnusedLabels.\n[Error] g3ts-tsconfig/strict-baseline tsconfig.json strict tsconfig baseline weakened\n  The effective tsconfig does not keep the required strict baseline. Problems: strict=false (expected true), noImplicitReturns missing, noUnusedLocals missing, noUnusedParameters missing, noUncheckedIndexedAccess missing, exactOptionalPropertyTypes missing, noPropertyAccessFromIndexSignature missing, noImplicitOverride missing, noFallthroughCasesInSwitch missing, forceConsistentCasingInFileNames missing, allowUnreachableCode missing, allowUnusedLabels missing.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "typecov",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:05b2f372b8b73c2c935d5a1cac2a2d8b5d6ae8f222479b2b0a48a89f35dc3675",
+      "fixture_id": "typecov-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== typecov ==\n[Info] g3ts-typecov/package-present package.json type-coverage package is installed\n  `package.json` directly installs `type-coverage`.\n[Info] g3ts-typecov/script-present package.json Typecov script is configured\n  `package.json` defines a parseable `typecov` script.\n[Info] g3ts-typecov/threshold-fail-closed package.json Typecov script is fail-closed\n  `package.json` defines `typecov` with a fail-closed `type-coverage --at-least 100` invocation.\n[Info] g3ts-typecov/validate-runs-typecov package.json Validate script runs typecov\n  `package.json` defines a fail-closed `validate` script that reaches `typecov` or direct `type-coverage --at-least 100`.\n[Info] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage is pinned by Syncpack\n  `.syncpackrc` pins `type-coverage` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "typecov",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:262ac6d3a5ddfb4aac30572e0867b8640a2c292b340d09cf007baf76a5060616",
+      "fixture_id": "typecov-R10-policy-root-missing",
+      "stderr": "",
+      "stdout": "== typecov ==\n[Error] g3ts-typecov/policy-configured - Typecov policy root is missing\n  `package.json` must exist so G3TS can evaluate typecov policy for this app/package root.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "typecov",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:53662b0c5e2d3f530e9fb190aaf3e7a0bfa1607ffaff17c34b938618ae6c6749",
+      "fixture_id": "typecov-R20-policy-violations",
+      "stderr": "",
+      "stdout": "== typecov ==\n[Error] g3ts-typecov/package-present package.json type-coverage package is missing\n  `package.json` must install `type-coverage` directly so typecov is reproducible for this app/package root.\n[Info] g3ts-typecov/script-present package.json Typecov script is configured\n  `package.json` defines a parseable `typecov` script.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Info] g3ts-typecov/validate-runs-typecov package.json Validate script runs typecov\n  `package.json` defines a fail-closed `validate` script that reaches `typecov` or direct `type-coverage --at-least 100`.\n[Error] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage is not pinned by Syncpack\n  `.syncpackrc` must pin `type-coverage` in a non-ignored Syncpack version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "typecov",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:7ad30dc89f65859c15ef1645cc9dfe3e1ea986ba0b4502168e690655c2b1bc8a",
+      "fixture_id": "typecov-R30-script-not-wired",
+      "stderr": "",
+      "stdout": "== typecov ==\n[Info] g3ts-typecov/package-present package.json type-coverage package is installed\n  `package.json` directly installs `type-coverage`.\n[Error] g3ts-typecov/script-present package.json Typecov script is missing or unparseable\n  `package.json` must define `typecov` as `type-coverage ...`.\n[Error] g3ts-typecov/threshold-fail-closed package.json Typecov script is not fail-closed\n  `package.json` must define `typecov` as a fail-closed `type-coverage --at-least 100` invocation without `||` fallback.\n[Error] g3ts-typecov/validate-runs-typecov package.json Validate script does not run typecov\n  `package.json` must define a fail-closed `validate` script that invokes `typecov` through a package-manager run command or directly invokes `type-coverage --at-least 100`.\n[Info] g3ts-typecov/syncpack-type-coverage-pin .syncpackrc type-coverage is pinned by Syncpack\n  `.syncpackrc` pins `type-coverage` in a non-ignored version group.\n"
     }
   ],
   "schema_version": "g3ts-replay-v1",

@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-44-45.792546Z-d06b5496",
-  "run_commit": "ff2983fbe",
+  "run_id": "2026-05-17T18-48-15.989133Z-d06b5496",
+  "run_commit": "74c98f4ce",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:44:45.792546Z",
-  "fixture_hash": "sha256:93ae706b14c86b03ab1c3ff2abd145d1ee0b6fa6392f12ff3744bb74a25727e5",
+  "recorded_at": "2026-05-17T18:48:15.989133Z",
+  "fixture_hash": "sha256:00355edc83a1d9dc6e7d70da153143aa081bdb27ae1d8307ba1e3bdf465192d4",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -79,6 +79,22 @@
       "sha256": "sha256:09ce213996d7ddc6418566f48967d2802d82eb50655864291e4956a9d67772f2"
     },
     {
+      "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:baa119f6c2c4c13d6b1a7f8f7316e6ab3ea544372ba73a7ecbfbb3006c470147"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R10-policy-root-missing/fixture.toml",
+      "sha256": "sha256:5a4ff9826e17a04995c735efbe087c23b92dbf7d3cc16cabc56e4defe80c6cca"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:c219c3c5b434519c9f77dc83c1159f9f1b65ad255e1b9b0a1d6d0da2030a9729"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R30-script-not-wired/fixture.toml",
+      "sha256": "sha256:d5c90d171d4768aa91e77ba6c832588f06fc4684ba49c9fa0829acf51b222c05"
+    },
+    {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f0eec8107ff23b233cafb24dac68d60f5f1b5e7f987948df23f78b0903143efb"
     },
@@ -97,7 +113,23 @@
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R40-strict-baseline-violations/fixture.toml",
       "sha256": "sha256:4c9b9b9f2c155b05d61b6c88596ced8fcba52ad3ea6541114043079a6febaae9"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:921adc1a1255a226d982032978752ca4482dbf47fcfb0449ba7bda36f12fe07e"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R10-policy-root-missing/fixture.toml",
+      "sha256": "sha256:ceb8ae2a06b1e7e168e4db38a1e6eb880755058dc8ac6707824df9fd2169dc6e"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:acfce307a39371def2304c94ce4615d67247dfa133d2a3d147d42dc589070d28"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R30-script-not-wired/fixture.toml",
+      "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS tsconfig, jscpd, and fmt family rule fixtures"
+  "comment": "Add G3TS spelling and typecov family rule fixtures"
 }

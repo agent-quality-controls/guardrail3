@@ -1,0 +1,22 @@
+id = "spelling-R20-policy-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "spelling", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "spelling"
+target_rules = [
+  "g3ts-spelling/cspell-package-present",
+  "g3ts-spelling/cspell-config-present",
+  "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/syncpack-cspell-pin"
+]
+expected_findings = [
+  "g3ts-spelling/cspell-package-present",
+  "g3ts-spelling/cspell-config-present",
+  "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/syncpack-cspell-pin"
+]
