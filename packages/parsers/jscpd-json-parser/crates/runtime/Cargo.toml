@@ -24,9 +24,5 @@ api = []
 jscpd-json-parser-types = { path = "../types", version = "0.1.0" }
 serde_json = "1"
 
-[dev-dependencies]
-tempfile = "3"
-jscpd-json-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

@@ -134,7 +134,3 @@ fn normalize_compiler_options(value: Option<&Value>) -> NormalizeResult<Tsconfig
 fn bool_value(value: Option<&Value>) -> Option<bool> {
     value.and_then(Value::as_bool)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

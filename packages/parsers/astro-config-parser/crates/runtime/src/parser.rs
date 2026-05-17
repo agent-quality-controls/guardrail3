@@ -1492,7 +1492,3 @@ const fn expr_kind_name(expr: &Expr) -> &'static str {
         _ => "expression",
     }
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

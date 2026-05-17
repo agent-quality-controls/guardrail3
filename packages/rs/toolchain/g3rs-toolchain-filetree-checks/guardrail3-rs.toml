@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3rs-toolchain-filetree-checks-assertions",
   "g3rs-toolchain-types",
   "guardrail3-check-types",
 ]

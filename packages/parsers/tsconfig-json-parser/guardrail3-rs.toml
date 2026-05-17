@@ -3,9 +3,7 @@ profile = "library"
 allowed_deps = [
   "jsonc-parser",
   "serde_json",
-  "tempfile",
   "tsconfig-json-parser-runtime",
-  "tsconfig-json-parser-runtime-assertions",
   "tsconfig-json-parser-types",
 ]
 

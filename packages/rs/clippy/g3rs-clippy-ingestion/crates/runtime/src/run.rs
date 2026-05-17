@@ -136,7 +136,3 @@ fn collect_workspace_member_states(
         })
         .collect()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

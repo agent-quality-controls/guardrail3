@@ -20,7 +20,3 @@ workspace = true
 g3rs-deny-types = { path = "../../../g3rs-deny-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-deny-filetree-checks-assertions = { path = "../assertions" }
-test_support = { path = "../test_support" }
-g3rs-deny-types = { path = "../../../g3rs-deny-types" }

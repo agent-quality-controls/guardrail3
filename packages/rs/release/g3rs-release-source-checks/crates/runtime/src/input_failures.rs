@@ -15,7 +15,3 @@ pub(crate) fn check(failure: &G3RsReleaseInputFailure, results: &mut Vec<G3Check
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "input_failures_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod input_failures_tests;

@@ -19,7 +19,3 @@ pub fn hook_contract() -> Vec<G3HookRequirement> {
         critical_commands: vec![G3HookCriticalCommand::CargoSubcommand("clippy".to_owned())],
     }]
 }
-
-#[cfg(test)]
-#[path = "contract_tests/mod.rs"] // reason: owned sidecar tests for contract module.
-mod contract_tests;

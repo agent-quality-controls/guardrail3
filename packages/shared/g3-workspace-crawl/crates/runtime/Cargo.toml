@@ -27,6 +27,3 @@ g3-workspace-crawl-types = { path = "../types", version = "0.1.0" }
 ignore = "0.4"
 walkdir = "2"
 
-[dev-dependencies]
-g3-workspace-crawl-assertions = { path = "../assertions" }
-tempfile = "3"

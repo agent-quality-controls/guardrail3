@@ -38,8 +38,3 @@ proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1.0.45"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 
-[dev-dependencies]
-g3rs-garde-source-checks = { path = "../../../g3rs-garde-source-checks" }
-g3rs-garde-config-checks = { path = "../../../g3rs-garde-config-checks" }
-g3rs-garde-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

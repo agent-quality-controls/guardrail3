@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3rs-apparch-source-checks-assertions",
   "g3rs-apparch-source-checks-runtime",
   "g3rs-apparch-types",
   "guardrail3-check-types",

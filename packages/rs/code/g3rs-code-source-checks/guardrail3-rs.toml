@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3rs-code-source-checks-assertions",
   "g3rs-code-source-checks-runtime",
   "g3rs-code-types",
   "guardrail3-check-types",
@@ -9,7 +8,6 @@ allowed_deps = [
   "proc-macro2",
   "quote",
   "syn",
-  "test_support",
 ]
 
 [checks]

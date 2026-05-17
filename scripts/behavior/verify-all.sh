@@ -12,7 +12,6 @@ fixture3 check --all
 python3 "$HERE/verify-fixture3-migration.py"
 python3 "$HERE/verify-rule-coverage.py"
 python3 "$HERE/verify-ledger.py"
-python3 "$HERE/classify-test-fixture-ledger.py" --check
 python3 "$HERE/verify-unclassified-fixture-coverage.py"
 python3 "$HERE/verify-test-fixture-ledger.py" --strict
 python3 "$HERE/classify-kept-test-dispositions.py" --check

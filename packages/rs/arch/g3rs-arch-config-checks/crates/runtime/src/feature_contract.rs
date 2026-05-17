@@ -53,8 +53,3 @@ pub(crate) fn check(node: &G3RsArchConfigCrate, results: &mut Vec<G3CheckResult>
         .into_inventory(),
     );
 }
-
-#[cfg(test)]
-#[path = "feature_contract_tests/mod.rs"]
-// reason: keep rule tests in the owned x_tests sidecar directory.
-mod feature_contract_tests;

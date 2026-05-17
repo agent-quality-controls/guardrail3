@@ -37,7 +37,3 @@ pub(crate) fn check(input: &G3RsDepsFileTreeChecksInput, results: &mut Vec<G3Che
         .into_inventory(),
     );
 }
-
-#[cfg(test)]
-#[path = "gitignore_not_ignoring_cargo_lock_tests/mod.rs"]
-mod gitignore_not_ignoring_cargo_lock_tests;

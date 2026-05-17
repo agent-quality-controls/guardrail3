@@ -41,15 +41,6 @@ diff_dir = ".fixture3/g3rs-cli-output"
 runner = "scripts/behavior/fixture3-g3rs-replay.py"
 schema_version = "g3rs-replay-v1"
 
-[[fixture3_suite]]
-name = "g3rs-report-output"
-manifest = "fixture3.yaml"
-approved_dir = "behavior/golden/g3rs-report-output"
-received_dir = ".fixture3/g3rs-report-output"
-diff_dir = ".fixture3/g3rs-report-output"
-runner = "scripts/behavior/fixture3-g3rs-report-output.py"
-schema_version = "g3rs-report-output-v1"
-
 [[forbidden_active_reference]]
 pattern = "goldencheck"
 path_globs = [

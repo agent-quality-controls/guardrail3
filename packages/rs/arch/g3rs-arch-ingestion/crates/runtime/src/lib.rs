@@ -1,8 +1,4 @@
 //! Internal crate.
-#[cfg(test)]
-use g3rs_arch_ingestion_assertions as _;
-#[cfg(test)]
-use guardrail3_check_types as _;
 
 /// config module.
 mod config;

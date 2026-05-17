@@ -30,10 +30,3 @@ pub fn check(input: &G3RsCargoFileTreeChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-use g3rs_cargo_filetree_checks_assertions as _;
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

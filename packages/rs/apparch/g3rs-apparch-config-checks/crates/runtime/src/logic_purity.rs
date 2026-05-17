@@ -123,7 +123,3 @@ fn allowed_dependencies(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "logic_purity_tests/mod.rs"]
-mod logic_purity_tests;

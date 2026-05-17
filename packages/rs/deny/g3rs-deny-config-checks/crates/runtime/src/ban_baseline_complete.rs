@@ -63,7 +63,3 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         }
     }
 }
-
-#[cfg(test)]
-#[path = "ban_baseline_complete_tests/mod.rs"]
-mod ban_baseline_complete_tests;

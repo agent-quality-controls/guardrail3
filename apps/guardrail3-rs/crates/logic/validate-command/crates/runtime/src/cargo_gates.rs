@@ -250,7 +250,3 @@ fn has_rs_extension(path: &str) -> bool {
         .extension()
         .is_some_and(|ext| ext.eq_ignore_ascii_case("rs"))
 }
-
-#[cfg(test)]
-#[path = "cargo_gates_tests/mod.rs"]
-mod cargo_gates_tests;

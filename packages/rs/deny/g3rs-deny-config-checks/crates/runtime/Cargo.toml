@@ -30,6 +30,3 @@ guardrail3-reason-policy = { path = "../../../../../shared/reason-policy", versi
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 toml = "0.8"
 
-[dev-dependencies]
-g3rs-deny-config-checks-assertions = { path = "../assertions" }
-test_support = { path = "../test_support" }

@@ -24,9 +24,5 @@ api = []
 serde_json = "1"
 package-json-parser-types = { path = "../types", version = "0.1.0" }
 
-[dev-dependencies]
-tempfile = "3"
-package-json-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

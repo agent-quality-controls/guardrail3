@@ -118,8 +118,3 @@ fn inspect_clippy_lints(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "approved_allow_inventory_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod approved_allow_inventory_tests;

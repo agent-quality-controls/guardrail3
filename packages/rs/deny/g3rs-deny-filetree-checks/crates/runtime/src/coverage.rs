@@ -41,8 +41,3 @@ pub(crate) fn check(input: &G3RsDenyFileTreeChecksInput, results: &mut Vec<G3Che
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "coverage_tests/mod.rs"]
-// reason: file module tests live in the owned coverage_tests sidecar directory.
-mod coverage_tests;

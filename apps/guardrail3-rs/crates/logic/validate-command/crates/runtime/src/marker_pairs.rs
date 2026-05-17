@@ -123,7 +123,3 @@ fn relative(root: &Path, path: &Path) -> String {
             },
         )
 }
-
-#[cfg(test)]
-#[path = "marker_pairs_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod marker_pairs_tests;

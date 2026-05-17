@@ -77,8 +77,3 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
         }
     }
 }
-
-#[cfg(test)]
-#[path = "no_path_deps_to_unpublishable_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod no_path_deps_to_unpublishable_tests;

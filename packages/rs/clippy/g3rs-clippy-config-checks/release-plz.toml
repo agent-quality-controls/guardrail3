@@ -7,9 +7,6 @@ release_always = false
 name = "g3rs-clippy-config-checks"
 
 [[package]]
-name = "g3rs-clippy-config-checks-assertions"
-
-[[package]]
 name = "g3rs-clippy-config-checks-runtime"
 
 [[package]]

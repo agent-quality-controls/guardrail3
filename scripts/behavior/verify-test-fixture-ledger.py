@@ -37,6 +37,13 @@ ALLOWED_STATUSES = {
 }
 FINDING_STATUSES = {"covered_hit", "covered_non_hit"}
 DISPOSITION_COVERED = {"covered_by_cli_output", "covered_by_renderer_output"}
+KNOWN_KEPT_DISPOSITIONS = {
+    "keep_internal_unit_test",
+    "keep_public_api_contract",
+    "needs_family_runner_output",
+    "needs_rule_fixture_or_golden_output",
+    "needs_validate_command_output",
+}
 
 
 def main() -> int:
@@ -159,7 +166,9 @@ def load_dispositions() -> dict[tuple[str, str], str]:
 def row_can_stay_after_test_deletion(row: dict[str, Any], disposition: str | None) -> bool:
     if row.get("status") in FINDING_STATUSES:
         return True
-    return row.get("status") == "kept_compile_contract" and disposition in DISPOSITION_COVERED
+    return row.get("status") == "kept_compile_contract" and disposition in (
+        DISPOSITION_COVERED | KNOWN_KEPT_DISPOSITIONS
+    )
 
 
 def active_test_keys() -> set[tuple[str, str]]:

@@ -70,7 +70,3 @@ pub(crate) fn check(
         );
     }
 }
-
-#[cfg(test)]
-#[path = "types_public_surface_tests/mod.rs"]
-mod types_public_surface_tests;

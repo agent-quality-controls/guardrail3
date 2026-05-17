@@ -71,7 +71,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         );
     }
 }
-
-#[cfg(test)]
-#[path = "library_global_state_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod library_global_state_tests;

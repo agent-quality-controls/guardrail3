@@ -53,7 +53,3 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "rust_version_policy_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod rust_version_policy_tests;

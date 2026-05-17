@@ -2,12 +2,9 @@ profile = "library"
 
 allowed_deps = [
   "cspell-config-parser-runtime",
-  "cspell-config-parser-runtime-assertions",
   "cspell-config-parser-types",
   "serde_json",
-  "tempfile",
 ]
 
 [checks]
 garde = false
-

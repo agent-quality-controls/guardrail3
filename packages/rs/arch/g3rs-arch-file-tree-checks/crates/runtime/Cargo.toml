@@ -26,5 +26,3 @@ workspace = true
 g3rs-arch-types = { path = "../../../g3rs-arch-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-arch-file-tree-checks-assertions = { path = "../assertions" }

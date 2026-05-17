@@ -4,7 +4,6 @@ allowed_deps = [
   "cargo-toml-parser",
   "g3rs-deps-config-checks",
   "g3rs-deps-filetree-checks",
-  "g3rs-deps-ingestion-assertions",
   "g3rs-deps-ingestion-runtime",
   "g3rs-deps-ingestion-types",
   "g3rs-deps-types",
@@ -12,7 +11,6 @@ allowed_deps = [
   "glob",
   "guardrail3-check-types",
   "g3rs-toml-parser",
-  "tempfile",
   "toml",
 ]
 

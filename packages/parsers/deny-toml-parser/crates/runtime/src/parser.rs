@@ -1,8 +1,3 @@
-#[cfg(test)]
-pub(super) use crate::Error;
-#[cfg(test)]
-pub(super) use crate::types::DenyToml;
-#[cfg(not(test))]
 use crate::types::DenyToml;
 
 /// Parse `deny.toml` content into typed data.
@@ -27,7 +22,3 @@ pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<DenyToml, crate::e
     let content = crate::fs::read_to_string(path)?;
     parse(&content)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod parser_tests;

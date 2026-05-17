@@ -8,7 +8,6 @@ allowed_deps = [
   "quote",
   "syn",
   "g3rs-toml-parser",
-  "tempfile",
 ]
 
 [checks]

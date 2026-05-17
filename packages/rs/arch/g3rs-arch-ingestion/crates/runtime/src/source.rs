@@ -69,7 +69,3 @@ fn collect_lib_facade_checks(
         })
         .collect()
 }
-
-#[cfg(test)]
-#[path = "source_tests/mod.rs"]
-mod source_tests;

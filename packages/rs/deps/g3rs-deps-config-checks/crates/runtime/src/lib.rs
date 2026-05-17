@@ -1,8 +1,5 @@
 //! Runtime rules for the `g3rs-deps-config-checks` family.
 
-#[cfg(test)]
-use g3rs_deps_config_checks_assertions as _;
-
 /// Rule implementation for `build dependencies allowlisted`.
 mod build_dependencies_allowlisted;
 /// Rule implementation for `cargo deny installed`.

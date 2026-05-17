@@ -5,11 +5,6 @@ pub(super) use crate::types::{
     EslintConfigDocument, EslintConfigParseState, EslintConfigSnapshot, EslintProbeTarget,
 };
 
-#[cfg(test)]
-pub(crate) use crate::types::{
-    EslintConfigFileKind, EslintProbeKind, EslintReportUnusedSetting, EslintRuleSeverity,
-};
-
 /// `JavaScript` helper script that probes `ESLint`'s flat-config resolution and emits a typed snapshot.
 const NODE_HELPER: &str = r"
 import path from 'node:path';
@@ -331,7 +326,3 @@ fn evaluate(
 
     Ok(serde_json::from_slice(&output.stdout)?)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for parser entrypoints.
-mod parser_tests;

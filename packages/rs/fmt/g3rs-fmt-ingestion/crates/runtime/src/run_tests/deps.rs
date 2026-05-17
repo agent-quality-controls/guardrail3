@@ -1,3 +1,0 @@
-use g3rs_fmt_ingestion_assertions as _;
-/// Anchor dev-dependency crates that are used transitively in test modules.
-use guardrail3_check_types as _;

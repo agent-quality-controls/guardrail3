@@ -208,7 +208,3 @@ fn sorted_keys(object: &Map<String, Value>) -> Vec<String> {
     keys.sort_unstable();
     keys
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

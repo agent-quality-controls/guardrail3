@@ -27,5 +27,3 @@ g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version =
 [lints]
 workspace = true
 
-[dev-dependencies]
-g3rs-deps-config-checks-assertions = { path = "../assertions" }

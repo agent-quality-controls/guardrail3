@@ -161,7 +161,3 @@ fn normalize_optional_string_array(
 
     normalize_string_array(Some(value), field_name).map(Some)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

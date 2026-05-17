@@ -144,8 +144,3 @@ fn classify_unapproved_allow(
         },
     }
 }
-
-#[cfg(test)]
-#[path = "unapproved_allow_entries_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod unapproved_allow_entries_tests;

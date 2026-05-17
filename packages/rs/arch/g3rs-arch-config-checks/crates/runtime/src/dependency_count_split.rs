@@ -38,8 +38,3 @@ fn has_waiver(node: &G3RsArchConfigCrate, rust_policy: &G3RsArchRustPolicyState)
         waiver.rule == ID && waiver.file == node.cargo_rel_path && waiver.selector == SELECTOR
     })
 }
-
-#[cfg(test)]
-#[path = "dependency_count_split_tests/mod.rs"]
-// reason: keep rule tests in the owned x_tests sidecar directory.
-mod dependency_count_split_tests;

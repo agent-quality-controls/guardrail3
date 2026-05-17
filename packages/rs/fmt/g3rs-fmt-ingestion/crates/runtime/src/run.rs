@@ -166,7 +166,3 @@ fn ingest_rust_policy(crawl: &G3WorkspaceCrawl) -> G3RsFmtRustPolicyState {
             .collect(),
     }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

@@ -1,8 +1,5 @@
 use proc_macro2 as _;
 
-#[cfg(test)]
-use g3rs_arch_source_checks_assertions as _;
-
 /// feature gated exports module.
 mod feature_gated_exports;
 /// lib facade only module.

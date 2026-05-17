@@ -34,7 +34,6 @@ all-features = true
 
 [workspace]
 members = [
-    "crates/assertions",
     "crates/runtime",
     "crates/types",
 ]

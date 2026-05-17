@@ -32,7 +32,6 @@ all-features = true
 [workspace]
 members = [
     "crates/runtime",
-    "crates/assertions",
     "crates/types",
 ]
 resolver = "2"
@@ -100,4 +99,3 @@ ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
 redundant_pub_crate = "allow"
-

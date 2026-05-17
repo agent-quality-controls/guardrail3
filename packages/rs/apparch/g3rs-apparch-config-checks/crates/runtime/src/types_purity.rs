@@ -123,7 +123,3 @@ fn allowed_dependencies(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "types_purity_tests/mod.rs"]
-mod types_purity_tests;

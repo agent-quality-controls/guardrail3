@@ -81,8 +81,3 @@ pub(crate) fn check(
         );
     }
 }
-
-#[cfg(test)]
-#[path = "feature_gated_exports_tests/mod.rs"]
-// reason: keep rule tests in the owned x_tests sidecar directory.
-mod feature_gated_exports_tests;

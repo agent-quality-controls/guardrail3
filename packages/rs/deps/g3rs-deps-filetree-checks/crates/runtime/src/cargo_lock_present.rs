@@ -51,7 +51,3 @@ pub(crate) fn check(input: &G3RsDepsFileTreeChecksInput, results: &mut Vec<G3Che
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "cargo_lock_present_tests/mod.rs"]
-mod cargo_lock_present_tests;

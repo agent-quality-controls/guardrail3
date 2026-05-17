@@ -4,7 +4,6 @@ allowed_deps = [
   "cargo-toml-parser",
   "clippy-toml-parser",
   "g3rs-garde-config-checks",
-  "g3rs-garde-config-checks-assertions",
   "g3rs-garde-source-checks",
   "g3rs-garde-source-checks-types",
   "g3rs-garde-types",
@@ -14,7 +13,6 @@ allowed_deps = [
   "proc-macro2",
   "quote",
   "syn",
-  "tempfile",
 ]
 
 [checks]

@@ -24,9 +24,6 @@ workspace = true
 g3rs-release-types = { path = "../../../g3rs-release-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
 
-[dev-dependencies]
-g3rs-release-filetree-checks-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true
 

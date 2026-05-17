@@ -20,5 +20,3 @@ workspace = true
 [dependencies]
 g3rs-hooks-contract-types = { path = "../../../../hooks/g3rs-hooks-contract-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs_deps_hook_contract_assertions = { package = "g3rs-deps-hook-contract-assertions", path = "../assertions" }

@@ -101,7 +101,3 @@ fn check_entry(
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "wrappers_tests/mod.rs"]
-mod wrappers_tests;

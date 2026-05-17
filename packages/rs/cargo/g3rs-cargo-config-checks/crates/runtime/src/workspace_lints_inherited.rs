@@ -41,7 +41,3 @@ pub(crate) fn check(member: &G3RsCargoWorkspaceMember, results: &mut Vec<G3Check
         }
     }
 }
-
-#[cfg(test)]
-#[path = "workspace_lints_inherited_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod workspace_lints_inherited_tests;

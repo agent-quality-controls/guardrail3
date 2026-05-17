@@ -1,10 +1,5 @@
 //! File-tree checks for the g3rs topology family.
 
-#[cfg(test)]
-use cargo_toml_parser as _;
-#[cfg(test)]
-use g3rs_topology_file_tree_checks_assertions as _;
-
 /// Rule: every Cargo workspace member must be declared in the root `Cargo.toml`.
 mod declared_workspace_members_only;
 /// Rule: declared workspace member paths must not escape the workspace root.

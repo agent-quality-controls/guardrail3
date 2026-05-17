@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "rustfmt-toml-parser-runtime",
-  "rustfmt-toml-parser-runtime-assertions",
   "rustfmt-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

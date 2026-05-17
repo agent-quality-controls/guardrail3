@@ -29,10 +29,3 @@ g3rs-toolchain-ingestion-types = { path = "../types", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 rust-toolchain-toml-parser = { path = "../../../../../parsers/rust-toolchain-toml-parser", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-toolchain-config-checks = { path = "../../../g3rs-toolchain-config-checks" }
-g3rs-toolchain-filetree-checks = { path = "../../../g3rs-toolchain-filetree-checks" }
-g3rs-toolchain-ingestion-assertions = { path = "../assertions" }
-g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", features = ["runtime"] }
-guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
-tempfile = "3"

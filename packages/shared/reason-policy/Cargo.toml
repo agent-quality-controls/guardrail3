@@ -23,8 +23,8 @@ workspace = true
 path = "src/lib.rs"
 
 [workspace]
-members = ["crates/runtime", "crates/assertions"]
 resolver = "2"
+members = ["crates/runtime"]
 
 [workspace.package]
 edition = "2024"

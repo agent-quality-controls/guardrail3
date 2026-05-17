@@ -32,9 +32,7 @@ all-features = true
 
 [workspace]
 members = [
-    "crates/assertions",
     "crates/runtime",
-    "crates/test_support",
 ]
 resolver = "2"
 

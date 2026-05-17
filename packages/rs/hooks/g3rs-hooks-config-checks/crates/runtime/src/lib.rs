@@ -1,8 +1,5 @@
 //! Runtime rules for the `g3rs-hooks-config-checks` family.
 
-#[cfg(test)]
-use g3rs_hooks_config_checks_assertions as _;
-
 /// Rule implementation for `cargo dupes installed`.
 mod cargo_dupes_installed;
 /// Rule implementation for `contract required tools installed`.

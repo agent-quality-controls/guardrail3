@@ -62,7 +62,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         );
     }
 }
-
-#[cfg(test)]
-#[path = "ban_reason_quality_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod ban_reason_quality_tests;

@@ -18,10 +18,6 @@ use super::model::{CrateRecord, DependencyCollections};
 use super::workspace::{collect_workspace_crates, load_workspace_root};
 use crate::view::CrawlView;
 
-#[cfg(test)]
-#[path = "config_tests/mod.rs"]
-mod config_tests;
-
 pub fn ingest_for_config_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<apparch::G3RsApparchConfigChecksInput, G3RsApparchIngestionError> {

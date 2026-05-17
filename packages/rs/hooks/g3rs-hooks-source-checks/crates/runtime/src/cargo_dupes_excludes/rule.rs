@@ -206,5 +206,5 @@ fn is_help_or_version_flag(token: &str) -> bool {
 
 /// `dupes_flag_takes_value` function.
 fn dupes_flag_takes_value(flag: &str) -> bool {
-    matches!(flag, "--max-exact" | "--max-exact-percent")
+    matches!(flag, "--max-exact" | "--max-exact-percent" | "--min-lines")
 }

@@ -30,8 +30,3 @@ glob = "0.3.3"
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 toml = "0.8"
 
-[dev-dependencies]
-g3rs-deps-config-checks = { path = "../../../g3rs-deps-config-checks" }
-g3rs-deps-filetree-checks = { path = "../../../g3rs-deps-filetree-checks" }
-g3rs-deps-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

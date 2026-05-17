@@ -151,7 +151,3 @@ fn finish_function(function: PendingFunction) -> ShellFunction {
         body: function.body,
     }
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod parser_tests;

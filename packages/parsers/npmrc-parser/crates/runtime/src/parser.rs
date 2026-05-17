@@ -143,7 +143,3 @@ fn duplicate_keys(settings: &[NpmrcSetting]) -> Vec<String> {
         .filter_map(|(key, count)| (count > 1).then_some(key.to_owned()))
         .collect()
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

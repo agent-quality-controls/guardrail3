@@ -65,7 +65,3 @@ pub fn check(input: &G3RsGardeConfigChecksInput) -> Vec<G3CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

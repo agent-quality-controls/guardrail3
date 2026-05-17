@@ -217,7 +217,3 @@ pub const fn ingest_for_file_tree_checks(
 ) -> Result<G3RsGardeFileTreeChecksInput, IngestionError> {
     Err(IngestionError::FileTreeIngestionNotImplemented)
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

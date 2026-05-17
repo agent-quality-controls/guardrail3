@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "clippy-toml-parser-runtime",
-  "clippy-toml-parser-runtime-assertions",
   "clippy-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

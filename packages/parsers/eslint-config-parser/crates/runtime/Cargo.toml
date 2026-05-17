@@ -24,9 +24,5 @@ api = []
 eslint-config-parser-types = { path = "../types", version = "0.1.0" }
 serde_json = "1"
 
-[dev-dependencies]
-eslint-config-parser-runtime-assertions = { path = "../assertions" }
-tempfile = "3"
-
 [package.metadata.docs.rs]
 all-features = true

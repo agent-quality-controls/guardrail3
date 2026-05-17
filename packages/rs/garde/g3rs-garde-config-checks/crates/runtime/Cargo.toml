@@ -29,5 +29,3 @@ clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", versi
 g3rs-garde-types = { path = "../../../g3rs-garde-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-garde-config-checks-assertions = { path = "../assertions" }

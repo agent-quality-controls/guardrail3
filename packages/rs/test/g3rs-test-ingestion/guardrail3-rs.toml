@@ -14,7 +14,6 @@ allowed_deps = [
   "nextest-toml-parser",
   "proc-macro2",
   "syn",
-  "tempfile",
 ]
 
 [[waivers]]

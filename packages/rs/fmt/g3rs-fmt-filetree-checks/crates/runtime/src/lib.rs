@@ -1,10 +1,5 @@
 //! Runtime rules for the `g3rs-fmt-filetree-checks` family.
 
-#[cfg(test)]
-use g3rs_fmt_filetree_checks_assertions as _;
-#[cfg(test)]
-use test_support as _;
-
 /// Rule implementation for `dual file conflict`.
 mod dual_file_conflict;
 /// Rule implementation for `exists`.

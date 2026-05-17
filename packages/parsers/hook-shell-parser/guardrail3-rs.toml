@@ -2,7 +2,6 @@ profile = "library"
 
 allowed_deps = [
   "hook-shell-parser-runtime",
-  "hook-shell-parser-runtime-assertions",
   "hook-shell-parser-types",
   "serde",
   "tree-sitter",
