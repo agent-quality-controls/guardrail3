@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:css": "stylelint src/**/*.css --max-warnings 0",
+    "validate": "pnpm run lint:css"
+  },
+  "devDependencies": {
+    "stylelint": "16.0.0",
+    "stylelint-config-standard": "36.0.0",
+    "stylelint-config-tailwindcss": "0.0.7",
+    "@double-great/stylelint-a11y": "3.0.0",
+    "g3ts-eslint-plugin-style-policy": "0.1.3"
+  }
+}

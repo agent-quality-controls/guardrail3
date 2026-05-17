@@ -1,0 +1,18 @@
+id = "style-R40-incomplete-stylelint"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "style", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "style"
+target_rules = [
+  "g3ts-style/stylelint-config-stack",
+  "g3ts-style/stylelint-a11y-rules"
+]
+expected_findings = [
+  "g3ts-style/stylelint-config-stack",
+  "g3ts-style/stylelint-a11y-rules"
+]

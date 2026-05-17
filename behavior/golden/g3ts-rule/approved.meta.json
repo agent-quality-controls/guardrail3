@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-48-15.989133Z-d06b5496",
-  "run_commit": "74c98f4ce",
+  "run_id": "2026-05-17T18-53-30.148541Z-d06b5496",
+  "run_commit": "3ba6ead80",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:48:15.989133Z",
-  "fixture_hash": "sha256:00355edc83a1d9dc6e7d70da153143aa081bdb27ae1d8307ba1e3bdf465192d4",
+  "recorded_at": "2026-05-17T18:53:30.148541Z",
+  "fixture_hash": "sha256:5fa0a38e3f4a6a2200e3d591e2787ab67cf7ab2db6eddc8fbcef9c375e0c43e9",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -95,6 +95,30 @@
       "sha256": "sha256:d5c90d171d4768aa91e77ba6c832588f06fc4684ba49c9fa0829acf51b222c05"
     },
     {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:952d04f36a292cac77e30752c7cab6c89ebf2a97416cc3db95b3f931ad2edf1a"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R10-missing-policy/fixture.toml",
+      "sha256": "sha256:8974b3849058bf0bf2e6600d0f960917a806cf2aa1a3072408be322d39d33772"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R20-invalid-policy-paths/fixture.toml",
+      "sha256": "sha256:19586dcfecbad7979f6738e7178e7b360dfb5db24744f0ed659c039c06fa335f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R30-missing-tooling/fixture.toml",
+      "sha256": "sha256:4a784e973ea05c8d0a41afcd20b13a21d4e300d2e0b6902de5b4e86b7cad6c7d"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R40-incomplete-stylelint/fixture.toml",
+      "sha256": "sha256:e109f43ec9f36d58935b234d19667bec71ac05bcbda03d9e093df7c1b662c95f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/style/style-R50-eslint-disable-inventory/fixture.toml",
+      "sha256": "sha256:00962ac1289630933af07512721358b100296e0fb2c3125252b2b35ab5602287"
+    },
+    {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f0eec8107ff23b233cafb24dac68d60f5f1b5e7f987948df23f78b0903143efb"
     },
@@ -131,5 +155,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS spelling and typecov family rule fixtures"
+  "comment": "Add G3TS style family rule fixtures"
 }

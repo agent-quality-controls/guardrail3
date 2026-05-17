@@ -87,6 +87,10 @@ reason = "spelling hook contract is exported for hooks aggregation and is not em
 id = "g3ts-typecov/hook-contract"
 reason = "typecov hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family typecov"
 
+[[cli_unreachable_rule]]
+id = "g3ts-style/hook-contract"
+reason = "style hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family style"
+
 [[family]]
 name = "package"
 rule_count = 10
@@ -139,7 +143,7 @@ status = "completed"
 name = "style"
 rule_count = 13
 fixture_dir = "behavior/fixtures/g3ts-rule/style"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "topology"

@@ -1,0 +1,3 @@
+[style]
+source_globs = ["src/**/*.tsx"]
+stylelint_css_globs = ["src/**/*.css"]

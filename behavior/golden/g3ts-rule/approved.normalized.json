@@ -407,6 +407,120 @@
         "--path",
         ".",
         "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:4a0252daad6e4bf12fc7f406b2e7b54170ff4126d747363a814b9416b0bafe09",
+      "fixture_id": "style-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Info] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are valid\n  `guardrail3-ts.toml` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.\n[Info] g3ts-style/style-packages-present package.json Style packages are installed\n  `package.json` directly installs Stylelint, Tailwind style policy, and CSS a11y packages.\n[Info] g3ts-style/stylelint-config-present stylelint.config.mjs Stylelint config is present\n  `stylelint.config.mjs` was resolved through Stylelint.\n[Info] g3ts-style/stylelint-config-stack stylelint.config.mjs Stylelint stack is configured\n  `stylelint.config.mjs` extends Stylelint standard and Tailwind configs and loads the a11y plugin.\n[Info] g3ts-style/stylelint-a11y-rules stylelint.config.mjs Stylelint a11y rules are enabled\n  `stylelint.config.mjs` enables the required CSS accessibility rules on `[ts.style].stylelint_css_globs`.\n[Info] g3ts-style/css-lint-script package.json CSS lint script is fail-closed\n  `package.json` defines `lint:css` with `stylelint --max-warnings 0`.\n[Info] g3ts-style/validate-runs-css-lint package.json Validate script runs CSS lint\n  `package.json` defines a fail-closed `validate` script that reaches `lint:css` or direct `stylelint --max-warnings 0`.\n[Info] g3ts-style/style-policy-eslint-rule eslint.config.mjs Style policy ESLint rule is effective\n  `eslint.config.mjs` activates `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned deny policy.\n[Info] g3ts-style/protected-style-rule-disables-restricted eslint.config.mjs Style delegated-rule disables are restricted\n  `eslint.config.mjs` enables `@eslint-community/eslint-comments/no-restricted-disable` and restricts disables for style-policy and legacy Tailwind-ban rules.\n[Info] g3ts-style/syncpack-style-policy-pin .syncpackrc Style package floor is pinned by Syncpack\n  `.syncpackrc` covers `package.json` and pins `g3ts-eslint-plugin-style-policy` to the required floor.\n[Info] g3ts-style/eslint-disable-inventory eslint.config.* Style source contains no ESLint disable directives\n  No ESLint disable directives were found in style source lanes.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:e8d637ff7cc946594276ccd6da98dac78559dea212b58aabe851ea05fa7d99d3",
+      "fixture_id": "style-R10-missing-policy",
+      "stderr": "",
+      "stdout": "== style ==\n[Error] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is not configured\n  `guardrail3-ts.toml` must define `[ts.style]` with non-empty `source_globs` and `stylelint_css_globs`.\n[Error] g3ts-style/style-packages-present package.json Style packages are missing\n  `package.json` must install `stylelint-config-standard`, `stylelint-config-tailwindcss`, `@double-great/stylelint-a11y`, `g3ts-eslint-plugin-style-policy`.\n[Error] g3ts-style/stylelint-config-present stylelint.config.* Stylelint config is missing\n  `stylelint.config.*` must exist and be readable.\n[Error] g3ts-style/css-lint-script package.json CSS lint script is not fail-closed\n  `package.json` must define `lint:css` that invokes `stylelint` with `--max-warnings 0` and does not use `||` fail-open separators.\n[Error] g3ts-style/validate-runs-css-lint package.json Validate script does not run CSS lint\n  `package.json` must define a fail-closed `validate` script that invokes `lint:css` through a package-manager run command or directly invokes `stylelint --max-warnings 0`. This makes style validation part of the standard app quality gate.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Info] g3ts-style/eslint-disable-inventory eslint.config.* Style source contains no ESLint disable directives\n  No ESLint disable directives were found in style source lanes.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:994e6934b91f88027dc7eb313c8ec95cf238fd17d2856d613678681f6c5bb1b1",
+      "fixture_id": "style-R20-invalid-policy-paths",
+      "stderr": "",
+      "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Error] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are invalid\n  `guardrail3-ts.toml` has invalid `[ts.style]` path values: source_globs=`/src/**/*.tsx`, source_globs=`https://example.com/source.tsx`, stylelint_css_globs=`../shared/**/*.css`. Values must be non-empty app-relative globs without `..` and must not be external URLs.\n[Error] g3ts-style/style-packages-present package.json Style packages are missing\n  `package.json` must install `stylelint`, `stylelint-config-standard`, `stylelint-config-tailwindcss`, `@double-great/stylelint-a11y`, `g3ts-eslint-plugin-style-policy`.\n[Error] g3ts-style/stylelint-config-present stylelint.config.* Stylelint config is missing\n  `stylelint.config.*` must exist and be readable.\n[Error] g3ts-style/validate-runs-css-lint package.json Validate script cannot be checked\n  `package.json` must be readable and parseable so G3TS can prove `validate` runs CSS lint fail-closed.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Info] g3ts-style/eslint-disable-inventory eslint.config.* Style source contains no ESLint disable directives\n  No ESLint disable directives were found in style source lanes.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:f1990c3975c63073431afd60506b57b1a90dc009e44575651c928e98c181d145",
+      "fixture_id": "style-R30-missing-tooling",
+      "stderr": "",
+      "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Info] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are valid\n  `guardrail3-ts.toml` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.\n[Error] g3ts-style/style-packages-present package.json Style packages are missing\n  `package.json` must install `stylelint`, `stylelint-config-standard`, `stylelint-config-tailwindcss`, `@double-great/stylelint-a11y`, `g3ts-eslint-plugin-style-policy`.\n[Error] g3ts-style/stylelint-config-present stylelint.config.* Stylelint config is missing\n  `stylelint.config.*` must exist and be readable.\n[Error] g3ts-style/css-lint-script package.json CSS lint script is not fail-closed\n  `package.json` must define `lint:css` that invokes `stylelint` with `--max-warnings 0` and does not use `||` fail-open separators.\n[Error] g3ts-style/validate-runs-css-lint package.json Validate script does not run CSS lint\n  `package.json` must define a fail-closed `validate` script that invokes `lint:css` through a package-manager run command or directly invokes `stylelint --max-warnings 0`. This makes style validation part of the standard app quality gate.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Info] g3ts-style/eslint-disable-inventory eslint.config.* Style source contains no ESLint disable directives\n  No ESLint disable directives were found in style source lanes.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:82227a91fa6e6197d871de3591b17e6818339be11225a39a67377f2f1c703d07",
+      "fixture_id": "style-R40-incomplete-stylelint",
+      "stderr": "",
+      "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Info] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are valid\n  `guardrail3-ts.toml` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.\n[Info] g3ts-style/style-packages-present package.json Style packages are installed\n  `package.json` directly installs Stylelint, Tailwind style policy, and CSS a11y packages.\n[Info] g3ts-style/stylelint-config-present stylelint.config.mjs Stylelint config is present\n  `stylelint.config.mjs` was resolved through Stylelint.\n[Error] g3ts-style/stylelint-config-stack stylelint.config.mjs Stylelint stack is incomplete\n  `stylelint.config.mjs` must extend `stylelint-config-standard` and `stylelint-config-tailwindcss`, and load `@double-great/stylelint-a11y`.\n[Error] g3ts-style/stylelint-a11y-rules stylelint.config.mjs Stylelint a11y rules are not enabled\n  `stylelint.config.mjs` must enable these rules on `[ts.style].stylelint_css_globs`: `a11y/content-property-no-static-value`, `a11y/font-size-is-readable`, `a11y/line-height-is-vertical-rhythmed`, `a11y/media-prefers-reduced-motion`, `a11y/no-display-none`, `a11y/no-obsolete-attribute`, `a11y/no-obsolete-element`, `a11y/no-outline-none`, `a11y/no-spread-text`, `a11y/no-text-align-justify`, `a11y/selector-pseudo-class-focus`.\n[Info] g3ts-style/css-lint-script package.json CSS lint script is fail-closed\n  `package.json` defines `lint:css` with `stylelint --max-warnings 0`.\n[Info] g3ts-style/validate-runs-css-lint package.json Validate script runs CSS lint\n  `package.json` defines a fail-closed `validate` script that reaches `lint:css` or direct `stylelint --max-warnings 0`.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Info] g3ts-style/eslint-disable-inventory eslint.config.* Style source contains no ESLint disable directives\n  No ESLint disable directives were found in style source lanes.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "style",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:61859a35a7ef9842e23de3a82c60f01482790ac54aed8ed1caec392beade9cd1",
+      "fixture_id": "style-R50-eslint-disable-inventory",
+      "stderr": "",
+      "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Info] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are valid\n  `guardrail3-ts.toml` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.\n[Error] g3ts-style/style-packages-present package.json Style packages are missing\n  `package.json` must install `stylelint`, `stylelint-config-standard`, `stylelint-config-tailwindcss`, `@double-great/stylelint-a11y`, `g3ts-eslint-plugin-style-policy`.\n[Error] g3ts-style/stylelint-config-present stylelint.config.* Stylelint config is missing\n  `stylelint.config.*` must exist and be readable.\n[Error] g3ts-style/validate-runs-css-lint package.json Validate script cannot be checked\n  `package.json` must be readable and parseable so G3TS can prove `validate` runs CSS lint fail-closed.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Warn] g3ts-style/eslint-disable-inventory src/index.tsx Style source contains an ESLint disable directive\n  `src/index.tsx` line 1 contains `Disable` for style-policy/no-denied-class-tokens. ESLint disables are allowed only as visible escape hatches; keep the directive described and avoid disabling protected style rules.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "tsconfig",
         "--rules-only",
         "--inventory"

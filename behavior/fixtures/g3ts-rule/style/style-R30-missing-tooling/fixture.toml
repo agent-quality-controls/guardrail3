@@ -1,0 +1,28 @@
+id = "style-R30-missing-tooling"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "style", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "style"
+target_rules = [
+  "g3ts-style/style-packages-present",
+  "g3ts-style/stylelint-config-present",
+  "g3ts-style/css-lint-script",
+  "g3ts-style/validate-runs-css-lint",
+  "g3ts-style/style-policy-eslint-rule",
+  "g3ts-style/protected-style-rule-disables-restricted",
+  "g3ts-style/syncpack-style-policy-pin"
+]
+expected_findings = [
+  "g3ts-style/style-packages-present",
+  "g3ts-style/stylelint-config-present",
+  "g3ts-style/css-lint-script",
+  "g3ts-style/validate-runs-css-lint",
+  "g3ts-style/style-policy-eslint-rule",
+  "g3ts-style/protected-style-rule-disables-restricted",
+  "g3ts-style/syncpack-style-policy-pin"
+]

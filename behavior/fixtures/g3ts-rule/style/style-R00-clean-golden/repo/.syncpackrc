@@ -1,0 +1,10 @@
+{
+  "source": ["package.json"],
+  "versionGroups": [
+    {
+      "dependencies": ["g3ts-eslint-plugin-style-policy"],
+      "dependencyTypes": ["prod", "dev"],
+      "pinVersion": "0.1.3"
+    }
+  ]
+}

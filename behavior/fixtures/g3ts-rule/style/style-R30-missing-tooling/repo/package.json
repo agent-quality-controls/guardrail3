@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "scripts": {
+    "lint:css": "echo css",
+    "validate": "echo ok"
+  },
+  "devDependencies": {}
+}

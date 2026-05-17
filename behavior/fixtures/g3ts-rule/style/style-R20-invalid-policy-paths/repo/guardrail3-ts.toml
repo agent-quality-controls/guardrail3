@@ -1,0 +1,3 @@
+[style]
+source_globs = ["/src/**/*.tsx", "https://example.com/source.tsx"]
+stylelint_css_globs = ["../shared/**/*.css"]

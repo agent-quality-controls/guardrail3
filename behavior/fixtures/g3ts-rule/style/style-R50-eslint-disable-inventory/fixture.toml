@@ -1,0 +1,16 @@
+id = "style-R50-eslint-disable-inventory"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "style", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+
+rule_family = "style"
+target_rules = [
+  "g3ts-style/eslint-disable-inventory"
+]
+expected_findings = [
+  "g3ts-style/eslint-disable-inventory"
+]

@@ -1,0 +1,16 @@
+id = "style-R10-missing-policy"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "style", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_input_failure"
+
+rule_family = "style"
+target_rules = [
+  "g3ts-style/strict-policy-configured"
+]
+expected_findings = [
+  "g3ts-style/strict-policy-configured"
+]
