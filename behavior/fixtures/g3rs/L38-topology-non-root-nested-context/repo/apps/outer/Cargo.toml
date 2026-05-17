@@ -1,5 +1,0 @@
-[workspace]
-members = [
-  "../shared",
-]
-resolver = "2"

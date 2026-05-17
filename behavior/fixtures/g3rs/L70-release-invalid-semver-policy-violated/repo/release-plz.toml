@@ -1,7 +1,0 @@
-[workspace]
-changelog_config = "wrong.toml"
-git_release_enable = false
-release_always = true
-
-[[package]]
-name = "invalid_semver_fixture"

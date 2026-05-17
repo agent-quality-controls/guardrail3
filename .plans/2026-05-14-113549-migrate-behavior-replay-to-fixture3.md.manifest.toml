@@ -15,15 +15,6 @@ from = "scripts/behavior/verify-goldencheck-migration.py"
 to = "scripts/behavior/verify-fixture3-migration.py"
 
 [[fixture3_suite]]
-name = "g3rs-validate"
-manifest = "fixture3.yaml"
-approved_dir = "behavior/golden/g3rs-validate"
-received_dir = ".fixture3/g3rs-validate"
-diff_dir = ".fixture3/g3rs-validate"
-runner = "scripts/behavior/fixture3-g3rs-replay.py"
-schema_version = "g3rs-replay-v1"
-
-[[fixture3_suite]]
 name = "g3rs-validate-repo"
 manifest = "fixture3.yaml"
 approved_dir = "behavior/golden/g3rs-validate-repo"
