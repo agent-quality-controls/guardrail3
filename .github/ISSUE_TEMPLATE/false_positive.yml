@@ -1,0 +1,29 @@
+name: False positive
+description: A guardrail3 check fired on code that should be permitted
+labels: ["false-positive"]
+body:
+  - type: input
+    id: check-id
+    attributes:
+      label: Check ID
+      description: e.g. R-IO-04
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: The code that fired
+      render: rust
+    validations:
+      required: true
+  - type: textarea
+    id: why-ok
+    attributes:
+      label: Why this should be allowed
+      description: What makes this an acceptable use? Domain idiom, technical necessity, intentional escape hatch?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: guardrail3 version
