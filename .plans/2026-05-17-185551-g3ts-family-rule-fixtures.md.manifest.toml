@@ -149,19 +149,19 @@ status = "completed"
 name = "topology"
 rule_count = 1
 fixture_dir = "behavior/fixtures/g3ts-rule/topology"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "arch"
 rule_count = 7
 fixture_dir = "behavior/fixtures/g3ts-rule/arch"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "apparch"
 rule_count = 9
 fixture_dir = "behavior/fixtures/g3ts-rule/apparch"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "hooks"

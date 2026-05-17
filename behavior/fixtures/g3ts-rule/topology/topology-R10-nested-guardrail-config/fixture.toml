@@ -1,0 +1,16 @@
+id = "topology-R10-nested-guardrail-config"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate-repo", "--path", "."],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree"
+
+rule_family = "topology"
+target_rules = [
+  "g3ts-topology/no-nested-guardrail3-ts-toml"
+]
+expected_findings = [
+  "g3ts-topology/no-nested-guardrail3-ts-toml"
+]

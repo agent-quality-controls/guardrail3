@@ -8,6 +8,139 @@
         "--path",
         ".",
         "--family",
+        "apparch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:a702d7a0c4dda124d1a5daed7909bbfc9c1f6a904ef5e1fdaadf06c8c1eea68e",
+      "fixture_id": "apparch-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== apparch ==\n[Info] g3ts-apparch/types-dependency-direction - types layer depends only on allowed layers\n  Types layer files import only `types` siblings or no apparch-owned layers.\n[Info] g3ts-apparch/logic-dependency-direction - logic layer depends only on allowed layers\n  Logic layer files import only `logic`, `types`, or no apparch-owned layers.\n[Info] g3ts-apparch/io-outbound-dependency-direction - io/outbound layer depends only on allowed layers\n  io/outbound layer files import only `io/outbound`, `types`, or no apparch-owned layers.\n[Info] g3ts-apparch/io-inbound-dependency-direction - io/inbound layer depends only on allowed layers\n  io/inbound layer files import only `io/inbound`, `logic`, `types`, or no apparch-owned layers.\n[Info] g3ts-apparch/app-no-direct-outbound - app shell avoids direct outbound imports\n  App shell files do not import `io/outbound` directly.\n[Info] g3ts-apparch/types-purity - types layer stays free of Next and React runtime imports\n  Types layer files do not import `next/*`, `react`, or `react-dom` runtime modules.\n[Info] g3ts-apparch/logic-purity - logic layer stays free of Next and React runtime imports\n  Logic layer files do not import `next/*`, `react`, or `react-dom` runtime modules.\n[Info] g3ts-apparch/types-public-surface - types layer keeps behavioral API out of its public surface\n  Types layer files expose no exported functions or classes.\n[Info] g3ts-apparch/io-contracts-in-types - io layers keep interface contracts out of their public surface\n  io/inbound and io/outbound expose no exported interfaces.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "apparch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:8bd6eab4311d4ffd0e80f76bbdba07736ecc44c527aee739503c150e28e9fa6c",
+      "fixture_id": "apparch-R10-layer-violations",
+      "stderr": "",
+      "stdout": "== apparch ==\n[Error] g3ts-apparch/types-dependency-direction src/types/user.ts types layer imports forbidden app layer\n  `src/types/user.ts` in `types` imports `src/logic/get_user.ts` in `logic`. Keep `types` passive and move behavior or framework coupling outward.\n[Error] g3ts-apparch/logic-dependency-direction src/logic/get_user.ts logic layer imports forbidden app layer\n  `src/logic/get_user.ts` in `logic` imports `src/io/inbound/http.ts` in `io/inbound`. Logic must stay independent of app shell and concrete io adapters.\n[Error] g3ts-apparch/io-outbound-dependency-direction src/io/outbound/db.ts io/outbound layer imports forbidden app layer\n  `src/io/outbound/db.ts` in `io/outbound` imports `src/logic/get_user.ts` in `logic`. Outbound adapters must not depend on logic, inbound adapters, or the app shell.\n[Error] g3ts-apparch/io-inbound-dependency-direction src/io/inbound/http.ts io/inbound layer imports forbidden app layer\n  `src/io/inbound/http.ts` in `io/inbound` imports `src/io/outbound/db.ts` in `io/outbound`. Inbound adapters may call logic, but they must not reach outbound adapters or the app shell directly.\n[Error] g3ts-apparch/app-no-direct-outbound src/app/page.tsx app shell imports io/outbound directly\n  `src/app/page.tsx` in `app` imports `src/io/outbound/db.ts` in `io/outbound`. Keep Next entry files thin and delegate through inbound adapters or logic.\n[Error] g3ts-apparch/types-purity src/types/user.ts types layer imports framework runtime module\n  `src/types/user.ts` in `types` imports external module `next/navigation`. Keep `types` passive and free of Next/React runtime coupling.\n[Error] g3ts-apparch/logic-purity src/logic/get_user.ts logic layer imports framework runtime module\n  `src/logic/get_user.ts` in `logic` imports external module `react`. Keep `logic` independent from Next/React runtime code.\n[Error] g3ts-apparch/types-public-surface src/types/user.ts types layer exposes behavioral API\n  `src/types/user.ts` exports `makeUser` from `types`. Keep behavior out of `types` and move it into `logic` or another owning runtime layer.\n[Error] g3ts-apparch/io-contracts-in-types src/io/inbound/http.ts io layer exposes interface contract\n  `src/io/inbound/http.ts` exports interface `HttpPort` from `io/inbound`. Move shared contracts into `src/types`.\n[Error] g3ts-apparch/io-contracts-in-types src/io/outbound/db.ts io layer exposes interface contract\n  `src/io/outbound/db.ts` exports interface `DbPort` from `io/outbound`. Move shared contracts into `src/types`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:29958d0231dd2b65f5cdb380ff9d40c5370a76995b64dcdd326a32665c09e9ff",
+      "fixture_id": "arch-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== arch ==\n[Info] g3ts-arch/root-manifest-exists package.json root package.json exists\n  Root package manifest `package.json` exists for TS arch checks.\n[Info] g3ts-arch/root-manifest-parseable package.json root package.json parseable\n  Root package manifest `package.json` parsed successfully.\n[Info] g3ts-arch/declared-entrypoints-canonical package.json declared facade entrypoint is canonical\n  Declared facade entrypoint `src/index.ts` uses the canonical package facade location.\n[Info] g3ts-arch/declared-entrypoint-exists package.json declared facade entrypoint exists\n  Declared facade entrypoint `src/index.ts` exists in the target root.\n[Info] g3ts-arch/facade-parseable src/index.ts facade file parseable\n  Facade file `src/index.ts` parsed successfully.\n[Info] g3ts-arch/facade-only src/index.ts facade file is facade-only\n  Facade file `src/index.ts` contains only facade declarations.\n[Info] g3ts-arch/no-broad-reexport src/index.ts facade file avoids broad re-exports\n  Facade file `src/index.ts` avoids `export *` broad re-exports.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:2a28b7bb608785ded2d06f754a4b94b5974c164ad8157b9f97d37bc83723ab66",
+      "fixture_id": "arch-R10-root-missing",
+      "stderr": "",
+      "stdout": "== arch ==\n[Error] g3ts-arch/root-manifest-exists package.json root package.json missing\n  No root `package.json` file was found. TypeScript package architecture requires a root package manifest.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:d0a3ade2b763c23ae05d5a3aa761ab853cc7e4759234d473e719b93f1a9f4a5e",
+      "fixture_id": "arch-R20-root-parse-error",
+      "stderr": "",
+      "stdout": "== arch ==\n[Info] g3ts-arch/root-manifest-exists package.json root package.json exists\n  Root package manifest `package.json` exists for TS arch checks.\n[Error] g3ts-arch/root-manifest-parseable package.json root package.json parse failed\n  Root package manifest `package.json` could not be parsed: failed to parse package.json: key must be a string at line 1 column 3.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:5776b49bcf4b28a64ee1675247a1f2dabd0209cd12452617bb129cdfcd9ec7d0",
+      "fixture_id": "arch-R30-facade-violations",
+      "stderr": "",
+      "stdout": "== arch ==\n[Info] g3ts-arch/root-manifest-exists package.json root package.json exists\n  Root package manifest `package.json` exists for TS arch checks.\n[Info] g3ts-arch/root-manifest-parseable package.json root package.json parseable\n  Root package manifest `package.json` parsed successfully.\n[Error] g3ts-arch/declared-entrypoints-canonical package.json declared facade entrypoint is not canonical\n  Declared facade entrypoint `src/missing.ts` is not canonical. Use `src/index.ts`, `src/index.tsx`, `index.ts`, or `index.tsx`.\n[Error] g3ts-arch/declared-entrypoints-canonical package.json declared facade entrypoint is not canonical\n  Declared facade entrypoint `src/public/api.ts` is not canonical. Use `src/index.ts`, `src/index.tsx`, `index.ts`, or `index.tsx`.\n[Error] g3ts-arch/declared-entrypoint-exists package.json declared facade entrypoint missing\n  Declared facade entrypoint `src/missing.ts` does not exist. Create the facade file or fix the manifest.\n[Info] g3ts-arch/declared-entrypoint-exists package.json declared facade entrypoint exists\n  Declared facade entrypoint `src/public/api.ts` exists in the target root.\n[Info] g3ts-arch/facade-parseable src/public/api.ts facade file parseable\n  Facade file `src/public/api.ts` parsed successfully.\n[Error] g3ts-arch/facade-only src/public/api.ts facade file must be facade-only\n  Facade file `src/public/api.ts` contains function_declaration `function makeValue() {`. Move implementation into a sibling module and re-export it from the facade.\n[Error] g3ts-arch/no-broad-reexport src/public/api.ts facade file has broad re-export\n  Facade file `src/public/api.ts` uses broad re-export `export * from \"../value\";`. Re-export specific items instead.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "arch",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:b7131489721fd81c464b09d25f927a650d240a9b5dc473f80b66731bcd59f64d",
+      "fixture_id": "arch-R40-facade-parse-error",
+      "stderr": "",
+      "stdout": "== arch ==\n[Info] g3ts-arch/root-manifest-exists package.json root package.json exists\n  Root package manifest `package.json` exists for TS arch checks.\n[Info] g3ts-arch/root-manifest-parseable package.json root package.json parseable\n  Root package manifest `package.json` parsed successfully.\n[Info] g3ts-arch/declared-entrypoints-canonical package.json declared facade entrypoint is canonical\n  Declared facade entrypoint `src/index.ts` uses the canonical package facade location.\n[Info] g3ts-arch/declared-entrypoint-exists package.json declared facade entrypoint exists\n  Declared facade entrypoint `src/index.ts` exists in the target root.\n[Error] g3ts-arch/facade-parseable src/index.ts facade file parse failed\n  Facade file `src/index.ts` could not be parsed: TypeScript parser reported syntax errors.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "fmt",
         "--rules-only",
         "--inventory"
@@ -513,6 +646,40 @@
       "fixture_id": "style-R50-eslint-disable-inventory",
       "stderr": "",
       "stdout": "== style ==\n[Info] g3ts-style/strict-policy-configured guardrail3-ts.toml Style policy is configured\n  `guardrail3-ts.toml` defines `[ts.style]` with source lanes and Stylelint CSS lanes.\n[Info] g3ts-style/policy-paths-valid guardrail3-ts.toml Style policy paths are valid\n  `guardrail3-ts.toml` uses app-relative `[ts.style]` source and CSS globs without parent traversal or external URLs.\n[Error] g3ts-style/style-packages-present package.json Style packages are missing\n  `package.json` must install `stylelint`, `stylelint-config-standard`, `stylelint-config-tailwindcss`, `@double-great/stylelint-a11y`, `g3ts-eslint-plugin-style-policy`.\n[Error] g3ts-style/stylelint-config-present stylelint.config.* Stylelint config is missing\n  `stylelint.config.*` must exist and be readable.\n[Error] g3ts-style/validate-runs-css-lint package.json Validate script cannot be checked\n  `package.json` must be readable and parseable so G3TS can prove `validate` runs CSS lint fail-closed.\n[Error] g3ts-style/style-policy-eslint-rule eslint.config.* Style policy ESLint rule is not effective\n  `eslint.config.*` must activate `style-policy/no-denied-class-tokens` at `error` with a non-empty ESLint-owned `denyList`, `denyPrefixes`, or `denyPatterns` policy.\n[Error] g3ts-style/protected-style-rule-disables-restricted eslint.config.* Style protected-disable policy cannot be checked\n  `eslint.config.*` must configure `@eslint-community/eslint-comments/no-restricted-disable` for `style-policy/*` and `tailwind-ban/*` on every `[ts.style].source_globs` probe.\n[Error] g3ts-style/syncpack-style-policy-pin .syncpackrc Style Syncpack policy is missing\n  `.syncpackrc` must pin `g3ts-eslint-plugin-style-policy` through Syncpack. G3TS does not parse dependency ranges from `package.json`; Syncpack owns the style package floor.\n[Warn] g3ts-style/eslint-disable-inventory src/index.tsx Style source contains an ESLint disable directive\n  `src/index.tsx` line 1 contains `Disable` for style-policy/no-denied-class-tokens. ESLint disables are allowed only as visible escape hatches; keep the directive described and avoid disabling protected style rules.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "topology",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:932a5e8ffb92856e86b230684849207ae01711f4d780ab3a1c260d450a23c11a",
+      "fixture_id": "topology-R00-clean-golden",
+      "stderr": "",
+      "stdout": "No findings.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate-repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:9c648ddf5eb8a196b761416cd49040074e11abc3f1b78eacb3c4573112911715",
+      "fixture_id": "topology-R10-nested-guardrail-config",
+      "stderr": "",
+      "stdout": "== hooks ==\n[Error] g3ts-hooks/pre-commit-exists - pre-commit hook is missing\n  TypeScript projects must have a selected pre-commit hook. Configure `git config core.hooksPath .githooks` and create `.githooks/pre-commit`.\n[Error] g3ts-hooks/hooks-path-configured - git hooks path is not .githooks\n  Git must use the repo-owned hook directory: run `git config core.hooksPath .githooks`. Other hook locations can bypass G3TS without changing repo files.\n== topology ==\n[Error] g3ts-topology/no-nested-guardrail3-ts-toml sub/guardrail3-ts.toml Nested `guardrail3-ts.toml` at `sub` is forbidden\n  `sub/guardrail3-ts.toml` declares a nested adopted TS unit marker under `.`. Nested adoption breaks the upward-walk routing assumption. Remove the inner `sub/guardrail3-ts.toml`, or move it so it is not nested under `.`.\n"
     },
     {
       "command": [

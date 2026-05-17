@@ -1,15 +1,43 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-53-30.148541Z-d06b5496",
-  "run_commit": "3ba6ead80",
+  "run_id": "2026-05-17T19-00-28.464257Z-d06b5496",
+  "run_commit": "4fa6a81c6",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:53:30.148541Z",
-  "fixture_hash": "sha256:5fa0a38e3f4a6a2200e3d591e2787ab67cf7ab2db6eddc8fbcef9c375e0c43e9",
+  "recorded_at": "2026-05-17T19:00:28.464257Z",
+  "fixture_hash": "sha256:0b89d1329ef4b4d2558b74dd57c4d5dfdfb6df77cb45cf7e6613e84dbfcbf202",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-rule/apparch/apparch-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:019c6f9d8b679cdce4a205a3ca0a4db42ede11f5d59e2a718c82f10f7f59a621"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/apparch/apparch-R10-layer-violations/fixture.toml",
+      "sha256": "sha256:b033111dc83f3aa8e005e7ccdfed28d5f495280c5514adce37a6e3b82afe3fde"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/arch/arch-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:d81977573bbe7bd63673a4c238e57e782a31739a2e47218f00247281bd2406df"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/arch/arch-R10-root-missing/fixture.toml",
+      "sha256": "sha256:ad6381c157ebcd7f83a5d499120fb08c0cf319568c383fa7b9291b084b4e2061"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/arch/arch-R20-root-parse-error/fixture.toml",
+      "sha256": "sha256:41952ac0f2e6bc2fdd50e9e1fe5762e0d61499bcc12e57b50603bc296290bb61"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/arch/arch-R30-facade-violations/fixture.toml",
+      "sha256": "sha256:479b5c4c14557114f6ac04061715098408f8c9ead10fc202a904fce880773763"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/arch/arch-R40-facade-parse-error/fixture.toml",
+      "sha256": "sha256:3e28d2a5bcdc004a04bc91dd8b92e2bb93c9b2b9df0ae0b7c36de0b5be5d10c8"
+    },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f879bb4e7fa48c26da3801e1984cb47dfab315fdf6397008159f1170ff415f14"
@@ -119,6 +147,14 @@
       "sha256": "sha256:00962ac1289630933af07512721358b100296e0fb2c3125252b2b35ab5602287"
     },
     {
+      "path": "behavior/fixtures/g3ts-rule/topology/topology-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:57e1e1196d69ba809ab796b4007d8bbcf6cc46071659a89936dae16c074c6f9f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/topology/topology-R10-nested-guardrail-config/fixture.toml",
+      "sha256": "sha256:2514dc89920bd8defa0e74ffdda09e6a74a02a2567f6db06567a4732d1b051b7"
+    },
+    {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f0eec8107ff23b233cafb24dac68d60f5f1b5e7f987948df23f78b0903143efb"
     },
@@ -155,5 +191,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS style family rule fixtures"
+  "comment": "Add G3TS topology arch apparch family rule fixtures"
 }

@@ -1,0 +1,12 @@
+id = "topology-R00-clean-golden"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "topology", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_clean_golden"
+
+rule_family = "topology"
+target_rules = []
+expected_findings = []

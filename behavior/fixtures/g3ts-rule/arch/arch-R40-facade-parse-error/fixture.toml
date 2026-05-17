@@ -1,0 +1,16 @@
+id = "arch-R40-facade-parse-error"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+
+rule_family = "arch"
+target_rules = [
+  "g3ts-arch/facade-parseable"
+]
+expected_findings = [
+  "g3ts-arch/facade-parseable"
+]

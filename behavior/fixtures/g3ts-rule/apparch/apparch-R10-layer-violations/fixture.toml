@@ -1,0 +1,32 @@
+id = "apparch-R10-layer-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "apparch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+
+rule_family = "apparch"
+target_rules = [
+  "g3ts-apparch/types-dependency-direction",
+  "g3ts-apparch/logic-dependency-direction",
+  "g3ts-apparch/io-outbound-dependency-direction",
+  "g3ts-apparch/io-inbound-dependency-direction",
+  "g3ts-apparch/app-no-direct-outbound",
+  "g3ts-apparch/types-purity",
+  "g3ts-apparch/logic-purity",
+  "g3ts-apparch/types-public-surface",
+  "g3ts-apparch/io-contracts-in-types"
+]
+expected_findings = [
+  "g3ts-apparch/types-dependency-direction",
+  "g3ts-apparch/logic-dependency-direction",
+  "g3ts-apparch/io-outbound-dependency-direction",
+  "g3ts-apparch/io-inbound-dependency-direction",
+  "g3ts-apparch/app-no-direct-outbound",
+  "g3ts-apparch/types-purity",
+  "g3ts-apparch/logic-purity",
+  "g3ts-apparch/types-public-surface",
+  "g3ts-apparch/io-contracts-in-types"
+]

@@ -1,0 +1,6 @@
+{
+  "exports": {
+    ".": "./src/public/api.ts"
+  },
+  "types": "./src/missing.ts"
+}

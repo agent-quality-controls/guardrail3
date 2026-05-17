@@ -1,0 +1,22 @@
+id = "arch-R30-facade-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "arch", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+
+rule_family = "arch"
+target_rules = [
+  "g3ts-arch/declared-entrypoints-canonical",
+  "g3ts-arch/declared-entrypoint-exists",
+  "g3ts-arch/facade-only",
+  "g3ts-arch/no-broad-reexport"
+]
+expected_findings = [
+  "g3ts-arch/declared-entrypoints-canonical",
+  "g3ts-arch/declared-entrypoint-exists",
+  "g3ts-arch/facade-only",
+  "g3ts-arch/no-broad-reexport"
+]
