@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-16T22-59-25.41451Z-078cb096",
-  "run_commit": "036047f5f",
+  "run_id": "2026-05-17T15-11-29.648307Z-9a2e74a6",
+  "run_commit": "867e8902e",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T22:59:25.41451Z",
+  "recorded_at": "2026-05-17T15:11:29.648307Z",
   "fixture_hash": "sha256:9a5be37fef37566b050edc6a1312c14f6fb954ba218a92c73ec0342f716db7bb",
   "manifest_hash": "sha256:9a2e74a675e4d91068521c3ba11aeae7cca32394223a361d108605ff6575f618",
   "tool_version": "0.1.7",
@@ -255,5 +255,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Normalize remaining Rust family fixture files"
+  "comment": "Approve hash-only fixture output drift after behavior-preserving reduction"
 }
