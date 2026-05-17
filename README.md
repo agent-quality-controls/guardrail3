@@ -1,5 +1,10 @@
 # guardrail3
 
+[![license](https://img.shields.io/github/license/agent-quality-controls/guardrail3)](LICENSE)
+[![rust](https://img.shields.io/badge/rust-stable-orange)](rust-toolchain.toml)
+[![issues](https://img.shields.io/github/issues/agent-quality-controls/guardrail3)](https://github.com/agent-quality-controls/guardrail3/issues)
+
+
 Composable code guardrails for Rust and TypeScript projects.
 
 ## Why This Exists
