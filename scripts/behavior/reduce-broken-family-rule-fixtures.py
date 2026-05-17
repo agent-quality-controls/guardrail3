@@ -22,7 +22,7 @@ ORACLE_SCRIPTS = {
 
 def main() -> int:
     args = parse_args()
-    roots = fixture_roots(include_clean=args.include_clean or args.all_cases)
+    roots = fixture_roots()
     if args.case:
         roots = [root for root in roots if root.name == args.case]
     if args.limit is not None:
@@ -42,18 +42,16 @@ def main() -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--case", help="Reduce one fixture case directory name")
-    parser.add_argument("--include-clean", action="store_true", help="Include clean R00 fixture roots")
-    parser.add_argument("--all-cases", action="store_true", help="Alias for --include-clean")
     parser.add_argument("--limit", type=int, help="Reduce the first N broken fixture roots")
     parser.add_argument("--max-oracle-calls", type=int, help="Pass a shared oracle-call cap to fixture3")
     parser.add_argument("--oracle", choices=sorted(ORACLE_SCRIPTS), default="exact")
     return parser.parse_args()
 
 
-def fixture_roots(*, include_clean: bool) -> list[Path]:
+def fixture_roots() -> list[Path]:
     roots = []
     for fixture in sorted(RULE_FIXTURE_ROOT.glob("*/*/fixture.toml")):
-        if include_clean or "R00-clean-golden" not in fixture.parent.name:
+        if "R00-clean-golden" not in fixture.parent.name:
             roots.append(fixture.parent)
     return roots
 

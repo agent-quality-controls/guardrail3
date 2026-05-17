@@ -1,0 +1,32 @@
+use g3rs_deny_config_checks_assertions::sources::skip_hygiene::rule as assertions;
+
+use super::helpers::run_check;
+
+#[test]
+fn documented_skip_entry_warns() {
+    let results = run_check(
+        r#"
+[bans]
+skip = [
+    { name = "regex", version = "1.0.0", reason = "Pinned for compat with tree-sitter which requires this exact version" },
+]
+"#,
+    );
+    assertions::assert_findings(
+        &results,
+        &[
+            assertions::warn(
+                "skip entry",
+                "`deny.toml` has documented skip entry `regex`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::warn(
+                "skip entry count",
+                "`deny.toml` has 1 skip entries (1 documented, 0 missing reasons, 0 weak reasons).",
+                "deny.toml",
+                false,
+            ),
+        ],
+    );
+}
