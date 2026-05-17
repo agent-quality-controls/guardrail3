@@ -71,6 +71,106 @@ name = "family_rule_filetree"
 [[allowed_fixture_level]]
 name = "family_rule_source"
 
+[[clean_fixture]]
+family = "package"
+fixture_id = "package-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "npmrc"
+fixture_id = "npmrc-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "tsconfig"
+fixture_id = "tsconfig-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "eslint"
+fixture_id = "eslint-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "jscpd"
+fixture_id = "jscpd-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "fmt"
+fixture_id = "fmt-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "spelling"
+fixture_id = "spelling-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "typecov"
+fixture_id = "typecov-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "style"
+fixture_id = "style-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "topology"
+fixture_id = "topology-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "arch"
+fixture_id = "arch-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "apparch"
+fixture_id = "apparch-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "hooks"
+fixture_id = "hooks-R00-clean-golden"
+clean_kind = "active-clean"
+
+[[clean_fixture]]
+family = "astro-setup"
+fixture_id = "astro-setup-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-content"
+fixture_id = "astro-content-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-mdx"
+fixture_id = "astro-mdx-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-i18n"
+fixture_id = "astro-i18n-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-media"
+fixture_id = "astro-media-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-seo"
+fixture_id = "astro-seo-R00-clean-golden"
+clean_kind = "inactive-clean"
+
+[[clean_fixture]]
+family = "astro-state"
+fixture_id = "astro-state-R00-clean-golden"
+clean_kind = "active-clean"
+
 [[inventory_only_rule]]
 id = "g3ts-npmrc/extra-settings-inventory"
 reason = "extra npmrc settings are intentional inventory and emit Info, not Error or Warn"

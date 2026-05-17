@@ -18,6 +18,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / ".plans" / "2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
 APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3ts-rule" / "approved.normalized.json"
 RULE_PATTERN = re.compile(r"g3ts-[a-z0-9-]+(?:-[a-z0-9-]+)*/[a-z0-9-]+(?:-[a-z0-9-]+)*")
+ALLOWED_CLEAN_KINDS = {"active-clean", "inactive-clean"}
 
 
 def main() -> int:
@@ -29,6 +30,7 @@ def main() -> int:
     approved_records = load_approved_records(failures)
 
     verify_fixture_rows(fixture_rows, rule_ids, approved_records, failures)
+    verify_clean_fixture_manifest(manifest, fixture_rows, failures)
     verify_completed_families(manifest, fixture_rows, approved_records, rule_ids, failures)
 
     if failures:
@@ -203,6 +205,54 @@ def verify_completed_families(
         missing = sorted(expected - broken_by_family.get(family, set()))
         for rule_id in missing:
             failures.append(f"{family}: no broken fixture emits {rule_id}")
+
+
+def verify_clean_fixture_manifest(
+    manifest: dict[str, Any],
+    rows: list[dict[str, Any]],
+    failures: list[str],
+) -> None:
+    rows_by_family_and_id = {
+        (str(row.get("rule_family")), str(row.get("id"))): row
+        for row in rows
+        if row.get("level") == "family_rule_clean_golden"
+    }
+    clean_rows = manifest.get("clean_fixture", [])
+    if not isinstance(clean_rows, list):
+        failures.append("manifest clean_fixture must be a list")
+        return
+
+    seen_families: set[str] = set()
+    classified: set[tuple[str, str]] = set()
+    for row in clean_rows:
+        if not isinstance(row, dict):
+            failures.append("manifest clean_fixture rows must be tables")
+            continue
+        family = row.get("family")
+        fixture_id = row.get("fixture_id")
+        clean_kind = row.get("clean_kind")
+        if not isinstance(family, str) or not family:
+            failures.append("manifest clean_fixture.family must be a non-empty string")
+            continue
+        if not isinstance(fixture_id, str) or not fixture_id:
+            failures.append(f"{family}: manifest clean_fixture.fixture_id must be a non-empty string")
+            continue
+        if clean_kind not in ALLOWED_CLEAN_KINDS:
+            failures.append(
+                f"{family}: clean fixture {fixture_id} clean_kind must be one of "
+                f"{', '.join(sorted(ALLOWED_CLEAN_KINDS))}"
+            )
+        if family in seen_families:
+            failures.append(f"{family}: duplicate clean_fixture manifest row")
+        seen_families.add(family)
+        key = (family, fixture_id)
+        if key not in rows_by_family_and_id:
+            failures.append(f"{family}: manifest clean fixture {fixture_id} does not match a clean fixture")
+        classified.add(key)
+
+    for family, fixture_id in sorted(rows_by_family_and_id):
+        if (family, fixture_id) not in classified:
+            failures.append(f"{family}: clean fixture {fixture_id} missing clean_kind manifest row")
 
 
 def listed_rule_ids(manifest: dict[str, Any], key: str) -> set[str]:
