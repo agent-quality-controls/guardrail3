@@ -4,55 +4,33 @@
 [![rust](https://img.shields.io/badge/rust-stable-orange)](rust-toolchain.toml)
 [![issues](https://img.shields.io/github/issues/agent-quality-controls/guardrail3)](https://github.com/agent-quality-controls/guardrail3/issues)
 
-
 Composable code guardrails for Rust and TypeScript projects.
 
-For design rationale (why banned-by-default, why self-validating, why Rust), see [Philosophy](https://github.com/agent-quality-controls/guardrail3/wiki/Philosophy). For how guardrail3 compares to ArchUnit, clippy, cargo-deny, dependency-cruiser, and ts-prune, see [Comparison](https://github.com/agent-quality-controls/guardrail3/wiki/Comparison).
-
-## Quick Start
+## Install
 
 ```bash
 cargo install guardrail3
+```
 
-# Rust service
+## Quick start
+
+```bash
 guardrail3 rs init --profile service .
 guardrail3 rs generate
 guardrail3 rs validate .
-
-# TypeScript app
-guardrail3 ts init .
-guardrail3 ts generate
-guardrail3 ts validate .
-
-# Generate comprehensive guide
-guardrail3 dump-guide
 ```
 
-Run `guardrail3 --help` for full documentation including all commands, profiles, topology conventions, config reference, and the complete check inventory.
+Run `guardrail3 --help` for all commands, profiles, topology conventions, config reference, and the full check inventory. Or `guardrail3 dump-guide` to produce a comprehensive Markdown guide.
 
-## What It Checks
+## More
 
-**Rust:** Config completeness (clippy, deny, rustfmt, toolchain, workspace lints), AST-based source scan via syn (allows without reason, unsafe, unwrap, todo, std::fs, file length), dependency allowlists, apparch enforcement, release readiness, test quality, garde validation at input boundaries.
-
-All source scanning is 100% AST-based (syn for Rust, tree-sitter for TypeScript). Zero grep. No false positives from strings, comments, or macros.
-
-## Active Layout
-
-The active Rust CLI is:
-
-```
-apps/guardrail3-rs/
-packages/rs/
-packages/parsers/
-packages/shared/
-```
-
-The old multi-language app is archived under:
-
-```
-legacy/apps/guardrail3-current/
-legacy/guardrail3.toml
-```
+- [Philosophy](https://github.com/agent-quality-controls/guardrail3/wiki/Philosophy) — why banned-by-default, why self-validating, why Rust.
+- [Comparison](https://github.com/agent-quality-controls/guardrail3/wiki/Comparison) — guardrail3 vs ArchUnit, clippy, cargo-deny, dependency-cruiser, ts-prune.
+- [Checks](https://github.com/agent-quality-controls/guardrail3/wiki/Checks) — what guardrail3 checks (config, source scan, dependency allowlists, apparch, release readiness, test quality, validation).
+- [Quick start](https://github.com/agent-quality-controls/guardrail3/wiki/Quick-Start) — Rust and TypeScript bootstrap walkthroughs.
+- [Layout](https://github.com/agent-quality-controls/guardrail3/wiki/Layout) — active workspace layout and legacy archive.
+- [Contributing](.github/CONTRIBUTING.md) — adding checks, dev setup, self-validation.
+- [Security policy](.github/SECURITY.md) — vulnerability disclosure.
 
 ## License
 
