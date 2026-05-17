@@ -1,0 +1,33 @@
+name: Check request
+description: Propose a new guardrail check
+labels: ["check-request"]
+body:
+  - type: textarea
+    id: pattern
+    attributes:
+      label: The pattern to enforce or forbid
+      description: What code shape should the check find? Minimal examples of accepted and rejected code.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: What bug class, security risk, architectural drift, or maintenance pain does this prevent?
+    validations:
+      required: true
+  - type: input
+    id: domain
+    attributes:
+      label: Suggested domain
+      description: lint, topology, validation, io, release, or propose a new one
+  - type: input
+    id: severity
+    attributes:
+      label: Suggested severity
+      description: error or warning
+  - type: input
+    id: suggested-id
+    attributes:
+      label: Suggested check ID
+      description: e.g. R-IO-09
