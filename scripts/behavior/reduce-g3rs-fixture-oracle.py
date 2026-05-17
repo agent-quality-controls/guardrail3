@@ -31,7 +31,7 @@ def normalized_behavior_json(raw_json: str) -> str:
     for record in payload.get("records", []):
         record["fixture_id"] = "fixture-root"
         record.pop("fixture_hash", None)
-    return json.dumps(payload, indent=2, sort_keys=True)
+    return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
 
 
 if __name__ == "__main__":

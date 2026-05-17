@@ -14,11 +14,15 @@ RULE_FIXTURE_ROOT = REPO_ROOT / "behavior/fixtures/g3rs-rules"
 REPLAY_MANIFEST = (
     REPO_ROOT / ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
 )
+ORACLE_SCRIPTS = {
+    "exact": "scripts/behavior/reduce-g3rs-fixture-oracle.py",
+    "rule-set": "scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py",
+}
 
 
 def main() -> int:
     args = parse_args()
-    roots = broken_fixture_roots()
+    roots = fixture_roots(include_clean=args.include_clean or args.all_cases)
     if args.case:
         roots = [root for root in roots if root.name == args.case]
     if args.limit is not None:
@@ -28,7 +32,7 @@ def main() -> int:
 
     report_rows = []
     for root in roots:
-        row = reduce_root(root, args.max_oracle_calls)
+        row = reduce_root(root, args.max_oracle_calls, args.oracle)
         report_rows.append(row)
 
     print(json.dumps({"reduced": report_rows}, indent=2, sort_keys=True))
@@ -38,20 +42,23 @@ def main() -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--case", help="Reduce one fixture case directory name")
+    parser.add_argument("--include-clean", action="store_true", help="Include clean R00 fixture roots")
+    parser.add_argument("--all-cases", action="store_true", help="Alias for --include-clean")
     parser.add_argument("--limit", type=int, help="Reduce the first N broken fixture roots")
     parser.add_argument("--max-oracle-calls", type=int, help="Pass a shared oracle-call cap to fixture3")
+    parser.add_argument("--oracle", choices=sorted(ORACLE_SCRIPTS), default="exact")
     return parser.parse_args()
 
 
-def broken_fixture_roots() -> list[Path]:
+def fixture_roots(*, include_clean: bool) -> list[Path]:
     roots = []
     for fixture in sorted(RULE_FIXTURE_ROOT.glob("*/*/fixture.toml")):
-        if "R00-clean-golden" not in fixture.parent.name:
+        if include_clean or "R00-clean-golden" not in fixture.parent.name:
             roots.append(fixture.parent)
     return roots
 
 
-def reduce_root(root: Path, max_oracle_calls: int | None) -> dict[str, object]:
+def reduce_root(root: Path, max_oracle_calls: int | None, oracle: str) -> dict[str, object]:
     rel = root.relative_to(REPO_ROOT)
     scratch = REPO_ROOT / ".fixture3/reduce-broken-family-rule-fixtures" / rel
     backup = scratch / "backup"
@@ -64,8 +71,9 @@ def reduce_root(root: Path, max_oracle_calls: int | None) -> dict[str, object]:
     scratch.mkdir(parents=True)
     shutil.copytree(root, backup)
     approved_dir.mkdir(parents=True)
-    write_single_fixture_approved(root / "fixture.toml", approved_dir / "approved.normalized.json")
-    write_reduce_manifest(root, approved_dir, work_dir, manifest)
+    oracle_script = ORACLE_SCRIPTS[oracle]
+    write_single_fixture_approved(root / "fixture.toml", approved_dir / "approved.normalized.json", oracle_script)
+    write_reduce_manifest(root, approved_dir, work_dir, manifest, oracle_script)
 
     command = [
         "fixture3",
@@ -88,7 +96,7 @@ def reduce_root(root: Path, max_oracle_calls: int | None) -> dict[str, object]:
 
     try:
         apply_report(root, report)
-        verify_single_fixture_behavior(root, approved_dir / "approved.normalized.json")
+        verify_single_fixture_behavior(root, approved_dir / "approved.normalized.json", oracle_script)
     except BaseException:
         restore_root(root, backup)
         raise
@@ -103,7 +111,7 @@ def reduce_root(root: Path, max_oracle_calls: int | None) -> dict[str, object]:
     }
 
 
-def write_single_fixture_approved(fixture: Path, output: Path) -> None:
+def write_single_fixture_approved(fixture: Path, output: Path, oracle_script: str) -> None:
     fixture_root = fixture.parent
     fixture_args = [
         str(path.relative_to(REPO_ROOT))
@@ -113,7 +121,7 @@ def write_single_fixture_approved(fixture: Path, output: Path) -> None:
     completed = run(
         [
             "python3",
-            "scripts/behavior/reduce-g3rs-fixture-oracle.py",
+            oracle_script,
             "--manifest",
             str(REPLAY_MANIFEST.relative_to(REPO_ROOT)),
             *fixture_args,
@@ -122,7 +130,13 @@ def write_single_fixture_approved(fixture: Path, output: Path) -> None:
     output.write_text(completed.stdout, encoding="utf-8")
 
 
-def write_reduce_manifest(root: Path, approved_dir: Path, work_dir: Path, manifest: Path) -> None:
+def write_reduce_manifest(
+    root: Path,
+    approved_dir: Path,
+    work_dir: Path,
+    manifest: Path,
+    oracle_script: str,
+) -> None:
     root_rel = root.relative_to(REPO_ROOT).as_posix()
     approved_rel = approved_dir.relative_to(REPO_ROOT).as_posix()
     received_rel = (work_dir / "received").relative_to(REPO_ROOT).as_posix()
@@ -139,7 +153,7 @@ def write_reduce_manifest(root: Path, approved_dir: Path, work_dir: Path, manife
                 "    command:",
                 "      argv:",
                 '        - "python3"',
-                '        - "scripts/behavior/reduce-g3rs-fixture-oracle.py"',
+                f'        - "{oracle_script}"',
                 '        - "--manifest"',
                 f'        - "{replay_manifest_rel}"',
                 '        - "{fixtures}"',
@@ -173,7 +187,7 @@ def restore_root(root: Path, backup: Path) -> None:
     shutil.copytree(backup, root)
 
 
-def verify_single_fixture_behavior(root: Path, approved: Path) -> None:
+def verify_single_fixture_behavior(root: Path, approved: Path, oracle_script: str) -> None:
     fixture_args = [
         str(path.relative_to(REPO_ROOT))
         for path in sorted(root.rglob("*"))
@@ -182,7 +196,7 @@ def verify_single_fixture_behavior(root: Path, approved: Path) -> None:
     completed = run(
         [
             "python3",
-            "scripts/behavior/reduce-g3rs-fixture-oracle.py",
+            oracle_script,
             "--manifest",
             str(REPLAY_MANIFEST.relative_to(REPO_ROOT)),
             *fixture_args,
