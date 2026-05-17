@@ -233,4 +233,4 @@ status = "planned"
 name = "astro-state"
 rule_count = 2
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-state"
-status = "planned"
+status = "completed"

@@ -1,0 +1,18 @@
+id = "astro-state-R10-forbidden-state"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-state", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree"
+
+rule_family = "astro-state"
+target_rules = [
+  "g3ts-astro-state/no-legacy-parallel-state",
+  "g3ts-astro-state/configured-forbidden-state"
+]
+expected_findings = [
+  "g3ts-astro-state/no-legacy-parallel-state",
+  "g3ts-astro-state/configured-forbidden-state"
+]

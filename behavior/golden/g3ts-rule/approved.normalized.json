@@ -141,6 +141,44 @@
         "--path",
         ".",
         "--family",
+        "astro-state",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:b2719cfdc74a0c2d92d6da179787f57a386a02d2c4d25d860089be1ce2805c40",
+      "fixture_id": "astro-state-R00-clean-golden",
+      "stderr": "",
+      "stdout": "No findings.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "astro-state",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:95f78d6effb85f7147ef9649a802d420a85a3bfd5d756f8f7829e0533732f5ae",
+      "fixture_id": "astro-state-R10-forbidden-state",
+      "stderr": "",
+      "stdout": "== astro-state ==\n[Error] g3ts-astro-state/no-legacy-parallel-state .next Astro content app must not contain legacy parallel framework state\n  Astro content app `.` contains `.next`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections.\n[Error] g3ts-astro-state/no-legacy-parallel-state .next/server Astro content app must not contain legacy parallel framework state\n  Astro content app `.` contains `.next/server`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections.\n[Error] g3ts-astro-state/no-legacy-parallel-state .next/server/app Astro content app must not contain legacy parallel framework state\n  Astro content app `.` contains `.next/server/app`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections.\n[Error] g3ts-astro-state/no-legacy-parallel-state .next/server/app/page.js Astro content app must not contain legacy parallel framework state\n  Astro content app `.` contains `.next/server/app/page.js`. Remove `.next/**`, `.contentlayer/**`, and `contentlayer.config.*` from this Astro app. These files prove a parallel Next/Contentlayer pipeline is present or was left behind, so agents can bypass Astro content collections.\n[Error] g3ts-astro-state/configured-forbidden-state generated-state/cache.txt Astro app contains state forbidden by `[astro.state].forbidden`\n  Astro content app `.` contains `generated-state/cache.txt`, which matches its configured `[astro.state].forbidden` policy. Remove the generated or legacy state so agents cannot bypass the Astro content pipeline.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "eslint",
         "--rules-only",
         "--inventory"

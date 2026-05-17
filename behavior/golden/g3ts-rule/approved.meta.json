@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T19-12-01.601117Z-d06b5496",
-  "run_commit": "f23b9b790",
+  "run_id": "2026-05-17T19-20-26.648941Z-d06b5496",
+  "run_commit": "64327e603",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T19:12:01.601117Z",
-  "fixture_hash": "sha256:1eee55bc55876d3e709732acc444ae0df8a1398f1155cac8a1be2d0fa8f48824",
+  "recorded_at": "2026-05-17T19:20:26.648941Z",
+  "fixture_hash": "sha256:51f69c3f8638a073d9e0dba62440a9b6d9298dbd1f87db480ffa58beee2c6a83",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -37,6 +37,14 @@
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R40-facade-parse-error/fixture.toml",
       "sha256": "sha256:3e28d2a5bcdc004a04bc91dd8b92e2bb93c9b2b9df0ae0b7c36de0b5be5d10c8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-state/astro-state-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:d0ec9d894bdc5c7367247f7584fc6bfecae8883dd85c5a7979eaa9db53eef4f1"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-state/astro-state-R10-forbidden-state/fixture.toml",
+      "sha256": "sha256:b64ee5f95f7b330f334d90674556cce223900b944457787aeb410ef4c2f85250"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R00-clean-golden/fixture.toml",
@@ -239,5 +247,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS hooks family rule fixtures"
+  "comment": "Add G3TS astro-state family rule fixtures"
 }
