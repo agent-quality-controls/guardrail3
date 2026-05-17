@@ -1,0 +1,24 @@
+id = "astro-seo-R20-llms-and-helper-policy"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-seo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-seo"
+target_rules = [
+  "g3ts-astro-seo/llms-integration-present",
+  "g3ts-astro-seo/llms-generator-package-present",
+  "g3ts-astro-seo/llms-auditor-package-present",
+  "g3ts-astro-seo/strict-policy-paths",
+  "g3ts-astro-seo/policy-helper-surfaces"
+]
+expected_findings = [
+  "g3ts-astro-seo/llms-integration-present",
+  "g3ts-astro-seo/llms-generator-package-present",
+  "g3ts-astro-seo/llms-auditor-package-present",
+  "g3ts-astro-seo/strict-policy-paths",
+  "g3ts-astro-seo/policy-helper-surfaces"
+]

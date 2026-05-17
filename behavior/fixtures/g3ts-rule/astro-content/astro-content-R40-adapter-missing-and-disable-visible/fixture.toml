@@ -1,0 +1,18 @@
+id = "astro-content-R40-adapter-missing-and-disable-visible"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-content"
+target_rules = [
+  "g3ts-astro-content/content-adapter-exists",
+  "g3ts-astro-content/eslint-disable-inventory"
+]
+expected_findings = [
+  "g3ts-astro-content/content-adapter-exists",
+  "g3ts-astro-content/eslint-disable-inventory"
+]

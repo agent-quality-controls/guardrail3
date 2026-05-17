@@ -1,0 +1,22 @@
+id = "astro-content-R30-policy-paths-and-adapter-source"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-content"
+target_rules = [
+  "g3ts-astro-content/strict-policy-paths",
+  "g3ts-astro-content/route-scope-overlap",
+  "g3ts-astro-content/policy-eslint-coverage",
+  "g3ts-astro-content/content-adapter-astro-content"
+]
+expected_findings = [
+  "g3ts-astro-content/strict-policy-paths",
+  "g3ts-astro-content/route-scope-overlap",
+  "g3ts-astro-content/policy-eslint-coverage",
+  "g3ts-astro-content/content-adapter-astro-content"
+]

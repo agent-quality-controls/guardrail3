@@ -1,0 +1,16 @@
+id = "astro-mdx-R30-disable-visible"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-mdx", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+
+rule_family = "astro-mdx"
+target_rules = [
+  "g3ts-astro-mdx/eslint-disable-inventory"
+]
+expected_findings = [
+  "g3ts-astro-mdx/eslint-disable-inventory"
+]

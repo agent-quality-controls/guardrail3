@@ -1,0 +1,24 @@
+id = "astro-content-R10-missing-policy-and-eslint"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-content"
+target_rules = [
+  "g3ts-astro-content/pipeline-plugin-package-present",
+  "g3ts-astro-content/inline-copy-rule",
+  "g3ts-astro-content/content-adapter-rule",
+  "g3ts-astro-content/protected-content-rule-disables-restricted",
+  "g3ts-astro-content/strict-content-policy"
+]
+expected_findings = [
+  "g3ts-astro-content/pipeline-plugin-package-present",
+  "g3ts-astro-content/inline-copy-rule",
+  "g3ts-astro-content/content-adapter-rule",
+  "g3ts-astro-content/protected-content-rule-disables-restricted",
+  "g3ts-astro-content/strict-content-policy"
+]

@@ -1,0 +1,13 @@
+[astro.i18n]
+locales = ["en", "fr"]
+default_locale = "en"
+require_locale_prefix_for_content_routes = true
+allowed_unprefixed_routes = ["/"]
+content_route_prefixes = ["/blog"]
+checked_internal_link_helpers = ["src/i18n/link"]
+approved_internal_link_helpers = ["src/i18n/link"]
+approved_localized_link_components = ["src/i18n/LocalizedLink"]
+approved_date_format_helpers = ["../bad"]
+approved_number_format_helpers = ["src/i18n/number"]
+public_source_globs = ["src/pages/**/*"]
+helper_source_globs = ["src/i18n/**/*"]

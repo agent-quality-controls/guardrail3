@@ -1,0 +1,22 @@
+id = "astro-content-R20-forbidden-content-state"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree"
+
+rule_family = "astro-content"
+target_rules = [
+  "g3ts-astro-content/content-config-exists",
+  "g3ts-astro-content/no-route-markdown-pages",
+  "g3ts-astro-content/no-velite-config",
+  "g3ts-astro-content/no-velite-output"
+]
+expected_findings = [
+  "g3ts-astro-content/content-config-exists",
+  "g3ts-astro-content/no-route-markdown-pages",
+  "g3ts-astro-content/no-velite-config",
+  "g3ts-astro-content/no-velite-output"
+]

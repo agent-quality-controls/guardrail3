@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "astro": "6.1.9",
+    "eslint-plugin-i18next": "6.1.4",
+    "g3ts-eslint-plugin-astro-i18n-policy": "0.1.2",
+    "@eslint-community/eslint-plugin-eslint-comments": "4.7.1"
+  }
+}

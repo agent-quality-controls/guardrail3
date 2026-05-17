@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "validate": "g3ts-astro-sitemap-checks"
+  },
+  "dependencies": {
+    "astro": "6.1.9"
+  }
+}

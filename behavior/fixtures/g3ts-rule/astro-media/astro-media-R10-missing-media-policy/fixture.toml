@@ -1,0 +1,38 @@
+id = "astro-media-R10-missing-media-policy"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-media", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-media"
+target_rules = [
+  "g3ts-astro-media/strict-policy-configured",
+  "g3ts-astro-media/media-assets-package-present",
+  "g3ts-astro-media/media-policy-plugin-package-present",
+  "g3ts-astro-media/eslint-comments-plugin-package-present",
+  "g3ts-astro-media/media-assets-integration-wired",
+  "g3ts-astro-media/media-build-validation-runs",
+  "g3ts-astro-media/media-policy-plugin-wired",
+  "g3ts-astro-media/no-raw-public-image-paths-rule",
+  "g3ts-astro-media/no-inline-image-alt-rule",
+  "g3ts-astro-media/require-content-image-key-rule",
+  "g3ts-astro-media/require-approved-media-helper-rule",
+  "g3ts-astro-media/protected-media-rule-disables-restricted"
+]
+expected_findings = [
+  "g3ts-astro-media/strict-policy-configured",
+  "g3ts-astro-media/media-assets-package-present",
+  "g3ts-astro-media/media-policy-plugin-package-present",
+  "g3ts-astro-media/eslint-comments-plugin-package-present",
+  "g3ts-astro-media/media-assets-integration-wired",
+  "g3ts-astro-media/media-build-validation-runs",
+  "g3ts-astro-media/media-policy-plugin-wired",
+  "g3ts-astro-media/no-raw-public-image-paths-rule",
+  "g3ts-astro-media/no-inline-image-alt-rule",
+  "g3ts-astro-media/require-content-image-key-rule",
+  "g3ts-astro-media/require-approved-media-helper-rule",
+  "g3ts-astro-media/protected-media-rule-disables-restricted"
+]

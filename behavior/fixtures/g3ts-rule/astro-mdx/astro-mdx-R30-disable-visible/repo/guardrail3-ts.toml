@@ -1,0 +1,2 @@
+[astro.mdx]
+component_maps = ["src/mdx-components.tsx"]

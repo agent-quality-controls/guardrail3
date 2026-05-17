@@ -1,0 +1,18 @@
+id = "astro-mdx-R20-policy-paths-and-disable-visible"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-mdx", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-mdx"
+target_rules = [
+  "g3ts-astro-mdx/strict-policy-paths",
+  "g3ts-astro-mdx/policy-helper-surfaces"
+]
+expected_findings = [
+  "g3ts-astro-mdx/strict-policy-paths",
+  "g3ts-astro-mdx/policy-helper-surfaces"
+]

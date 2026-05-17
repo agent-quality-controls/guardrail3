@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "validate": "astro build"
+  },
+  "dependencies": {
+    "astro": "6.1.9",
+    "@astrojs/sitemap": "3.7.2",
+    "astro-robots": "2.3.1",
+    "g3ts-astro-sitemap-auditor": "0.1.5",
+    "g3ts-astro-robots-auditor": "0.1.4",
+    "@nuasite/checks": "0.18.0",
+    "g3ts-astro-nuasite-checks": "0.1.2",
+    "schema-dts": "2.0.0",
+    "g3ts-eslint-plugin-astro-pipeline": "0.1.8"
+  }
+}

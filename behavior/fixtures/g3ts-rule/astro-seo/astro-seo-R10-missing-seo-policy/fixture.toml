@@ -1,0 +1,44 @@
+id = "astro-seo-R10-missing-seo-policy"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-seo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-seo"
+target_rules = [
+  "g3ts-astro-seo/canonical-site-config",
+  "g3ts-astro-seo/static-output-config",
+  "g3ts-astro-seo/trailing-slash-policy",
+  "g3ts-astro-seo/nuasite-checks",
+  "g3ts-astro-seo/sitemap-integration-present",
+  "g3ts-astro-seo/robots-integration-present",
+  "g3ts-astro-seo/sitemap-generator-package-present",
+  "g3ts-astro-seo/robots-generator-package-present",
+  "g3ts-astro-seo/sitemap-auditor-package-present",
+  "g3ts-astro-seo/robots-auditor-package-present",
+  "g3ts-astro-seo/seo-packages",
+  "g3ts-astro-seo/structured-data-check",
+  "g3ts-astro-seo/metadata-helper-rule",
+  "g3ts-astro-seo/json-ld-helper-rule",
+  "g3ts-astro-seo/protected-seo-rule-disables-restricted"
+]
+expected_findings = [
+  "g3ts-astro-seo/canonical-site-config",
+  "g3ts-astro-seo/static-output-config",
+  "g3ts-astro-seo/trailing-slash-policy",
+  "g3ts-astro-seo/nuasite-checks",
+  "g3ts-astro-seo/sitemap-integration-present",
+  "g3ts-astro-seo/robots-integration-present",
+  "g3ts-astro-seo/sitemap-generator-package-present",
+  "g3ts-astro-seo/robots-generator-package-present",
+  "g3ts-astro-seo/sitemap-auditor-package-present",
+  "g3ts-astro-seo/robots-auditor-package-present",
+  "g3ts-astro-seo/seo-packages",
+  "g3ts-astro-seo/structured-data-check",
+  "g3ts-astro-seo/metadata-helper-rule",
+  "g3ts-astro-seo/json-ld-helper-rule",
+  "g3ts-astro-seo/protected-seo-rule-disables-restricted"
+]

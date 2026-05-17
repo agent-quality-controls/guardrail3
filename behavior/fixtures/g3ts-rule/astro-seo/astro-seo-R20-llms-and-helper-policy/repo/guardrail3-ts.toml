@@ -1,0 +1,6 @@
+[astro.seo]
+metadata_helpers = ["../bad"]
+json_ld_helpers = []
+strict_ai_readable = true
+llms_required_sections = ["Overview"]
+llms_required_links = []

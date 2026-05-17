@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "astro": "6.1.9",
+    "g3ts-eslint-plugin-astro-pipeline": "0.1.8",
+    "eslint-plugin-i18next": "6.1.4"
+  }
+}

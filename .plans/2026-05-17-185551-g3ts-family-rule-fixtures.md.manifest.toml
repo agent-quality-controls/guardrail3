@@ -91,6 +91,30 @@ reason = "typecov hook contract is exported for hooks aggregation and is not emi
 id = "g3ts-style/hook-contract"
 reason = "style hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family style"
 
+[[cli_unreachable_rule]]
+id = "g3ts-astro-setup/hook-contract"
+reason = "Astro setup hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-setup"
+
+[[cli_unreachable_rule]]
+id = "g3ts-astro-content/hook-contract"
+reason = "Astro content hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-content"
+
+[[cli_unreachable_rule]]
+id = "g3ts-astro-mdx/hook-contract"
+reason = "Astro MDX hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-mdx"
+
+[[cli_unreachable_rule]]
+id = "g3ts-astro-i18n/hook-contract"
+reason = "Astro i18n hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-i18n"
+
+[[cli_unreachable_rule]]
+id = "g3ts-astro-media/hook-contract"
+reason = "Astro media hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-media"
+
+[[cli_unreachable_rule]]
+id = "g3ts-astro-seo/hook-contract"
+reason = "Astro SEO hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family astro-seo"
+
 [[inventory_only_rule]]
 id = "g3ts-hooks/modular-directory-inventory"
 reason = "hook modular-directory state is intentional inventory and emits Info, not Error or Warn"
@@ -114,6 +138,14 @@ reason = "hook file-size reporting is intentional inventory and emits Info, not 
 [[inventory_only_rule]]
 id = "g3ts-hooks/alternate-hook-surface-inventory"
 reason = "alternate hook surface reporting is intentional inventory and emits Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-astro-content/live-config-exists"
+reason = "current CLI ingestion emits this rule as live-config inventory; the missing-live branch is not externally reachable"
+
+[[inventory_only_rule]]
+id = "g3ts-astro-seo/broad-crawler-generator-absent"
+reason = "broad crawler generator absence is intentional inventory and emits Info, not Error or Warn"
 
 [[family]]
 name = "package"
@@ -197,37 +229,37 @@ status = "completed"
 name = "astro-setup"
 rule_count = 19
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-setup"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-content"
 rule_count = 17
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-content"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-mdx"
 rule_count = 14
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-mdx"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-i18n"
 rule_count = 11
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-i18n"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-media"
 rule_count = 14
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-media"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-seo"
 rule_count = 23
 fixture_dir = "behavior/fixtures/g3ts-rule/astro-seo"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-state"

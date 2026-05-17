@@ -1,0 +1,15 @@
+[astro.media]
+favicon = "favicon.ico"
+app_icons = ["/icon.png"]
+default_social_image = "/og.png"
+allow_svg_icons = false
+public_source_globs = ["../bad"]
+media_helper_modules = ["src/lib/media"]
+approved_media_helpers = ["media"]
+content_image_components = ["ContentImage"]
+content_image_key_props = ["imageKey"]
+banned_image_source_props = ["src"]
+banned_image_alt_props = ["alt"]
+allowed_public_image_paths = ["/logo.png"]
+checked_image_extensions = ["png"]
+metadata_image_property_names = ["image"]

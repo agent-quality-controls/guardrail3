@@ -1,0 +1,34 @@
+id = "astro-mdx-R10-missing-mdx-wiring"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-mdx", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-mdx"
+target_rules = [
+  "g3ts-astro-mdx/mdx-eslint-plugin-package-present",
+  "g3ts-astro-mdx/mdx-eslint-lane-wired",
+  "g3ts-astro-mdx/mdx-component-map-rule",
+  "g3ts-astro-mdx/mdx-import-names",
+  "g3ts-astro-mdx/no-raw-ui-exports",
+  "g3ts-astro-mdx/mdx-component-wrapper-zod-parse",
+  "g3ts-astro-mdx/no-raw-mdx-images",
+  "g3ts-astro-mdx/eslint-disable-descriptions-required",
+  "g3ts-astro-mdx/unused-eslint-disables-fail",
+  "g3ts-astro-mdx/protected-mdx-rule-disables-restricted"
+]
+expected_findings = [
+  "g3ts-astro-mdx/mdx-eslint-plugin-package-present",
+  "g3ts-astro-mdx/mdx-eslint-lane-wired",
+  "g3ts-astro-mdx/mdx-component-map-rule",
+  "g3ts-astro-mdx/mdx-import-names",
+  "g3ts-astro-mdx/no-raw-ui-exports",
+  "g3ts-astro-mdx/mdx-component-wrapper-zod-parse",
+  "g3ts-astro-mdx/no-raw-mdx-images",
+  "g3ts-astro-mdx/eslint-disable-descriptions-required",
+  "g3ts-astro-mdx/unused-eslint-disables-fail",
+  "g3ts-astro-mdx/protected-mdx-rule-disables-restricted"
+]

@@ -1,0 +1,11 @@
+[astro]
+profile = "strict-static-content"
+
+[astro.routes]
+content = ["src/pages/**/*.astro"]
+non_content = []
+endpoints = []
+
+[astro.seo]
+metadata_helpers = ["src/seo/metadata.ts"]
+json_ld_helpers = ["src/seo/jsonld.ts"]

@@ -1,0 +1,16 @@
+id = "astro-setup-R20-missing-astro-package"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-setup", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-setup"
+target_rules = [
+  "g3ts-astro-setup/astro-package-present"
+]
+expected_findings = [
+  "g3ts-astro-setup/astro-package-present"
+]

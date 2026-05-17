@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "validate": "astro build"
+  },
+  "dependencies": {
+    "astro": "6.1.9",
+    "g3ts-astro-media-assets": "0.1.2",
+    "g3ts-eslint-plugin-astro-media-policy": "0.1.10",
+    "@eslint-community/eslint-plugin-eslint-comments": "4.7.1"
+  }
+}

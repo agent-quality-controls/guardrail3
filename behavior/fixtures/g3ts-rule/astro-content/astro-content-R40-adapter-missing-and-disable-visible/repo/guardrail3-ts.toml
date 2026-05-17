@@ -1,0 +1,11 @@
+[astro]
+profile = "strict-static-content"
+
+[astro.routes]
+content = ["src/pages/**/*.astro"]
+non_content = []
+endpoints = []
+
+[astro.content]
+root = "src/content"
+adapters = ["src/lib/content"]

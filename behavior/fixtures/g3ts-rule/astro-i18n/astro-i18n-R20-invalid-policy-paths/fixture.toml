@@ -1,0 +1,16 @@
+id = "astro-i18n-R20-invalid-policy-paths"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-i18n", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-i18n"
+target_rules = [
+  "g3ts-astro-i18n/policy-paths-valid"
+]
+expected_findings = [
+  "g3ts-astro-i18n/policy-paths-valid"
+]

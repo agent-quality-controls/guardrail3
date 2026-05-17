@@ -1,0 +1,46 @@
+id = "astro-setup-R10-missing-setup"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-setup", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-setup"
+target_rules = [
+  "g3ts-astro-setup/astro-check-present",
+  "g3ts-astro-setup/astro-eslint-plugin-package-present",
+  "g3ts-astro-setup/eslint-comments-plugin-package-present",
+  "g3ts-astro-setup/lint-script",
+  "g3ts-astro-setup/syncpack-lint-script",
+  "g3ts-astro-setup/validate-script",
+  "g3ts-astro-setup/astro-eslint-plugin-wired",
+  "g3ts-astro-setup/eslint-disable-descriptions-required",
+  "g3ts-astro-setup/unused-eslint-disables-fail",
+  "g3ts-astro-setup/protected-setup-rule-disables-restricted",
+  "g3ts-astro-setup/syncpack-stack-pins",
+  "g3ts-astro-setup/syncpack-forbidden-deps",
+  "g3ts-astro-setup/site-url",
+  "g3ts-astro-setup/static-output",
+  "g3ts-astro-setup/required-integrations",
+  "g3ts-astro-setup/astro-config-exists"
+]
+expected_findings = [
+  "g3ts-astro-setup/astro-check-present",
+  "g3ts-astro-setup/astro-eslint-plugin-package-present",
+  "g3ts-astro-setup/eslint-comments-plugin-package-present",
+  "g3ts-astro-setup/lint-script",
+  "g3ts-astro-setup/syncpack-lint-script",
+  "g3ts-astro-setup/validate-script",
+  "g3ts-astro-setup/astro-eslint-plugin-wired",
+  "g3ts-astro-setup/eslint-disable-descriptions-required",
+  "g3ts-astro-setup/unused-eslint-disables-fail",
+  "g3ts-astro-setup/protected-setup-rule-disables-restricted",
+  "g3ts-astro-setup/syncpack-stack-pins",
+  "g3ts-astro-setup/syncpack-forbidden-deps",
+  "g3ts-astro-setup/site-url",
+  "g3ts-astro-setup/static-output",
+  "g3ts-astro-setup/required-integrations",
+  "g3ts-astro-setup/astro-config-exists"
+]

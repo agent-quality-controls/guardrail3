@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T19-20-26.648941Z-d06b5496",
-  "run_commit": "64327e603",
+  "run_id": "2026-05-17T19-34-05.502257Z-d06b5496",
+  "run_commit": "cd4d46076",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T19:20:26.648941Z",
-  "fixture_hash": "sha256:51f69c3f8638a073d9e0dba62440a9b6d9298dbd1f87db480ffa58beee2c6a83",
+  "recorded_at": "2026-05-17T19:34:05.502257Z",
+  "fixture_hash": "sha256:e08f954cd56f1f406b8a2cfdafbda964cdf8c8044f8748a83cd3f009992f7c8f",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -37,6 +37,98 @@
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R40-facade-parse-error/fixture.toml",
       "sha256": "sha256:3e28d2a5bcdc004a04bc91dd8b92e2bb93c9b2b9df0ae0b7c36de0b5be5d10c8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:8cf20670e1a00d661cdbf3297c4bada695c607fd211f41a7c70caf89dfc61583"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R10-missing-policy-and-eslint/fixture.toml",
+      "sha256": "sha256:dcb823bae3cf8c46d06cb5b2dd322f26cde87001b1fca08cb033493187e9b0b3"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R20-forbidden-content-state/fixture.toml",
+      "sha256": "sha256:4b1b0b87e17d702069760b3cb3e4f4cdff1f149791e374caf695fbfeebed3b14"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R30-policy-paths-and-adapter-source/fixture.toml",
+      "sha256": "sha256:67eab92d950d9b62bf2a05d60381b167ccdcf10f0ae4620e1dbb2bda6270a8a3"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R40-adapter-missing-and-disable-visible/fixture.toml",
+      "sha256": "sha256:08b270c231bc7d5b167cf106eba2b8cf6ccd5dfba683b2a7d6e03cb27d4c9ef4"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:b8bedc5338a749ede2a89233bf6cecf8a8ebc7e34a0e5fed8b8c4f0f0d6a050a"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R10-missing-i18n-policy/fixture.toml",
+      "sha256": "sha256:af1a06b513da38fa87b49628aff9297ab5c5edce468458d9586247773b28351f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R20-invalid-policy-paths/fixture.toml",
+      "sha256": "sha256:a12505fb0c8919da2b42cbab66dd3d3395186424e2ee7a90d85d3085e0124330"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:bb95042a413930fe60d0654eab33265e2a61b83ea6fac2e5427f8c433e8db0ea"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R10-missing-mdx-wiring/fixture.toml",
+      "sha256": "sha256:b0ab457c54c27983e8aa2e9dce6d0aa4ffff5b37aa2819d3fff3697cf13ade9f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R20-policy-paths-and-disable-visible/fixture.toml",
+      "sha256": "sha256:a1c23856ff1687279a3cfe51ca707bddea026da61642b5a7459679f5195b384a"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R30-disable-visible/fixture.toml",
+      "sha256": "sha256:377a89d5bb32358f9ec87e7f90adc321f6a4db153296026258ccba0a3ce3a744"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:d5080321ba57da32c0aaa9302b6e88b7a728835858d6c1d5427fd014bec84ca9"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R10-missing-media-policy/fixture.toml",
+      "sha256": "sha256:020e5ac93b741a20521206d2041f1d5d2415ba601e84164eea2faaef5e571bc7"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R20-invalid-policy-paths/fixture.toml",
+      "sha256": "sha256:81492f78dc27f02285af8b81792aef8af18d522f09d50c4c1d39300dd455cbab"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:7a467585f25c85136d5ed593b0ae6ee631bef872c1202be3ebcfe11480577188"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R10-missing-seo-policy/fixture.toml",
+      "sha256": "sha256:25f54a15f1024046ed09ec998326b7653bd169c672a075575702aa2d368691a0"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R20-llms-and-helper-policy/fixture.toml",
+      "sha256": "sha256:db7f03c54ae7c497284c27e393b194b5e933f62c5e274a4e189554bdcde34f83"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R30-disable-visible/fixture.toml",
+      "sha256": "sha256:e70eccf3b8a88f3aea430b50f3a82ba7c5144e32fbb77b3f03ee3d98270210aa"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:f3d347fc473f13621b6cccbf55ae8ee428ff33f6a32d28119346fb417f1d6520"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R10-missing-setup/fixture.toml",
+      "sha256": "sha256:7afcc5c18a6f91edba9799c8c5b7ebf554909298fa66775b87e2a240e31c18f5"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R20-missing-astro-package/fixture.toml",
+      "sha256": "sha256:6708bb37a546b0602feb0e0669453bac8e741a7a2b7b9458de28dc5015552044"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R30-forbidden-script-target/fixture.toml",
+      "sha256": "sha256:bdeb358389841bb2e83f402da528f172f16f412fa95018522196243e2ab05871"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-state/astro-state-R00-clean-golden/fixture.toml",
@@ -247,5 +339,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS astro-state family rule fixtures"
+  "comment": "Update Astro MDX fixture target metadata"
 }

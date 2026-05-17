@@ -1,0 +1,32 @@
+id = "astro-i18n-R10-missing-i18n-policy"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "astro-i18n", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "astro-i18n"
+target_rules = [
+  "g3ts-astro-i18n/strict-policy-configured",
+  "g3ts-astro-i18n/i18next-plugin-package-present",
+  "g3ts-astro-i18n/i18n-policy-plugin-package-present",
+  "g3ts-astro-i18n/eslint-comments-plugin-package-present",
+  "g3ts-astro-i18n/i18next-plugin-wired",
+  "g3ts-astro-i18n/i18n-policy-plugin-wired",
+  "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule",
+  "g3ts-astro-i18n/raw-date-number-formatting-bans",
+  "g3ts-astro-i18n/protected-i18n-rule-disables-restricted"
+]
+expected_findings = [
+  "g3ts-astro-i18n/strict-policy-configured",
+  "g3ts-astro-i18n/i18next-plugin-package-present",
+  "g3ts-astro-i18n/i18n-policy-plugin-package-present",
+  "g3ts-astro-i18n/eslint-comments-plugin-package-present",
+  "g3ts-astro-i18n/i18next-plugin-wired",
+  "g3ts-astro-i18n/i18n-policy-plugin-wired",
+  "g3ts-astro-i18n/no-unlocalized-internal-hrefs-rule",
+  "g3ts-astro-i18n/raw-date-number-formatting-bans",
+  "g3ts-astro-i18n/protected-i18n-rule-disables-restricted"
+]
