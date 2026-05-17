@@ -29,8 +29,7 @@ Run `guardrail3 --help` for all commands, profiles, topology conventions, config
 - [Checks](https://github.com/agent-quality-controls/guardrail3/wiki/Checks) — what guardrail3 checks (config, source scan, dependency allowlists, apparch, release readiness, test quality, validation).
 - [Quick start](https://github.com/agent-quality-controls/guardrail3/wiki/Quick-Start) — Rust and TypeScript bootstrap walkthroughs.
 - [Layout](https://github.com/agent-quality-controls/guardrail3/wiki/Layout) — active workspace layout and legacy archive.
-- [Contributing](.github/CONTRIBUTING.md) — adding checks, dev setup, self-validation.
-- [Security policy](.github/SECURITY.md) — vulnerability disclosure.
+- [Contributing](.github/CONTRIBUTING.md) — open a detailed issue first; PRs must pass the G3RS pre-commit gate.
 
 ## License
 

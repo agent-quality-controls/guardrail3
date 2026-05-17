@@ -8,7 +8,7 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 
 ## Our Standards
 
-Examples of behavior that contributes to a positive environment:
+Examples of behavior that contributes to a positive environment include:
 
 - Demonstrating empathy and kindness toward other people
 - Being respectful of differing opinions, viewpoints, and experiences
@@ -16,7 +16,7 @@ Examples of behavior that contributes to a positive environment:
 - Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
 - Focusing on what is best for the overall community
 
-Examples of unacceptable behavior:
+Examples of unacceptable behavior include:
 
 - The use of sexualized language or imagery, and sexual attention or advances
 - Trolling, insulting or derogatory comments, and personal or political attacks
@@ -28,7 +28,7 @@ Examples of unacceptable behavior:
 
 Community leaders are responsible for clarifying and enforcing our standards and will take appropriate and fair corrective action in response to any behavior they deem inappropriate, threatening, offensive, or harmful.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the maintainers at eugene@trtk.me. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by opening a private issue or contacting the maintainers via the repository discussions. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 
