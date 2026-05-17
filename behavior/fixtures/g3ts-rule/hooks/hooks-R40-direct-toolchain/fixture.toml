@@ -1,0 +1,17 @@
+id = "hooks-R40-direct-toolchain"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "hooks", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+git_init = true
+
+rule_family = "hooks"
+target_rules = [
+  "g3ts-hooks/no-toolchain-invocation"
+]
+expected_findings = [
+  "g3ts-hooks/no-toolchain-invocation"
+]

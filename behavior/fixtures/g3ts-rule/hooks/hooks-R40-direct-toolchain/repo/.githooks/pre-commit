@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACM)"
+gitleaks protect --staged --no-banner
+grep -E '<<<<<<<|=======|>>>>>>>' $STAGED_FILES >/dev/null && exit 1 || true
+MAX_FILE_SIZE=1000000
+file_size="$(git cat-file -s ":package.json" 2>/dev/null || echo 0)"
+echo "$file_size $MAX_FILE_SIZE" >/dev/null
+echo "drizzle/"
+echo "db/schema/"
+pnpm install --frozen-lockfile
+g3ts validate-repo
+if [ -f "apps/landing/package.json" ] && [ -f "apps/landing/guardrail3-ts.toml" ]; then
+    echo "marker pair"
+fi
+TS_UNIQUE_UNITS="$(printf '%s\n' apps/landing | awk 'NF' | sort -u)"
+if [ -n "$TS_UNIQUE_UNITS" ]; then
+    for unit in $TS_UNIQUE_UNITS; do
+        if [ -z "$unit" ]; then
+            continue
+        fi
+        g3ts validate --path "$unit" --staged
+    done
+fi
+eslint .

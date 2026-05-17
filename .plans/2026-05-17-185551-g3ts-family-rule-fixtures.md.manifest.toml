@@ -91,6 +91,30 @@ reason = "typecov hook contract is exported for hooks aggregation and is not emi
 id = "g3ts-style/hook-contract"
 reason = "style hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family style"
 
+[[inventory_only_rule]]
+id = "g3ts-hooks/modular-directory-inventory"
+reason = "hook modular-directory state is intentional inventory and emits Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-hooks/modular-scripts-inventory"
+reason = "hook modular script stats are intentional inventory and emit Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-hooks/local-override-inventory"
+reason = "local hook override files are intentional inventory and emit Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-hooks/script-stats-inventory"
+reason = "hook script stats are intentional inventory and emit Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-hooks/pre-commit-file-size-inventory"
+reason = "hook file-size reporting is intentional inventory and emits Info, not Error or Warn"
+
+[[inventory_only_rule]]
+id = "g3ts-hooks/alternate-hook-surface-inventory"
+reason = "alternate hook surface reporting is intentional inventory and emits Info, not Error or Warn"
+
 [[family]]
 name = "package"
 rule_count = 10
@@ -167,7 +191,7 @@ status = "completed"
 name = "hooks"
 rule_count = 25
 fixture_dir = "behavior/fixtures/g3ts-rule/hooks"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "astro-setup"

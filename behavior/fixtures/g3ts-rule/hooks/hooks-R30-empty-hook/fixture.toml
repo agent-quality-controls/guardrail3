@@ -1,0 +1,37 @@
+id = "hooks-R30-empty-hook"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "hooks", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_source"
+git_init = true
+
+rule_family = "hooks"
+target_rules = [
+  "g3ts-hooks/routing-discovers-marker-pair",
+  "g3ts-hooks/routing-staged-files-diff-filter-acm",
+  "g3ts-hooks/calls-validate-repo",
+  "g3ts-hooks/dispatches-per-unit-validate-staged",
+  "g3ts-hooks/dedups-owning-units",
+  "g3ts-hooks/skips-when-no-owning-unit",
+  "g3ts-hooks/merge-conflict-scan",
+  "g3ts-hooks/gitleaks-scan",
+  "g3ts-hooks/file-size-cap",
+  "g3ts-hooks/migration-consistency",
+  "g3ts-hooks/lockfile-integrity"
+]
+expected_findings = [
+  "g3ts-hooks/routing-discovers-marker-pair",
+  "g3ts-hooks/routing-staged-files-diff-filter-acm",
+  "g3ts-hooks/calls-validate-repo",
+  "g3ts-hooks/dispatches-per-unit-validate-staged",
+  "g3ts-hooks/dedups-owning-units",
+  "g3ts-hooks/skips-when-no-owning-unit",
+  "g3ts-hooks/merge-conflict-scan",
+  "g3ts-hooks/gitleaks-scan",
+  "g3ts-hooks/file-size-cap",
+  "g3ts-hooks/migration-consistency",
+  "g3ts-hooks/lockfile-integrity"
+]

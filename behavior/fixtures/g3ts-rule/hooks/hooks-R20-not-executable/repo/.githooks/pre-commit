@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACM)"
+gitleaks protect --staged --no-banner
+grep -E '<<<<<<<|=======|>>>>>>>' $STAGED_FILES >/dev/null && exit 1 || true
+
+MAX_FILE_SIZE=1000000
+for staged_file in $STAGED_FILES; do
+    file_size="$(git cat-file -s ":$staged_file" 2>/dev/null || echo 0)"
+    if [ "$file_size" -gt "$MAX_FILE_SIZE" ]; then
+        exit 1
+    fi
+done
+
+echo "drizzle/"
+echo "db/schema/"
+if printf '%s\n' "$STAGED_FILES" | grep 'package.json' >/dev/null; then
+    pnpm install --frozen-lockfile
+fi
+
+TS_UNIQUE_UNITS=""
+for staged_file in $STAGED_FILES; do
+    search_dir="$(dirname "$staged_file")"
+    while [ "$search_dir" != "." ] && [ "$search_dir" != "/" ]; do
+        if [ -f "$search_dir/package.json" ] && [ -f "$search_dir/guardrail3-ts.toml" ]; then
+            TS_UNIQUE_UNITS="${TS_UNIQUE_UNITS}
+$search_dir"
+            break
+        fi
+        search_dir="$(dirname "$search_dir")"
+    done
+done
+
+TS_UNIQUE_UNITS="$(printf '%s\n' "$TS_UNIQUE_UNITS" | awk 'NF' | sort -u)"
+g3ts validate-repo
+if [ -n "$TS_UNIQUE_UNITS" ]; then
+    for unit in $TS_UNIQUE_UNITS; do
+        if [ -z "$unit" ]; then
+            continue
+        fi
+        g3ts validate --path "$unit" --staged
+    done
+fi

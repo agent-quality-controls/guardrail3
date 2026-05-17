@@ -1,0 +1,17 @@
+id = "hooks-R20-not-executable"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "hooks", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_filetree"
+git_init = true
+
+rule_family = "hooks"
+target_rules = [
+  "g3ts-hooks/pre-commit-executable"
+]
+expected_findings = [
+  "g3ts-hooks/pre-commit-executable"
+]

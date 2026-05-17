@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T19-05-33.876265Z-d06b5496",
-  "run_commit": "e5d9ab099",
+  "run_id": "2026-05-17T19-12-01.601117Z-d06b5496",
+  "run_commit": "f23b9b790",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T19:05:33.876265Z",
-  "fixture_hash": "sha256:92d6791758bbd1f51a1f96d76492afbd0aab0f1494d5bb33492cea8d3c2d2b7e",
+  "recorded_at": "2026-05-17T19:12:01.601117Z",
+  "fixture_hash": "sha256:1eee55bc55876d3e709732acc444ae0df8a1398f1155cac8a1be2d0fa8f48824",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -73,6 +73,34 @@
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R30-validate-not-wired/fixture.toml",
       "sha256": "sha256:9fedb86e514544b47dc31552d5807492482455f0ca1df2c8e6f7d0b292840798"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:5f500b047ef71d546f613e7c97b6f80af20384ec4c20a648c3798ee0a16f9a19"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R10-missing-surface/fixture.toml",
+      "sha256": "sha256:9b1b3b6c036bd2fa8d8c67111a0c6d5430e4252192e90a2c5a941c8d67c24f65"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R20-not-executable/fixture.toml",
+      "sha256": "sha256:50df7186e255cf689f786eaca1afc39d1624a69d70cd1b911e43aacb8f9fefd8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R30-empty-hook/fixture.toml",
+      "sha256": "sha256:fc0397f19939ff15dbd2a3c6a68037310f0c18e7ee11c7e79a20eff15654cb6a"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R40-direct-toolchain/fixture.toml",
+      "sha256": "sha256:00c7e1f70244ece237e1d62e2e07ccf6ce365b1e819dc0209797e8d8e23d01b3"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R50-routing-violations/fixture.toml",
+      "sha256": "sha256:f0e570134984a5c90a21d0c4a97cab1f7582724cfbca87f13ba6e16248ec2b5f"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R60-binary-unavailable/fixture.toml",
+      "sha256": "sha256:60c135d7f7e3fd16b8828e27ca71f90bdc07a4d8b2a09f2e041df908bf3e2a75"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R00-clean-golden/fixture.toml",
@@ -211,5 +239,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS eslint family rule fixtures"
+  "comment": "Add G3TS hooks family rule fixtures"
 }
