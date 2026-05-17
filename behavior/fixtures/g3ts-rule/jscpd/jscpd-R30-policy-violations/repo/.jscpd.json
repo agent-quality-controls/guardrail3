@@ -1,0 +1,7 @@
+{
+  "threshold": 5,
+  "absolute": false,
+  "format": ["javascript"],
+  "ignore": ["**/node_modules/**"],
+  "extra": true
+}

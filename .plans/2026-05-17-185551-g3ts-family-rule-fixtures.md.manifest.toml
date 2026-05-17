@@ -75,6 +75,10 @@ name = "family_rule_source"
 id = "g3ts-npmrc/extra-settings-inventory"
 reason = "extra npmrc settings are intentional inventory and emit Info, not Error or Warn"
 
+[[cli_unreachable_rule]]
+id = "g3ts-fmt/hook-contract"
+reason = "fmt hook contract is exported for hooks aggregation and is not emitted by g3ts validate --family fmt"
+
 [[family]]
 name = "package"
 rule_count = 10
@@ -91,7 +95,7 @@ status = "completed"
 name = "tsconfig"
 rule_count = 5
 fixture_dir = "behavior/fixtures/g3ts-rule/tsconfig"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "eslint"
@@ -103,13 +107,13 @@ status = "planned"
 name = "jscpd"
 rule_count = 6
 fixture_dir = "behavior/fixtures/g3ts-rule/jscpd"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "fmt"
 rule_count = 8
 fixture_dir = "behavior/fixtures/g3ts-rule/fmt"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "spelling"

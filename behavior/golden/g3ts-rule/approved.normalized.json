@@ -8,6 +8,158 @@
         "--path",
         ".",
         "--family",
+        "fmt",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:f5967bb1ac7607c7879b328b7d3aa8537da805f00d9c5a65a85a28a8b9272fa4",
+      "fixture_id": "fmt-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== fmt ==\n[Info] g3ts-fmt/prettier-package-present package.json Prettier package is installed\n  `package.json` directly installs `prettier`.\n[Info] g3ts-fmt/prettier-config-present prettier.config.mjs Prettier config is present\n  `prettier.config.mjs` defines the local formatter policy.\n[Info] g3ts-fmt/format-scripts package.json Format scripts are configured\n  `package.json` defines parseable `format` and `format:check` scripts.\n[Info] g3ts-fmt/format-check-fail-closed package.json Format check script is fail-closed\n  `package.json` defines `format:check` with a fail-closed `prettier --check` invocation.\n[Info] g3ts-fmt/validate-runs-format-check package.json Validate script runs format check\n  `package.json` defines a fail-closed `validate` script that reaches `format:check` or direct `prettier --check`.\n[Info] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier is pinned by Syncpack\n  `.syncpackrc` pins `prettier` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "fmt",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:db58ee5654ecea0c36a8afaba29d281442db995927815f8260f484eb472137d8",
+      "fixture_id": "fmt-R10-policy-root-missing",
+      "stderr": "",
+      "stdout": "== fmt ==\n[Error] g3ts-fmt/policy-configured - Formatter policy root is missing\n  `package.json` must exist so G3TS can evaluate formatter policy for this app/package root.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "fmt",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:aab21162e086bdef5b57fe9e5ed6fc4333b4ffbd995668fd53fac52b9b4e90bf",
+      "fixture_id": "fmt-R20-policy-violations",
+      "stderr": "",
+      "stdout": "== fmt ==\n[Error] g3ts-fmt/prettier-package-present package.json Prettier package is missing\n  `package.json` must install `prettier` directly so formatting is reproducible for this app/package root.\n[Error] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n[Error] g3ts-fmt/format-scripts package.json Format scripts are incomplete\n  `package.json` must define `format` as `prettier --write ...` and a parseable `format:check` script.\n[Error] g3ts-fmt/format-check-fail-closed package.json Format check script is not fail-closed\n  `package.json` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.\n[Info] g3ts-fmt/validate-runs-format-check package.json Validate script runs format check\n  `package.json` defines a fail-closed `validate` script that reaches `format:check` or direct `prettier --check`.\n[Error] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier is not pinned by Syncpack\n  `.syncpackrc` must pin `prettier` in a non-ignored Syncpack version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "fmt",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:5cd1a38fd3becb019d19750d70e1a4e6b0555201ab948c894e51c36f4acbcecf",
+      "fixture_id": "fmt-R30-validate-not-wired",
+      "stderr": "",
+      "stdout": "== fmt ==\n[Info] g3ts-fmt/prettier-package-present package.json Prettier package is installed\n  `package.json` directly installs `prettier`.\n[Info] g3ts-fmt/prettier-config-present prettier.config.mjs Prettier config is present\n  `prettier.config.mjs` defines the local formatter policy.\n[Info] g3ts-fmt/format-scripts package.json Format scripts are configured\n  `package.json` defines parseable `format` and `format:check` scripts.\n[Info] g3ts-fmt/format-check-fail-closed package.json Format check script is fail-closed\n  `package.json` defines `format:check` with a fail-closed `prettier --check` invocation.\n[Error] g3ts-fmt/validate-runs-format-check package.json Validate script does not run format check\n  `package.json` must define a fail-closed `validate` script that invokes `format:check` through a package-manager run command or directly invokes `prettier --check`.\n[Info] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier is pinned by Syncpack\n  `.syncpackrc` pins `prettier` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "jscpd",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:4cb2a5b7643ca1192df389960e45e42cf429487c3fcb22cdb4dc082a49216538",
+      "fixture_id": "jscpd-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== jscpd ==\n[Info] g3ts-jscpd/root-exists .jscpd.json root .jscpd.json exists\n  Found root JSCpd config `.jscpd.json`.\n[Info] g3ts-jscpd/root-parseable .jscpd.json root .jscpd.json parseable\n  `.jscpd.json` parsed successfully as jscpd JSON.\n[Info] g3ts-jscpd/threshold-zero .jscpd.json jscpd threshold set to zero\n  The root `.jscpd.json` enforces zero duplication tolerance with `threshold: 0`.\n[Info] g3ts-jscpd/absolute-true .jscpd.json jscpd absolute paths enabled\n  The root `.jscpd.json` sets `absolute: true`.\n[Info] g3ts-jscpd/required-ignores .jscpd.json jscpd required ignore patterns present\n  The root `.jscpd.json` includes the required ignore-pattern baseline.\n[Info] g3ts-jscpd/format-and-inventory .jscpd.json jscpd format includes typescript\n  The root `.jscpd.json` format list includes `typescript`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "jscpd",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:a3c19d78e019dee6bcb5dd36edbb92b38dafb90c3a1e93211788dc797532318c",
+      "fixture_id": "jscpd-R10-missing-root",
+      "stderr": "",
+      "stdout": "== jscpd ==\n[Error] g3ts-jscpd/root-exists - root .jscpd.json missing\n  No root `.jscpd.json` file was found. Add a root duplication-policy config.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "jscpd",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:812484961654a917590f03f5b065624dc0c3ab1da64d89ae3e1e8edd54cf8fc5",
+      "fixture_id": "jscpd-R20-parse-error",
+      "stderr": "",
+      "stdout": "== jscpd ==\n[Info] g3ts-jscpd/root-exists .jscpd.json root .jscpd.json exists\n  Found root JSCpd config `.jscpd.json`.\n[Error] g3ts-jscpd/root-parseable .jscpd.json root .jscpd.json parse error\n  Failed to parse root `.jscpd.json`: failed to parse .jscpd: key must be a string at line 1 column 3\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "jscpd",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:e05b89cb37475ecaebae6394cdc26c2d0e4090e42362baac9116aa01e815db8a",
+      "fixture_id": "jscpd-R30-policy-violations",
+      "stderr": "",
+      "stdout": "== jscpd ==\n[Info] g3ts-jscpd/root-exists .jscpd.json root .jscpd.json exists\n  Found root JSCpd config `.jscpd.json`.\n[Info] g3ts-jscpd/root-parseable .jscpd.json root .jscpd.json parseable\n  `.jscpd.json` parsed successfully as jscpd JSON.\n[Error] g3ts-jscpd/threshold-zero .jscpd.json jscpd threshold is not zero\n  Root `.jscpd.json` sets `threshold` to `5`, but the current baseline requires `0`.\n[Error] g3ts-jscpd/absolute-true .jscpd.json jscpd absolute paths disabled\n  Root `.jscpd.json` sets `absolute: false`, but the current baseline requires `true`.\n[Error] g3ts-jscpd/required-ignores .jscpd.json jscpd required ignore patterns missing\n  Root `.jscpd.json` is missing required ignore patterns: **/.next/**, **/dist/**, **/target/**, **/components/ui/**.\n[Error] g3ts-jscpd/format-and-inventory .jscpd.json jscpd format misses typescript\n  Root `.jscpd.json` must include `typescript` in `format`.\n[Info] g3ts-jscpd/format-and-inventory .jscpd.json jscpd extra top-level key present\n  Extra root `.jscpd.json` key `extra` is outside the current wave-1 baseline. Keep it only if intentional.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "npmrc",
         "--rules-only",
         "--inventory"
@@ -171,6 +323,101 @@
       "fixture_id": "package-R40-validate-fail-open",
       "stderr": "",
       "stdout": "== package ==\n[Info] g3ts-package/root-exists package.json root package.json exists\n  Found root package manifest `package.json`.\n[Info] g3ts-package/root-parseable package.json root package.json parses\n  The root package manifest parses as valid package.json.\n[Info] g3ts-package/root-private package.json root package.json is private\n  The root package manifest sets `private: true`.\n[Info] g3ts-package/root-package-manager package.json root packageManager is pinned to pnpm\n  The root package manifest pins `packageManager` to `pnpm@10.32.0`.\n[Info] g3ts-package/root-engines package.json root engines are declared\n  The root package manifest declares both `engines.node` and `engines.pnpm`.\n[Info] g3ts-package/root-scripts package.json root package scripts are present\n  The root package manifest keeps the required `preinstall`, `prepare`, `lint`, and `typecheck` scripts.\n[Info] g3ts-package/validate-script-present package.json validate script is present\n  The root package manifest defines the standard `validate` script.\n[Error] g3ts-package/validate-script-fail-closed package.json validate script is not fail-closed\n  The root package manifest must define `validate` with supported shell syntax and no reachable `||` fallback.\n[Info] g3ts-package/root-pnpm package.json root pnpm policy is present\n  The root package manifest keeps both `pnpm.overrides` and `pnpm.onlyBuiltDependencies`.\n[Info] g3ts-package/local-banned-dependencies package.json Syncpack bans forbidden package dependencies\n  `package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`, `lodash`, `moment`, `uuid`, `nanoid`, `express`, `classnames`, `winston`, `pino`, `request`, `got`, `superagent`, `node-fetch`, `isomorphic-fetch`, `underscore`, `request-promise`, `cross-fetch`, `xregexp`, `regexp-tree`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "tsconfig",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:25d3337cea9e981ca1b45e3a0f8c96ab1f3e9f09d9a516ea8c3879873c4461e8",
+      "fixture_id": "tsconfig-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== tsconfig ==\n[Info] g3ts-tsconfig/exists tsconfig.json tsconfig exists\n  Found root TypeScript config `tsconfig.json`.\n[Info] g3ts-tsconfig/parseable tsconfig.json tsconfig parseable\n  `tsconfig.json` parsed successfully as tsconfig JSONC.\n[Info] g3ts-tsconfig/extends-chain-resolves tsconfig.json tsconfig extends chain resolved\n  All local `extends` entries resolved to parseable tsconfig files.\n[Info] g3ts-tsconfig/extends-or-inline tsconfig.json standalone tsconfig carries strict baseline inline\n  Root `tsconfig.json` does not use `extends`, but all strict baseline flags are present inline.\n[Info] g3ts-tsconfig/strict-baseline tsconfig.json strict tsconfig baseline enforced\n  The effective tsconfig keeps the required 12 strict boolean flags.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "tsconfig",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:4ace66168a2eba69de95e36509a1540e436d6340aff6c972959108214c93ea8d",
+      "fixture_id": "tsconfig-R10-missing-root",
+      "stderr": "",
+      "stdout": "== tsconfig ==\n[Error] g3ts-tsconfig/exists - tsconfig missing\n  No root `tsconfig.json` or `tsconfig.base.json` file was found. Add a root TypeScript config.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "tsconfig",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:541b1c49c630152bc12371aead93eefd4cc84b73c70891b42a9c78bee94b0f23",
+      "fixture_id": "tsconfig-R20-parse-error",
+      "stderr": "",
+      "stdout": "== tsconfig ==\n[Info] g3ts-tsconfig/exists tsconfig.json tsconfig exists\n  Found root TypeScript config `tsconfig.json`.\n[Error] g3ts-tsconfig/parseable tsconfig.json tsconfig parse error\n  Failed to parse `tsconfig.json` as tsconfig JSONC: failed to parse tsconfig JSONC: Expected colon after the string or word in object property on line 2 column 1\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "tsconfig",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:eb456f0750d6572056ea43697c7dd12ad088eac66f56d15f878182a41a6ac5e3",
+      "fixture_id": "tsconfig-R30-extends-chain-violation",
+      "stderr": "",
+      "stdout": "== tsconfig ==\n[Info] g3ts-tsconfig/exists tsconfig.json tsconfig exists\n  Found root TypeScript config `tsconfig.json`.\n[Info] g3ts-tsconfig/parseable tsconfig.json tsconfig parseable\n  `tsconfig.json` parsed successfully as tsconfig JSONC.\n[Error] g3ts-tsconfig/extends-chain-resolves tsconfig.json tsconfig extends chain broken\n  Local `extends` entries could not be resolved cleanly: `./missing.json` resolved to missing path `./missing.json`.\n[Info] g3ts-tsconfig/extends-or-inline tsconfig.json tsconfig inherits strict baseline\n  Root `tsconfig.json` declares `extends`, so strict baseline can be inherited.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "tsconfig",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:08e9da2d4584af64316950729fffb8d30addd62b28b0f9654ab5e640cbceba04",
+      "fixture_id": "tsconfig-R40-strict-baseline-violations",
+      "stderr": "",
+      "stdout": "== tsconfig ==\n[Info] g3ts-tsconfig/exists tsconfig.json tsconfig exists\n  Found root TypeScript config `tsconfig.json`.\n[Info] g3ts-tsconfig/parseable tsconfig.json tsconfig parseable\n  `tsconfig.json` parsed successfully as tsconfig JSONC.\n[Info] g3ts-tsconfig/extends-chain-resolves tsconfig.json tsconfig extends chain resolved\n  All local `extends` entries resolved to parseable tsconfig files.\n[Error] g3ts-tsconfig/extends-or-inline tsconfig.json standalone tsconfig misses inline strict baseline\n  Root `tsconfig.json` does not use `extends`, so it must carry the strict baseline inline. Missing or invalid flags: noImplicitReturns, noUnusedLocals, noUnusedParameters, noUncheckedIndexedAccess, exactOptionalPropertyTypes, noPropertyAccessFromIndexSignature, noImplicitOverride, noFallthroughCasesInSwitch, forceConsistentCasingInFileNames, allowUnreachableCode, allowUnusedLabels.\n[Error] g3ts-tsconfig/strict-baseline tsconfig.json strict tsconfig baseline weakened\n  The effective tsconfig does not keep the required strict baseline. Problems: strict=false (expected true), noImplicitReturns missing, noUnusedLocals missing, noUnusedParameters missing, noUncheckedIndexedAccess missing, exactOptionalPropertyTypes missing, noPropertyAccessFromIndexSignature missing, noImplicitOverride missing, noFallthroughCasesInSwitch missing, forceConsistentCasingInFileNames missing, allowUnreachableCode missing, allowUnusedLabels missing.\n"
     }
   ],
   "schema_version": "g3ts-replay-v1",

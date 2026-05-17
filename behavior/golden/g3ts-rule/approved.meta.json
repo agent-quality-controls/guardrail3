@@ -1,15 +1,47 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-32-52.225654Z-d06b5496",
-  "run_commit": "73569f2c2",
+  "run_id": "2026-05-17T18-44-45.792546Z-d06b5496",
+  "run_commit": "ff2983fbe",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:32:52.225654Z",
-  "fixture_hash": "sha256:d6154f922265f9b79e54d5f2d0199d3c840e5beec3f7330aa664bbd49e4ad7cb",
+  "recorded_at": "2026-05-17T18:44:45.792546Z",
+  "fixture_hash": "sha256:93ae706b14c86b03ab1c3ff2abd145d1ee0b6fa6392f12ff3744bb74a25727e5",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:f879bb4e7fa48c26da3801e1984cb47dfab315fdf6397008159f1170ff415f14"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R10-policy-root-missing/fixture.toml",
+      "sha256": "sha256:a04277aaf5782c92b42d0341f4521e4125a70082113c9b0aaefaa44c6c4d732d"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R20-policy-violations/fixture.toml",
+      "sha256": "sha256:0b26bbb7778af48d5902c8084917b5ffc11f748cd79f59fb386fbf81a4ae09ad"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R30-validate-not-wired/fixture.toml",
+      "sha256": "sha256:9fedb86e514544b47dc31552d5807492482455f0ca1df2c8e6f7d0b292840798"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:b6d768c745efbc7da59213c5f2376d009c0b9f903d041644137cd8969101439d"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R10-missing-root/fixture.toml",
+      "sha256": "sha256:c29276c9e4b20a3408f136833fb194cad5e1935785815ad04585e2e8f3fd584e"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R20-parse-error/fixture.toml",
+      "sha256": "sha256:2318286f0a5590f7996014f5447159c316974ab7d77197fc8896254666df645d"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R30-policy-violations/fixture.toml",
+      "sha256": "sha256:012c7bc4a4cf93d56e76c44e8f4e320bfa77beb9674de796617bf8d1a3c5df2a"
+    },
     {
       "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R00-clean-golden/fixture.toml",
       "sha256": "sha256:d8273242b26455fe1cfb1d1f64222348470f7dc356210a9a09b82a37b6b76d34"
@@ -45,7 +77,27 @@
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R40-validate-fail-open/fixture.toml",
       "sha256": "sha256:09ce213996d7ddc6418566f48967d2802d82eb50655864291e4956a9d67772f2"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:f0eec8107ff23b233cafb24dac68d60f5f1b5e7f987948df23f78b0903143efb"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R10-missing-root/fixture.toml",
+      "sha256": "sha256:74e7799c58c33b07c2bdf560c4e0fbc1907b570f54331bbfddf3350aaeb11b1a"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R20-parse-error/fixture.toml",
+      "sha256": "sha256:6977e1a7d551ef537f86ead7380fdafef204f08fc4bd983ba0507c1942c0cb09"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R30-extends-chain-violation/fixture.toml",
+      "sha256": "sha256:c511f33f0aad9fec5b0bf2b7bb6e859abd56bd4e473debe1fd89208258ad7f8d"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R40-strict-baseline-violations/fixture.toml",
+      "sha256": "sha256:4c9b9b9f2c155b05d61b6c88596ced8fcba52ad3ea6541114043079a6febaae9"
     }
   ],
-  "comment": "Add npmrc family rule fixtures"
+  "comment": "Add G3TS tsconfig, jscpd, and fmt family rule fixtures"
 }

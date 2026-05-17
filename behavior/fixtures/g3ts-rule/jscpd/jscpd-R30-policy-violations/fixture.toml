@@ -1,0 +1,22 @@
+id = "jscpd-R30-policy-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "jscpd", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "jscpd"
+target_rules = [
+  "g3ts-jscpd/threshold-zero",
+  "g3ts-jscpd/absolute-true",
+  "g3ts-jscpd/format-and-inventory",
+  "g3ts-jscpd/required-ignores"
+]
+expected_findings = [
+  "g3ts-jscpd/threshold-zero",
+  "g3ts-jscpd/absolute-true",
+  "g3ts-jscpd/format-and-inventory",
+  "g3ts-jscpd/required-ignores"
+]

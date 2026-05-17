@@ -1,0 +1,12 @@
+{
+  "threshold": 0,
+  "absolute": true,
+  "format": ["typescript"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/target/**",
+    "**/components/ui/**"
+  ]
+}

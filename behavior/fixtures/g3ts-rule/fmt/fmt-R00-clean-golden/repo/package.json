@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "pnpm run format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

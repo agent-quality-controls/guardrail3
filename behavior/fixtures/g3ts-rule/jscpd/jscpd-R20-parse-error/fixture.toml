@@ -1,0 +1,16 @@
+id = "jscpd-R20-parse-error"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "jscpd", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_input_failure"
+
+rule_family = "jscpd"
+target_rules = [
+  "g3ts-jscpd/root-parseable"
+]
+expected_findings = [
+  "g3ts-jscpd/root-parseable"
+]

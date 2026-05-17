@@ -1,0 +1,16 @@
+id = "fmt-R10-policy-root-missing"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_input_failure"
+
+rule_family = "fmt"
+target_rules = [
+  "g3ts-fmt/policy-configured"
+]
+expected_findings = [
+  "g3ts-fmt/policy-configured"
+]

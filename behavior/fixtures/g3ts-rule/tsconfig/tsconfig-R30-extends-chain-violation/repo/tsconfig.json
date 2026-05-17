@@ -1,0 +1,6 @@
+{
+  "extends": "./missing.json",
+  "compilerOptions": {
+    "strict": true
+  }
+}
