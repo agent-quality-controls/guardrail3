@@ -19,6 +19,3 @@ workspace = true
 [dependencies]
 g3ts-astro-i18n-types = { path = "../../../g3ts-astro-i18n-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
-
-[dev-dependencies]
-g3ts-astro-i18n-config-checks-assertions = { path = "../assertions" }

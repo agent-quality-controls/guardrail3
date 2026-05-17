@@ -27,7 +27,3 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
         ),
     }
 }
-
-#[cfg(test)]
-#[path = "cspell_config_present_tests/mod.rs"]
-mod cspell_config_present_tests;

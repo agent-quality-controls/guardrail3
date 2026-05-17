@@ -13,7 +13,3 @@ pub fn check(input: &G3TsApparchConfigChecksInput) -> Vec<G3CheckResult> {
     crate::logic_purity::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

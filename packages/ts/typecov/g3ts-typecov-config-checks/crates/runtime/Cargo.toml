@@ -15,9 +15,6 @@ shared = true
 g3ts-typecov-types = { path = "../../../g3ts-typecov-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3ts-typecov-config-checks-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

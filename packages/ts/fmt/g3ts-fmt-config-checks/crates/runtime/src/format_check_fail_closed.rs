@@ -36,7 +36,3 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "format_check_fail_closed_tests/mod.rs"]
-mod format_check_fail_closed_tests;

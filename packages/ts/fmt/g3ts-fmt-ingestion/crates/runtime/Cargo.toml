@@ -15,9 +15,6 @@ package-json-parser = { path = "../../../../../parsers/package-json-parser", ver
 package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0" }
 syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }
 
-[dev-dependencies]
-g3ts-fmt-ingestion-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

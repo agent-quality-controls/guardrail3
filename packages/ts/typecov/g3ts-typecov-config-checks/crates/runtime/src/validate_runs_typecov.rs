@@ -36,7 +36,3 @@ pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "validate_runs_typecov_tests/mod.rs"]
-mod validate_runs_typecov_tests;

@@ -15,9 +15,6 @@ shared = true
 g3ts-spelling-types = { path = "../../../g3ts-spelling-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3ts-spelling-config-checks-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

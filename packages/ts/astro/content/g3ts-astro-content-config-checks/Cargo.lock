@@ -30,19 +30,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-astro-content-config-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-astro-content-config-checks-runtime",
- "g3ts-astro-content-types",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-astro-content-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-astro-content-config-checks-assertions",
  "g3ts-astro-content-types",
  "globset",
  "guardrail3-check-types",

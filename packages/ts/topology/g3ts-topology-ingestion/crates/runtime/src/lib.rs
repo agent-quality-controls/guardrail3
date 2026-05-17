@@ -7,8 +7,3 @@ mod run;
 pub use g3ts_topology_ingestion_types::G3TsTopologyIngestionError;
 #[cfg(feature = "ingest")]
 pub use run::ingest_for_file_tree_checks;
-
-#[cfg(test)]
-use g3ts_topology_ingestion_assertions as _;
-#[cfg(test)]
-use tempfile as _;

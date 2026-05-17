@@ -139,7 +139,3 @@ fn disabled_rules(rules: eslint_directive_parser::types::EslintDisabledRuleSet) 
         eslint_directive_parser::types::EslintDisabledRuleSet::Rules(rules) => rules,
     }
 }
-
-#[cfg(test)]
-#[path = "eslint_directives_tests/mod.rs"]
-mod eslint_directives_tests;

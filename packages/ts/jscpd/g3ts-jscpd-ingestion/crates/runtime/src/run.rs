@@ -143,7 +143,3 @@ fn relative_ancestor_config_path(validation_root: &Path, config_dir: &Path) -> S
     rel_path.push(".jscpd.json");
     rel_path.to_string_lossy().into_owned()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

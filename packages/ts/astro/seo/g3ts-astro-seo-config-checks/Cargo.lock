@@ -31,19 +31,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-astro-seo-config-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-astro-seo-config-checks-runtime",
- "g3ts-astro-seo-types",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-astro-seo-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-astro-seo-config-checks-assertions",
  "g3ts-astro-seo-types",
  "guardrail3-check-types",
  "url",

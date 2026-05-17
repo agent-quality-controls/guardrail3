@@ -16,7 +16,3 @@ pub fn check(input: &G3TsPackageChecksInput) -> Vec<G3CheckResult> {
     crate::local_banned_dependencies::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

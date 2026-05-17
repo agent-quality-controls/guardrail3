@@ -34,19 +34,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-eslint-config-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-eslint-config-checks-runtime",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-eslint-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "eslint-config-parser",
- "g3ts-eslint-config-checks-assertions",
  "g3ts-eslint-types",
  "guardrail3-check-types",
  "serde_json",

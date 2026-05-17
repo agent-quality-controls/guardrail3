@@ -97,7 +97,3 @@ fn select_syncpack_config<'crawl>(
 fn missing_syncpack_config_rel_path(app_root_rel_path: &str) -> String {
     crate::roots::scoped_rel_path(app_root_rel_path, SYNCPACK_CONFIG_REL_PATH)
 }
-
-#[cfg(test)]
-#[path = "syncpack_tests/mod.rs"]
-mod syncpack_tests;

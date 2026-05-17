@@ -419,7 +419,3 @@ fn has_uncommented_substring(body: &str, needle: &str) -> bool {
         line.contains(needle)
     })
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

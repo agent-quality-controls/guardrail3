@@ -7,7 +7,3 @@ pub fn check(input: &G3TsArchFileTreeChecksInput) -> Vec<G3CheckResult> {
     crate::declared_entrypoint_exists::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

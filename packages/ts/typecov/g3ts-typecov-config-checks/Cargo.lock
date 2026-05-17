@@ -10,19 +10,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-typecov-config-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-typecov-config-checks-runtime",
- "g3ts-typecov-types",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-typecov-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-typecov-config-checks-assertions",
  "g3ts-typecov-types",
  "guardrail3-check-types",
 ]

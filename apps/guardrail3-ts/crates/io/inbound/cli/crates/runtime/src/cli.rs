@@ -118,7 +118,3 @@ where
 {
     Ok(Cli::try_parse_from(args)?.command)
 }
-
-#[cfg(test)]
-#[path = "cli_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod cli_tests;

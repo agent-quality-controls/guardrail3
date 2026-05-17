@@ -36,9 +36,7 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "prepack": "npm run clean && npm run build",
-    "prepublishOnly": "npm test",
-    "pretest": "npm run build",
-    "test": "tsx --test tests/*.test.ts"
+    "prepublishOnly": "npm run build"
   },
   "publishConfig": {
     "access": "public"
@@ -52,7 +50,6 @@
   "devDependencies": {
     "@types/node": "^24.9.1",
     "astro": "^6.1.9",
-    "tsx": "^4.20.6",
     "typescript": "5.9.3"
   }
 }

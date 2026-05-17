@@ -21,9 +21,6 @@ serde_json = "1"
 stylelint-config-parser = { path = "../../../../../parsers/stylelint-config-parser", version = "0.1.0" }
 syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }
 
-[dev-dependencies]
-g3ts-style-ingestion-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

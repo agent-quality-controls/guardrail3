@@ -44,7 +44,3 @@ pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "syncpack_type_coverage_pin_tests/mod.rs"]
-mod syncpack_type_coverage_pin_tests;

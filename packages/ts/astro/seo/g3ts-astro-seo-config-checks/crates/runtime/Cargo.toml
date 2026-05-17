@@ -30,6 +30,3 @@ all-features = true
 g3ts-astro-seo-types = { path = "../../../g3ts-astro-seo-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 url = "2.5.7"
-
-[dev-dependencies]
-g3ts-astro-seo-config-checks-assertions = { path = "../assertions" }

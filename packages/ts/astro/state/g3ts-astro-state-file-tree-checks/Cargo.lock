@@ -11,19 +11,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-astro-state-file-tree-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-astro-state-file-tree-checks-runtime",
- "g3ts-astro-state-types",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-astro-state-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-astro-state-file-tree-checks-assertions",
  "g3ts-astro-state-types",
  "guardrail3-check-types",
 ]

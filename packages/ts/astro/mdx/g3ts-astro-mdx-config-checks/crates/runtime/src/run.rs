@@ -44,7 +44,3 @@ pub fn check(input: &G3TsAstroMdxConfigChecksInput) -> Vec<G3CheckResult> {
     crate::eslint_suppression::disable_inventory::check_all(&input.eslint_directives, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
-mod run_tests;

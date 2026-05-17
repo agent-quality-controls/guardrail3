@@ -97,19 +97,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-fmt-ingestion-assertions"
-version = "0.1.0"
-dependencies = [
- "g3-workspace-crawl",
- "g3ts-fmt-ingestion-runtime",
-]
-
-[[package]]
 name = "g3ts-fmt-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "g3-workspace-crawl",
- "g3ts-fmt-ingestion-assertions",
  "g3ts-fmt-types",
  "package-json-parser",
  "package-script-command-parser",

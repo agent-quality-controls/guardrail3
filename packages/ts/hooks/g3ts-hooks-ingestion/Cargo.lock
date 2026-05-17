@@ -101,19 +101,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-hooks-ingestion-assertions"
-version = "0.1.0"
-dependencies = [
- "g3ts-hooks-ingestion-runtime",
- "g3ts-hooks-types",
-]
-
-[[package]]
 name = "g3ts-hooks-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "g3-workspace-crawl",
- "g3ts-hooks-ingestion-assertions",
  "g3ts-hooks-types",
  "hook-shell-parser",
 ]
@@ -164,6 +155,9 @@ dependencies = [
 [[package]]
 name = "hook-shell-parser-types"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "ignore"
@@ -272,6 +266,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
+ "serde_derive",
 ]
 
 [[package]]

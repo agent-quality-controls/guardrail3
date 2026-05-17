@@ -11,18 +11,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-npmrc-config-checks-assertions"
-version = "0.0.0"
-dependencies = [
- "g3ts-npmrc-config-checks-runtime",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-npmrc-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-npmrc-config-checks-assertions",
  "g3ts-npmrc-types",
  "guardrail3-check-types",
 ]

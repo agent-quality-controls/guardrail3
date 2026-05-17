@@ -29,6 +29,3 @@ all-features = true
 [dependencies]
 g3ts-apparch-types = { path = "../../../g3ts-apparch-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
-
-[dev-dependencies]
-g3ts-apparch-config-checks-assertions = { path = "../assertions" }

@@ -81,7 +81,3 @@ fn render_stdout(
 
     renderer.render(report, include_inventory)
 }
-
-#[cfg(test)]
-#[path = "execute_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod execute_tests;

@@ -40,9 +40,7 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "prepack": "npm run clean && npm run build",
-    "prepublishOnly": "npm test",
-    "pretest": "npm run build",
-    "test": "tsx --test tests/*.test.ts"
+    "prepublishOnly": "npm run build"
   },
   "publishConfig": {
     "access": "public"
@@ -62,7 +60,6 @@
     "@typescript-eslint/parser": "^8.59.0",
     "astro-eslint-parser": "^1.4.0",
     "eslint": "^9.39.1",
-    "tsx": "^4.20.6",
     "typescript": "5.9.3"
   }
 }

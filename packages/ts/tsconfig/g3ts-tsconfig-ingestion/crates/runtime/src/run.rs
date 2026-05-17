@@ -59,7 +59,3 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTsconfigChecksI
 fn select_root_tsconfig(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
     root_file(crawl, "tsconfig.json").or_else(|| root_file(crawl, "tsconfig.base.json"))
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

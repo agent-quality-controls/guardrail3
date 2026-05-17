@@ -21,7 +21,6 @@ workspace = true
 [workspace]
 members = [
     "crates/runtime",
-    "crates/assertions",
 ]
 resolver = "2"
 

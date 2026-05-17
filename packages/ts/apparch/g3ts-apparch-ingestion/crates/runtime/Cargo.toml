@@ -31,7 +31,3 @@ g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", versio
 g3ts-apparch-types = { path = "../../../g3ts-apparch-types", version = "0.1.0" }
 tree-sitter = "0.25.9"
 tree-sitter-typescript = "0.23.2"
-
-[dev-dependencies]
-g3ts-apparch-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

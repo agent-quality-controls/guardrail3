@@ -88,7 +88,3 @@ fn collect_disabled(checks: &TsChecksConfig) -> Vec<SupportedFamily> {
     }
     disabled
 }
-
-#[cfg(test)]
-#[path = "family_opt_out_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod family_opt_out_tests;

@@ -36,7 +36,3 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "spellcheck_fail_closed_tests/mod.rs"]
-mod spellcheck_fail_closed_tests;

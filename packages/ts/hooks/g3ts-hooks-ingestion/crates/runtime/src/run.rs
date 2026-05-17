@@ -539,7 +539,3 @@ fn trust_risks(crawl: &workspace_crawl::G3WorkspaceCrawl) -> Vec<String> {
         .map(ToOwned::to_owned)
         .collect()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

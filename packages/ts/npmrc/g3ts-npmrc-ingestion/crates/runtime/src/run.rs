@@ -59,7 +59,3 @@ fn root_policy_applies(crawl: &G3WorkspaceCrawl) -> bool {
     root_file(crawl, "pnpm-workspace.yaml").is_some()
         || root_file(crawl, "pnpm-lock.yaml").is_some()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

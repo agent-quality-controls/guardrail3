@@ -28,7 +28,7 @@ shared = true
 all-features = true
 
 [workspace]
-members = ["crates/assertions", "crates/runtime"]
+members = ["crates/runtime"]
 resolver = "2"
 
 [workspace.package]

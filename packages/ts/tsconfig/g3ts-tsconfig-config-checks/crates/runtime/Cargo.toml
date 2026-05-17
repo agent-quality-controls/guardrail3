@@ -30,6 +30,3 @@ all-features = true
 g3ts-tsconfig-types = { path = "../../../g3ts-tsconfig-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 tsconfig-json-parser = { path = "../../../../../parsers/tsconfig-json-parser", version = "0.1.0", features = ["api"] }
-
-[dev-dependencies]
-g3ts-tsconfig-config-checks-assertions = { path = "../assertions" }

@@ -19,9 +19,6 @@ package-json-parser = { path = "../../../../../../parsers/package-json-parser", 
 package-script-command-parser = { path = "../../../../../../parsers/package-script-command-parser", version = "0.1.0", features = ["api"] }
 serde_json = "1"
 
-[dev-dependencies]
-g3ts-astro-media-ingestion-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

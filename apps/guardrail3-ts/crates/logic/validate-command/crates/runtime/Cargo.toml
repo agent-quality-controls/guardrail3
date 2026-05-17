@@ -10,11 +10,6 @@ guardrail3-check-types.workspace = true
 g3ts-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/runtime", features = ["api"] }
 g3ts-toml-parser-types = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/types", features = ["api"] }
 
-[dev-dependencies]
-g3-workspace-crawl.workspace = true
-tempfile.workspace = true
-guardrail3-ts-validate-command-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

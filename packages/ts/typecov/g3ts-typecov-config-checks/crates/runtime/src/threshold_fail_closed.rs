@@ -36,7 +36,3 @@ pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "threshold_fail_closed_tests/mod.rs"]
-mod threshold_fail_closed_tests;

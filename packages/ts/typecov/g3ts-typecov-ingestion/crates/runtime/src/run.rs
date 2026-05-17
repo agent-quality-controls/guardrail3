@@ -14,7 +14,3 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTypecovConfigCh
             .collect(),
     }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

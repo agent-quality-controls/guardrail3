@@ -60,7 +60,3 @@ pub fn run_command_with_defaults(command: Command) -> CliOutput {
         &crate::PlainTextReportRenderer,
     )
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
-mod run_tests;

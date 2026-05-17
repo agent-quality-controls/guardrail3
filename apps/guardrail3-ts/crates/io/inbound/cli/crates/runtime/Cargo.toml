@@ -18,11 +18,6 @@ guardrail3-ts-validate-command = { path = "../../../../../logic/validate-command
 guardrail3-ts-packages = { path = "../../../../outbound/packages" }
 guardrail3-ts-report = { path = "../../../../outbound/report/crates/runtime" }
 
-[dev-dependencies]
-g3-workspace-crawl.workspace = true
-tempfile.workspace = true
-guardrail3-ts-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

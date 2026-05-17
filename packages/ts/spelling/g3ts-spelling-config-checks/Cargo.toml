@@ -22,7 +22,7 @@ api = ["dep:g3ts-spelling-config-checks-runtime"]
 workspace = true
 
 [workspace]
-members = ["crates/runtime", "crates/assertions"]
+members = ["crates/runtime"]
 resolver = "2"
 
 [workspace.package]

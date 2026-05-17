@@ -11,18 +11,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-jscpd-config-checks-assertions"
-version = "0.0.0"
-dependencies = [
- "g3ts-jscpd-config-checks-runtime",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3ts-jscpd-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3ts-jscpd-config-checks-assertions",
  "g3ts-jscpd-types",
  "guardrail3-check-types",
 ]

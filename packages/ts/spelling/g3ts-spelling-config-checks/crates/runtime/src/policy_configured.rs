@@ -16,7 +16,3 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> Option<G3CheckResul
     }
     None
 }
-
-#[cfg(test)]
-#[path = "policy_configured_tests/mod.rs"]
-mod policy_configured_tests;

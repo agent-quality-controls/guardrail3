@@ -30,7 +30,3 @@ all-features = true
 g3ts-topology-ingestion-types = { path = "../types", version = "0.1.0" }
 g3ts-topology-types = { path = "../../../g3ts-topology-types", version = "0.1.0" }
 walkdir = "2"
-
-[dev-dependencies]
-g3ts-topology-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

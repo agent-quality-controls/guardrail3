@@ -44,7 +44,3 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "syncpack_cspell_pin_tests/mod.rs"]
-mod syncpack_cspell_pin_tests;

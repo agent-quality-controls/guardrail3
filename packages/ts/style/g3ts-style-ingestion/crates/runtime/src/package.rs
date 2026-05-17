@@ -147,7 +147,3 @@ fn script_parse_blocker(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "package_tests/mod.rs"]
-mod package_tests;

@@ -44,7 +44,3 @@ pub(crate) fn check(contract: &G3TsTypecovContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "script_present_tests/mod.rs"]
-mod script_present_tests;

@@ -2,15 +2,11 @@
 members = [
     "crates/types/app-types",
     "crates/logic/family-runner-config",
-    "crates/logic/family-runner-hooks/crates/assertions",
     "crates/logic/family-runner-hooks/crates/runtime",
     "crates/logic/family-runner-structure",
-    "crates/logic/validate-command/crates/assertions",
     "crates/logic/validate-command/crates/runtime",
-    "crates/io/inbound/cli/crates/assertions",
     "crates/io/inbound/cli/crates/runtime",
     "crates/io/outbound/packages",
-    "crates/io/outbound/report/crates/assertions",
     "crates/io/outbound/report/crates/runtime",
 ]
 resolver = "2"

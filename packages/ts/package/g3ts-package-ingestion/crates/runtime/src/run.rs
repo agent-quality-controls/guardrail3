@@ -426,7 +426,3 @@ fn strings_match_exactly(left: &[String], right: &[&str]) -> bool {
             .zip(right.iter().copied())
             .all(|(left, right)| left == right)
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

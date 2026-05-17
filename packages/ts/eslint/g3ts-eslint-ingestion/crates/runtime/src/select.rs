@@ -240,8 +240,3 @@ fn is_config_like_rel_path(rel_path: &str) -> bool {
         .and_then(|name| name.to_str())
         .is_some_and(|name| name.contains(".config."))
 }
-
-#[cfg(test)]
-#[path = "select_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod select_tests;

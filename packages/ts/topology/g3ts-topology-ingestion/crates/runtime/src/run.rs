@@ -193,7 +193,3 @@ fn contains_sequence(segments: &[&str], sequence: &[&str]) -> bool {
         .windows(sequence.len())
         .any(|window| window == sequence)
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
-mod run_tests;

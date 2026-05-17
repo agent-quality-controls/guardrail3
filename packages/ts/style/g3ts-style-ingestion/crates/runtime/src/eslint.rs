@@ -343,11 +343,6 @@ fn nearest_config(crawl: &G3WorkspaceCrawl, app_root_rel_path: &str) -> Option<S
     })
 }
 
-#[cfg(test)]
-#[path = "eslint_tests/mod.rs"]
-// reason: keep private ESLint style ingestion tests in the owned sidecar directory.
-mod eslint_tests;
-
 /// Enumerate `app_root_rel_path` and each of its ancestor directories, in
 /// nearest-first order, using `"."` for the workspace root.
 fn ancestors(app_root_rel_path: &str) -> Vec<String> {

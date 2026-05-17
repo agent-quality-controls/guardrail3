@@ -14,9 +14,6 @@ g3ts-hooks-types = { path = "../../../g3ts-hooks-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0", features = ["types"] }
 hook-shell-parser = { path = "../../../../../parsers/hook-shell-parser", version = "0.1.0", features = ["api"] }
 
-[dev-dependencies]
-g3ts-hooks-source-checks-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

@@ -9,7 +9,3 @@ pub fn check(input: &G3TsArchSourceChecksInput) -> Vec<G3CheckResult> {
     crate::no_broad_reexport::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

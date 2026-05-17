@@ -22,11 +22,6 @@ mod deps {
     use guardrail3_ts_packages as _;
     use guardrail3_ts_report as _;
     use guardrail3_ts_validate_command as _;
-
-    #[cfg(test)]
-    use guardrail3_ts_assertions as _;
-    #[cfg(test)]
-    use tempfile as _;
 }
 
 fn main() -> std::process::ExitCode {

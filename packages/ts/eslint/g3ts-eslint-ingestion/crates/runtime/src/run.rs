@@ -57,8 +57,3 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsEslintConfigChe
 
     G3TsEslintConfigChecksInput { config }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod run_tests;

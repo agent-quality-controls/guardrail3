@@ -30,7 +30,3 @@ all-features = true
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 g3ts-tsconfig-types = { path = "../../../g3ts-tsconfig-types", version = "0.1.0" }
 tsconfig-json-parser = { path = "../../../../../parsers/tsconfig-json-parser", version = "0.1.0", features = ["api"] }
-
-[dev-dependencies]
-g3ts-tsconfig-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

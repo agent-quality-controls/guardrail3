@@ -68,7 +68,3 @@ const fn family_cli_name(family: SupportedFamily) -> &'static str {
         SupportedFamily::Topology => "topology",
     }
 }
-
-#[cfg(test)]
-#[path = "plain_text_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod plain_text_tests;

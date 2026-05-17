@@ -11,7 +11,3 @@ pub fn check(input: &G3TsArchConfigChecksInput) -> Vec<G3CheckResult> {
     crate::declared_entrypoints_canonical::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

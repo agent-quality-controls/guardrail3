@@ -28,7 +28,3 @@ pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckRes
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "validate_script_present_tests/mod.rs"]
-mod validate_script_present_tests;

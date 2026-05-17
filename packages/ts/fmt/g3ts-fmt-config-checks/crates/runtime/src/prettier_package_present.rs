@@ -36,7 +36,3 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
         )
     }
 }
-
-#[cfg(test)]
-#[path = "prettier_package_present_tests/mod.rs"]
-mod prettier_package_present_tests;

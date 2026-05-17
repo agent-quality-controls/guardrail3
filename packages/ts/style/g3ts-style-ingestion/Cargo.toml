@@ -19,7 +19,7 @@ api = ["dep:g3ts-style-ingestion-runtime"]
 workspace = true
 
 [workspace]
-members = ["crates/runtime", "crates/assertions"]
+members = ["crates/runtime"]
 resolver = "2"
 
 [workspace.package]

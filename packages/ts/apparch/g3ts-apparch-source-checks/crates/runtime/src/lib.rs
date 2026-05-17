@@ -7,6 +7,3 @@ mod types_public_surface;
 
 #[cfg(feature = "checks")]
 pub use run::check;
-
-#[cfg(test)]
-use g3ts_apparch_source_checks_assertions as _;

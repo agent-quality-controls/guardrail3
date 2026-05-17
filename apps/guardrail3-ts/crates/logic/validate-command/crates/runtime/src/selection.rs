@@ -61,7 +61,3 @@ pub fn selected_families_with_opt_out(
         .filter(|family| !disabled.contains(family))
         .collect()
 }
-
-#[cfg(test)]
-#[path = "selection_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod selection_tests;

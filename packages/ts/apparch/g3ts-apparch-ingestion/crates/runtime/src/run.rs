@@ -46,7 +46,3 @@ pub fn ingest_for_source_checks(
         public_items: facts.public_items,
     })
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

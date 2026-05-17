@@ -277,14 +277,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3ts-astro-media-ingestion-assertions"
-version = "0.1.0"
-dependencies = [
- "eslint-config-parser",
- "g3ts-astro-media-ingestion-runtime",
-]
-
-[[package]]
 name = "g3ts-astro-media-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
@@ -292,7 +284,6 @@ dependencies = [
  "eslint-config-parser",
  "g3-workspace-crawl",
  "g3ts-astro-check-support",
- "g3ts-astro-media-ingestion-assertions",
  "g3ts-astro-media-types",
  "g3ts-toml-parser",
  "package-json-parser",

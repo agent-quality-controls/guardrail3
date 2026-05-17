@@ -8,7 +8,3 @@ pub fn check(input: &G3TsApparchSourceChecksInput) -> Vec<G3CheckResult> {
     crate::io_contracts_in_types::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

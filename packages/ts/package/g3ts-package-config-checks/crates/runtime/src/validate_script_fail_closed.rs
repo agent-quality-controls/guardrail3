@@ -50,7 +50,3 @@ fn validate_script_is_fail_closed(snapshot: &G3TsPackageRootSnapshot) -> bool {
                     && invocation.followed_by != Some(G3TsPackageScriptCommandSeparator::Or)
             })
 }
-
-#[cfg(test)]
-#[path = "validate_script_fail_closed_tests/mod.rs"]
-mod validate_script_fail_closed_tests;

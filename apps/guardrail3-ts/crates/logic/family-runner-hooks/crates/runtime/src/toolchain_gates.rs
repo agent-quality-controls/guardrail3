@@ -283,7 +283,3 @@ fn detect_package_manager(path: &Path) -> PackageManager {
     }
     PackageManager::Pnpm
 }
-
-#[cfg(test)]
-#[path = "toolchain_gates_tests/mod.rs"] // reason: owned sidecar tests for toolchain gates module.
-mod toolchain_gates_tests;

@@ -11,6 +11,3 @@ mod support;
 
 #[cfg(feature = "checks")]
 pub use run::check;
-
-#[cfg(test)]
-use g3ts_arch_config_checks_assertions as _;

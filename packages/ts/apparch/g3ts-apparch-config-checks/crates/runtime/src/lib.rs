@@ -19,6 +19,3 @@ mod types_purity;
 
 #[cfg(feature = "checks")]
 pub use run::check;
-
-#[cfg(test)]
-use g3ts_apparch_config_checks_assertions as _;

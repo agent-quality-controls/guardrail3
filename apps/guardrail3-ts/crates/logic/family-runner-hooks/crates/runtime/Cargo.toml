@@ -23,10 +23,6 @@ g3ts-typecov-hook-contract.workspace = true
 g3ts-style-hook-contract.workspace = true
 guardrail3-ts-app-types = { path = "../../../../types/app-types" }
 
-[dev-dependencies]
-tempfile.workspace = true
-guardrail3-ts-family-runner-hooks-assertions = { path = "../assertions" }
-
 [features]
 default = ["api"]
 api = []

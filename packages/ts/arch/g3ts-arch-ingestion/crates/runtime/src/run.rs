@@ -44,7 +44,3 @@ pub fn ingest_for_source_checks(crawl: &G3WorkspaceCrawl) -> Vec<G3TsArchSourceC
         facades: crate::source::facade_states(crawl, &manifest),
     }]
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

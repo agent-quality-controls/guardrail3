@@ -24,6 +24,3 @@ mod run;
 
 #[cfg(feature = "api")]
 pub use run::ingest_for_config_checks;
-
-#[cfg(test)]
-use g3ts_astro_media_ingestion_assertions as _;

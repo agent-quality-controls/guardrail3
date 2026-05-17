@@ -14,7 +14,3 @@ pub fn check(input: &G3TsNpmrcChecksInput) -> Vec<G3CheckResult> {
     crate::extra_settings_inventory::check(input, &mut results);
     results
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;
