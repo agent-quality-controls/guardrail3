@@ -1,13 +1,13 @@
 {
   "suite": "g3rs-rule-fixtures",
   "kind": "approved",
-  "run_id": "2026-05-17T15-11-29.648307Z-9a2e74a6",
-  "run_commit": "867e8902e",
+  "run_id": "2026-05-17T16-17-19.707985Z-9a2e74a6",
+  "run_commit": "5ab595eb5",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T15:11:29.648307Z",
+  "recorded_at": "2026-05-17T16:17:19.707985Z",
   "fixture_hash": "sha256:9a5be37fef37566b050edc6a1312c14f6fb954ba218a92c73ec0342f716db7bb",
   "manifest_hash": "sha256:9a2e74a675e4d91068521c3ba11aeae7cca32394223a361d108605ff6575f618",
-  "tool_version": "0.1.7",
+  "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -255,5 +255,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Approve hash-only fixture output drift after behavior-preserving reduction"
+  "comment": "Approve behavior-preserving deep fixture reduction"
 }
