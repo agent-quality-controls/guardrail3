@@ -1,0 +1,9 @@
+id = "C20-reject-old-command-shapes"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", "."],
+  ["validate", "repo", "--path", "."],
+]
+expected_exit = "nonzero"
+level = "cli_reject_removed_contracts"

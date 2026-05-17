@@ -1,0 +1,35 @@
+{
+  "suite": "g3ts-rule-fixtures",
+  "kind": "approved",
+  "run_id": "2026-05-17T18-03-18.679966Z-61c3969f",
+  "run_commit": "43440ea5e",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-17T18:03:18.679966Z",
+  "fixture_hash": "sha256:7abb40ae2fa1061008e8ee364b2d38b4a1bb2c761516bddc431bdaca3dfce640",
+  "manifest_hash": "sha256:61c3969f02975dcd8e39dd0ec4a79e15824841973eddaee18b839ad0228259c5",
+  "tool_version": "0.1.8",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-rules/package/package-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:f073e8d665a73987128bf73738ad64a87b2bc48673bf0b935cfe4bc0bdc684da"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rules/package/package-R10-policy-violations/fixture.toml",
+      "sha256": "sha256:fc1207128f7a4d567af4e436be923be0cacf00d42e5c990f79b00bd4913499d7"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rules/package/package-R20-input-failures/fixture.toml",
+      "sha256": "sha256:e6e0fa8d2eeddaacd1bd5165276ad313ca3bb342939439f8741505e142b51dac"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rules/package/package-R30-root-parse-error/fixture.toml",
+      "sha256": "sha256:3ecd104924246e7876566f310432352e2efc5bbc2473f347ceb6a2d3ff9cb327"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rules/package/package-R40-validate-fail-open/fixture.toml",
+      "sha256": "sha256:09ce213996d7ddc6418566f48967d2802d82eb50655864291e4956a9d67772f2"
+    }
+  ],
+  "comment": "initial G3TS package family rule fixture baseline"
+}

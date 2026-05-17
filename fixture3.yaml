@@ -48,3 +48,51 @@ suites:
       approved_dir: "behavior/golden/g3rs-cli-output"
       received_dir: ".fixture3/g3rs-cli-output"
       diff_dir: ".fixture3/g3rs-cli-output"
+  g3ts-rule-fixtures:
+    fixtures:
+      - "behavior/fixtures/g3ts-rules/*/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    storage:
+      approved_dir: "behavior/golden/g3ts-rule-fixtures"
+      received_dir: ".fixture3/g3ts-rule-fixtures"
+      diff_dir: ".fixture3/g3ts-rule-fixtures"
+  g3ts-validate-repo:
+    fixtures:
+      - "behavior/fixtures/g3ts-validate-repo/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    storage:
+      approved_dir: "behavior/golden/g3ts-validate-repo"
+      received_dir: ".fixture3/g3ts-validate-repo"
+      diff_dir: ".fixture3/g3ts-validate-repo"
+  g3ts-cli-output:
+    fixtures:
+      - "behavior/fixtures/g3ts-cli-output/*/fixture.toml"
+    command:
+      argv:
+        - "python3"
+        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "--manifest"
+        - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
+        - "{fixtures}"
+      ok_exit_codes:
+        - 0
+    storage:
+      approved_dir: "behavior/golden/g3ts-cli-output"
+      received_dir: ".fixture3/g3ts-cli-output"
+      diff_dir: ".fixture3/g3ts-cli-output"

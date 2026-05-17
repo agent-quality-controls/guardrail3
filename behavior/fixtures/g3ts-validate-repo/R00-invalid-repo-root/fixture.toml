@@ -1,0 +1,9 @@
+id = "R00-invalid-repo-root"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate-repo", "--path", "missing"],
+  ["validate-repo", "--path", "README.md"],
+]
+expected_exit = "nonzero"
+level = "repo_root_invalid"

@@ -1,0 +1,23 @@
+{
+  "suite": "g3ts-cli-output",
+  "kind": "approved",
+  "run_id": "2026-05-17T18-03-18.679987Z-61c3969f",
+  "run_commit": "43440ea5e",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-17T18:03:18.679987Z",
+  "fixture_hash": "sha256:97d271f9b7322ff763ef809fbc075cc4b248fb74022aa6b1662e3d58937319af",
+  "manifest_hash": "sha256:61c3969f02975dcd8e39dd0ec4a79e15824841973eddaee18b839ad0228259c5",
+  "tool_version": "0.1.8",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-cli-output/C10-help-contract/fixture.toml",
+      "sha256": "sha256:38d1ed5f7368f8027994e44cfcfd641c17e5d946cf620b4d1f586b50162b1ae9"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-cli-output/C20-reject-old-command-shapes/fixture.toml",
+      "sha256": "sha256:4f0b6a439bd3f08fb0c5650e64422956c02b27bb467dd3b98e279df18335aaed"
+    }
+  ],
+  "comment": "initial G3TS CLI output fixture baseline"
+}

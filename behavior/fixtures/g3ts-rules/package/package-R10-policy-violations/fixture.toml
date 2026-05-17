@@ -1,0 +1,28 @@
+id = "package-R10-policy-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "package", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "package"
+target_rules = [
+  "g3ts-package/root-private",
+  "g3ts-package/root-package-manager",
+  "g3ts-package/root-engines",
+  "g3ts-package/root-scripts",
+  "g3ts-package/validate-script-present",
+  "g3ts-package/root-pnpm",
+  "g3ts-package/local-banned-dependencies",
+]
+expected_findings = [
+  "g3ts-package/root-private",
+  "g3ts-package/root-package-manager",
+  "g3ts-package/root-engines",
+  "g3ts-package/root-scripts",
+  "g3ts-package/validate-script-present",
+  "g3ts-package/root-pnpm",
+  "g3ts-package/local-banned-dependencies",
+]

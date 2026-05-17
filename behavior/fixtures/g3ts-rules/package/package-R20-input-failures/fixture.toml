@@ -1,0 +1,16 @@
+id = "package-R20-input-failures"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "package", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_input_failure"
+
+rule_family = "package"
+target_rules = [
+  "g3ts-package/root-exists"
+]
+expected_findings = [
+  "g3ts-package/root-exists"
+]

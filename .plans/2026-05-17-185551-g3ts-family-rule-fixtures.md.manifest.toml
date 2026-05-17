@@ -1,0 +1,192 @@
+[target]
+fixture_root = "behavior/fixtures/g3ts-rules"
+suite = "g3ts-rule-fixtures"
+repo_suite = "g3ts-validate-repo"
+cli_suite = "g3ts-cli-output"
+replay = "scripts/behavior/fixture3-g3ts-replay.py"
+family_verifier = "scripts/behavior/verify-g3ts-family-rule-fixtures.py"
+coverage_verifier = "scripts/behavior/verify-g3ts-rule-coverage.py"
+coverage_mode = "external_cli_behavior"
+
+[[suite]]
+name = "g3ts-rule-fixtures"
+fixture_glob = "behavior/fixtures/g3ts-rules/*/*/fixture.toml"
+approved_dir = "behavior/golden/g3ts-rule-fixtures"
+received_dir = ".fixture3/g3ts-rule-fixtures"
+diff_dir = ".fixture3/g3ts-rule-fixtures"
+
+[[suite]]
+name = "g3ts-validate-repo"
+fixture_glob = "behavior/fixtures/g3ts-validate-repo/*/fixture.toml"
+approved_dir = "behavior/golden/g3ts-validate-repo"
+received_dir = ".fixture3/g3ts-validate-repo"
+diff_dir = ".fixture3/g3ts-validate-repo"
+
+[[suite]]
+name = "g3ts-cli-output"
+fixture_glob = "behavior/fixtures/g3ts-cli-output/*/fixture.toml"
+approved_dir = "behavior/golden/g3ts-cli-output"
+received_dir = ".fixture3/g3ts-cli-output"
+diff_dir = ".fixture3/g3ts-cli-output"
+
+[[required_fixture_field]]
+name = "id"
+
+[[required_fixture_field]]
+name = "tool"
+
+[[required_fixture_field]]
+name = "run_from"
+
+[[required_fixture_field]]
+name = "commands"
+
+[[required_fixture_field]]
+name = "expected_exit"
+
+[[required_fixture_field]]
+name = "level"
+
+[[required_fixture_field]]
+name = "rule_family"
+
+[[required_fixture_field]]
+name = "target_rules"
+
+[[required_fixture_field]]
+name = "expected_findings"
+
+[[allowed_fixture_level]]
+name = "family_rule_clean_golden"
+
+[[allowed_fixture_level]]
+name = "family_rule_policy"
+
+[[allowed_fixture_level]]
+name = "family_rule_input_failure"
+
+[[allowed_fixture_level]]
+name = "family_rule_filetree"
+
+[[allowed_fixture_level]]
+name = "family_rule_source"
+
+[[family]]
+name = "package"
+rule_count = 10
+fixture_dir = "behavior/fixtures/g3ts-rules/package"
+status = "completed"
+
+[[family]]
+name = "npmrc"
+rule_count = 6
+fixture_dir = "behavior/fixtures/g3ts-rules/npmrc"
+status = "planned"
+
+[[family]]
+name = "tsconfig"
+rule_count = 5
+fixture_dir = "behavior/fixtures/g3ts-rules/tsconfig"
+status = "planned"
+
+[[family]]
+name = "eslint"
+rule_count = 17
+fixture_dir = "behavior/fixtures/g3ts-rules/eslint"
+status = "planned"
+
+[[family]]
+name = "jscpd"
+rule_count = 6
+fixture_dir = "behavior/fixtures/g3ts-rules/jscpd"
+status = "planned"
+
+[[family]]
+name = "fmt"
+rule_count = 8
+fixture_dir = "behavior/fixtures/g3ts-rules/fmt"
+status = "planned"
+
+[[family]]
+name = "spelling"
+rule_count = 8
+fixture_dir = "behavior/fixtures/g3ts-rules/spelling"
+status = "planned"
+
+[[family]]
+name = "typecov"
+rule_count = 7
+fixture_dir = "behavior/fixtures/g3ts-rules/typecov"
+status = "planned"
+
+[[family]]
+name = "style"
+rule_count = 13
+fixture_dir = "behavior/fixtures/g3ts-rules/style"
+status = "planned"
+
+[[family]]
+name = "topology"
+rule_count = 1
+fixture_dir = "behavior/fixtures/g3ts-rules/topology"
+status = "planned"
+
+[[family]]
+name = "arch"
+rule_count = 7
+fixture_dir = "behavior/fixtures/g3ts-rules/arch"
+status = "planned"
+
+[[family]]
+name = "apparch"
+rule_count = 9
+fixture_dir = "behavior/fixtures/g3ts-rules/apparch"
+status = "planned"
+
+[[family]]
+name = "hooks"
+rule_count = 25
+fixture_dir = "behavior/fixtures/g3ts-rules/hooks"
+status = "planned"
+
+[[family]]
+name = "astro-setup"
+rule_count = 19
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-setup"
+status = "planned"
+
+[[family]]
+name = "astro-content"
+rule_count = 17
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-content"
+status = "planned"
+
+[[family]]
+name = "astro-mdx"
+rule_count = 14
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-mdx"
+status = "planned"
+
+[[family]]
+name = "astro-i18n"
+rule_count = 11
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-i18n"
+status = "planned"
+
+[[family]]
+name = "astro-media"
+rule_count = 14
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-media"
+status = "planned"
+
+[[family]]
+name = "astro-seo"
+rule_count = 23
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-seo"
+status = "planned"
+
+[[family]]
+name = "astro-state"
+rule_count = 2
+fixture_dir = "behavior/fixtures/g3ts-rules/astro-state"
+status = "planned"

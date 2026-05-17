@@ -1,0 +1,80 @@
+{
+  "manifest": ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml",
+  "records": [
+    {
+      "command": [
+        "g3ts",
+        "--help"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:961ff0cfc75db48fdbe0e9bf8bf3c3d5cbd9f8cae7eb4780d80dd7f20fa9040d",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Top-level CLI parser for the g3ts binary\n\nUsage: g3ts <COMMAND>\n\nCommands:\n  validate       Validates one TypeScript package root against the selected families\n  validate-repo  Validates repository-level invariants (hooks, tools, topology, marker pairs)\n  help           Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--help"
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:961ff0cfc75db48fdbe0e9bf8bf3c3d5cbd9f8cae7eb4780d80dd7f20fa9040d",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Validates one TypeScript package root against the selected families\n\nUsage: g3ts validate [OPTIONS] --path <PATH>\n\nOptions:\n      --path <PATH>      Package root to validate\n      --family <FAMILY>  Optional family filter [possible values: eslint, astro, astro-setup, astro-content, astro-mdx, astro-i18n, astro-media, astro-seo, astro-state, arch, apparch, tsconfig, package, npmrc, jscpd, style, fmt, spelling, typecov, hooks, topology]\n      --inventory        Includes inventory findings in the rendered output\n      --staged           Filters toolchain gates by staged files\n      --rules-only       Skips toolchain gates and runs only the static rule families\n  -h, --help             Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate-repo",
+        "--help"
+      ],
+      "command_index": 2,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:961ff0cfc75db48fdbe0e9bf8bf3c3d5cbd9f8cae7eb4780d80dd7f20fa9040d",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Validates repository-level invariants (hooks, tools, topology, marker pairs)\n\nUsage: g3ts validate-repo [OPTIONS]\n\nOptions:\n      --path <PATH>  Optional repo root override; defaults to git rev-parse --show-toplevel\n  -h, --help         Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "workspace",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:b6c87138ce8f2efe5a7cb9bb2e8dbdedfc1d6283bbb39451a97293fb3a21e6e1",
+      "fixture_id": "C20-reject-old-command-shapes",
+      "stderr": "error: unexpected argument 'workspace' found\n\nUsage: g3ts validate [OPTIONS] --path <PATH>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 2,
+      "fixture_hash": "sha256:b6c87138ce8f2efe5a7cb9bb2e8dbdedfc1d6283bbb39451a97293fb3a21e6e1",
+      "fixture_id": "C20-reject-old-command-shapes",
+      "stderr": "error: unexpected argument 'repo' found\n\nUsage: g3ts validate [OPTIONS] --path <PATH>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    }
+  ],
+  "schema_version": "g3ts-replay-v1",
+  "tool": "g3ts"
+}

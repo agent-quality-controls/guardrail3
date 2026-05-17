@@ -16,4 +16,6 @@ python3 "$HERE/classify-kept-test-dispositions.py" --check
 python3 "$HERE/verify-kept-test-dispositions.py"
 python3 "$HERE/verify-fixture-contract-language.py"
 python3 "$HERE/verify-family-rule-fixtures.py"
+python3 "$HERE/verify-g3ts-family-rule-fixtures.py"
+python3 "$HERE/verify-g3ts-rule-coverage.py"
 python3 "$HERE/verify-test-deletion.py"

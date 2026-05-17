@@ -1,0 +1,16 @@
+id = "package-R40-validate-fail-open"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "package", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "package"
+target_rules = [
+  "g3ts-package/validate-script-fail-closed"
+]
+expected_findings = [
+  "g3ts-package/validate-script-fail-closed"
+]

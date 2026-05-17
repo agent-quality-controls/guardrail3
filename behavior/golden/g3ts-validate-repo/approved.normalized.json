@@ -1,0 +1,37 @@
+{
+  "manifest": ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml",
+  "records": [
+    {
+      "command": [
+        "g3ts",
+        "validate-repo",
+        "--path",
+        "missing"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:bcfe2c865123296212fae4c35dfb86a4ffbeb4972b5fbca0c1ce6f81fcc264ce",
+      "fixture_id": "R00-invalid-repo-root",
+      "stderr": "InvalidRoot(\"$REPO/missing\")\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate-repo",
+        "--path",
+        "README.md"
+      ],
+      "command_index": 1,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:bcfe2c865123296212fae4c35dfb86a4ffbeb4972b5fbca0c1ce6f81fcc264ce",
+      "fixture_id": "R00-invalid-repo-root",
+      "stderr": "InvalidRoot(\"$REPO/README.md\")\n",
+      "stdout": ""
+    }
+  ],
+  "schema_version": "g3ts-replay-v1",
+  "tool": "g3ts"
+}

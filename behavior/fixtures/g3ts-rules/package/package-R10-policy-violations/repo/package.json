@@ -1,0 +1,14 @@
+{
+  "private": false,
+  "packageManager": "pnpm@latest",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "preinstall": "echo only-allow pnpm",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "1.0.0"
+  }
+}

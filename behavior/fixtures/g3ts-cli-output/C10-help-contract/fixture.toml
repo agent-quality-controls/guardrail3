@@ -1,0 +1,10 @@
+id = "C10-help-contract"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["--help"],
+  ["validate", "--help"],
+  ["validate-repo", "--help"],
+]
+expected_exit = "zero"
+level = "cli_help_contract"

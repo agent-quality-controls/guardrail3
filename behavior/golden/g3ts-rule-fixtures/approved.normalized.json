@@ -1,0 +1,102 @@
+{
+  "manifest": ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml",
+  "records": [
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "package",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:a52fcb346bffa517fc000a83680daef8834dbe82ab2433bcf41b99171ce439ed",
+      "fixture_id": "package-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== package ==\n[Info] g3ts-package/root-exists package.json root package.json exists\n  Found root package manifest `package.json`.\n[Info] g3ts-package/root-parseable package.json root package.json parses\n  The root package manifest parses as valid package.json.\n[Info] g3ts-package/root-private package.json root package.json is private\n  The root package manifest sets `private: true`.\n[Info] g3ts-package/root-package-manager package.json root packageManager is pinned to pnpm\n  The root package manifest pins `packageManager` to `pnpm@10.32.0`.\n[Info] g3ts-package/root-engines package.json root engines are declared\n  The root package manifest declares both `engines.node` and `engines.pnpm`.\n[Info] g3ts-package/root-scripts package.json root package scripts are present\n  The root package manifest keeps the required `preinstall`, `prepare`, `lint`, and `typecheck` scripts.\n[Info] g3ts-package/validate-script-present package.json validate script is present\n  The root package manifest defines the standard `validate` script.\n[Info] g3ts-package/validate-script-fail-closed package.json validate script is fail-closed\n  The root package manifest defines `validate` with supported shell syntax and no reachable `||` fallback.\n[Info] g3ts-package/root-pnpm package.json root pnpm policy is present\n  The root package manifest keeps both `pnpm.overrides` and `pnpm.onlyBuiltDependencies`.\n[Info] g3ts-package/local-banned-dependencies package.json Syncpack bans forbidden package dependencies\n  `package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`, `lodash`, `moment`, `uuid`, `nanoid`, `express`, `classnames`, `winston`, `pino`, `request`, `got`, `superagent`, `node-fetch`, `isomorphic-fetch`, `underscore`, `request-promise`, `cross-fetch`, `xregexp`, `regexp-tree`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "package",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:5cb23ba207b11d90620491159c6c3a9b27de41f381ee8405c593a0fb06718a48",
+      "fixture_id": "package-R10-policy-violations",
+      "stderr": "",
+      "stdout": "== package ==\n[Info] g3ts-package/root-exists package.json root package.json exists\n  Found root package manifest `package.json`.\n[Info] g3ts-package/root-parseable package.json root package.json parses\n  The root package manifest parses as valid package.json.\n[Error] g3ts-package/root-private package.json root package.json is publishable\n  The root package manifest must set `private: true`.\n[Error] g3ts-package/root-package-manager package.json root packageManager missing or not pinned to pnpm\n  The root package manifest must set a pinned `packageManager` such as `pnpm@10.32.0`.\n[Error] g3ts-package/root-engines package.json root engines are incomplete\n  The root package manifest must declare engines.pnpm.\n[Error] g3ts-package/root-scripts package.json root package scripts are incomplete\n  The root package manifest script baseline is broken: scripts.preinstall must run `only-allow pnpm` in a supported fail-closed command position; scripts.prepare is missing; scripts.lint is missing.\n[Error] g3ts-package/validate-script-present package.json validate script is missing\n  The root package manifest must define the standard `validate` script.\n[Error] g3ts-package/root-pnpm package.json root pnpm policy is incomplete\n  The root package manifest must declare pnpm.overrides and pnpm.onlyBuiltDependencies.\n[Error] g3ts-package/local-banned-dependencies package.json Syncpack package policy validator is not installed and wired\n  `package.json` does not list `syncpack` in dependencies or devDependencies and does not run `syncpack lint` in any root script. Add `syncpack` and wire `syncpack lint` so dependency policy is enforced by Syncpack instead of G3TS scanning package manifests.\n[Error] g3ts-package/local-banned-dependencies .syncpackrc Syncpack does not ban forbidden package dependencies\n  `.syncpackrc` is missing, so the package family cannot prove Syncpack bans forbidden package deps for `package.json`. Add a parseable `.syncpackrc` with exact `source` entries and canonical `isBanned: true` versionGroups for `axios`, `lodash`, `moment`, `uuid`, `nanoid`, `express`, `classnames`, `winston`, `pino`, `request`, `got`, `superagent`, `node-fetch`, `isomorphic-fetch`, `underscore`, `request-promise`, `cross-fetch`, `xregexp`, `regexp-tree`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "package",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:cd0703d36a7f848d3819976ae0d2d54af7d2e38410bbe69a3b6aadf24a16bd85",
+      "fixture_id": "package-R20-input-failures",
+      "stderr": "",
+      "stdout": "== package ==\n[Error] g3ts-package/root-exists - root package.json missing\n  No root `package.json` file was found. Add a root workspace manifest.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "package",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:275bac6fe2ec7c3c080edd99ad2895e54f4e7a11ba083428f3f3d7ce95fcdc57",
+      "fixture_id": "package-R30-root-parse-error",
+      "stderr": "",
+      "stdout": "== package ==\n[Info] g3ts-package/root-exists package.json root package.json exists\n  Found root package manifest `package.json`.\n[Error] g3ts-package/root-parseable package.json root package.json parse error\n  Failed to parse root `package.json`: failed to parse package.json: key must be a string at line 1 column 3\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "package",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:4753c151505a299e2aeb4abd6bf4e331c0916124fbc26a9ac073b1088acf4e1b",
+      "fixture_id": "package-R40-validate-fail-open",
+      "stderr": "",
+      "stdout": "== package ==\n[Info] g3ts-package/root-exists package.json root package.json exists\n  Found root package manifest `package.json`.\n[Info] g3ts-package/root-parseable package.json root package.json parses\n  The root package manifest parses as valid package.json.\n[Info] g3ts-package/root-private package.json root package.json is private\n  The root package manifest sets `private: true`.\n[Info] g3ts-package/root-package-manager package.json root packageManager is pinned to pnpm\n  The root package manifest pins `packageManager` to `pnpm@10.32.0`.\n[Info] g3ts-package/root-engines package.json root engines are declared\n  The root package manifest declares both `engines.node` and `engines.pnpm`.\n[Info] g3ts-package/root-scripts package.json root package scripts are present\n  The root package manifest keeps the required `preinstall`, `prepare`, `lint`, and `typecheck` scripts.\n[Info] g3ts-package/validate-script-present package.json validate script is present\n  The root package manifest defines the standard `validate` script.\n[Error] g3ts-package/validate-script-fail-closed package.json validate script is not fail-closed\n  The root package manifest must define `validate` with supported shell syntax and no reachable `||` fallback.\n[Info] g3ts-package/root-pnpm package.json root pnpm policy is present\n  The root package manifest keeps both `pnpm.overrides` and `pnpm.onlyBuiltDependencies`.\n[Info] g3ts-package/local-banned-dependencies package.json Syncpack bans forbidden package dependencies\n  `package.json` lists `syncpack`, runs `syncpack lint` fail-closed, and `.syncpackrc` bans forbidden package deps through Syncpack: `axios`, `lodash`, `moment`, `uuid`, `nanoid`, `express`, `classnames`, `winston`, `pino`, `request`, `got`, `superagent`, `node-fetch`, `isomorphic-fetch`, `underscore`, `request-promise`, `cross-fetch`, `xregexp`, `regexp-tree`.\n"
+    }
+  ],
+  "schema_version": "g3ts-replay-v1",
+  "tool": "g3ts"
+}

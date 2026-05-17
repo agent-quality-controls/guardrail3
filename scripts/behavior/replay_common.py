@@ -20,6 +20,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 G3RS_MANIFEST_PATH = REPO_ROOT / "apps" / "guardrail3-rs" / "Cargo.toml"
+G3TS_MANIFEST_PATH = REPO_ROOT / "apps" / "guardrail3-ts" / "Cargo.toml"
 DELEGATED_TOOL_NAMES = {
     "cargo-deny",
     "cargo-dupes",
@@ -27,6 +28,7 @@ DELEGATED_TOOL_NAMES = {
     "cargo-mutants",
     "cargo-semver-checks",
     "g3rs",
+    "g3ts",
     "gitleaks",
 }
 
@@ -84,9 +86,48 @@ def g3rs_candidate_binary() -> Path:
     return Path(target_directory) / "debug" / "g3rs"
 
 
+@lru_cache(maxsize=1)
+def g3ts_candidate_binary() -> Path:
+    subprocess.run(
+        [
+            "cargo",
+            "build",
+            "--quiet",
+            "--manifest-path",
+            str(G3TS_MANIFEST_PATH),
+            "-p",
+            "g3ts",
+            "--bin",
+            "g3ts",
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+    metadata = subprocess.run(
+        [
+            "cargo",
+            "metadata",
+            "--quiet",
+            "--manifest-path",
+            str(G3TS_MANIFEST_PATH),
+            "--no-deps",
+            "--format-version",
+            "1",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    target_directory = json.loads(metadata.stdout)["target_directory"]
+    return Path(target_directory) / "debug" / "g3ts"
+
+
 def tool_executable(tool: str) -> Path | str:
     if tool == "g3rs":
         return g3rs_candidate_binary()
+    if tool == "g3ts":
+        return g3ts_candidate_binary()
     return tool
 
 

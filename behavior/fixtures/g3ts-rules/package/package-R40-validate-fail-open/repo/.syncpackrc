@@ -1,0 +1,102 @@
+{
+  "source": [
+    "package.json"
+  ],
+  "versionGroups": [
+    {
+      "dependencies": ["axios"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["lodash"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["moment"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["uuid"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["nanoid"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["express"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["classnames"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["winston"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["pino"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["request"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["got"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["superagent"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["node-fetch"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["isomorphic-fetch"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["underscore"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["request-promise"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["cross-fetch"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["xregexp"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    },
+    {
+      "dependencies": ["regexp-tree"],
+      "dependencyTypes": ["prod", "dev", "optional", "peer"],
+      "isBanned": true
+    }
+  ]
+}

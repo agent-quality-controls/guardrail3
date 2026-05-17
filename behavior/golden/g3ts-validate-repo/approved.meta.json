@@ -1,0 +1,19 @@
+{
+  "suite": "g3ts-validate-repo",
+  "kind": "approved",
+  "run_id": "2026-05-17T18-03-17.979569Z-61c3969f",
+  "run_commit": "43440ea5e",
+  "working_tree": "dirty",
+  "recorded_at": "2026-05-17T18:03:17.979569Z",
+  "fixture_hash": "sha256:1ecf1c3159f02dff36c5136dde8a91cf5438a4ed1510f01d8d52e046d357ee0a",
+  "manifest_hash": "sha256:61c3969f02975dcd8e39dd0ec4a79e15824841973eddaee18b839ad0228259c5",
+  "tool_version": "0.1.8",
+  "output_schema_version": "1",
+  "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-validate-repo/R00-invalid-repo-root/fixture.toml",
+      "sha256": "sha256:d2600df185293b711dfcec7913d58a5cfb653c17f4bf0584add7ae194b83d66f"
+    }
+  ],
+  "comment": "initial G3TS validate-repo fixture baseline"
+}
