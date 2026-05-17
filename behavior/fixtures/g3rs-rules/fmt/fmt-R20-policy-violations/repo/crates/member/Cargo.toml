@@ -1,4 +1,0 @@
-[package]
-name = "fmt_policy_invalid_member"
-version = "0.1.0"
-publish = false
