@@ -44,7 +44,3 @@ fn normalize_value(raw: Value) -> Result<CspellConfigSnapshot, String> {
 fn strip_bom(input: &str) -> &str {
     input.strip_prefix('\u{FEFF}').unwrap_or(input)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

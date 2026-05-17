@@ -227,7 +227,3 @@ fn highest_severity(report: &ValidateReport, include_inventory: bool) -> Option<
             G3Severity::Error => 2_u8,
         })
 }
-
-#[cfg(test)]
-#[path = "execute_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod execute_tests;

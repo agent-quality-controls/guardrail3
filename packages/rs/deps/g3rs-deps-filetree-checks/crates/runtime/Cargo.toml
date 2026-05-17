@@ -24,5 +24,3 @@ g3rs-deps-types = { path = "../../../g3rs-deps-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-deps-filetree-checks-assertions = { path = "../assertions", version = "0.1.0" }

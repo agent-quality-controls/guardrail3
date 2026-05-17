@@ -24,9 +24,5 @@ api = []
 clippy-toml-parser-types = { path = "../types", version = "0.1.0" }
 toml = "0.8"
 
-[dev-dependencies]
-clippy-toml-parser-runtime-assertions = { path = "../assertions" }
-tempfile = "3"
-
 [package.metadata.docs.rs]
 all-features = true

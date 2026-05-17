@@ -1,6 +1,3 @@
-#[cfg(test)]
-use g3rs_hooks_file_tree_checks_assertions as _;
-
 /// `execution_trust` module.
 mod execution_trust;
 /// `hooks_path_configured` module.

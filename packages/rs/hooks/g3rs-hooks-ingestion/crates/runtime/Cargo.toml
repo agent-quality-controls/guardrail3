@@ -35,15 +35,3 @@ g3rs-hooks-types = { path = "../../../g3rs-hooks-types", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 hook-shell-parser = { path = "../../../../../../packages/parsers/hook-shell-parser", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-clippy-config-checks = { path = "../../../../clippy/g3rs-clippy-config-checks", version = "0.1.0" }
-g3rs-clippy-ingestion = { path = "../../../../clippy/g3rs-clippy-ingestion", version = "0.1.0" }
-g3rs-code-ingestion = { path = "../../../../code/g3rs-code-ingestion", version = "0.1.0" }
-g3rs-code-source-checks = { path = "../../../../code/g3rs-code-source-checks", version = "0.1.0" }
-g3rs-hooks-config-checks = { path = "../../../g3rs-hooks-config-checks", version = "0.1.0" }
-g3rs-hooks-file-tree-checks = { path = "../../../g3rs-hooks-file-tree-checks", version = "0.1.0" }
-g3rs-hooks-ingestion-assertions = { path = "../assertions" }
-g3rs-hooks-source-checks = { path = "../../../g3rs-hooks-source-checks", version = "0.1.0" }
-g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", features = ["runtime"] }
-guardrail3-check-types = { path = "../../../../../../packages/shared/guardrail3-check-types", version = "0.1.0" }
-tempfile = "3"

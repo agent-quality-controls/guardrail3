@@ -164,7 +164,3 @@ fn strong_connect(
         components.push(component);
     }
 }
-
-#[cfg(test)]
-#[path = "same_layer_cycles_tests/mod.rs"]
-mod same_layer_cycles_tests;

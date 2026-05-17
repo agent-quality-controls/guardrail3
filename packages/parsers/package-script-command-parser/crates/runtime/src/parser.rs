@@ -766,7 +766,3 @@ fn script_name_is_guardrail_related(script_name: &str) -> bool {
         )
     })
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

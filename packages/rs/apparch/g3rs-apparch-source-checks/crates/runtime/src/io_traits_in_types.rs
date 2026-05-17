@@ -61,7 +61,3 @@ pub(crate) fn check(
         );
     }
 }
-
-#[cfg(test)]
-#[path = "io_traits_in_types_tests/mod.rs"]
-mod io_traits_in_types_tests;

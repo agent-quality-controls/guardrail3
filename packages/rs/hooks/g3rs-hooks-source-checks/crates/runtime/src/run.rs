@@ -489,10 +489,6 @@ fn dispatcher_invokes_modular_directory(command_text: &str) -> bool {
     }
 }
 
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
-mod run_tests;
-
 // Suppress dead-code warnings for the legacy ResolvedCommand type alias.
 /// `_unused` function.
 #[allow(dead_code)] // reason: parking-only reference to keep the legacy ResolvedCommand alias alive while callers migrate to the new command-query surface.

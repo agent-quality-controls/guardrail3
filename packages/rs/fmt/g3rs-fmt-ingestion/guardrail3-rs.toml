@@ -4,7 +4,6 @@ allowed_deps = [
   "cargo-toml-parser",
   "g3rs-fmt-config-checks",
   "g3rs-fmt-filetree-checks",
-  "g3rs-fmt-ingestion-assertions",
   "g3rs-fmt-ingestion-runtime",
   "g3rs-fmt-ingestion-types",
   "g3rs-fmt-types",
@@ -13,7 +12,6 @@ allowed_deps = [
   "g3rs-toml-parser",
   "rust-toolchain-toml-parser",
   "rustfmt-toml-parser",
-  "tempfile",
   "toml",
 ]
 

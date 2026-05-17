@@ -29,8 +29,3 @@ g3rs-deny-ingestion-types = { path = "../types", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0" }
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-deny-config-checks = { path = "../../../g3rs-deny-config-checks" }
-g3rs-deny-filetree-checks = { path = "../../../g3rs-deny-filetree-checks" }
-g3rs-deny-ingestion-assertions = { path = "../assertions" }
-tempfile = "3"

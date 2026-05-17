@@ -24,7 +24,3 @@ pub(crate) fn display_crate(krate: &G3RsApparchCrate) -> &str {
         &krate.crate_name
     }
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

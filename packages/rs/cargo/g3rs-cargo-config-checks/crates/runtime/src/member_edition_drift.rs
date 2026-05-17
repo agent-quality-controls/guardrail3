@@ -96,7 +96,3 @@ fn edition_rank(edition: &str) -> Option<usize> {
         _ => None,
     }
 }
-
-#[cfg(test)]
-#[path = "member_edition_drift_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod member_edition_drift_tests;

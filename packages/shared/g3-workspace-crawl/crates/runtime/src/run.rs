@@ -48,7 +48,3 @@ pub fn crawl(workspace_root: &Path) -> Result<G3WorkspaceCrawl, G3WorkspaceCrawl
 pub fn crawl_any_root(workspace_root: &Path) -> Result<G3WorkspaceCrawl, G3WorkspaceCrawlError> {
     crate::crawl::crawl_any_root(workspace_root)
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

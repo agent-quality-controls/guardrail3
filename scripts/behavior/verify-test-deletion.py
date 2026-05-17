@@ -54,10 +54,10 @@ def main() -> int:
 
     fixture_rows = load_toml(args.fixture_ledger).get("test", [])
     active_keys = active_test_keys()
-    replaceable, kept = classify_counts(fixture_rows, load_dispositions(args.disposition_ledger))
+    replaceable, tracked = classify_counts(fixture_rows, load_dispositions(args.disposition_ledger))
     print(
         "behavior-test-deletion: PASS "
-        f"rows:{len(fixture_rows)} active:{len(active_keys)} replaceable:{replaceable} kept:{kept}"
+        f"rows:{len(fixture_rows)} active:{len(active_keys)} replaceable:{replaceable} tracked:{tracked}"
     )
     return 0
 
@@ -78,23 +78,17 @@ def verify(fixture_ledger_path: Path, disposition_ledger_path: Path, plan_manife
     fixture_by_key = rows_by_key(fixture_rows, "fixture ledger", failures)
     disposition_by_key = rows_by_key(disposition_rows, "disposition ledger", failures)
 
-    for key in sorted(active_keys - set(fixture_by_key)):
-        failures.append(f"{key.label()}: active test missing from fixture ledger")
+    for key in sorted(active_keys):
+        failures.append(f"{key.label()}: active Rust unit test remains after fixture migration")
 
     for key, row in sorted(fixture_by_key.items()):
         status = row.get("status")
-        is_active = key in active_keys
         if status == "kept_compile_contract":
-            disposition = disposition_for(key, disposition_by_key, failures)
-            if disposition in DISPOSITION_COVERED:
-                continue
-            if disposition in KNOWN_KEPT_DISPOSITIONS and not is_active:
-                failures.append(f"{key.label()}: kept disposition {disposition} requires active test")
+            disposition_for(key, disposition_by_key, failures)
             continue
         if status in FIXTURE_COVERED_STATUSES:
             continue
-        if not is_active:
-            failures.append(f"{key.label()}: status {status} requires active test")
+        failures.append(f"{key.label()}: unknown fixture ledger status {status}")
 
     for key in sorted(set(disposition_by_key) - {
         key for key, row in fixture_by_key.items() if row.get("status") == "kept_compile_contract"
@@ -217,7 +211,7 @@ def classify_counts(
     disposition_by_key: dict[TestKey, dict[str, Any]],
 ) -> tuple[int, int]:
     replaceable = 0
-    kept = 0
+    tracked = 0
     if not isinstance(fixture_rows, list):
         return (0, 0)
     for row in fixture_rows:
@@ -232,8 +226,8 @@ def classify_counts(
         if status == "kept_compile_contract" and disposition in DISPOSITION_COVERED:
             replaceable += 1
         else:
-            kept += 1
-    return (replaceable, kept)
+            tracked += 1
+    return (replaceable, tracked)
 
 
 def test_key_without_failures(row: dict[str, Any]) -> TestKey | None:

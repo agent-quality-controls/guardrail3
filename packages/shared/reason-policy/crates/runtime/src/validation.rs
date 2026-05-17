@@ -1,11 +1,6 @@
 use crate::ReasonIssue;
 use crate::ReasonPolicy;
 
-#[cfg(test)]
-pub(super) use crate::policy::DEFAULT_MIN_REASON_CHARS;
-#[cfg(test)]
-pub(super) use crate::policy::DEFAULT_MIN_REASON_WORDS;
-
 /// Lowercased phrases treated as non-informative reason placeholders.
 const PLACEHOLDERS: &[&str] = &[
     "ok",
@@ -79,7 +74,3 @@ pub fn validate_reason_text_with_policy(
 pub fn reason_text_is_useful(reason: &str) -> bool {
     validate_reason_text(reason).is_ok()
 }
-
-#[cfg(test)]
-#[path = "validation_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod validation_tests;

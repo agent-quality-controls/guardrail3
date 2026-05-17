@@ -3,7 +3,6 @@ profile = "library"
 allowed_deps = [
   "g3rs-arch-config-checks",
   "g3rs-arch-file-tree-checks",
-  "g3rs-arch-ingestion-assertions",
   "g3rs-arch-ingestion-runtime",
   "g3rs-arch-source-checks",
   "g3rs-arch-types",
@@ -13,7 +12,6 @@ allowed_deps = [
   "g3rs-toml-parser",
   "proc-macro2",
   "syn",
-  "tempfile",
   "toml",
 ]
 

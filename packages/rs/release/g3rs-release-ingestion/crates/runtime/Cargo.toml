@@ -36,9 +36,3 @@ glob = "0.3"
 release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-parser", version = "0.1.0" }
 serde_yaml = "0.9"
 
-[dev-dependencies]
-g3rs-release-config-checks = { path = "../../../g3rs-release-config-checks" }
-g3rs-release-filetree-checks = { path = "../../../g3rs-release-filetree-checks" }
-g3rs-release-ingestion-assertions = { path = "../assertions" }
-g3rs-release-source-checks = { path = "../../../g3rs-release-source-checks" }
-tempfile = "3"

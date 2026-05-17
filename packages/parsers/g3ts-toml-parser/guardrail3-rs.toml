@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "g3ts-toml-parser-runtime",
-  "g3ts-toml-parser-runtime-assertions",
   "g3ts-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

@@ -36,9 +36,3 @@ g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", versio
 glob = "0.3"
 toml = "0.8"
 
-[dev-dependencies]
-g3rs-clippy-config-checks = { path = "../../../g3rs-clippy-config-checks" }
-g3rs-clippy-filetree-checks = { path = "../../../g3rs-clippy-filetree-checks" }
-g3rs-clippy-ingestion-assertions = { path = "../assertions" }
-g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0" }
-tempfile = "3"

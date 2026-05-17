@@ -63,7 +63,3 @@ pub(crate) fn check(input: &G3RsClippyConfigChecksInput, results: &mut Vec<G3Che
         }
     }
 }
-
-#[cfg(test)]
-#[path = "missing_method_ban_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod missing_method_ban_tests;

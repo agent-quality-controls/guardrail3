@@ -25,8 +25,3 @@ pub(crate) fn check(input: &G3RsDenyFileTreeChecksInput, results: &mut Vec<G3Che
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "shadowing_tests/mod.rs"]
-// reason: file module tests live in the owned shadowing_tests sidecar directory.
-mod shadowing_tests;

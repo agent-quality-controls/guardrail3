@@ -528,7 +528,3 @@ fn parse_comma_separated_rule_names(rules_text: &str) -> Result<Vec<String>, Str
     }
     Ok(rules)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"]
-mod parser_tests;

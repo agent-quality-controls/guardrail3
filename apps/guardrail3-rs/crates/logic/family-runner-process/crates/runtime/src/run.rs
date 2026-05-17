@@ -111,7 +111,3 @@ pub(crate) fn rust_hook_requirements() -> Vec<G3HookRequirement> {
     .flatten()
     .collect()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;

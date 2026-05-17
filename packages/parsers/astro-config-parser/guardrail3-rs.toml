@@ -7,9 +7,7 @@ allowed_deps = [
   "swc_common",
   "swc_ecma_ast",
   "swc_ecma_parser",
-  "tempfile",
   "package-json-parser-runtime",
-  "package-json-parser-runtime-assertions",
   "package-json-parser-types",
 ]
 

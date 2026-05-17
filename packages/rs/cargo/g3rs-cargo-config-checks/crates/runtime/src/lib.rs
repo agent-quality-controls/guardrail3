@@ -29,8 +29,5 @@ mod workspace_lints_inherited;
 /// Checks that required workspace metadata keys are present.
 mod workspace_metadata;
 
-#[cfg(test)]
-use g3rs_cargo_config_checks_assertions as _;
-
 #[cfg(feature = "checks")]
 pub use run::check;

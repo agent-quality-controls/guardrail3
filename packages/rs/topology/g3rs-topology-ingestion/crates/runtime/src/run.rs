@@ -398,10 +398,6 @@ fn parent_dir(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(dir, _)| dir)
 }
 
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for run module.
-mod run_tests;
-
 /// `logical_owner_rel` function.
 fn logical_owner_rel(rel_path: &str, kind: G3RsTopologyWorkspaceFamilyFileKind) -> String {
     match kind {

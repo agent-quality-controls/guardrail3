@@ -6,8 +6,6 @@ mod cargo_lock_present;
 mod gitignore_not_ignoring_cargo_lock;
 /// Family entry point that runs all `g3rs-deps` file-tree rules.
 mod run;
-#[cfg(test)]
-use g3rs_deps_filetree_checks_assertions as _;
 
 #[cfg(feature = "checks")]
 pub use run::check;

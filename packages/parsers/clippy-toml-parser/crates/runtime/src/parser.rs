@@ -1,9 +1,4 @@
 pub(super) use crate::types::{ClippyToml, ClippyTomlDocument, ClippyTomlParseState};
-#[cfg(test)]
-pub(super) use crate::types::{
-    InherentImplLintScope, MatchLintBehaviour, PubUnderscoreFieldsBehaviour,
-    SourceItemOrderingWithinModuleItemGroupings,
-};
 
 /// Parse `clippy.toml` content into typed data.
 ///
@@ -45,7 +40,3 @@ pub fn from_path(path: impl AsRef<std::path::Path>) -> Result<ClippyToml, crate:
     let content = crate::fs::read_to_string(path)?;
     parse(&content)
 }
-
-#[cfg(test)]
-#[path = "parser_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod parser_tests;

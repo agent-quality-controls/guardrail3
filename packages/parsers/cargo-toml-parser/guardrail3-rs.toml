@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "cargo-toml-parser-runtime",
-  "cargo-toml-parser-runtime-assertions",
   "cargo-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

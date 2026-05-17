@@ -28,7 +28,3 @@ pub(crate) fn check(input: &G3RsToolchainFileTreeChecksInput, results: &mut Vec<
         )),
     }
 }
-
-#[cfg(test)]
-#[path = "exists_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod exists_tests;

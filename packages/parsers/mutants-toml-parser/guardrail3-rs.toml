@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "mutants-toml-parser-runtime",
-  "mutants-toml-parser-runtime-assertions",
   "mutants-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

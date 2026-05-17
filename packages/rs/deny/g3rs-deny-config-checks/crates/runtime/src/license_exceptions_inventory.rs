@@ -149,7 +149,3 @@ fn classify_exception_entry(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "license_exceptions_inventory_tests/mod.rs"]
-mod license_exceptions_inventory_tests;

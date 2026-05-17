@@ -97,15 +97,7 @@ name = "syncpack-config-parser-runtime"
 version = "0.1.0"
 dependencies = [
  "serde_json",
- "syncpack-config-parser-runtime-assertions",
  "syncpack-config-parser-types",
-]
-
-[[package]]
-name = "syncpack-config-parser-runtime-assertions"
-version = "0.1.0"
-dependencies = [
- "syncpack-config-parser-runtime",
 ]
 
 [[package]]

@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "deny-toml-parser-runtime",
-  "deny-toml-parser-runtime-assertions",
   "deny-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

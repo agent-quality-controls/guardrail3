@@ -3,8 +3,6 @@ use cliff_toml_parser as _;
 use release_plz_toml_parser as _;
 use semver as _;
 
-#[cfg(test)]
-use g3rs_release_config_checks_assertions as _;
 /// `accidentally_publishable` module.
 mod accidentally_publishable;
 /// `binary_release_workflow` module.
@@ -53,7 +51,6 @@ mod run;
 mod semver_checks_installed;
 /// `support` module.
 mod support;
-mod test_support;
 /// `valid_semver` module.
 mod valid_semver;
 

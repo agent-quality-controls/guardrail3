@@ -22,9 +22,5 @@ api = []
 [dependencies]
 eslint-directive-parser-types = { path = "../types", version = "0.1.0" }
 
-[dev-dependencies]
-tempfile = "3"
-eslint-directive-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

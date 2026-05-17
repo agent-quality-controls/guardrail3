@@ -25,10 +25,5 @@ mod support;
 /// Rule implementation for `wrappers`.
 mod wrappers;
 
-#[cfg(test)]
-use g3rs_deny_config_checks_assertions as _;
-#[cfg(test)]
-use test_support as _;
-
 #[cfg(feature = "checks")]
 pub use run::check;

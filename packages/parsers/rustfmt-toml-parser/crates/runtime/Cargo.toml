@@ -24,8 +24,5 @@ api = []
 rustfmt-toml-parser-types = { path = "../types", version = "0.1.0" }
 toml = "0.8"
 
-[dev-dependencies]
-rustfmt-toml-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

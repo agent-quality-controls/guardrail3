@@ -2,10 +2,8 @@ profile = "library"
 
 allowed_deps = [
   "nextest-toml-parser-runtime",
-  "nextest-toml-parser-runtime-assertions",
   "nextest-toml-parser-types",
   "serde",
-  "tempfile",
   "toml",
 ]
 

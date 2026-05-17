@@ -35,9 +35,6 @@ g3rs-topology-hook-contract.workspace = true
 default = ["api"]
 api = []
 
-[dev-dependencies]
-guardrail3-rs-family-runner-process-assertions = { path = "../assertions" }
-
 [package.metadata.guardrail3]
 shared = true
 

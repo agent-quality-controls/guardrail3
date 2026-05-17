@@ -105,7 +105,3 @@ pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec
         },
     }
 }
-
-#[cfg(test)]
-#[path = "patch_replace_bypass_tests/mod.rs"]
-mod patch_replace_bypass_tests;

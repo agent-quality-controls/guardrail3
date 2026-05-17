@@ -13,10 +13,6 @@ use g3rs_test_ingestion_types::{
 
 pub use g3rs_test_ingestion_types::G3RsTestIngestionError as IngestionError;
 
-#[cfg(test)]
-#[path = "run_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod run_tests;
-
 pub fn ingest_for_config_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<Vec<G3RsTestConfigChecksInput>, IngestionError> {
@@ -203,27 +199,4 @@ fn cargo_mutants_installed_with_cargo(cargo_program: impl AsRef<std::ffi::OsStr>
         .status()
         .map(|status| status.success())
         .unwrap_or(false)
-}
-
-#[cfg(test)]
-pub(super) fn create_fixture_dir(path: &std::path::Path) -> std::io::Result<()> {
-    crate::fs::create_dir_all(path)
-}
-
-#[cfg(test)]
-pub(super) fn write_fixture(path: &std::path::Path, content: &str) -> std::io::Result<()> {
-    crate::fs::write(path, content)
-}
-
-#[cfg(test)]
-pub(super) fn read_fixture_metadata(path: &std::path::Path) -> std::io::Result<std::fs::Metadata> {
-    crate::fs::metadata(path)
-}
-
-#[cfg(test)]
-pub(super) fn set_fixture_permissions(
-    path: &std::path::Path,
-    permissions: std::fs::Permissions,
-) -> std::io::Result<()> {
-    crate::fs::set_permissions(path, permissions)
 }

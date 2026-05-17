@@ -34,7 +34,6 @@ assert!(matches!(
 
 - `crates/runtime` owns parsing and file loading
 - `crates/types` owns the typed Cargo config schema
-- `crates/assertions` owns shared proof helpers for runtime sidecar tests
 
 ## License
 

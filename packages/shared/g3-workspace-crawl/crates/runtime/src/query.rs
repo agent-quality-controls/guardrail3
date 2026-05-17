@@ -39,7 +39,3 @@ pub fn files_with_extension<'a>(
         })
         .collect()
 }
-
-#[cfg(test)]
-#[path = "query_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod query_tests;

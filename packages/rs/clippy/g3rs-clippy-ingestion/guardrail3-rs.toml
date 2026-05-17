@@ -3,9 +3,7 @@ profile = "library"
 allowed_deps = [
   "cargo-config-toml-parser",
   "cargo-toml-parser",
-  "g3rs-clippy-config-checks-assertions",
   "clippy-toml-parser",
-  "g3rs-clippy-filetree-checks-assertions",
   "g3rs-clippy-config-checks",
   "g3rs-clippy-filetree-checks",
   "g3rs-clippy-types",
@@ -13,7 +11,6 @@ allowed_deps = [
   "g3-workspace-crawl",
   "glob",
   "g3rs-toml-parser",
-  "tempfile",
   "toml",
 ]
 

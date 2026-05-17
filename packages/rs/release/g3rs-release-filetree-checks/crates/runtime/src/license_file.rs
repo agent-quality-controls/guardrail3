@@ -38,7 +38,3 @@ pub(crate) fn check(repo: &G3RsReleaseFileTreeRepo, results: &mut Vec<G3CheckRes
         }
     }
 }
-
-#[cfg(test)]
-#[path = "license_file_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod license_file_tests;

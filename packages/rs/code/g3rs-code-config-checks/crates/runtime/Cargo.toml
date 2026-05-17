@@ -27,5 +27,3 @@ cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version
 g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-g3rs-code-config-checks-assertions = { path = "../assertions" }

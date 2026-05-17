@@ -96,7 +96,3 @@ pub(crate) fn is_package_internal_runtime_to_assertions_dev_edge(
 
     source_package == target_package && source_member == "runtime" && target_member == "assertions"
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

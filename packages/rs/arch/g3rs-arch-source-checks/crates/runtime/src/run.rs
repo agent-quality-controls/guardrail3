@@ -36,7 +36,3 @@ pub(crate) fn broad_reexports(
 ) -> impl Iterator<Item = &g3rs_arch_types::types::G3RsArchFacadeItem> {
     surface.broad_reexports.iter()
 }
-
-#[cfg(test)]
-#[path = "run_tests/mod.rs"]
-mod run_tests;

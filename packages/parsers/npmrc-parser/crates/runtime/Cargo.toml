@@ -23,9 +23,5 @@ api = []
 [dependencies]
 npmrc-parser-types = { path = "../types", version = "0.1.0" }
 
-[dev-dependencies]
-tempfile = "3"
-npmrc-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

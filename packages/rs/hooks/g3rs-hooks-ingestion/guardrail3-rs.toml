@@ -15,7 +15,6 @@ allowed_deps = [
   "g3-workspace-crawl",
   "guardrail3-check-types",
   "hook-shell-parser",
-  "tempfile",
 ]
 
 [checks]

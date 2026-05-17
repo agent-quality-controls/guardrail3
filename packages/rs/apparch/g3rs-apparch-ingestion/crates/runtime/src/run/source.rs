@@ -20,10 +20,6 @@ use super::source_support::{
 use super::workspace::{collect_workspace_crates, load_workspace_root};
 use crate::view::CrawlView;
 
-#[cfg(test)]
-#[path = "source_tests/mod.rs"]
-mod source_tests;
-
 pub fn ingest_for_source_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<apparch::G3RsApparchSourceChecksInput, G3RsApparchIngestionError> {

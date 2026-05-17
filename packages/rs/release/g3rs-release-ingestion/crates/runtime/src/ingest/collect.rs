@@ -534,7 +534,3 @@ pub(super) fn push_all_failures(
     filetree_failures.push(input_failure(&rel_path, &message));
     source_failures.push(input_failure(rel_path, message));
 }
-
-#[cfg(test)]
-#[path = "collect_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod collect_tests;

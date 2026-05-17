@@ -66,8 +66,3 @@ fn finding(cargo_config: &G3RsClippyCargoConfigState) -> Option<FindingTriple> {
             )),
     }
 }
-
-#[cfg(test)]
-#[path = "forbid_clippy_conf_dir_override_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod forbid_clippy_conf_dir_override_tests;

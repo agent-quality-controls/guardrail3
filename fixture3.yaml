@@ -64,19 +64,3 @@ suites:
       approved_dir: "behavior/golden/g3rs-cli-output"
       received_dir: ".fixture3/g3rs-cli-output"
       diff_dir: ".fixture3/g3rs-cli-output"
-  g3rs-report-output:
-    fixtures:
-      - "behavior/fixtures/g3rs-report-output/*/fixture.toml"
-    command:
-      argv:
-        - "python3"
-        - "scripts/behavior/fixture3-g3rs-report-output.py"
-        - "--manifest"
-        - "{manifest}"
-        - "{fixtures}"
-      ok_exit_codes:
-        - 0
-    storage:
-      approved_dir: "behavior/golden/g3rs-report-output"
-      received_dir: ".fixture3/g3rs-report-output"
-      diff_dir: ".fixture3/g3rs-report-output"

@@ -181,10 +181,3 @@ pub fn visit_resolved_commands_with_env<S>(
 pub fn shell_words(command_text: &str) -> Vec<String> {
     crate::shell_ast::shell_words(command_text)
 }
-
-#[cfg(test)]
-pub(super) use crate::parse_script as parse_script_for_tests;
-
-#[cfg(test)]
-#[path = "api_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod api_tests;

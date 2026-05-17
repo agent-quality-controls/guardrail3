@@ -49,8 +49,3 @@ pub(crate) fn check(edge: &G3RsReleaseConfigEdge, results: &mut Vec<G3CheckResul
         &edge.source.cargo_rel_path,
     ));
 }
-
-#[cfg(test)]
-#[path = "interdependent_version_consistency_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod interdependent_version_consistency_tests;

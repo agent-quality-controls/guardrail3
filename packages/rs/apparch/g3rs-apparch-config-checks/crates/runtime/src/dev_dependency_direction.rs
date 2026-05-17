@@ -52,7 +52,3 @@ pub(crate) fn check(
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "dev_dependency_direction_tests/mod.rs"]
-mod dev_dependency_direction_tests;

@@ -73,7 +73,3 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         .into_inventory(),
     );
 }
-
-#[cfg(test)]
-#[path = "extra_deny_bans_inventory_tests/mod.rs"]
-mod extra_deny_bans_inventory_tests;

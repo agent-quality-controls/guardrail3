@@ -58,8 +58,3 @@ pub(crate) fn check(edge: &G3RsArchDependencyEdge, results: &mut Vec<G3CheckResu
         None,
     ));
 }
-
-#[cfg(test)]
-#[path = "shared_flag_required_tests/mod.rs"]
-// reason: keep rule tests in the owned x_tests sidecar directory.
-mod shared_flag_required_tests;

@@ -38,7 +38,6 @@ assert!(matches!(
 
 - `crates/runtime` owns parsing and file loading
 - `crates/types` owns the typed Cargo.toml schema
-- `crates/assertions` owns shared proof helpers for runtime sidecar tests
 
 ## License
 

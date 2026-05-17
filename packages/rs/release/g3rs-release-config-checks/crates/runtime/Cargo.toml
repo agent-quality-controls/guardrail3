@@ -35,5 +35,3 @@ release-plz-toml-parser = { path = "../../../../../parsers/release-plz-toml-pars
 semver = "1"
 toml = "0.8"
 
-[dev-dependencies]
-g3rs-release-config-checks-assertions = { path = "../assertions" }

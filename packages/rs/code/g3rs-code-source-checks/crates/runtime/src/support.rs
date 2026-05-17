@@ -1,10 +1,10 @@
-#[cfg(test)]
-use g3rs_code_types::G3RsSourceFile;
-use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsCodeWaiver};
+use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsCodeWaiver, G3RsSourceFile};
 
-#[cfg(test)]
+/// One Rust source file paired with its parsed syntax tree.
 pub(crate) struct G3RsCodeSourceFileAst {
+    /// Original source-file fact.
     pub(crate) source_file: G3RsSourceFile,
+    /// Parsed Rust syntax tree for the source file.
     pub(crate) source: syn::File,
 }
 
@@ -48,7 +48,6 @@ pub(crate) struct ParsedCodeSourceInput<'a> {
     source: syn::File,
 }
 
-#[cfg(test)]
 impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
     fn from(value: &'a G3RsCodeSourceFileAst) -> Self {
         Self {

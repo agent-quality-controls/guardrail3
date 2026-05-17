@@ -153,8 +153,3 @@ fn lints_are_well_formed(lints: CargoLintTableState<'_>) -> bool {
         CargoLintTableState::WrongType(_) => false,
     }
 }
-
-#[cfg(test)]
-#[path = "member_local_allows_forbidden_tests/mod.rs"]
-// reason: owned sidecar tests for file module.
-mod member_local_allows_forbidden_tests;

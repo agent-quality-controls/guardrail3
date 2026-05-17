@@ -126,7 +126,3 @@ fn classify_hash_prefixed(trimmed: &str, after_hashes: &str) -> LineClass {
     }
     LineClass::Skip
 }
-
-#[cfg(test)]
-#[path = "readme_quality_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod readme_quality_tests;

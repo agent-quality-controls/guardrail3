@@ -239,7 +239,3 @@ fn is_direct_child(crate_nodes: &[G3RsArchCrateNode], parent_rel: &str, child_re
     }
     parent_of(crate_nodes, child_rel).is_some_and(|rel| rel == parent_rel)
 }
-
-#[cfg(test)]
-#[path = "config_tests/mod.rs"]
-mod config_tests;

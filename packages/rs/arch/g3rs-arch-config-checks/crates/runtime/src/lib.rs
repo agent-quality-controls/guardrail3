@@ -4,9 +4,6 @@
     reason = "rule modules in this crate follow a uniform layout (private const ID/SELECTOR + pub(crate) check fn); doc-per-private-item adds no signal beyond the module's public docstring"
 )]
 
-#[cfg(test)]
-use g3rs_arch_config_checks_assertions as _;
-
 /// Rule: split crates exceeding the dependency-count threshold.
 mod dependency_count_split;
 /// Rule: validate feature contract across crate boundaries.

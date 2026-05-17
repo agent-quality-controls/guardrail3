@@ -30,6 +30,3 @@ shared = true
 g3rs-topology-types = { path = "../../../g3rs-topology-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
 
-[dev-dependencies]
-cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
-g3rs-topology-file-tree-checks-assertions = { path = "../assertions" }

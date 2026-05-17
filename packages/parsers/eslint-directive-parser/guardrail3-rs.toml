@@ -1,9 +1,7 @@
 profile = "library"
 
 allowed_deps = [
-  "tempfile",
   "eslint-directive-parser-runtime",
-  "eslint-directive-parser-runtime-assertions",
   "eslint-directive-parser-types",
 ]
 

@@ -1,5 +1,3 @@
-#[cfg(test)]
-use g3rs_release_repo_root_checks_assertions as _;
 use g3rs_release_types as _;
 
 /// `publish_dry_run_workflow` module.

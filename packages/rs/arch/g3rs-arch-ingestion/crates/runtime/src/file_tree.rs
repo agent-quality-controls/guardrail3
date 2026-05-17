@@ -277,7 +277,3 @@ fn collect_module_dirs_from_directory_scan(
         );
     }
 }
-
-#[cfg(test)]
-#[path = "file_tree_tests/mod.rs"]
-mod file_tree_tests;

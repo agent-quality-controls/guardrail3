@@ -3,7 +3,6 @@ profile = "library"
 allowed_deps = [
   "serde_json",
   "syncpack-config-parser-runtime",
-  "syncpack-config-parser-runtime-assertions",
   "syncpack-config-parser-types",
 ]
 

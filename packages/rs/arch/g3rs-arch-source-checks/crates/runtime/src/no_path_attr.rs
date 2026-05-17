@@ -50,8 +50,3 @@ fn owned_sidecar_module_name(file_rel_path: &str) -> Option<String> {
     }
     Some(format!("{stem}_tests"))
 }
-
-#[cfg(test)]
-#[path = "no_path_attr_tests/mod.rs"]
-// reason: keep rule tests in the owned x_tests sidecar directory.
-mod no_path_attr_tests;

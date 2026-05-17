@@ -7,7 +7,6 @@ allowed_deps = [
   "g3rs-code-ingestion",
   "g3rs-code-config-checks",
   "g3rs-code-file-tree-checks",
-  "g3rs-code-ingestion-assertions",
   "g3rs-code-ingestion-runtime",
   "g3rs-code-ingestion-types",
   "g3rs-code-source-checks",
@@ -20,7 +19,6 @@ allowed_deps = [
   "rustfmt-toml-parser",
   "serde",
   "serde_json",
-  "tempfile",
 ]
 
 [checks]

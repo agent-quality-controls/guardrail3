@@ -1,9 +1,7 @@
 profile = "library"
 
 allowed_deps = [
-  "tempfile",
   "package-script-command-parser-runtime",
-  "package-script-command-parser-runtime-assertions",
   "package-script-command-parser-types",
   "tree-sitter",
   "tree-sitter-bash",
@@ -17,15 +15,3 @@ rule = "g3rs-code/too-many-effective-code-lines"
 file = "crates/runtime/src/parser.rs"
 selector = "effective-code-lines"
 reason = "Package script parser is a tree-sitter shell reducer; splitting it safely requires a dedicated parser-module extraction."
-
-[[waivers]]
-rule = "g3rs-code/public-struct-named-fields"
-file = "crates/assertions/src/parser.rs"
-selector = "struct:ExpectedEslintInvocation"
-reason = "Assertion fixture structs are declarative expected values used only by the assertions crate API."
-
-[[waivers]]
-rule = "g3rs-code/public-struct-named-fields"
-file = "crates/assertions/src/parser.rs"
-selector = "struct:ExpectedToolInvocation"
-reason = "Assertion fixture structs are declarative expected values used only by the assertions crate API."

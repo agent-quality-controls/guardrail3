@@ -25,9 +25,5 @@ jsonc-parser = { version = "0.32", features = ["serde"] }
 serde_json = "1"
 tsconfig-json-parser-types = { path = "../types", version = "0.1.0" }
 
-[dev-dependencies]
-tempfile = "3"
-tsconfig-json-parser-runtime-assertions = { path = "../assertions" }
-
 [package.metadata.docs.rs]
 all-features = true

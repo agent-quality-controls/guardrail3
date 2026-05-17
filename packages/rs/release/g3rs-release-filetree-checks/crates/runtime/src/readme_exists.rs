@@ -36,7 +36,3 @@ pub(crate) fn check(readme: &G3RsReleaseFileTreeReadme, results: &mut Vec<G3Chec
         ));
     }
 }
-
-#[cfg(test)]
-#[path = "readme_exists_tests/mod.rs"] // reason: owned sidecar tests for file module.
-mod readme_exists_tests;

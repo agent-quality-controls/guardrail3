@@ -70,7 +70,6 @@ allowed_deps = [
   "guardrail3-rs-app-types",
   "guardrail3-rs-family-runner-policy",
   "guardrail3-rs-family-runner-process",
-  "guardrail3-rs-family-runner-process-assertions",
   "guardrail3-rs-family-runner-quality",
   "guardrail3-rs-family-runner-structure",
   "guardrail3-rs-family-runner-style",
@@ -80,7 +79,6 @@ allowed_deps = [
   "g3rs-toml-parser-runtime",
   "g3rs-toml-parser-types",
   "guardrail3-rs-validate-command",
-  "tempfile",
 ]
 
 [[waivers]]

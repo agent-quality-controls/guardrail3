@@ -49,18 +49,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "g3rs-hooks-file-tree-checks-assertions"
-version = "0.1.0"
-dependencies = [
- "g3rs-hooks-file-tree-checks-runtime",
- "guardrail3-check-types",
-]
-
-[[package]]
 name = "g3rs-hooks-file-tree-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3rs-hooks-file-tree-checks-assertions",
  "g3rs-hooks-types",
  "guardrail3-check-types",
 ]

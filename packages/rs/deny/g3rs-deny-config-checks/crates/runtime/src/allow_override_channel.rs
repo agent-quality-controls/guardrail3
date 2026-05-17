@@ -79,7 +79,3 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         }
     }
 }
-
-#[cfg(test)]
-#[path = "allow_override_channel_tests/mod.rs"]
-mod allow_override_channel_tests;

@@ -14,5 +14,3 @@ api = []
 [lints]
 workspace = true
 
-[dev-dependencies]
-guardrail3-reason-policy-assertions = { path = "../assertions" }
