@@ -8,6 +8,82 @@
         "--path",
         ".",
         "--family",
+        "npmrc",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:1ef21b81c5855cfda1eaa45212cff7688ce2845818d462f84be20a9e2282cd90",
+      "fixture_id": "npmrc-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== npmrc ==\n[Info] g3ts-npmrc/root-exists .npmrc root .npmrc exists\n  Found root .npmrc `.npmrc`.\n[Info] g3ts-npmrc/root-parseable .npmrc root .npmrc parses\n  The root .npmrc parses as valid config.\n[Info] g3ts-npmrc/duplicate-keys .npmrc root .npmrc has no duplicate keys\n  The root .npmrc has no duplicate key collisions.\n[Info] g3ts-npmrc/required-settings-present .npmrc root .npmrc baseline settings are present\n  The root .npmrc contains the required narrow baseline settings.\n[Info] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc baseline settings are strong enough\n  The root .npmrc keeps the required baseline values.\n[Info] g3ts-npmrc/extra-settings-inventory .npmrc root .npmrc keeps only baseline settings\n  The root .npmrc does not add extra settings beyond the current baseline.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "npmrc",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:ee187da8bcb8c1e8c9ba3d20e0fa97ca8675cef0fc5d8f398b129761f86d42f9",
+      "fixture_id": "npmrc-R10-missing-root",
+      "stderr": "",
+      "stdout": "== npmrc ==\n[Error] g3ts-npmrc/root-exists - root .npmrc missing\n  No root `.npmrc` file was found. Add a root package-manager config.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "npmrc",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:627d0e2906bbeb085e7d807723ed5fb051f97987b96cfc1bc7215a9d6e6125ff",
+      "fixture_id": "npmrc-R20-parse-error",
+      "stderr": "",
+      "stdout": "== npmrc ==\n[Info] g3ts-npmrc/root-exists .npmrc root .npmrc exists\n  Found root .npmrc `.npmrc`.\n[Error] g3ts-npmrc/root-parseable .npmrc root .npmrc parse error\n  Failed to parse root `.npmrc`: .npmrc line 1 must use key=value syntax\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "npmrc",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:0b2a069e516b1a74f1d8427574248fc626870ec8be3351f98f4c63f52ed40b27",
+      "fixture_id": "npmrc-R30-policy-violations",
+      "stderr": "",
+      "stdout": "== npmrc ==\n[Info] g3ts-npmrc/root-exists .npmrc root .npmrc exists\n  Found root .npmrc `.npmrc`.\n[Info] g3ts-npmrc/root-parseable .npmrc root .npmrc parses\n  The root .npmrc parses as valid config.\n[Error] g3ts-npmrc/duplicate-keys .npmrc root .npmrc has duplicate key\n  Duplicate root .npmrc key `strict-peer-dependencies` is not allowed; pnpm uses the last value and can mask earlier settings.\n[Error] g3ts-npmrc/required-settings-present .npmrc root .npmrc baseline settings are missing\n  The root .npmrc is missing required settings: disallow-workspace-cycles.\n[Error] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc setting is weaker than baseline\n  Root .npmrc setting `strict-peer-dependencies` is `false` but must be `true`.\n[Error] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc setting is weaker than baseline\n  Root .npmrc setting `engine-strict` is `false` but must be `true`.\n[Error] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc setting is weaker than baseline\n  Root .npmrc setting `minimum-release-age` is `0` but must be `1440`.\n[Error] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc setting is weaker than baseline\n  Root .npmrc setting `block-exotic-subdeps` is `false` but must be `true`.\n[Error] g3ts-npmrc/required-settings-strong-enough .npmrc root .npmrc setting is weaker than baseline\n  Root .npmrc setting `trust-policy` is `allow` but must be `warn`.\n[Info] g3ts-npmrc/extra-settings-inventory .npmrc root .npmrc has extra setting\n  Extra root .npmrc setting `legacy-peer-deps=true` is outside the current baseline. Keep it only if it is intentional.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "package",
         "--rules-only",
         "--inventory"

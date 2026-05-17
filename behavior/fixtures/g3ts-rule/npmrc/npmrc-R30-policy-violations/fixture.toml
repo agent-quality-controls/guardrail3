@@ -1,0 +1,21 @@
+id = "npmrc-R30-policy-violations"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "npmrc", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "npmrc"
+target_rules = [
+  "g3ts-npmrc/duplicate-keys",
+  "g3ts-npmrc/required-settings-present",
+  "g3ts-npmrc/required-settings-strong-enough",
+]
+expected_findings = [
+  "g3ts-npmrc/duplicate-keys",
+  "g3ts-npmrc/required-settings-present",
+  "g3ts-npmrc/required-settings-strong-enough",
+  "g3ts-npmrc/extra-settings-inventory",
+]

@@ -1,15 +1,31 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-20-29.076268Z-d06b5496",
-  "run_commit": "9cdd1fb87",
+  "run_id": "2026-05-17T18-32-52.225654Z-d06b5496",
+  "run_commit": "73569f2c2",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:20:29.076268Z",
-  "fixture_hash": "sha256:f9e2d0f2d8ddb2bee7907fb0415301d12c92a622dae6027b6433d368aa9a4954",
+  "recorded_at": "2026-05-17T18:32:52.225654Z",
+  "fixture_hash": "sha256:d6154f922265f9b79e54d5f2d0199d3c840e5beec3f7330aa664bbd49e4ad7cb",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
+    {
+      "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:d8273242b26455fe1cfb1d1f64222348470f7dc356210a9a09b82a37b6b76d34"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R10-missing-root/fixture.toml",
+      "sha256": "sha256:2751c98df52cb6ba9ac165743f67f1cb1c910c0fb4d84ee719b61ddfc1cfe19b"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R20-parse-error/fixture.toml",
+      "sha256": "sha256:69e99603b422531785842e153e429d95e8889c95c2d441c6c7480496120f70d3"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R30-policy-violations/fixture.toml",
+      "sha256": "sha256:ba18913b4bb4f4b732f4ed3f01c9a8331a7d2b56b3e4a8b5f94f4fa0ca2eb8fe"
+    },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R00-clean-golden/fixture.toml",
       "sha256": "sha256:f073e8d665a73987128bf73738ad64a87b2bc48673bf0b935cfe4bc0bdc684da"
@@ -31,5 +47,5 @@
       "sha256": "sha256:09ce213996d7ddc6418566f48967d2802d82eb50655864291e4956a9d67772f2"
     }
   ],
-  "comment": "rename G3TS rule fixture suite and folders"
+  "comment": "Add npmrc family rule fixtures"
 }
