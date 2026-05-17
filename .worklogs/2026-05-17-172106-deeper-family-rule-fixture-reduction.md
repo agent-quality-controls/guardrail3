@@ -1,6 +1,6 @@
 # Summary
 
-Reduced the `g3rs-rules` fixture corpus with a second, deeper fixture3 reduction pass.
+Reduced the `g3rs-rule` fixture corpus with a second, deeper fixture3 reduction pass.
 
 The first reduction was too conservative because it skipped clean copied fixtures and used exact-output preservation. This pass added a semantic rule-set oracle, reduced clean fixtures, removed ignored build artifacts, and approved the new fixture output after verification.
 
@@ -19,7 +19,7 @@ The first reduction was too conservative because it skipped clean copied fixture
 
 # Reduction Result
 
-Measured against commit `867e8902e` under `behavior/fixtures/g3rs-rules`:
+Measured against commit `867e8902e` under `behavior/fixtures/g3rs-rule`:
 
 - Files: 1,352 to 306, reduction 1,046 files, 77.4%.
 - Folders: 600 to 257, reduction 343 folders, 57.2%.
@@ -28,21 +28,21 @@ Measured against commit `867e8902e` under `behavior/fixtures/g3rs-rules`:
 
 # Verification
 
-- `fixture3 check --suite g3rs-rule-fixtures --json`
+- `fixture3 check --suite g3rs-rule --json`
 - `fixture3 check --all --json`
-- `python3 scripts/behavior/verify-family-rule-fixtures.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
-- `python3 -m py_compile scripts/behavior/reduce-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py`
+- `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
+- `python3 -m py_compile scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py`
 - `git diff --check`
 
 # Key Files For Context
 
 - `.plans/2026-05-17-163104-deeper-fixture-reduction.md`
-- `scripts/behavior/reduce-broken-family-rule-fixtures.py`
+- `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py`
 - `scripts/behavior/reduce-g3rs-fixture-oracle.py`
 - `scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py`
-- `behavior/fixtures/g3rs-rules`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
+- `behavior/fixtures/g3rs-rule`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
 
 # Next Steps
 

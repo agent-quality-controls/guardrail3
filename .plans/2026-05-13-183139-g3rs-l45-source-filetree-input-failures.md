@@ -251,7 +251,7 @@ Expected count change if exactly these four absent rules become covered:
 - `baseline_error_warn_rule_ids`: `209 -> 213`
 - `absent_rule_ids`: `10 -> 6`
 
-Do not update counts by hand before running `verify-rule-coverage.py`; if the actual numbers differ, inspect the emitted baselines before changing the manifest.
+Do not update counts by hand before running `verify-g3rs-rule-fixture-coverage.py`; if the actual numbers differ, inspect the emitted baselines before changing the manifest.
 
 ## Required Verification
 
@@ -286,6 +286,6 @@ Reviewer C:
 
 - inspect manifest, baseline, and coverage matrix
 - verify every new `Error`, `Warn`, and intended `Info` row is pinned
-- verify `verify-rule-coverage.py` rejects stale counts and missing coverage rows
+- verify `verify-g3rs-rule-fixture-coverage.py` rejects stale counts and missing coverage rows
 
 No implementation stage is done until adversarial review returns no `MUST FIX`.

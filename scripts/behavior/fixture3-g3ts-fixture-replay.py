@@ -38,7 +38,7 @@ def main() -> int:
 
 def parse_args(argv: list[str]) -> tuple[Path, list[Path]]:
     if len(argv) < 3 or argv[0] != "--manifest":
-        raise SystemExit("usage: fixture3-g3ts-replay.py --manifest <path> <fixture.toml>...")
+        raise SystemExit("usage: fixture3-g3ts-fixture-replay.py --manifest <path> <fixture.toml>...")
     manifest_path = absolute_path(argv[1])
     fixture_paths = [absolute_path(path) for path in argv[2:]]
     for fixture_path in fixture_paths:

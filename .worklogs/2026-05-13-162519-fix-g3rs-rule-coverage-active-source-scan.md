@@ -16,7 +16,7 @@ The coverage matrix now has `266` active source rule IDs instead of `276`; the r
 ## Verification
 
 - `python3 -m py_compile scripts/behavior/*.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - scanner negative controls:
   - fake ID under `rule_tests` is ignored
   - fake ID under runtime source fails as missing from the coverage matrix
@@ -27,7 +27,7 @@ The coverage matrix now has `266` active source rule IDs instead of `276`; the r
 
 ## Key Files For Context
 
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `behavior/coverage/g3rs-rule-coverage.toml`
 - `.plans/2026-05-13-160231-g3rs-replay-coverage-matrix.md`
 - `.plans/2026-05-13-160231-g3rs-replay-coverage-matrix.md.manifest.toml`

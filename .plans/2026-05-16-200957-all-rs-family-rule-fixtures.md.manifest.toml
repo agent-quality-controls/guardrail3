@@ -1,8 +1,8 @@
 [target]
-fixture_root = "behavior/fixtures/g3rs-rules"
+fixture_root = "behavior/fixtures/g3rs-rule"
 suite = "g3rs-validate"
-rule_fixture_suite = "g3rs-rule-fixtures"
-verifier = "scripts/behavior/verify-family-rule-fixtures.py"
+rule_fixture_suite = "g3rs-rule"
+verifier = "scripts/behavior/verify-g3rs-family-rule-fixtures.py"
 mode = "one_clean_golden_plus_minimal_broken_fixtures_per_family"
 active_rule_count = 247
 
@@ -192,13 +192,13 @@ cli_unreachable_rules = [
 ]
 
 [[verification]]
-command = "fixture3 check --suite g3rs-rule-fixtures"
+command = "fixture3 check --suite g3rs-rule"
 
 [[verification]]
-command = "python3 scripts/behavior/verify-family-rule-fixtures.py"
+command = "python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py"
 
 [[verification]]
-command = "python3 scripts/behavior/verify-rule-coverage.py"
+command = "python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py"
 
 [[verification]]
 command = "python3 scripts/behavior/verify-kept-test-dispositions.py"

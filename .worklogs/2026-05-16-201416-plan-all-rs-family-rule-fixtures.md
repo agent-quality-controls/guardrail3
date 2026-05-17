@@ -9,8 +9,8 @@ Decisions made:
 Key files for context:
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md.manifest.toml`
-- `scripts/behavior/verify-family-rule-fixtures.py`
-- `behavior/fixtures/g3rs-rules/cargo`
+- `scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `behavior/fixtures/g3rs-rule/cargo`
 
 Verification:
 - `git diff --check`
@@ -19,4 +19,4 @@ Verification:
 
 Next steps:
 - Implement the next planned family fixture set, starting with `fmt`.
-- Update `verify-family-rule-fixtures.py` so completed families must break every active family rule ID unless a kept-test ledger row explicitly marks it non-CLI-exposable.
+- Update `verify-g3rs-family-rule-fixtures.py` so completed families must break every active family rule ID unless a kept-test ledger row explicitly marks it non-CLI-exposable.

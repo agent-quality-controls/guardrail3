@@ -28,7 +28,7 @@ def main() -> int:
     plan_manifest = load_toml(plan_manifest_path)
     failures = verify_rule_coverage(plan_manifest)
     if failures:
-        print("behavior-rule-coverage: FAIL")
+        print("g3rs-rule-fixture-coverage: FAIL")
         for failure in failures:
             print(f"  {failure}")
         return 1
@@ -39,7 +39,7 @@ def main() -> int:
     replaced = sum(1 for row in rows if row["coverage_status"] == "replaced_by_managed_hook")
     planned = len(rows) - covered - replaced
     print(
-        f"behavior-rule-coverage: PASS source:{len(rows)} covered:{covered} replaced:{replaced} planned:{planned}"
+        f"g3rs-rule-fixture-coverage: PASS source:{len(rows)} covered:{covered} replaced:{replaced} planned:{planned}"
     )
     return 0
 
@@ -50,7 +50,7 @@ def path_from_argv(argv: list[str]) -> Path:
     if len(argv) == 2 and argv[0] == "--manifest":
         path = Path(argv[1])
         return path if path.is_absolute() else REPO_ROOT / path
-    raise SystemExit("usage: verify-rule-coverage.py [--manifest <path>]")
+    raise SystemExit("usage: verify-g3rs-rule-fixture-coverage.py [--manifest <path>]")
 
 
 def load_toml(path: Path) -> dict[str, Any]:

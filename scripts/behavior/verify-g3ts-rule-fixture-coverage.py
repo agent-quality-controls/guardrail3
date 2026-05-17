@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / ".plans" / "2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
-APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3ts-rule-fixtures" / "approved.normalized.json"
+APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3ts-rule" / "approved.normalized.json"
 RULE_PATTERN = re.compile(r"g3ts-[a-z0-9-]+(?:-[a-z0-9-]+)*/[a-z0-9-]+(?:-[a-z0-9-]+)*")
 FINDING_PATTERN = re.compile(r"^\[(Error|Warn|Info)\] (g3ts-[^ ]+)", re.MULTILINE)
 
@@ -45,14 +45,14 @@ def main() -> int:
                 failures.append(f"{rule_id}: completed family has no fixture coverage classification")
 
     if failures:
-        print("g3ts-rule-coverage: FAIL")
+        print("g3ts-rule-fixture-coverage: FAIL")
         for failure in failures:
             print(f"  {failure}")
         return 1
 
     covered = sum(1 for states_for_rule in states.values() if "error_or_warn" in states_for_rule)
     print(
-        "g3ts-rule-coverage: PASS "
+        "g3ts-rule-fixture-coverage: PASS "
         f"source:{len(rule_ids)} covered_error_or_warn:{covered} "
         f"inventory_only:{len(inventory_only)} cli_unreachable:{len(cli_unreachable)}"
     )

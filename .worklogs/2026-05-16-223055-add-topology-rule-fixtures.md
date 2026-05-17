@@ -1,7 +1,7 @@
 Summary:
-- Added topology family rule fixtures under `behavior/fixtures/g3rs-rules/topology`.
+- Added topology family rule fixtures under `behavior/fixtures/g3rs-rule/topology`.
 - The topology fixture set has one clean golden fixture and two broken fixtures.
-- Approved the updated `g3rs-rule-fixtures` golden output.
+- Approved the updated `g3rs-rule` golden output.
 
 Decisions made:
 - Merged membership, escaping member path, nested workspace, nested guardrail config, and illegal workspace-local file placement into one structural fixture because they emit together without hiding each other.
@@ -12,13 +12,13 @@ Key files for context:
 - `.plans/2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md.manifest.toml`
-- `behavior/fixtures/g3rs-rules/topology`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
+- `behavior/fixtures/g3rs-rule/topology`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
 
 Verification:
-- `fixture3 check --suite g3rs-rule-fixtures`
-- `python3 scripts/behavior/verify-family-rule-fixtures.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `fixture3 check --suite g3rs-rule`
+- `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `python3 scripts/behavior/verify-kept-test-dispositions.py`
 - `python3 scripts/behavior/verify-test-deletion.py`
 - `bash scripts/behavior/verify-all.sh`

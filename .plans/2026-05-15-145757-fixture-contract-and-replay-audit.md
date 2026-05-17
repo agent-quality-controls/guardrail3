@@ -52,7 +52,7 @@ Required result:
 
 Existing acceptable implementation:
 
-- `scripts/behavior/fixture3-g3rs-replay.py` is a generic fixture3 command runner
+- `scripts/behavior/fixture3-g3rs-fixture-replay.py` is a generic fixture3 command runner
 - `scripts/behavior/replay_common.py` is generic fixture command support
 - the JSON `records` array is allowed because one fixture3 command can run more than one fixture and more than one command per fixture
 

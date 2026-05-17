@@ -88,11 +88,11 @@ path = "scripts/behavior/verify-all.sh"
 forbidden = "generate-baselines.py"
 
 [[script_reads]]
-path = "scripts/behavior/verify-rule-coverage.py"
+path = "scripts/behavior/verify-g3rs-rule-fixture-coverage.py"
 required = "golden_outputs"
 
 [[script_not_contains]]
-path = "scripts/behavior/verify-rule-coverage.py"
+path = "scripts/behavior/verify-g3rs-rule-fixture-coverage.py"
 forbidden = "behavior/baselines"
 
 [[script_reads]]

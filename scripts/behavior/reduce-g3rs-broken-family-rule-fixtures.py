@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RULE_FIXTURE_ROOT = REPO_ROOT / "behavior/fixtures/g3rs-rules"
+RULE_FIXTURE_ROOT = REPO_ROOT / "behavior/fixtures/g3rs-rule"
 REPLAY_MANIFEST = (
     REPO_ROOT / ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
 )
@@ -58,7 +58,7 @@ def fixture_roots() -> list[Path]:
 
 def reduce_root(root: Path, max_oracle_calls: int | None, oracle: str) -> dict[str, object]:
     rel = root.relative_to(REPO_ROOT)
-    scratch = REPO_ROOT / ".fixture3/reduce-broken-family-rule-fixtures" / rel
+    scratch = REPO_ROOT / ".fixture3/reduce-g3rs-broken-family-rule-fixtures" / rel
     backup = scratch / "backup"
     work_dir = scratch / "work"
     approved_dir = scratch / "approved"

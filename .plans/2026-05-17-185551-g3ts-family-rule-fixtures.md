@@ -22,7 +22,7 @@ G3TS has no active `fixture3` suites.
 
 Current `fixture3.yaml` suites are all Rust-only:
 
-- `g3rs-rule-fixtures`
+- `g3rs-rule`
 - `g3rs-validate-repo`
 - `g3rs-cli-output`
 
@@ -67,9 +67,9 @@ Total discovered production G3TS rule IDs: `222`.
 Add one rule fixture suite:
 
 ```text
-behavior/fixtures/g3ts-rules/<family>/<fixture-id>/fixture.toml
-behavior/fixtures/g3ts-rules/<family>/<fixture-id>/repo/...
-behavior/golden/g3ts-rule-fixtures/approved.normalized.json
+behavior/fixtures/g3ts-rule/<family>/<fixture-id>/fixture.toml
+behavior/fixtures/g3ts-rule/<family>/<fixture-id>/repo/...
+behavior/golden/g3ts-rule/approved.normalized.json
 ```
 
 Add one repo-level suite:
@@ -99,7 +99,7 @@ Do not serialize internal TS family structs for fixture comparison.
 Each family folder must contain exactly one clean fixture:
 
 ```text
-behavior/fixtures/g3ts-rules/<family>/<family>-R00-clean-golden/
+behavior/fixtures/g3ts-rule/<family>/<family>-R00-clean-golden/
 ```
 
 Each family folder must contain the minimum number of broken fixtures needed to expose every CLI-visible rule in that family.
@@ -176,13 +176,13 @@ Split fixtures when any of these are true:
 Add these suites to `fixture3.yaml`:
 
 ```yaml
-g3ts-rule-fixtures:
+g3ts-rule:
   fixtures:
-    - "behavior/fixtures/g3ts-rules/*/*/fixture.toml"
+    - "behavior/fixtures/g3ts-rule/*/*/fixture.toml"
   command:
     argv:
       - "python3"
-      - "scripts/behavior/fixture3-g3ts-replay.py"
+      - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
       - "--manifest"
       - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
       - "{fixtures}"
@@ -193,7 +193,7 @@ g3ts-validate-repo:
   command:
     argv:
       - "python3"
-      - "scripts/behavior/fixture3-g3ts-replay.py"
+      - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
       - "--manifest"
       - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
       - "{fixtures}"
@@ -204,22 +204,22 @@ g3ts-cli-output:
   command:
     argv:
       - "python3"
-      - "scripts/behavior/fixture3-g3ts-replay.py"
+      - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
       - "--manifest"
       - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
       - "{fixtures}"
 ```
 
-The G3TS replay script should mirror `scripts/behavior/fixture3-g3rs-replay.py`, with only the tool name and schema version changed.
+The G3TS replay script should mirror `scripts/behavior/fixture3-g3rs-fixture-replay.py`, with only the tool name and schema version changed.
 
 ## Verification Scripts
 
 Add:
 
 ```text
-scripts/behavior/fixture3-g3ts-replay.py
+scripts/behavior/fixture3-g3ts-fixture-replay.py
 scripts/behavior/verify-g3ts-family-rule-fixtures.py
-scripts/behavior/verify-g3ts-rule-coverage.py
+scripts/behavior/verify-g3ts-rule-fixture-coverage.py
 ```
 
 `verify-g3ts-family-rule-fixtures.py` must:
@@ -227,7 +227,7 @@ scripts/behavior/verify-g3ts-rule-coverage.py
 - read the manifest
 - discover active G3TS production rule IDs under `packages/ts`
 - ignore `target`, `tests`, `contract_tests`, `assertions`, and `*_tests`
-- load every `behavior/fixtures/g3ts-rules/*/*/fixture.toml`
+- load every `behavior/fixtures/g3ts-rule/*/*/fixture.toml`
 - require exactly one `family_rule_clean_golden` fixture per completed family
 - require every `target_rules` entry to exist in active production rule IDs
 - require every `target_rules` entry to also be listed in `expected_findings`
@@ -235,7 +235,7 @@ scripts/behavior/verify-g3ts-rule-coverage.py
 - require every non-clean fixture target rule to emit `Error` or `Warn`
 - fail on duplicate fixture IDs
 
-`verify-g3ts-rule-coverage.py` must:
+`verify-g3ts-rule-fixture-coverage.py` must:
 
 - read the manifest
 - discover all active G3TS production rule IDs
@@ -286,11 +286,11 @@ Implement in this order:
 
 Do not delete any G3TS test or assertion code until:
 
-- `fixture3 check --suite g3ts-rule-fixtures --json` passes
+- `fixture3 check --suite g3ts-rule --json` passes
 - `fixture3 check --suite g3ts-validate-repo --json` passes
 - `fixture3 check --suite g3ts-cli-output --json` passes
 - `python3 scripts/behavior/verify-g3ts-family-rule-fixtures.py` passes
-- `python3 scripts/behavior/verify-g3ts-rule-coverage.py` passes
+- `python3 scripts/behavior/verify-g3ts-rule-fixture-coverage.py` passes
 - every active G3TS production rule ID is covered, inventory-only, or CLI-unreachable
 
 ## Non-Goals

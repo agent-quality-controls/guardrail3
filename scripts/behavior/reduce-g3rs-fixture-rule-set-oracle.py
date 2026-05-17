@@ -22,7 +22,7 @@ def main() -> int:
     completed = subprocess.run(
         [
             sys.executable,
-            str(REPO_ROOT / "scripts/behavior/fixture3-g3rs-replay.py"),
+            str(REPO_ROOT / "scripts/behavior/fixture3-g3rs-fixture-replay.py"),
             *args[:2],
             *fixture_paths,
         ],

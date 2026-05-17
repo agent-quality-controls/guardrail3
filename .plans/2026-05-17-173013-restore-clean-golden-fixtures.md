@@ -6,9 +6,9 @@ Clean golden fixtures are not minimization targets. Their job is to remain a ful
 
 # Approach
 
-- Restore every `behavior/fixtures/g3rs-rules/*/*R00-clean-golden` directory from commit `5ab595eb5`, the commit where clean fixtures were still intentionally unchanged.
+- Restore every `behavior/fixtures/g3rs-rule/*/*R00-clean-golden` directory from commit `5ab595eb5`, the commit where clean fixtures were still intentionally unchanged.
 - Keep the reduced broken fixtures from commit `1a5b09a9e`.
-- Change `scripts/behavior/reduce-broken-family-rule-fixtures.py` so normal operation cannot reduce clean fixtures:
+- Change `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py` so normal operation cannot reduce clean fixtures:
   - remove `--include-clean`
   - remove `--all-cases`
   - always skip directories containing `R00-clean-golden`
@@ -23,7 +23,7 @@ Clean golden fixtures are not minimization targets. Their job is to remain a ful
 
 # Files To Modify
 
-- `behavior/fixtures/g3rs-rules/*/*R00-clean-golden`
-- `scripts/behavior/reduce-broken-family-rule-fixtures.py`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
-- `behavior/golden/g3rs-rule-fixtures/approved.meta.json`
+- `behavior/fixtures/g3rs-rule/*/*R00-clean-golden`
+- `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
+- `behavior/golden/g3rs-rule/approved.meta.json`

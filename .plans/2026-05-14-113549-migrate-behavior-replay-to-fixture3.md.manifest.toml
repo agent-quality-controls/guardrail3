@@ -8,7 +8,7 @@ to = "fixture3.yaml"
 
 [[rename]]
 from = "scripts/behavior/goldencheck-g3rs-replay.py"
-to = "scripts/behavior/fixture3-g3rs-replay.py"
+to = "scripts/behavior/fixture3-g3rs-fixture-replay.py"
 
 [[rename]]
 from = "scripts/behavior/verify-goldencheck-migration.py"
@@ -20,7 +20,7 @@ manifest = "fixture3.yaml"
 approved_dir = "behavior/golden/g3rs-validate-repo"
 received_dir = ".fixture3/g3rs-validate-repo"
 diff_dir = ".fixture3/g3rs-validate-repo"
-runner = "scripts/behavior/fixture3-g3rs-replay.py"
+runner = "scripts/behavior/fixture3-g3rs-fixture-replay.py"
 schema_version = "g3rs-replay-v1"
 
 [[fixture3_suite]]
@@ -29,7 +29,7 @@ manifest = "fixture3.yaml"
 approved_dir = "behavior/golden/g3rs-cli-output"
 received_dir = ".fixture3/g3rs-cli-output"
 diff_dir = ".fixture3/g3rs-cli-output"
-runner = "scripts/behavior/fixture3-g3rs-replay.py"
+runner = "scripts/behavior/fixture3-g3rs-fixture-replay.py"
 schema_version = "g3rs-replay-v1"
 
 [[forbidden_active_reference]]

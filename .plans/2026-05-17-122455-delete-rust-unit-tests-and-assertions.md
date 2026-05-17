@@ -49,10 +49,10 @@ Reason: current G3RS fixtures prove the Rust CLI external behavior. They do not 
    - Regenerate Cargo.lock files only where lockfiles changed because assertion crates were removed.
 
 5. Verify external behavior stayed stable.
-   - `fixture3 check --suite g3rs-rule-fixtures`
+   - `fixture3 check --suite g3rs-rule`
    - `fixture3 check --all`
-   - `python3 scripts/behavior/verify-family-rule-fixtures.py`
-   - `python3 scripts/behavior/verify-rule-coverage.py`
+   - `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+   - `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
    - `python3 scripts/behavior/verify-test-deletion.py`
    - `bash scripts/behavior/verify-all.sh`
    - `g3rs validate repo --path "$PWD"`

@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / ".plans" / "2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml"
-APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3rs-rule-fixtures" / "approved.normalized.json"
+APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3rs-rule" / "approved.normalized.json"
 DISPOSITION_PATH = REPO_ROOT / "behavior" / "migration" / "g3rs-kept-test-disposition.toml"
 RULE_ID_RE = re.compile(r'const ID: &str = "([^"]+)";')
 
@@ -34,14 +34,14 @@ def main() -> int:
     verify_completed_family_ledger_coverage(manifest, fixture_rows, rule_ids, failures)
 
     if failures:
-        print("family-rule-fixtures: FAIL")
+        print("g3rs-family-rule-fixtures: FAIL")
         for failure in failures:
             print(f"  {failure}")
         return 1
 
     families = sorted({row["rule_family"] for row in fixture_rows})
     print(
-        "family-rule-fixtures: PASS "
+        "g3rs-family-rule-fixtures: PASS "
         f"families:{','.join(families) if families else '-'} fixtures:{len(fixture_rows)}"
     )
     return 0

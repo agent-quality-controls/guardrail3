@@ -7,8 +7,8 @@ Replace remaining rule-level unit tests with minimized family-scoped CLI fixture
 The fixture design is:
 
 ```text
-behavior/fixtures/g3rs-rules/<family>/<fixture-id>/fixture.toml
-behavior/fixtures/g3rs-rules/<family>/<fixture-id>/repo/...
+behavior/fixtures/g3rs-rule/<family>/<fixture-id>/fixture.toml
+behavior/fixtures/g3rs-rule/<family>/<fixture-id>/repo/...
 ```
 
 Each fixture is a normal `g3rs validate` fixture. It tests the external CLI surface only:
@@ -69,7 +69,7 @@ Final fixture ownership:
 - `behavior/fixtures/g3rs-global/*`
   - global CLI/adoption/gating states
   - examples: workspace root missing, guardrail config missing, guardrail config invalid, required inputs missing, clean baseline
-- `behavior/fixtures/g3rs-rules/<family>/*`
+- `behavior/fixtures/g3rs-rule/<family>/*`
   - minimized rule fixtures for one family
   - each fixture triggers the maximum compatible set of rules inside that family
 - `behavior/fixtures/g3rs-validate-repo/*`
@@ -83,7 +83,7 @@ Migration rule:
 
 - Existing `behavior/fixtures/g3rs/*` remains temporarily as a broad safety corpus.
 - Do not treat broad `g3rs/*` fixtures as the final rule coverage design.
-- For each completed family, move rule coverage into `g3rs-rules/<family>`.
+- For each completed family, move rule coverage into `g3rs-rule/<family>`.
 - After a family is covered by minimized family-rule fixtures, remove or reduce old broad fixtures whose only remaining purpose was that family's rule coverage.
 - Keep only truly global fixtures in the global corpus.
 
@@ -92,16 +92,16 @@ Migration rule:
 Use one folder per rule family:
 
 ```text
-behavior/fixtures/g3rs-rules/apparch/
-behavior/fixtures/g3rs-rules/arch/
-behavior/fixtures/g3rs-rules/cargo/
-behavior/fixtures/g3rs-rules/clippy/
-behavior/fixtures/g3rs-rules/deny/
-behavior/fixtures/g3rs-rules/deps/
-behavior/fixtures/g3rs-rules/fmt/
-behavior/fixtures/g3rs-rules/hooks/
-behavior/fixtures/g3rs-rules/release/
-behavior/fixtures/g3rs-rules/toolchain/
+behavior/fixtures/g3rs-rule/apparch/
+behavior/fixtures/g3rs-rule/arch/
+behavior/fixtures/g3rs-rule/cargo/
+behavior/fixtures/g3rs-rule/clippy/
+behavior/fixtures/g3rs-rule/deny/
+behavior/fixtures/g3rs-rule/deps/
+behavior/fixtures/g3rs-rule/fmt/
+behavior/fixtures/g3rs-rule/hooks/
+behavior/fixtures/g3rs-rule/release/
+behavior/fixtures/g3rs-rule/toolchain/
 ```
 
 Do not create folders for families with no `needs_rule_fixture_or_golden_output` rows.
@@ -117,9 +117,9 @@ Fixture ID format:
 Examples:
 
 ```text
-behavior/fixtures/g3rs-rules/cargo/cargo-R10-workspace-policy/fixture.toml
-behavior/fixtures/g3rs-rules/clippy/clippy-R10-managed-config/fixture.toml
-behavior/fixtures/g3rs-rules/deny/deny-R10-policy-values/fixture.toml
+behavior/fixtures/g3rs-rule/cargo/cargo-R10-workspace-policy/fixture.toml
+behavior/fixtures/g3rs-rule/clippy/clippy-R10-managed-config/fixture.toml
+behavior/fixtures/g3rs-rule/deny/deny-R10-policy-values/fixture.toml
 ```
 
 ## Fixture Metadata Contract
@@ -194,7 +194,7 @@ Add the family-rule fixtures to the existing `g3rs-validate` suite while the mig
 ```yaml
 fixtures:
   - "behavior/fixtures/g3rs/*/fixture.toml"
-  - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+  - "behavior/fixtures/g3rs-rule/*/*/fixture.toml"
 ```
 
 Do not create one suite per family unless fixture3 output becomes too large to review. The product boundary is still the same CLI command.
@@ -204,7 +204,7 @@ Final `g3rs-validate` fixture input should be:
 ```yaml
 fixtures:
   - "behavior/fixtures/g3rs-global/*/fixture.toml"
-  - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+  - "behavior/fixtures/g3rs-rule/*/*/fixture.toml"
 ```
 
 The old glob is transitional:
@@ -221,7 +221,7 @@ Remove it after global fixtures are renamed/reduced and family-rule coverage has
 Add a verifier:
 
 ```text
-scripts/behavior/verify-family-rule-fixtures.py
+scripts/behavior/verify-g3rs-family-rule-fixtures.py
 ```
 
 The verifier must:
@@ -229,7 +229,7 @@ The verifier must:
 1. Read `behavior/migration/g3rs-kept-test-disposition.toml`.
 2. Select rows with `disposition = "needs_rule_fixture_or_golden_output"`.
 3. Extract each row's semantic rule name from the test path or sidecar rule file.
-4. Read all `behavior/fixtures/g3rs-rules/*/*/fixture.toml`.
+4. Read all `behavior/fixtures/g3rs-rule/*/*/fixture.toml`.
 5. Build the set of `target_rules`.
 6. Build the set of `expected_findings`.
 7. Fail if any target rule is missing from `expected_findings`.
@@ -239,7 +239,7 @@ The verifier must:
 
 This verifier does not decide whether a fixture's contents are minimal. It verifies declared coverage.
 
-During incremental migration, the verifier must fail on malformed family-rule fixture metadata and unknown rule IDs for every fixture that exists. It must not fail just because an unimplemented family has no `g3rs-rules/<family>` folder yet.
+During incremental migration, the verifier must fail on malformed family-rule fixture metadata and unknown rule IDs for every fixture that exists. It must not fail just because an unimplemented family has no `g3rs-rule/<family>` folder yet.
 
 For test-disposition coverage, the verifier must only require rows for families listed as completed in the manifest. A family is completed only after its fixture set covers all CLI-exposable rows for that family and non-CLI-exposable rows have been reclassified to `keep_internal_unit_test`.
 
@@ -300,7 +300,7 @@ Process:
 1. Read every `needs_rule_fixture_or_golden_output` row under `packages/rs/cargo/g3rs-cargo-config-checks`.
 2. Map each row to its semantic rule ID.
 3. Group rules by required repo state.
-4. Create the smallest set of `behavior/fixtures/g3rs-rules/cargo/*` fixtures that covers all cargo target rules.
+4. Create the smallest set of `behavior/fixtures/g3rs-rule/cargo/*` fixtures that covers all cargo target rules.
 5. Add those fixtures to `fixture3.yaml`.
 6. Run `fixture3 check --suite g3rs-validate`.
 7. Approve output only after verifying target findings appear.
@@ -314,7 +314,7 @@ After adding or changing fixtures:
 
 ```bash
 fixture3 check --suite g3rs-validate
-python3 scripts/behavior/verify-family-rule-fixtures.py
+python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py
 python3 scripts/behavior/verify-test-deletion.py
 bash scripts/behavior/verify-all.sh
 g3rs validate repo --path "$PWD"

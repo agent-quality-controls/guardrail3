@@ -279,7 +279,7 @@ Do not remove:
 - `behavior/golden/g3rs-cli-output`
 - `behavior/fixtures/g3rs-report-output/*`
 - `behavior/golden/g3rs-report-output`
-- `scripts/behavior/fixture3-g3rs-replay.py`
+- `scripts/behavior/fixture3-g3rs-fixture-replay.py`
 - `scripts/behavior/fixture3-g3rs-report-output.py`
 - `scripts/behavior/replay_common.py`
 

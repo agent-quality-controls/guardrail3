@@ -22,7 +22,7 @@ Current behavior replay code lives under:
 - `scripts/behavior/verify-baselines.py`
 - `scripts/behavior/verify-fixtures.py`
 - `scripts/behavior/verify-compaction.py`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `scripts/behavior/verify-ledger.py`
 - `scripts/behavior/verify-test-deletion.py`
 - `scripts/behavior/verify-all.sh`
@@ -242,7 +242,7 @@ Do not delete these scripts in the same step:
 
 - `scripts/behavior/verify-fixtures.py`
 - `scripts/behavior/verify-compaction.py`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `scripts/behavior/verify-ledger.py`
 - `scripts/behavior/verify-test-deletion.py`
 
@@ -281,7 +281,7 @@ Do not add compatibility mode for old `behavior/baselines`.
 
 ## Updating Existing Verifiers
 
-### `verify-rule-coverage.py`
+### `verify-g3rs-rule-fixture-coverage.py`
 
 Current behavior:
 
@@ -344,7 +344,7 @@ Required order:
 python3 "$HERE/verify-fixtures.py"
 python3 "$HERE/verify-compaction.py"
 goldencheck check --all
-python3 "$HERE/verify-rule-coverage.py"
+python3 "$HERE/verify-g3rs-rule-fixture-coverage.py"
 python3 "$HERE/verify-ledger.py"
 python3 "$HERE/verify-test-deletion.py"
 ```
@@ -479,7 +479,7 @@ Expected result:
 
 Deliverables:
 
-- `scripts/behavior/verify-rule-coverage.py` reads approved golden output
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py` reads approved golden output
 - `scripts/behavior/verify-fixtures.py` verifies each baseline-required fixture has approved records
 - `scripts/behavior/verify-all.sh` no longer calls `verify-baselines.py`
 
@@ -552,7 +552,7 @@ Minimum manifest rows:
 - old `behavior/baselines/g3rs-validate-repo` is absent
 - `scripts/behavior/generate-baselines.py` is absent
 - `scripts/behavior/verify-baselines.py` is absent
-- `verify-rule-coverage.py` reads `behavior/golden`
+- `verify-g3rs-rule-fixture-coverage.py` reads `behavior/golden`
 - `verify-fixtures.py` checks approved records for every baseline-required fixture
 
 ## Adversarial Review Requirements

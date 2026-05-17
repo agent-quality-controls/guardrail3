@@ -11,7 +11,7 @@ The initial combined fixture hid cargo-deny behavior, so it was split into four 
 - Put unknown top-level deny keys in `L60-deny-schema-invalid-policy-invalid`.
 - Put deprecated advisory keys in `L60-deny-deprecated-advisories-policy-invalid`.
 - Put allow/deny overlaps in `L60-deny-allow-override-policy-invalid`.
-- Tightened `verify-rule-coverage.py` so `target_replay = "info_inventory"` requires exact counted `Info|rule|title|path` rows in the named fixture manifest and baseline.
+- Tightened `verify-g3rs-rule-fixture-coverage.py` so `target_replay = "info_inventory"` requires exact counted `Info|rule|title|path` rows in the named fixture manifest and baseline.
 
 ## Key Files
 
@@ -23,13 +23,13 @@ The initial combined fixture hid cargo-deny behavior, so it was split into four 
 - `behavior/fixtures/g3rs/L60-deny-deprecated-advisories-policy-invalid`
 - `behavior/fixtures/g3rs/L60-deny-allow-override-policy-invalid`
 - `behavior/coverage/g3rs-rule-coverage.toml`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 
 ## Verification
 
 - `python3 -m py_compile scripts/behavior/*.py`
 - `scripts/behavior/verify-all.sh`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `g3rs validate --path apps/guardrail3-rs --inventory`
 - `g3rs validate --path behavior/fixtures/g3rs/L80-project-policy-valid-clean/repo --inventory`
 - `git diff --check`

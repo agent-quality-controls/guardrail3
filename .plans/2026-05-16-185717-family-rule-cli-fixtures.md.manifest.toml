@@ -1,19 +1,19 @@
 [target]
-fixture_root = "behavior/fixtures/g3rs-rules"
-suite = "g3rs-rule-fixtures"
-verifier = "scripts/behavior/verify-family-rule-fixtures.py"
+fixture_root = "behavior/fixtures/g3rs-rule"
+suite = "g3rs-rule"
+verifier = "scripts/behavior/verify-g3rs-family-rule-fixtures.py"
 strategy = "replace_broad_composite_rule_fixtures"
 coverage_mode = "incremental"
 
 [[fixture_corpus]]
-path = "behavior/fixtures/g3rs-rules"
+path = "behavior/fixtures/g3rs-rule"
 status = "target_family_rule_coverage"
 action = "build minimized family fixtures"
 
 [[family]]
 name = "cargo"
 remaining_rule_rows = 42
-fixture_dir = "behavior/fixtures/g3rs-rules/cargo"
+fixture_dir = "behavior/fixtures/g3rs-rule/cargo"
 first = true
 status = "completed"
 covered_by_cli_output = 26
@@ -22,7 +22,7 @@ kept_internal_unit_tests = 16
 [[family]]
 name = "clippy"
 remaining_rule_rows = 43
-fixture_dir = "behavior/fixtures/g3rs-rules/clippy"
+fixture_dir = "behavior/fixtures/g3rs-rule/clippy"
 status = "completed"
 covered_by_cli_output = 42
 kept_internal_unit_tests = 1
@@ -30,19 +30,19 @@ kept_internal_unit_tests = 1
 [[family]]
 name = "deny"
 remaining_rule_rows = 41
-fixture_dir = "behavior/fixtures/g3rs-rules/deny"
+fixture_dir = "behavior/fixtures/g3rs-rule/deny"
 status = "completed"
 
 [[family]]
 name = "topology"
 remaining_rule_rows = 6
-fixture_dir = "behavior/fixtures/g3rs-rules/topology"
+fixture_dir = "behavior/fixtures/g3rs-rule/topology"
 status = "completed"
 
 [[family]]
 name = "apparch"
 remaining_rule_rows = 44
-fixture_dir = "behavior/fixtures/g3rs-rules/apparch"
+fixture_dir = "behavior/fixtures/g3rs-rule/apparch"
 status = "completed"
 covered_by_cli_output = 44
 kept_internal_unit_tests = 0
@@ -50,7 +50,7 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "arch"
 remaining_rule_rows = 31
-fixture_dir = "behavior/fixtures/g3rs-rules/arch"
+fixture_dir = "behavior/fixtures/g3rs-rule/arch"
 status = "completed"
 covered_by_cli_output = 31
 kept_internal_unit_tests = 0
@@ -58,13 +58,13 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "release"
 remaining_rule_rows = 24
-fixture_dir = "behavior/fixtures/g3rs-rules/release"
+fixture_dir = "behavior/fixtures/g3rs-rule/release"
 status = "completed"
 
 [[family]]
 name = "toolchain"
 remaining_rule_rows = 5
-fixture_dir = "behavior/fixtures/g3rs-rules/toolchain"
+fixture_dir = "behavior/fixtures/g3rs-rule/toolchain"
 status = "completed"
 covered_by_cli_output = 5
 kept_internal_unit_tests = 0
@@ -72,7 +72,7 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "deps"
 remaining_rule_rows = 3
-fixture_dir = "behavior/fixtures/g3rs-rules/deps"
+fixture_dir = "behavior/fixtures/g3rs-rule/deps"
 status = "completed"
 covered_by_cli_output = 3
 kept_internal_unit_tests = 0
@@ -80,13 +80,13 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "hooks"
 remaining_rule_rows = 2
-fixture_dir = "behavior/fixtures/g3rs-rules/hooks"
+fixture_dir = "behavior/fixtures/g3rs-rule/hooks"
 status = "completed"
 
 [[family]]
 name = "fmt"
 remaining_rule_rows = 1
-fixture_dir = "behavior/fixtures/g3rs-rules/fmt"
+fixture_dir = "behavior/fixtures/g3rs-rule/fmt"
 status = "completed"
 covered_by_cli_output = 1
 inventory_only_rules = [
@@ -96,7 +96,7 @@ inventory_only_rules = [
 [[family]]
 name = "garde"
 remaining_rule_rows = 0
-fixture_dir = "behavior/fixtures/g3rs-rules/garde"
+fixture_dir = "behavior/fixtures/g3rs-rule/garde"
 status = "completed"
 covered_by_cli_output = 13
 kept_internal_unit_tests = 0
@@ -104,7 +104,7 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "test"
 remaining_rule_rows = 0
-fixture_dir = "behavior/fixtures/g3rs-rules/test"
+fixture_dir = "behavior/fixtures/g3rs-rule/test"
 status = "completed"
 covered_by_cli_output = 19
 kept_internal_unit_tests = 0
@@ -112,7 +112,7 @@ kept_internal_unit_tests = 0
 [[family]]
 name = "code"
 remaining_rule_rows = 0
-fixture_dir = "behavior/fixtures/g3rs-rules/code"
+fixture_dir = "behavior/fixtures/g3rs-rule/code"
 status = "completed"
 covered_by_cli_output = 29
 kept_internal_unit_tests = 1
@@ -257,8 +257,8 @@ name = "target_rules"
 name = "expected_findings"
 
 [[suite_fixture_glob]]
-suite = "g3rs-rule-fixtures"
-glob = "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+suite = "g3rs-rule"
+glob = "behavior/fixtures/g3rs-rule/*/*/fixture.toml"
 status = "target"
 
 [[forbidden]]
@@ -270,10 +270,10 @@ kind = "serialized_ingestion_suite"
 suite_name_pattern = "g3rs-*-ingestion"
 
 [[verification]]
-command = "fixture3 check --suite g3rs-rule-fixtures"
+command = "fixture3 check --suite g3rs-rule"
 
 [[verification]]
-command = "python3 scripts/behavior/verify-family-rule-fixtures.py"
+command = "python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py"
 
 [[verification]]
 command = "python3 scripts/behavior/verify-test-deletion.py"

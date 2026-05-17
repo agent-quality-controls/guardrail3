@@ -23,9 +23,9 @@ Do not rewrite historical worklogs or old plan prose only because they mention `
 ## Required Changes
 
 1. Rename `goldencheck.yaml` to `fixture3.yaml`.
-2. Rename `scripts/behavior/goldencheck-g3rs-replay.py` to `scripts/behavior/fixture3-g3rs-replay.py`.
+2. Rename `scripts/behavior/goldencheck-g3rs-replay.py` to `scripts/behavior/fixture3-g3rs-fixture-replay.py`.
 3. Rename `scripts/behavior/verify-goldencheck-migration.py` to `scripts/behavior/verify-fixture3-migration.py`.
-4. Update `fixture3.yaml` command argv to call `scripts/behavior/fixture3-g3rs-replay.py`.
+4. Update `fixture3.yaml` command argv to call `scripts/behavior/fixture3-g3rs-fixture-replay.py`.
 5. Update `fixture3.yaml` storage directories:
    - approved output stays under `behavior/golden/<suite>`
    - received output moves to `.fixture3/<suite>`

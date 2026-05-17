@@ -25,6 +25,6 @@ The plan defines a rule coverage matrix, a verifier, the current measured covera
 
 ## Next Steps
 
-- Implement Stage 1 from the plan: create `behavior/coverage/g3rs-rule-coverage.toml` and `scripts/behavior/verify-rule-coverage.py`.
+- Implement Stage 1 from the plan: create `behavior/coverage/g3rs-rule-coverage.toml` and `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`.
 - Wire the verifier into `scripts/behavior/verify-all.sh`.
 - Run adversarial review against the matrix and verifier before adding new fixtures.

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Finished the Rust family-rule fixture migration across all active Rust families. The `g3rs-rule-fixtures` suite now contains 61 fixtures covering every active Rust rule that is reachable through the public CLI, with one clean golden fixture per family and the smallest broken fixture groups currently encoded in the family fixture manifest.
+Finished the Rust family-rule fixture migration across all active Rust families. The `g3rs-rule` suite now contains 61 fixtures covering every active Rust rule that is reachable through the public CLI, with one clean golden fixture per family and the smallest broken fixture groups currently encoded in the family fixture manifest.
 
 ## Decisions Made
 
@@ -17,22 +17,22 @@ Finished the Rust family-rule fixture migration across all active Rust families.
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md.manifest.toml`
 - `.plans/2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml`
-- `behavior/fixtures/g3rs-rules`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
-- `scripts/behavior/verify-family-rule-fixtures.py`
-- `scripts/behavior/verify-rule-coverage.py`
+- `behavior/fixtures/g3rs-rule`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
+- `scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 
 ## Verification
 
 ```text
-$ fixture3 check --suite g3rs-rule-fixtures
+$ fixture3 check --suite g3rs-rule
 status: matched
 fixtures: 61
 
-$ python3 scripts/behavior/verify-family-rule-fixtures.py
+$ python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py
 family-rule-fixtures: PASS families:apparch,arch,cargo,clippy,code,deny,deps,fmt,garde,hooks,release,test,toolchain,topology fixtures:61
 
-$ python3 scripts/behavior/verify-rule-coverage.py
+$ python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py
 behavior-rule-coverage: PASS source:267 covered:250 replaced:17 planned:0
 
 $ python3 scripts/behavior/verify-kept-test-dispositions.py

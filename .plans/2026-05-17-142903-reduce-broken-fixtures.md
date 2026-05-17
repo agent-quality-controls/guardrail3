@@ -4,14 +4,14 @@ Reduce copied broken family-rule fixture trees without changing approved fixture
 
 # Scope
 
-- Include only broken fixture roots under `behavior/fixtures/g3rs-rules/*/*`.
+- Include only broken fixture roots under `behavior/fixtures/g3rs-rule/*/*`.
 - Exclude every fixture whose directory name contains `R00-clean-golden`.
 - Do not edit `behavior/golden/**`.
 - Do not edit clean golden fixture roots.
 
 # Approach
 
-1. Discover broken fixture roots from `behavior/fixtures/g3rs-rules/*/*/fixture.toml`.
+1. Discover broken fixture roots from `behavior/fixtures/g3rs-rule/*/*/fixture.toml`.
 2. For each root, create scratch space under `.fixture3/reduce-broken-family-rule-fixtures/<root>`.
 3. For each root, write a generated one-fixture `fixture3` manifest in scratch.
 4. For each root, write a generated approved output in scratch by running the replay command only for that root.
@@ -24,9 +24,9 @@ Reduce copied broken family-rule fixture trees without changing approved fixture
 9. If the normalized behavior output differs, restore that fixture root from scratch backup and stop.
 10. After all fixture roots are reduced, regenerate the committed full-suite approved output if and only if the only required drift is fixture-file identity/hash drift from the reduced files.
 11. After all fixture roots are reduced, run:
-   - `fixture3 check --suite g3rs-rule-fixtures --json`
-   - `python3 scripts/behavior/verify-family-rule-fixtures.py`
-   - `python3 scripts/behavior/verify-rule-coverage.py`
+   - `fixture3 check --suite g3rs-rule --json`
+   - `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+   - `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 
 # Key Decisions
 
@@ -40,6 +40,6 @@ Reduce copied broken family-rule fixture trees without changing approved fixture
 
 # Files To Modify
 
-- `behavior/fixtures/g3rs-rules/**` broken fixture roots only.
+- `behavior/fixtures/g3rs-rule/**` broken fixture roots only.
 - Optional helper script under `scripts/behavior/` if repeated reduction needs automation.
 - Worklog under `.worklogs/` before commit.

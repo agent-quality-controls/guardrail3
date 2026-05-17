@@ -15,10 +15,10 @@ The deps family now has one clean golden fixture and three broken fixtures that 
 
 ## Key Files
 
-- `behavior/fixtures/g3rs-rules/deps/deps-R00-clean-golden/fixture.toml`
-- `behavior/fixtures/g3rs-rules/deps/deps-R10-required-files-and-tools/fixture.toml`
-- `behavior/fixtures/g3rs-rules/deps/deps-R20-allowlist-and-count-violations/fixture.toml`
-- `behavior/fixtures/g3rs-rules/deps/deps-R21-library-allowlist-missing/fixture.toml`
+- `behavior/fixtures/g3rs-rule/deps/deps-R00-clean-golden/fixture.toml`
+- `behavior/fixtures/g3rs-rule/deps/deps-R10-required-files-and-tools/fixture.toml`
+- `behavior/fixtures/g3rs-rule/deps/deps-R20-allowlist-and-count-violations/fixture.toml`
+- `behavior/fixtures/g3rs-rule/deps/deps-R21-library-allowlist-missing/fixture.toml`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md`
 - `.plans/2026-05-16-200957-all-rs-family-rule-fixtures.md.manifest.toml`
 - `.plans/2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml`
@@ -26,11 +26,11 @@ The deps family now has one clean golden fixture and three broken fixtures that 
 ## Verification
 
 - `fixture3 check --suite g3rs-validate`
-- `python3 scripts/behavior/verify-family-rule-fixtures.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `python3 scripts/behavior/verify-kept-test-dispositions.py`
 - `python3 scripts/behavior/verify-test-deletion.py`
-- `python3 -m py_compile scripts/behavior/verify-family-rule-fixtures.py`
+- `python3 -m py_compile scripts/behavior/verify-g3rs-family-rule-fixtures.py`
 - `bash scripts/behavior/verify-all.sh`
 - `g3rs validate repo --path "$PWD"`
 - `git diff --check`

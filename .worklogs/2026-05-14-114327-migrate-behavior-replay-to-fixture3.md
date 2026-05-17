@@ -7,7 +7,7 @@ The approved normalized replay output is unchanged; only active config, scripts,
 ## Decisions
 
 - Renamed the root replay manifest to `fixture3.yaml` because `fixture3` defaults to that filename.
-- Renamed the replay harness to `scripts/behavior/fixture3-g3rs-replay.py`.
+- Renamed the replay harness to `scripts/behavior/fixture3-g3rs-fixture-replay.py`.
 - Renamed the migration verifier to `scripts/behavior/verify-fixture3-migration.py`.
 - Kept approved replay outputs under `behavior/golden/<suite>` because `fixture3` uses the same approved-output contract.
 - Moved received/diff runtime output from `.goldencheck/<suite>` to `.fixture3/<suite>`.
@@ -16,7 +16,7 @@ The approved normalized replay output is unchanged; only active config, scripts,
 ## Key Files
 
 - `fixture3.yaml`
-- `scripts/behavior/fixture3-g3rs-replay.py`
+- `scripts/behavior/fixture3-g3rs-fixture-replay.py`
 - `scripts/behavior/verify-fixture3-migration.py`
 - `scripts/behavior/verify-all.sh`
 - `.gitignore`

@@ -19,7 +19,7 @@ Added a function-level Rust test-to-fixture ledger so fixture migration can prov
 
 # Verification
 
-- `python3 -m py_compile scripts/behavior/list-rust-tests.py scripts/behavior/verify-test-fixture-ledger.py scripts/behavior/verify-ledger.py scripts/behavior/verify-fixtures.py scripts/behavior/verify-rule-coverage.py`
+- `python3 -m py_compile scripts/behavior/list-rust-tests.py scripts/behavior/verify-test-fixture-ledger.py scripts/behavior/verify-ledger.py scripts/behavior/verify-fixtures.py scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `python3 scripts/behavior/verify-test-fixture-ledger.py`
 - `python3 scripts/behavior/verify-test-fixture-ledger.py --strict`
 - `fixture3 check --all`

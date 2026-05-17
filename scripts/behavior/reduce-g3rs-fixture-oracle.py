@@ -16,7 +16,7 @@ def main() -> int:
         raise SystemExit(f"expected exactly one fixture.toml, found {len(fixture_paths)}")
     replay_args = args[:2] + fixture_paths
     completed = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/behavior/fixture3-g3rs-replay.py"), *replay_args],
+        [sys.executable, str(REPO_ROOT / "scripts/behavior/fixture3-g3rs-fixture-replay.py"), *replay_args],
         text=True,
         stdout=subprocess.PIPE,
         check=False,

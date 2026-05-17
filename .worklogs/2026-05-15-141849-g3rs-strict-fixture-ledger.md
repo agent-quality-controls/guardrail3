@@ -23,7 +23,7 @@ Closed the remaining unclassified Rust test-fixture ledger rows by adding focuse
 - `fixture3 check --all`
 - `python3 scripts/behavior/verify-fixtures.py`
 - `python3 scripts/behavior/verify-fixtures.py --manifest .plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `python3 scripts/behavior/verify-unclassified-fixture-coverage.py`
 - `python3 scripts/behavior/verify-test-fixture-ledger.py --strict`
 - `scripts/behavior/verify-all.sh`

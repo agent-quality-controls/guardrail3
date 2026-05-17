@@ -1,28 +1,28 @@
 version: 1
 suites:
-  g3rs-rule-fixtures:
+  g3rs-rule:
     fixtures:
-      - "behavior/fixtures/g3rs-rules/*/*/fixture.toml"
+      - "behavior/fixtures/g3rs-rule/*/*/fixture.toml"
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3rs-replay.py"
+        - "scripts/behavior/fixture3-g3rs-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml"
         - "{fixtures}"
       ok_exit_codes:
         - 0
     storage:
-      approved_dir: "behavior/golden/g3rs-rule-fixtures"
-      received_dir: ".fixture3/g3rs-rule-fixtures"
-      diff_dir: ".fixture3/g3rs-rule-fixtures"
+      approved_dir: "behavior/golden/g3rs-rule"
+      received_dir: ".fixture3/g3rs-rule"
+      diff_dir: ".fixture3/g3rs-rule"
   g3rs-validate-repo:
     fixtures:
       - "behavior/fixtures/g3rs-validate-repo/*/fixture.toml"
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3rs-replay.py"
+        - "scripts/behavior/fixture3-g3rs-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml"
         - "{fixtures}"
@@ -38,7 +38,7 @@ suites:
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3rs-replay.py"
+        - "scripts/behavior/fixture3-g3rs-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md.manifest.toml"
         - "{fixtures}"
@@ -48,29 +48,29 @@ suites:
       approved_dir: "behavior/golden/g3rs-cli-output"
       received_dir: ".fixture3/g3rs-cli-output"
       diff_dir: ".fixture3/g3rs-cli-output"
-  g3ts-rule-fixtures:
+  g3ts-rule:
     fixtures:
-      - "behavior/fixtures/g3ts-rules/*/*/fixture.toml"
+      - "behavior/fixtures/g3ts-rule/*/*/fixture.toml"
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
         - "{fixtures}"
       ok_exit_codes:
         - 0
     storage:
-      approved_dir: "behavior/golden/g3ts-rule-fixtures"
-      received_dir: ".fixture3/g3ts-rule-fixtures"
-      diff_dir: ".fixture3/g3ts-rule-fixtures"
+      approved_dir: "behavior/golden/g3ts-rule"
+      received_dir: ".fixture3/g3ts-rule"
+      diff_dir: ".fixture3/g3ts-rule"
   g3ts-validate-repo:
     fixtures:
       - "behavior/fixtures/g3ts-validate-repo/*/fixture.toml"
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
         - "{fixtures}"
@@ -86,7 +86,7 @@ suites:
     command:
       argv:
         - "python3"
-        - "scripts/behavior/fixture3-g3ts-replay.py"
+        - "scripts/behavior/fixture3-g3ts-fixture-replay.py"
         - "--manifest"
         - ".plans/2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
         - "{fixtures}"

@@ -103,7 +103,7 @@ If a rule ID is not currently CLI-visible, use `planned_cli_surface` and name th
 
 Create:
 
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 
 The script must:
 
@@ -342,7 +342,7 @@ Each new fixture must state its hiding boundary:
 Create:
 
 - `behavior/coverage/g3rs-rule-coverage.toml`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 
 Wire:
 

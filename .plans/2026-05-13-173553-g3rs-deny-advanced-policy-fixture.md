@@ -95,7 +95,7 @@ Modify verifier scripts only if existing verifiers cannot represent the fixture 
    - `target_replay` must match emitted severity or intended inventory
    - `fixture` must point to the exact fixture that emits the target rule
    - reason must state which deny policy layer the fixture mutates
-7. Update `scripts/behavior/verify-rule-coverage.py` so every `target_replay = "info_inventory"` covered row must have a matching `Info|rule-id|...` required result in the named fixture manifest.
+7. Update `scripts/behavior/verify-g3rs-rule-fixture-coverage.py` so every `target_replay = "info_inventory"` covered row must have a matching `Info|rule-id|...` required result in the named fixture manifest.
 8. Run verification.
 9. Send adversarial review against this plan, the coverage matrix plan, and the implementation.
 

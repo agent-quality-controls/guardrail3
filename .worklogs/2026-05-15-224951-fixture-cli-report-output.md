@@ -15,7 +15,7 @@ Key files for context
 - `.plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md`
 - `.plans/2026-05-15-220723-fixture-after-cli-refactor-implementation.md.manifest.toml`
 - `fixture3.yaml`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `scripts/behavior/verify-fixture3-migration.py`
 - `scripts/behavior/classify-kept-test-dispositions.py`
 - `scripts/behavior/fixture3-g3rs-report-output.py`
@@ -29,7 +29,7 @@ Verification
 
 - `fixture3 check --all --json`
 - `python3 scripts/behavior/verify-fixture3-migration.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `bash scripts/behavior/verify-all.sh`
 - `cargo test --manifest-path apps/guardrail3-rs/Cargo.toml -p guardrail3-rs-report-assertions`
 - `cargo clippy --manifest-path apps/guardrail3-rs/Cargo.toml -p guardrail3-rs-report-assertions --all-targets -- -D warnings`

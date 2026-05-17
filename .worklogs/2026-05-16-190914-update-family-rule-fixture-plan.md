@@ -9,7 +9,7 @@ Updated the family-rule fixture plan so the new family fixtures are a replacemen
 - Added target split between global CLI gating fixtures and minimized family rule fixtures.
 - Marked `behavior/fixtures/g3rs/*` as transitional broad composite coverage.
 - Added target `behavior/fixtures/g3rs-global/*` for global CLI/adoption/gating states.
-- Kept `behavior/fixtures/g3rs-rules/<family>/*` as the minimized family rule corpus.
+- Kept `behavior/fixtures/g3rs-rule/<family>/*` as the minimized family rule corpus.
 - Added migration rule to remove or reduce broad fixtures after family coverage replaces them.
 
 ## Key Files
@@ -20,5 +20,5 @@ Updated the family-rule fixture plan so the new family fixtures are a replacemen
 ## Next Steps
 
 - Start with cargo.
-- Build minimized cargo fixtures under `behavior/fixtures/g3rs-rules/cargo`.
+- Build minimized cargo fixtures under `behavior/fixtures/g3rs-rule/cargo`.
 - Then reduce old broad fixtures that only existed for cargo rule coverage.

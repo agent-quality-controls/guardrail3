@@ -16,13 +16,13 @@ This stage must make current verifier status truthful and add fixture3 coverage 
   - `g3rs-validate`
   - `g3rs-validate-repo`
   - `g3rs-code-ingestion`
-- `scripts/behavior/verify-rule-coverage.py` currently prints replaced hook rows as `planned`.
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py` currently prints replaced hook rows as `planned`.
 
 # Approach
 
 ## 1. Coverage Verifier Semantics
 
-Modify `scripts/behavior/verify-rule-coverage.py`.
+Modify `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`.
 
 Required behavior:
 
@@ -59,7 +59,7 @@ Target files:
 - `behavior/fixtures/g3rs-cli-output/*/fixture.toml`
 - `behavior/golden/g3rs-cli-output/approved.normalized.json`
 
-The suite must use `scripts/behavior/fixture3-g3rs-replay.py`.
+The suite must use `scripts/behavior/fixture3-g3rs-fixture-replay.py`.
 
 The suite must snapshot command output, not parse CLI internals.
 
@@ -154,7 +154,7 @@ Expected movement:
 Required commands:
 
 - `fixture3 check --all --json`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `bash scripts/behavior/verify-all.sh`
 - `cargo test --manifest-path apps/guardrail3-rs/Cargo.toml -p guardrail3-rs-report-assertions`
 - `cargo clippy --manifest-path apps/guardrail3-rs/Cargo.toml -p guardrail3-rs-report-assertions --all-targets -- -D warnings`

@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / ".plans" / "2026-05-17-185551-g3ts-family-rule-fixtures.md.manifest.toml"
-APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3ts-rule-fixtures" / "approved.normalized.json"
+APPROVED_OUTPUT_PATH = REPO_ROOT / "behavior" / "golden" / "g3ts-rule" / "approved.normalized.json"
 RULE_PATTERN = re.compile(r"g3ts-[a-z0-9-]+(?:-[a-z0-9-]+)*/[a-z0-9-]+(?:-[a-z0-9-]+)*")
 
 

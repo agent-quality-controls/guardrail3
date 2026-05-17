@@ -19,7 +19,7 @@ Added Stage 2 hook replay fixtures for validate-repo behavior and made replay co
 - `behavior/fixtures/g3rs-validate-repo/R16-hooks-required-steps-present-but-weakened`
 - `behavior/fixtures/g3rs-validate-repo/R17-hooks-modular-scripts-invalid`
 - `scripts/behavior/verify-baselines.py`
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `packages/rs/hooks/g3rs-hooks-config-checks`
 - `packages/rs/hooks/g3rs-hooks-source-checks`
 - `packages/rs/hooks/g3rs-hooks-ingestion`
@@ -27,7 +27,7 @@ Added Stage 2 hook replay fixtures for validate-repo behavior and made replay co
 ## Verification
 
 - `scripts/behavior/verify-all.sh`
-- `python3 scripts/behavior/verify-rule-coverage.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `python3 scripts/behavior/verify-baselines.py --manifest .plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml`
 - `cargo test -p g3rs-hooks-config-checks-runtime`
 - `cargo test -p g3rs-hooks-source-checks-runtime`

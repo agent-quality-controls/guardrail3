@@ -7,17 +7,17 @@ The reducer now only selects broken fixtures. The semantic `rule-set` oracle rem
 # Decisions Made
 
 - Restored clean fixtures from commit `5ab595eb5`.
-- Removed `--include-clean` and `--all-cases` from `scripts/behavior/reduce-broken-family-rule-fixtures.py`.
-- Re-approved `g3rs-rule-fixtures` after restoring clean fixtures because fixture hashes and clean fixture stdout returned to the unreduced state.
-- Did not consolidate to one global clean fixture in this change because `scripts/behavior/verify-family-rule-fixtures.py` currently enforces exactly one clean fixture per family.
+- Removed `--include-clean` and `--all-cases` from `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py`.
+- Re-approved `g3rs-rule` after restoring clean fixtures because fixture hashes and clean fixture stdout returned to the unreduced state.
+- Did not consolidate to one global clean fixture in this change because `scripts/behavior/verify-g3rs-family-rule-fixtures.py` currently enforces exactly one clean fixture per family.
 
 # Verification
 
-- `fixture3 check --suite g3rs-rule-fixtures --json`
+- `fixture3 check --suite g3rs-rule --json`
 - `fixture3 check --all --json`
-- `python3 scripts/behavior/verify-family-rule-fixtures.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
-- `python3 -m py_compile scripts/behavior/reduce-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py`
+- `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
+- `python3 -m py_compile scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py scripts/behavior/reduce-g3rs-fixture-rule-set-oracle.py`
 
 # Reduction Measurement
 
@@ -32,12 +32,12 @@ The full-suite reduction is low because clean fixtures are intentionally restore
 # Key Files For Context
 
 - `.plans/2026-05-17-173013-restore-clean-golden-fixtures.md`
-- `scripts/behavior/reduce-broken-family-rule-fixtures.py`
-- `behavior/fixtures/g3rs-rules`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
-- `scripts/behavior/verify-family-rule-fixtures.py`
+- `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py`
+- `behavior/fixtures/g3rs-rule`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
+- `scripts/behavior/verify-g3rs-family-rule-fixtures.py`
 
 # Next Steps
 
-- If one global clean fixture should replace per-family clean fixtures, change the fixture manifest and `verify-family-rule-fixtures.py` contract in a separate change.
+- If one global clean fixture should replace per-family clean fixtures, change the fixture manifest and `verify-g3rs-family-rule-fixtures.py` contract in a separate change.
 - If broken fixture line count still needs deeper reduction, the next reducer must edit file contents. `fixture3 reduce` currently removes only directories and files.

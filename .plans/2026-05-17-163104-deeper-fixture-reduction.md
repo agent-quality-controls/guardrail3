@@ -1,6 +1,6 @@
 # Goal
 
-Reduce the `g3rs-rules` fixture corpus substantially while preserving CLI-visible behavior for every fixture.
+Reduce the `g3rs-rule` fixture corpus substantially while preserving CLI-visible behavior for every fixture.
 
 # Current Finding
 
@@ -18,7 +18,7 @@ The previous reduction was conservative:
 
 # Approach
 
-1. Extend `scripts/behavior/reduce-broken-family-rule-fixtures.py` into a reusable family-rule fixture reducer:
+1. Extend `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py` into a reusable family-rule fixture reducer:
    - support `--include-clean`
    - support `--all-cases`
    - keep the default as broken-only
@@ -47,11 +47,11 @@ The previous reduction was conservative:
 
 # Verification
 
-- `fixture3 check --suite g3rs-rule-fixtures --json`
+- `fixture3 check --suite g3rs-rule --json`
 - `fixture3 check --all --json`
-- `python3 scripts/behavior/verify-family-rule-fixtures.py`
-- `python3 scripts/behavior/verify-rule-coverage.py`
-- `python3 -m py_compile scripts/behavior/reduce-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py`
+- `python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py`
+- `python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
+- `python3 -m py_compile scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py scripts/behavior/reduce-g3rs-fixture-oracle.py`
 
 # Rollback Rule
 
@@ -59,8 +59,8 @@ If normalized per-fixture behavior changes after applying a reducer report, rest
 
 # Files To Modify
 
-- `scripts/behavior/reduce-broken-family-rule-fixtures.py`
-- `behavior/fixtures/g3rs-rules/**`
-- `behavior/golden/g3rs-rule-fixtures/approved.normalized.json`
-- `behavior/golden/g3rs-rule-fixtures/approved.meta.json`
+- `scripts/behavior/reduce-g3rs-broken-family-rule-fixtures.py`
+- `behavior/fixtures/g3rs-rule/**`
+- `behavior/golden/g3rs-rule/approved.normalized.json`
+- `behavior/golden/g3rs-rule/approved.meta.json`
 - `.worklogs/<timestamp>-deeper-fixture-reduction.md`

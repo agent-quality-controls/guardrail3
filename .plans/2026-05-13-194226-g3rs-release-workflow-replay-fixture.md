@@ -342,7 +342,7 @@ Expected count changes if exactly the three absent workflow IDs become covered:
 - `info_only_rule_ids`: unchanged unless the new fixture is the first replay for `release-profile-inventory`
 - `absent_rule_ids`: `6 -> 3`
 
-Do not update counts by hand before running `verify-rule-coverage.py`.
+Do not update counts by hand before running `verify-g3rs-rule-fixture-coverage.py`.
 
 ### 7. Required Verification
 

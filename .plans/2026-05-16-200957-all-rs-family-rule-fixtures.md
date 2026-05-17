@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build `behavior/fixtures/g3rs-rules/<family>/` fixture sets for every active Rust rule family.
+Build `behavior/fixtures/g3rs-rule/<family>/` fixture sets for every active Rust rule family.
 
 Each completed family must have:
 
@@ -175,7 +175,7 @@ Broken fixture requirements:
 
 ## Verifier Contract
 
-`scripts/behavior/verify-family-rule-fixtures.py` must enforce:
+`scripts/behavior/verify-g3rs-family-rule-fixtures.py` must enforce:
 
 - one clean golden fixture per completed family
 - fixture IDs are unique
@@ -217,7 +217,7 @@ Rule count: 10.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/apparch/
+behavior/fixtures/g3rs-rule/apparch/
 ```
 
 Rules:
@@ -250,7 +250,7 @@ Rule count: 10.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/arch/
+behavior/fixtures/g3rs-rule/arch/
 ```
 
 Rules:
@@ -284,7 +284,7 @@ Rule count: 15.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/cargo/
+behavior/fixtures/g3rs-rule/cargo/
 ```
 
 Status: complete.
@@ -321,7 +321,7 @@ Rule count: 23.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/clippy/
+behavior/fixtures/g3rs-rule/clippy/
 ```
 
 Rules:
@@ -371,7 +371,7 @@ Rule count: 30.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/code/
+behavior/fixtures/g3rs-rule/code/
 ```
 
 Rules:
@@ -430,7 +430,7 @@ Status: complete.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/deny/
+behavior/fixtures/g3rs-rule/deny/
 ```
 
 Rules:
@@ -496,7 +496,7 @@ Status: complete.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/deps/
+behavior/fixtures/g3rs-rule/deps/
 ```
 
 Rules:
@@ -532,7 +532,7 @@ Rule count: 8.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/fmt/
+behavior/fixtures/g3rs-rule/fmt/
 ```
 
 Rules:
@@ -565,7 +565,7 @@ Rule count: 13.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/garde/
+behavior/fixtures/g3rs-rule/garde/
 ```
 
 Rules:
@@ -603,7 +603,7 @@ Rule count: 36.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/hooks/
+behavior/fixtures/g3rs-rule/hooks/
 ```
 
 Rules:
@@ -666,7 +666,7 @@ Rule count: 33.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/release/
+behavior/fixtures/g3rs-rule/release/
 ```
 
 Rules:
@@ -726,7 +726,7 @@ Rule count: 19.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/test/
+behavior/fixtures/g3rs-rule/test/
 ```
 
 Rules:
@@ -773,7 +773,7 @@ Status: complete.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/toolchain/
+behavior/fixtures/g3rs-rule/toolchain/
 ```
 
 Rules:
@@ -802,7 +802,7 @@ Status: complete.
 Target fixture directory:
 
 ```text
-behavior/fixtures/g3rs-rules/topology/
+behavior/fixtures/g3rs-rule/topology/
 ```
 
 Rules:
@@ -981,8 +981,8 @@ Run after each family:
 
 ```bash
 fixture3 check --suite g3rs-validate
-python3 scripts/behavior/verify-family-rule-fixtures.py
-python3 scripts/behavior/verify-rule-coverage.py
+python3 scripts/behavior/verify-g3rs-family-rule-fixtures.py
+python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py
 python3 scripts/behavior/verify-kept-test-dispositions.py
 python3 scripts/behavior/verify-test-deletion.py
 g3rs validate repo --path "$PWD"
@@ -1001,10 +1001,10 @@ git diff --check
 
 The work is done only when:
 
-- Every active `g3rs-*` rule namespace has a directory under `behavior/fixtures/g3rs-rules`.
+- Every active `g3rs-*` rule namespace has a directory under `behavior/fixtures/g3rs-rule`.
 - Every family directory has exactly one clean golden fixture.
 - Every active rule ID emits `Error` or `Warn` in at least one broken fixture, unless a kept-test ledger row says it is not CLI-exposable.
-- `verify-family-rule-fixtures.py` enforces that completed-family coverage mechanically.
+- `verify-g3rs-family-rule-fixtures.py` enforces that completed-family coverage mechanically.
 - `fixture3 check --all` passes.
 - `bash scripts/behavior/verify-all.sh` passes.
 - `g3rs validate repo --path "$PWD"` passes.

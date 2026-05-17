@@ -2,7 +2,7 @@
 
 ## Goal
 
-Make `scripts/behavior/verify-rule-coverage.py` count only runtime rule source files as active `g3rs-*/*` rule IDs.
+Make `scripts/behavior/verify-g3rs-rule-fixture-coverage.py` count only runtime rule source files as active `g3rs-*/*` rule IDs.
 
 ## Problem
 
@@ -19,7 +19,7 @@ Those IDs cannot be emitted by the runtime CLI. Fixture work based on those IDs 
 
 ## Approach
 
-- Update `verify-rule-coverage.py` with one `is_active_rule_source(path)` filter.
+- Update `verify-g3rs-rule-fixture-coverage.py` with one `is_active_rule_source(path)` filter.
 - Exclude `target` and `.cargo-target` paths.
 - Exclude path components named `tests`, `rule_tests`, and `contract_tests`.
 - Exclude path components ending in `_tests`.
@@ -36,7 +36,7 @@ Those IDs cannot be emitted by the runtime CLI. Fixture work based on those IDs 
 
 ## Files To Modify
 
-- `scripts/behavior/verify-rule-coverage.py`
+- `scripts/behavior/verify-g3rs-rule-fixture-coverage.py`
 - `behavior/coverage/g3rs-rule-coverage.toml`
 - `.plans/2026-05-13-160231-g3rs-replay-coverage-matrix.md`
 - `.plans/2026-05-13-160231-g3rs-replay-coverage-matrix.md.manifest.toml`
