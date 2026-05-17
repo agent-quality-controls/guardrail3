@@ -141,6 +141,101 @@
         "--path",
         ".",
         "--family",
+        "eslint",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:660b1ce1305b6d39e495708a480e7a002aaed565f48be8d1af2eff9857c01caa",
+      "fixture_id": "eslint-R00-clean-golden",
+      "stderr": "",
+      "stdout": "== eslint ==\n[Info] g3ts-eslint/exists eslint.config.mjs eslint config exists\n  Found root ESLint config `eslint.config.mjs`.\n[Info] g3ts-eslint/parseable eslint.config.mjs eslint config parseable\n  `eslint.config.mjs` parsed successfully through ESLint.\n[Info] g3ts-eslint/ts-plugin-present eslint.config.mjs @typescript-eslint plugin active on TS source\n  `@typescript-eslint` is active for the TS source probe.\n[Info] g3ts-eslint/project-service-enabled eslint.config.mjs projectService enabled for TS source\n  `projectService: true` is active for the TS source probe.\n[Info] g3ts-eslint/no-explicit-any-error eslint.config.mjs no-explicit-any enforced on TS source\n  `@typescript-eslint/no-explicit-any` is set to error on the TS source probe.\n[Info] g3ts-eslint/no-console-error eslint.config.mjs no-console enforced on TS source\n  `no-console` is set to error on the TS source probe.\n[Info] g3ts-eslint/thresholds eslint.config.mjs baseline thresholds and restricted imports enforced\n  The TS source probe has the expected threshold rules and `no-restricted-imports`.\n[Info] g3ts-eslint/core-baseline-rules eslint.config.mjs core TS baseline rules enforced\n  The TS source probe has the core async and boundary baseline rules at error severity.\n[Info] g3ts-eslint/type-safety-rules eslint.config.mjs type safety rules enforced\n  The TS source probe has the extended type-safety rule baseline at error severity.\n[Info] g3ts-eslint/hygiene-rules eslint.config.mjs hygiene rules enforced\n  The TS source probe has the extended hygiene rule baseline at error severity.\n[Info] g3ts-eslint/unicorn-rules eslint.config.mjs unicorn rules enforced\n  The TS source probe has the required unicorn baseline rules at error severity.\n[Info] g3ts-eslint/regexp-rules eslint.config.mjs regexp rules enforced\n  The TS source probe has the required regexp baseline rules at error severity.\n[Info] g3ts-eslint/sonarjs-rules eslint.config.mjs sonarjs rules enforced\n  The TS source probe has the required sonarjs baseline rules at error severity.\n[Info] g3ts-eslint/test-relaxations eslint.config.mjs test carve-out for no-explicit-any present\n  `@typescript-eslint/no-explicit-any` is off for the TS test probe.\n[Info] g3ts-eslint/js-carveout eslint.config.mjs JS carve-out disables typed linting\n  The JS source probe does not enable `projectService: true` and does not enforce the representative typed-lint rules.\n[Info] g3ts-eslint/plugin-stack eslint.config.mjs TS plugin stack active on TS source\n  The TS source probe has the required unicorn, regexp, and sonarjs plugin stack.\n[Info] g3ts-eslint/tsx-source-parity eslint.config.mjs TSX source baseline matches TS source baseline\n  The TSX source probe keeps the same typed-lint, threshold, plugin, and grouped-rule baseline as the TS source probe.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "eslint",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:0ac26d8d095869c9eb78723092fcfd2e6506d6f9fe32318fa85d84992274736b",
+      "fixture_id": "eslint-R10-missing-config",
+      "stderr": "",
+      "stdout": "== eslint ==\n[Error] g3ts-eslint/exists - eslint config missing\n  No root `eslint.config.*` file was found. Add a root flat ESLint config.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "eslint",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:467f68e4b045e49785c69ead0be202217f38930039b6d6716d23b2e52bc2e81f",
+      "fixture_id": "eslint-R20-parse-error",
+      "stderr": "",
+      "stdout": "== eslint ==\n[Info] g3ts-eslint/exists eslint.config.mjs eslint config exists\n  Found root ESLint config `eslint.config.mjs`.\n[Error] g3ts-eslint/parseable eslint.config.mjs eslint config parse error\n  Failed to parse `eslint.config.mjs` through ESLint: failed to evaluate eslint.config.*: file://$REPO/eslint.config.mjs:2\n\n\n\nSyntaxError: Unexpected end of input\n    at compileSourceTextModule (node:internal/modules/esm/utils:318:16)\n    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:99:18)\n    at #translate (node:internal/modules/esm/loader:473:20)\n    at afterLoad (node:internal/modules/esm/loader:529:29)\n    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:534:12)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:577:36)\n    at afterResolve (node:internal/modules/esm/loader:625:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:631:12)\n    at onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:650:32)\n    at TracingChannel.tracePromise (node:diagnostics_channel:350:14)\n\nNode.js v24.14.0\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "eslint",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:e295cd4a601e4346c1980362c8615172c55d5d8826286ede3edbee08a46796e5",
+      "fixture_id": "eslint-R30-weak-baseline",
+      "stderr": "",
+      "stdout": "== eslint ==\n[Info] g3ts-eslint/exists eslint.config.mjs eslint config exists\n  Found root ESLint config `eslint.config.mjs`.\n[Info] g3ts-eslint/parseable eslint.config.mjs eslint config parseable\n  `eslint.config.mjs` parsed successfully through ESLint.\n[Error] g3ts-eslint/ts-plugin-present eslint.config.mjs @typescript-eslint plugin missing on TS source\n  The TS source probe does not include the `@typescript-eslint` plugin. Route TS source files through the typed-lint ESLint stack.\n[Error] g3ts-eslint/project-service-enabled eslint.config.mjs projectService missing for TS source\n  The TS source probe does not enable `projectService: true`. Enable typed linting through the modern typescript-eslint project-service flow.\n[Error] g3ts-eslint/no-explicit-any-error eslint.config.mjs no-explicit-any not enforced on TS source\n  `@typescript-eslint/no-explicit-any` must be set to error on the TS source probe.\n[Error] g3ts-eslint/no-console-error eslint.config.mjs no-console not enforced on TS source\n  `no-console` must be set to error on the TS source probe.\n[Error] g3ts-eslint/thresholds eslint.config.mjs baseline thresholds or restricted imports not enforced\n  Wrong or missing threshold settings: `max-lines=400`, `max-lines-per-function=100`, `complexity=25`. Missing required error rules: `no-restricted-imports`.\n[Error] g3ts-eslint/core-baseline-rules eslint.config.mjs core TS baseline rules missing or relaxed\n  The TS source probe must enforce these rules at error severity: `@typescript-eslint/no-floating-promises`, `eqeqeq`, `no-restricted-globals`, `import-x/no-cycle`, `import-x/max-dependencies`, `@typescript-eslint/explicit-function-return-type`, `@typescript-eslint/strict-boolean-expressions`.\n[Error] g3ts-eslint/type-safety-rules eslint.config.mjs type safety rules missing or relaxed\n  The TS source probe must enforce these type-safety rules at error severity: `@typescript-eslint/no-misused-promises`, `@typescript-eslint/await-thenable`, `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-non-null-assertion`, `@typescript-eslint/switch-exhaustiveness-check`, `@typescript-eslint/no-unused-vars`, `@typescript-eslint/require-await`, `no-param-reassign`, `@typescript-eslint/no-unsafe-assignment`, `@typescript-eslint/no-unsafe-member-access`, `@typescript-eslint/no-unsafe-call`, `@typescript-eslint/no-unsafe-return`, `@typescript-eslint/no-unsafe-argument`.\n[Error] g3ts-eslint/hygiene-rules eslint.config.mjs hygiene rules missing or relaxed\n  The TS source probe must enforce these hygiene rules at error severity: `@typescript-eslint/explicit-module-boundary-types`, `@typescript-eslint/promise-function-async`, `@typescript-eslint/consistent-type-exports`, `@typescript-eslint/consistent-type-definitions`, `@typescript-eslint/no-unnecessary-condition`, `@typescript-eslint/prefer-nullish-coalescing`, `@typescript-eslint/prefer-optional-chain`, `@typescript-eslint/no-deprecated`, `@typescript-eslint/restrict-template-expressions`, `no-throw-literal`, `no-empty`.\n[Error] g3ts-eslint/unicorn-rules eslint.config.mjs unicorn rules missing or relaxed\n  The TS source probe must enforce these unicorn rules at error severity: `unicorn/no-keyword-prefix`, `unicorn/no-unused-properties`, `unicorn/require-post-message-target-origin`, `unicorn/no-anonymous-default-export`.\n[Error] g3ts-eslint/regexp-rules eslint.config.mjs regexp rules missing or relaxed\n  The TS source probe must enforce these regexp rules at error severity: `regexp/require-unicode-regexp`, `regexp/require-unicode-sets-regexp`, `regexp/prefer-named-capture-group`, `regexp/prefer-named-backreference`, `regexp/prefer-result-array-groups`, `regexp/no-misleading-capturing-group`.\n[Error] g3ts-eslint/sonarjs-rules eslint.config.mjs sonarjs rules missing or relaxed\n  The TS source probe must enforce these sonarjs rules at error severity: `sonarjs/cognitive-complexity`, `sonarjs/no-identical-functions`, `sonarjs/no-all-duplicated-branches`, `sonarjs/no-duplicated-branches`, `sonarjs/no-collapsible-if`, `sonarjs/no-identical-conditions`, `sonarjs/no-identical-expressions`, `sonarjs/no-inverted-boolean-check`, `sonarjs/no-redundant-boolean`, `sonarjs/prefer-single-boolean-return`, `sonarjs/no-gratuitous-expressions`, `sonarjs/no-invariant-returns`, `sonarjs/no-collection-size-mischeck`, `sonarjs/no-empty-collection`, `sonarjs/no-element-overwrite`, `sonarjs/no-unused-collection`, `sonarjs/no-use-of-empty-return-value`, `sonarjs/no-nested-switch`, `sonarjs/no-nested-template-literals`, `sonarjs/no-redundant-jump`, `sonarjs/expression-complexity`, `sonarjs/no-async-constructor`, `sonarjs/no-hook-setter-in-body`, `sonarjs/no-useless-react-setstate`.\n[Error] g3ts-eslint/test-relaxations eslint.config.mjs test carve-out for no-explicit-any missing\n  `@typescript-eslint/no-explicit-any` must be off for the TS test probe.\n[Info] g3ts-eslint/js-carveout eslint.config.mjs JS carve-out disables typed linting\n  The JS source probe does not enable `projectService: true` and does not enforce the representative typed-lint rules.\n[Error] g3ts-eslint/plugin-stack eslint.config.mjs TS plugin stack missing on TS source\n  The TS source probe must activate these plugins: `unicorn`, `regexp`, `sonarjs`.\n[Error] g3ts-eslint/tsx-source-parity eslint.config.mjs TSX source baseline drift detected\n  The TSX source probe must enable `projectService: true`. Wrong or missing threshold settings on the TSX source probe: `max-lines=400`, `max-lines-per-function=100`, `complexity=25`. Missing required error rules on the TSX source probe: `no-restricted-imports`. The TSX source probe must activate these plugins: `unicorn`, `regexp`, `sonarjs`. The TSX source probe must enforce these grouped baseline rules at error severity: `@typescript-eslint/no-floating-promises`, `eqeqeq`, `no-restricted-globals`, `import-x/no-cycle`, `import-x/max-dependencies`, `@typescript-eslint/explicit-function-return-type`, `@typescript-eslint/strict-boolean-expressions`, `@typescript-eslint/no-misused-promises`, `@typescript-eslint/await-thenable`, `@typescript-eslint/consistent-type-imports`, `@typescript-eslint/no-non-null-assertion`, `@typescript-eslint/switch-exhaustiveness-check`, `@typescript-eslint/no-unused-vars`, `@typescript-eslint/require-await`, `no-param-reassign`, `@typescript-eslint/no-unsafe-assignment`, `@typescript-eslint/no-unsafe-member-access`, `@typescript-eslint/no-unsafe-call`, `@typescript-eslint/no-unsafe-return`, `@typescript-eslint/no-unsafe-argument`, `@typescript-eslint/explicit-module-boundary-types`, `@typescript-eslint/promise-function-async`, `@typescript-eslint/consistent-type-exports`, `@typescript-eslint/consistent-type-definitions`, `@typescript-eslint/no-unnecessary-condition`, `@typescript-eslint/prefer-nullish-coalescing`, `@typescript-eslint/prefer-optional-chain`, `@typescript-eslint/no-deprecated`, `@typescript-eslint/restrict-template-expressions`, `no-throw-literal`, `no-empty`, `unicorn/no-keyword-prefix`, `unicorn/no-unused-properties`, `unicorn/require-post-message-target-origin`, `unicorn/no-anonymous-default-export`, `regexp/require-unicode-regexp`, `regexp/require-unicode-sets-regexp`, `regexp/prefer-named-capture-group`, `regexp/prefer-named-backreference`, `regexp/prefer-result-array-groups`, `regexp/no-misleading-capturing-group`, `sonarjs/cognitive-complexity`, `sonarjs/no-identical-functions`, `sonarjs/no-all-duplicated-branches`, `sonarjs/no-duplicated-branches`, `sonarjs/no-collapsible-if`, `sonarjs/no-identical-conditions`, `sonarjs/no-identical-expressions`, `sonarjs/no-inverted-boolean-check`, `sonarjs/no-redundant-boolean`, `sonarjs/prefer-single-boolean-return`, `sonarjs/no-gratuitous-expressions`, `sonarjs/no-invariant-returns`, `sonarjs/no-collection-size-mischeck`, `sonarjs/no-empty-collection`, `sonarjs/no-element-overwrite`, `sonarjs/no-unused-collection`, `sonarjs/no-use-of-empty-return-value`, `sonarjs/no-nested-switch`, `sonarjs/no-nested-template-literals`, `sonarjs/no-redundant-jump`, `sonarjs/expression-complexity`, `sonarjs/no-async-constructor`, `sonarjs/no-hook-setter-in-body`, `sonarjs/no-useless-react-setstate`.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
+        "eslint",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:8870e9a9b2f6b88063e8281f65beb76c30f3e951bff9308cb4ea3d19c713a00d",
+      "fixture_id": "eslint-R40-broken-carveouts",
+      "stderr": "",
+      "stdout": "== eslint ==\n[Info] g3ts-eslint/exists eslint.config.mjs eslint config exists\n  Found root ESLint config `eslint.config.mjs`.\n[Info] g3ts-eslint/parseable eslint.config.mjs eslint config parseable\n  `eslint.config.mjs` parsed successfully through ESLint.\n[Info] g3ts-eslint/ts-plugin-present eslint.config.mjs @typescript-eslint plugin active on TS source\n  `@typescript-eslint` is active for the TS source probe.\n[Info] g3ts-eslint/project-service-enabled eslint.config.mjs projectService enabled for TS source\n  `projectService: true` is active for the TS source probe.\n[Info] g3ts-eslint/no-explicit-any-error eslint.config.mjs no-explicit-any enforced on TS source\n  `@typescript-eslint/no-explicit-any` is set to error on the TS source probe.\n[Info] g3ts-eslint/no-console-error eslint.config.mjs no-console enforced on TS source\n  `no-console` is set to error on the TS source probe.\n[Info] g3ts-eslint/thresholds eslint.config.mjs baseline thresholds and restricted imports enforced\n  The TS source probe has the expected threshold rules and `no-restricted-imports`.\n[Info] g3ts-eslint/core-baseline-rules eslint.config.mjs core TS baseline rules enforced\n  The TS source probe has the core async and boundary baseline rules at error severity.\n[Info] g3ts-eslint/type-safety-rules eslint.config.mjs type safety rules enforced\n  The TS source probe has the extended type-safety rule baseline at error severity.\n[Info] g3ts-eslint/hygiene-rules eslint.config.mjs hygiene rules enforced\n  The TS source probe has the extended hygiene rule baseline at error severity.\n[Info] g3ts-eslint/unicorn-rules eslint.config.mjs unicorn rules enforced\n  The TS source probe has the required unicorn baseline rules at error severity.\n[Info] g3ts-eslint/regexp-rules eslint.config.mjs regexp rules enforced\n  The TS source probe has the required regexp baseline rules at error severity.\n[Info] g3ts-eslint/sonarjs-rules eslint.config.mjs sonarjs rules enforced\n  The TS source probe has the required sonarjs baseline rules at error severity.\n[Info] g3ts-eslint/test-relaxations eslint.config.mjs test carve-out for no-explicit-any present\n  `@typescript-eslint/no-explicit-any` is off for the TS test probe.\n[Error] g3ts-eslint/js-carveout eslint.config.mjs JS carve-out for typed linting missing\n  The JS source probe must not enable `projectService: true`. The JS source probe must not enforce these representative typed-lint rules at error severity: `@typescript-eslint/no-unsafe-assignment`.\n[Info] g3ts-eslint/plugin-stack eslint.config.mjs TS plugin stack active on TS source\n  The TS source probe has the required unicorn, regexp, and sonarjs plugin stack.\n[Info] g3ts-eslint/tsx-source-parity eslint.config.mjs TSX source baseline matches TS source baseline\n  The TSX source probe keeps the same typed-lint, threshold, plugin, and grouped-rule baseline as the TS source probe.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--path",
+        ".",
+        "--family",
         "fmt",
         "--rules-only",
         "--inventory"

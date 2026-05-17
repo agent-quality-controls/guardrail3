@@ -1,0 +1,42 @@
+id = "eslint-R30-weak-baseline"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "eslint", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "eslint"
+target_rules = [
+  "g3ts-eslint/ts-plugin-present",
+  "g3ts-eslint/project-service-enabled",
+  "g3ts-eslint/no-explicit-any-error",
+  "g3ts-eslint/no-console-error",
+  "g3ts-eslint/thresholds",
+  "g3ts-eslint/core-baseline-rules",
+  "g3ts-eslint/type-safety-rules",
+  "g3ts-eslint/hygiene-rules",
+  "g3ts-eslint/unicorn-rules",
+  "g3ts-eslint/regexp-rules",
+  "g3ts-eslint/sonarjs-rules",
+  "g3ts-eslint/test-relaxations",
+  "g3ts-eslint/plugin-stack",
+  "g3ts-eslint/tsx-source-parity"
+]
+expected_findings = [
+  "g3ts-eslint/ts-plugin-present",
+  "g3ts-eslint/project-service-enabled",
+  "g3ts-eslint/no-explicit-any-error",
+  "g3ts-eslint/no-console-error",
+  "g3ts-eslint/thresholds",
+  "g3ts-eslint/core-baseline-rules",
+  "g3ts-eslint/type-safety-rules",
+  "g3ts-eslint/hygiene-rules",
+  "g3ts-eslint/unicorn-rules",
+  "g3ts-eslint/regexp-rules",
+  "g3ts-eslint/sonarjs-rules",
+  "g3ts-eslint/test-relaxations",
+  "g3ts-eslint/plugin-stack",
+  "g3ts-eslint/tsx-source-parity"
+]

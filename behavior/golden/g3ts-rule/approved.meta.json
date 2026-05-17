@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T19-00-28.464257Z-d06b5496",
-  "run_commit": "4fa6a81c6",
+  "run_id": "2026-05-17T19-05-33.876265Z-d06b5496",
+  "run_commit": "e5d9ab099",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T19:00:28.464257Z",
-  "fixture_hash": "sha256:0b89d1329ef4b4d2558b74dd57c4d5dfdfb6df77cb45cf7e6613e84dbfcbf202",
+  "recorded_at": "2026-05-17T19:05:33.876265Z",
+  "fixture_hash": "sha256:92d6791758bbd1f51a1f96d76492afbd0aab0f1494d5bb33492cea8d3c2d2b7e",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -37,6 +37,26 @@
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R40-facade-parse-error/fixture.toml",
       "sha256": "sha256:3e28d2a5bcdc004a04bc91dd8b92e2bb93c9b2b9df0ae0b7c36de0b5be5d10c8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R00-clean-golden/fixture.toml",
+      "sha256": "sha256:fccee9d5459b89e948b1eb9730e7d3f1f228da157f74d7e4aae845b01c370873"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R10-missing-config/fixture.toml",
+      "sha256": "sha256:218d17291f09fe0670563f00b1036c35bfeffd84be1db0effe5c643afd3ad3aa"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R20-parse-error/fixture.toml",
+      "sha256": "sha256:60dc73cf604652044d6f6f182b3f9ccccd9077c0e43b8a5081a73bf0ace75a4b"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R30-weak-baseline/fixture.toml",
+      "sha256": "sha256:4c082a2b51ae1c7491bc2920247f4acdef6c9dd70b0a6343acfee481b5351e5e"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R40-broken-carveouts/fixture.toml",
+      "sha256": "sha256:27b95c578dc3ab02efe0dc3b5ee3c09270d0185bcabd749d31dfc381ad6435d0"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden/fixture.toml",
@@ -191,5 +211,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Add G3TS topology arch apparch family rule fixtures"
+  "comment": "Add G3TS eslint family rule fixtures"
 }

@@ -113,7 +113,7 @@ status = "completed"
 name = "eslint"
 rule_count = 17
 fixture_dir = "behavior/fixtures/g3ts-rule/eslint"
-status = "planned"
+status = "completed"
 
 [[family]]
 name = "jscpd"

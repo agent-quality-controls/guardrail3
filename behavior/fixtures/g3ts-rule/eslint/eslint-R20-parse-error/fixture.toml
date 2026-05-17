@@ -1,0 +1,16 @@
+id = "eslint-R20-parse-error"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "--path", ".", "--family", "eslint", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_input_failure"
+
+rule_family = "eslint"
+target_rules = [
+  "g3ts-eslint/parseable"
+]
+expected_findings = [
+  "g3ts-eslint/parseable"
+]
