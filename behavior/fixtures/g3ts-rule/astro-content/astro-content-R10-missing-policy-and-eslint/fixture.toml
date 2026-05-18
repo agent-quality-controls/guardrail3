@@ -2,7 +2,7 @@ id = "astro-content-R10-missing-policy-and-eslint"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "astro-content", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_policy"

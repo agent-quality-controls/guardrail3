@@ -33,12 +33,12 @@ $search_dir"
 done
 
 TS_UNIQUE_UNITS="$(printf '%s\n' "$TS_UNIQUE_UNITS" | awk 'NF' | sort -u)"
-g3ts validate-repo
+g3ts validate repo
 if [ -n "$TS_UNIQUE_UNITS" ]; then
     for unit in $TS_UNIQUE_UNITS; do
         if [ -z "$unit" ]; then
             continue
         fi
-        g3ts validate --path "$unit" --staged
+        g3ts validate workspace --path "$unit" --staged
     done
 fi

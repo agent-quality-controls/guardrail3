@@ -1,6 +1,6 @@
-# G3RS CLI
+# Guardrail3 CLI
 
-## Command Tree
+## G3RS Command Tree
 
 ```text
 g3rs init repo [--path <path>] [--force]
@@ -59,3 +59,42 @@ These deleted command forms are invalid:
 g3rs validate-repo
 g3rs validate --path <path>
 ```
+
+## G3TS Command Tree
+
+```text
+g3ts --version
+g3ts validate repo [--path <path>]
+g3ts validate workspace --path <path> [--family <family>] [--inventory] [--staged] [--rules-only]
+```
+
+## G3TS Local Install
+
+From this repository root:
+
+```text
+cargo install --path apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime --force
+g3ts --version
+g3ts --help
+```
+
+After install, `g3ts --help` must show `validate`, and `g3ts validate --help` must show `repo` and `workspace`.
+
+## G3TS Repo Vs Workspace
+
+- `repo` means the Git repository control surface containing `--path`.
+- `workspace` means one adopted TypeScript unit with `package.json` and `guardrail3-ts.toml`.
+- `validate repo` checks hooks, required tools, repo topology, and marker-pair completeness.
+- `validate workspace` checks one adopted TypeScript unit.
+- `--rules-only` is a workspace-only debug and fixture flag.
+
+## G3TS Normal Validation
+
+Run both repo and workspace validation in a project verify path:
+
+```text
+g3ts validate repo --path <repo>
+g3ts validate workspace --path <workspace>
+```
+
+For a monorepo, run `g3ts validate workspace --path <workspace>` once for each adopted TypeScript workspace that should be checked outside pre-commit.

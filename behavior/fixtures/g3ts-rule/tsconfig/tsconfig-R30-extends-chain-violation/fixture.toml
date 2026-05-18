@@ -2,7 +2,7 @@ id = "tsconfig-R30-extends-chain-violation"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "tsconfig", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "tsconfig", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_policy"

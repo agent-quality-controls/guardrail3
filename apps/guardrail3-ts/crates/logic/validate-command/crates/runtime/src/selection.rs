@@ -30,7 +30,7 @@ pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
 pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
     if request.families.is_empty() {
         // reason: per-package validate excludes repo-only families like Hooks
-        // and Topology; those run from validate-repo.
+        // and Topology; those run from validate repo.
         return SUPPORTED_FAMILIES
             .into_iter()
             .filter(|family| !is_repo_only_family(*family))
@@ -43,8 +43,8 @@ pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
         .collect()
 }
 
-/// Returns true when `family` only runs from `validate-repo` and is excluded
-/// from per-package `validate --path` defaults.
+/// Returns true when `family` only runs from `validate repo` and is excluded
+/// from per-workspace `validate workspace --path` defaults.
 const fn is_repo_only_family(family: SupportedFamily) -> bool {
     matches!(family, SupportedFamily::Hooks | SupportedFamily::Topology,)
 }

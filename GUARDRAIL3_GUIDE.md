@@ -49,12 +49,16 @@ guardrail3 rs validate . --family release --thorough
 ### TypeScript
 
 ```text
-guardrail3 ts init [PATH] [--force]
-guardrail3 ts generate [PATH]
-guardrail3 ts validate [PATH] [--staged|--dirty|--commits N|--files ...]
-guardrail3 ts hooks-install [PATH]
-guardrail3 ts hooks-validate [PATH]
+g3ts --version
+g3ts validate repo [--path <repo>]
+g3ts validate workspace --path <workspace> [--family <family>] [--inventory] [--staged] [--rules-only]
 ```
+
+TypeScript validation has two separate scopes:
+
+- `g3ts validate repo --path <repo>` checks repo-level hook/tool/topology/marker-pair invariants.
+- `g3ts validate workspace --path <workspace>` checks one adopted TypeScript workspace.
+
 
 ## Config File
 

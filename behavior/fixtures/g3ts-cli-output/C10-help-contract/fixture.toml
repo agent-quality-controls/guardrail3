@@ -3,8 +3,10 @@ tool = "g3ts"
 run_from = "repo"
 commands = [
   ["--help"],
+  ["--version"],
   ["validate", "--help"],
-  ["validate-repo", "--help"],
+  ["validate", "workspace", "--help"],
+  ["validate", "repo", "--help"],
 ]
 expected_exit = "zero"
 level = "cli_help_contract"

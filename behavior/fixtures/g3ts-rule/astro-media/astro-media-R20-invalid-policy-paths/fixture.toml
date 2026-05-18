@@ -2,7 +2,7 @@ id = "astro-media-R20-invalid-policy-paths"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "astro-media", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "astro-media", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_policy"

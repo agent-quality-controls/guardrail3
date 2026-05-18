@@ -1,4 +1,4 @@
-//! Validate / validate-repo execution: orchestrates the static rule
+//! Validate repo / validate workspace execution: orchestrates the static rule
 //! pipeline, toolchain gates, marker-pair walker, and tool-presence check.
 
 use std::fmt::Write as _;
@@ -16,7 +16,7 @@ use crate::process::run_git;
 use crate::run::CliOutput;
 use crate::tool_presence::check_required_tools_present;
 
-/// Runs the `validate` subcommand against `path`: orchestrates the static
+/// Runs the `validate workspace` subcommand against `path`: orchestrates the static
 /// rule pipeline, then (unless `rules_only`) the toolchain gates, returning
 /// merged `stdout` / `stderr` / `exit_code` as a `CliOutput`.
 #[expect(
@@ -82,7 +82,7 @@ pub(crate) fn run_validate(
     }
 }
 
-/// Runs the `validate-repo` subcommand: validates repository-level
+/// Runs the `validate repo` subcommand: validates repository-level
 /// invariants (hooks, topology, marker pairs, required-tool presence). When
 /// `path` is `None`, the repo root is discovered via `git rev-parse`.
 pub(crate) fn run_validate_repo(
@@ -97,7 +97,7 @@ pub(crate) fn run_validate_repo(
     else {
         return CliOutput {
             stdout: String::new(),
-            stderr: "validate-repo: could not resolve git repo root\n".to_owned(),
+            stderr: "validate repo: could not resolve git repo root\n".to_owned(),
             exit_code: 1,
         };
     };

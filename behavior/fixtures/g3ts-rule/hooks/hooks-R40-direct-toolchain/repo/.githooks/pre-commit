@@ -10,7 +10,7 @@ echo "$file_size $MAX_FILE_SIZE" >/dev/null
 echo "drizzle/"
 echo "db/schema/"
 pnpm install --frozen-lockfile
-g3ts validate-repo
+g3ts validate repo
 if [ -f "apps/landing/package.json" ] && [ -f "apps/landing/guardrail3-ts.toml" ]; then
     echo "marker pair"
 fi
@@ -20,7 +20,7 @@ if [ -n "$TS_UNIQUE_UNITS" ]; then
         if [ -z "$unit" ]; then
             continue
         fi
-        g3ts validate --path "$unit" --staged
+        g3ts validate workspace --path "$unit" --staged
     done
 fi
 eslint .

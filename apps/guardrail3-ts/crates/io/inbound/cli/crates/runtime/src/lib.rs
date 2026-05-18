@@ -5,23 +5,23 @@
 
 /// CLI parsing types and helpers.
 mod cli;
-/// Validate / validate-repo command execution.
+/// Validate repo / validate workspace command execution.
 mod execute;
 /// Centralized filesystem boundary used by the CLI runtime.
 mod fs;
-/// Marker-pair completeness walker for validate-repo.
+/// Marker-pair completeness walker for validate repo.
 mod marker_pairs;
 /// Centralized process-spawn boundary used by the CLI runtime.
 mod process;
 /// CLI dispatch entry points and shared CliOutput type.
 mod run;
-/// Required-tool presence checks for validate-repo.
+/// Required-tool presence checks for validate repo.
 mod tool_presence;
 /// Topology family dispatch and CLI family runner.
 mod topology;
 
 #[cfg(feature = "api")]
-pub use cli::{Cli, Command, FamilyArg, parse_command_from};
+pub use cli::{Cli, Command, FamilyArg, ValidateCommand, parse_command_from};
 #[cfg(feature = "api")]
 pub use guardrail3_ts_packages::PackageRuntime;
 #[cfg(feature = "api")]

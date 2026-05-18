@@ -2,7 +2,7 @@ id = "astro-state-R10-forbidden-state"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "astro-state", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "astro-state", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_filetree"

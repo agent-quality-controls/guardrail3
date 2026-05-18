@@ -2,7 +2,7 @@ id = "npmrc-R00-clean-golden"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "npmrc", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "npmrc", "--rules-only", "--inventory"],
 ]
 expected_exit = "zero"
 level = "family_rule_clean_golden"

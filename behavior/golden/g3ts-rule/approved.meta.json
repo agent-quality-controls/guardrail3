@@ -1,343 +1,343 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-18T09-04-04.897484Z-d06b5496",
-  "run_commit": "cf3fad18d",
+  "run_id": "2026-05-18T13-50-40.635652Z-d06b5496",
+  "run_commit": "9494d1251",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T09:04:04.897484Z",
-  "fixture_hash": "sha256:4d1fbf999981e368c0ab3bb66c45d25fccc03fedeb95f253c434eaa08dd893f7",
+  "recorded_at": "2026-05-18T13:50:40.635652Z",
+  "fixture_hash": "sha256:f6977cc7c2d1b89a43ac0d87d95f90d17a9769f8116189d8bc3ac6e2950cc99f",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
       "path": "behavior/fixtures/g3ts-rule/apparch/apparch-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:019c6f9d8b679cdce4a205a3ca0a4db42ede11f5d59e2a718c82f10f7f59a621"
+      "sha256": "sha256:59fc2c21947caba0c8db4d02dea1104facc3c8ef1d5af3cf2c9d9a1b52c5b6ee"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/apparch/apparch-R10-layer-violations/fixture.toml",
-      "sha256": "sha256:b033111dc83f3aa8e005e7ccdfed28d5f495280c5514adce37a6e3b82afe3fde"
+      "sha256": "sha256:ddbc9acc8f46ce96cf83af43d8dfefa42d388519ba4c480124811499c0fe883b"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:d81977573bbe7bd63673a4c238e57e782a31739a2e47218f00247281bd2406df"
+      "sha256": "sha256:fff72bdb87cac119e132910a6c768dbec7fed226ed860f8bc10a3e15e1d5e19c"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R10-root-missing/fixture.toml",
-      "sha256": "sha256:ad6381c157ebcd7f83a5d499120fb08c0cf319568c383fa7b9291b084b4e2061"
+      "sha256": "sha256:ff16899e3f1b891d66aba496a512060d94c2cae8c0a2bda3078a2b6d642683bc"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R20-root-parse-error/fixture.toml",
-      "sha256": "sha256:41952ac0f2e6bc2fdd50e9e1fe5762e0d61499bcc12e57b50603bc296290bb61"
+      "sha256": "sha256:b7d0eaac8c2d86302469e687b195ed772ed30ca76727b51dd59ce2fa6477a669"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R30-facade-violations/fixture.toml",
-      "sha256": "sha256:479b5c4c14557114f6ac04061715098408f8c9ead10fc202a904fce880773763"
+      "sha256": "sha256:4259297324a6a66e3ff41e9a9c21e0b629612c352f9ebe7502c10b1698c2c7ef"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/arch/arch-R40-facade-parse-error/fixture.toml",
-      "sha256": "sha256:3e28d2a5bcdc004a04bc91dd8b92e2bb93c9b2b9df0ae0b7c36de0b5be5d10c8"
+      "sha256": "sha256:fcaffbd8311cb104175200bc6f586a04ba36030b3bc0da39fc4652bf089c0ca2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:8cf20670e1a00d661cdbf3297c4bada695c607fd211f41a7c70caf89dfc61583"
+      "sha256": "sha256:d349d096aa90590a65b38c8b3ca4d4ac14a9eebd7197d00608849fd0ff38a3c2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R10-missing-policy-and-eslint/fixture.toml",
-      "sha256": "sha256:dcb823bae3cf8c46d06cb5b2dd322f26cde87001b1fca08cb033493187e9b0b3"
+      "sha256": "sha256:cc1149688d9e37fc6d59673ce1ec3310e6fa0e44b656b1504e687f07606a0d15"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R20-forbidden-content-state/fixture.toml",
-      "sha256": "sha256:4b1b0b87e17d702069760b3cb3e4f4cdff1f149791e374caf695fbfeebed3b14"
+      "sha256": "sha256:7edd29e3e11991edd001348de3b4c131de5368afa67651ec150e93cd1f0711b3"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R30-policy-paths-and-adapter-source/fixture.toml",
-      "sha256": "sha256:67eab92d950d9b62bf2a05d60381b167ccdcf10f0ae4620e1dbb2bda6270a8a3"
+      "sha256": "sha256:335e4c21b0802b54b86fb2b62387212591762f9ea8ef7ddb085fe7af2283c7dd"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-content/astro-content-R40-adapter-missing-and-disable-visible/fixture.toml",
-      "sha256": "sha256:08b270c231bc7d5b167cf106eba2b8cf6ccd5dfba683b2a7d6e03cb27d4c9ef4"
+      "sha256": "sha256:4980b7f50122dc85273fe9363fe71247dcab839702daadefde6c52e2db5216a5"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:b8bedc5338a749ede2a89233bf6cecf8a8ebc7e34a0e5fed8b8c4f0f0d6a050a"
+      "sha256": "sha256:2e9694031c427ab5d26c23066d6dbc0006c82dc9ddfde4e57d7d2a64d2fe5cf7"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R10-missing-i18n-policy/fixture.toml",
-      "sha256": "sha256:af1a06b513da38fa87b49628aff9297ab5c5edce468458d9586247773b28351f"
+      "sha256": "sha256:3fe8edcaa2a3ff19ea61bcc6df14f4d504636dcb977d288a6f486495836787ba"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-i18n/astro-i18n-R20-invalid-policy-paths/fixture.toml",
-      "sha256": "sha256:a12505fb0c8919da2b42cbab66dd3d3395186424e2ee7a90d85d3085e0124330"
+      "sha256": "sha256:aff0ba3bc9876b7d58d23876e280e05a14245e683ce0270997182ecb8d3966ae"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:bb95042a413930fe60d0654eab33265e2a61b83ea6fac2e5427f8c433e8db0ea"
+      "sha256": "sha256:da2ee1760611512074a171163078419c66ff698bddaa40c78279e840460e070c"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R10-missing-mdx-wiring/fixture.toml",
-      "sha256": "sha256:b0ab457c54c27983e8aa2e9dce6d0aa4ffff5b37aa2819d3fff3697cf13ade9f"
+      "sha256": "sha256:0fd277d4161aee241bcbe4661187823a5e2b79ac1917bbe88753a9e472b7ccb1"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R20-policy-paths-and-disable-visible/fixture.toml",
-      "sha256": "sha256:a1c23856ff1687279a3cfe51ca707bddea026da61642b5a7459679f5195b384a"
+      "sha256": "sha256:21f6e01088e85c51d2377704686f7ade16e4c4f4601fa7d3641accff780c97a8"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-mdx/astro-mdx-R30-disable-visible/fixture.toml",
-      "sha256": "sha256:377a89d5bb32358f9ec87e7f90adc321f6a4db153296026258ccba0a3ce3a744"
+      "sha256": "sha256:589e1c7846729cc6e6be71735b83e05c925f0daf89d82d1e67d7057c377a6dc2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:d5080321ba57da32c0aaa9302b6e88b7a728835858d6c1d5427fd014bec84ca9"
+      "sha256": "sha256:afbb833d68fdd89270dd1ac514f51c3c8cb808e152d75d9aba203c3cb870b62f"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R10-missing-media-policy/fixture.toml",
-      "sha256": "sha256:020e5ac93b741a20521206d2041f1d5d2415ba601e84164eea2faaef5e571bc7"
+      "sha256": "sha256:3c6bc8041c4b8d9458b2c5f5d709290dc0ef2de0649ac8aa8e2d53c242dfbdcb"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-media/astro-media-R20-invalid-policy-paths/fixture.toml",
-      "sha256": "sha256:81492f78dc27f02285af8b81792aef8af18d522f09d50c4c1d39300dd455cbab"
+      "sha256": "sha256:e029e7a81258e52cbb6a520d2f1ace29b0ee379b9b85ca53f0d909397c63b651"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:7a467585f25c85136d5ed593b0ae6ee631bef872c1202be3ebcfe11480577188"
+      "sha256": "sha256:235c7940a00a4acb35fe148b744c44a17e8af72ca5a4e1a4ce488b713c85cfaa"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R10-missing-seo-policy/fixture.toml",
-      "sha256": "sha256:25f54a15f1024046ed09ec998326b7653bd169c672a075575702aa2d368691a0"
+      "sha256": "sha256:c8103b97eca7bfe0ea7eae91dcfac3e0d8ce9949c002d012e3a4864a9397e2b0"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R20-llms-and-helper-policy/fixture.toml",
-      "sha256": "sha256:db7f03c54ae7c497284c27e393b194b5e933f62c5e274a4e189554bdcde34f83"
+      "sha256": "sha256:3eb23c4d1f4d286281a90556354a5890843b5050df36eac24fd317e512245538"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-seo/astro-seo-R30-disable-visible/fixture.toml",
-      "sha256": "sha256:e70eccf3b8a88f3aea430b50f3a82ba7c5144e32fbb77b3f03ee3d98270210aa"
+      "sha256": "sha256:dea12256ad208e53eaa534ccd2ac9e5a2bdb0ae7fad506697b2d3f6198d984ad"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:f3d347fc473f13621b6cccbf55ae8ee428ff33f6a32d28119346fb417f1d6520"
+      "sha256": "sha256:ca8fac893ec3adbba3bae51d2c097a090f8ff6813cbd8f19082db0973de61805"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R10-missing-setup/fixture.toml",
-      "sha256": "sha256:7afcc5c18a6f91edba9799c8c5b7ebf554909298fa66775b87e2a240e31c18f5"
+      "sha256": "sha256:367c3c833230f7aabb6cb1228be52f88e6e45e0f9c5538e95ee5c26e87b970d7"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R20-missing-astro-package/fixture.toml",
-      "sha256": "sha256:6708bb37a546b0602feb0e0669453bac8e741a7a2b7b9458de28dc5015552044"
+      "sha256": "sha256:d2fd231692270bd8293e082844e65e4e1f2a71b4dfa9cfe6de695b28b7eeed90"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-setup/astro-setup-R30-forbidden-script-target/fixture.toml",
-      "sha256": "sha256:bdeb358389841bb2e83f402da528f172f16f412fa95018522196243e2ab05871"
+      "sha256": "sha256:49062d625e5491baed7e47963df8ad6821628ece669a928fd3324b905628685a"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-state/astro-state-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:d0ec9d894bdc5c7367247f7584fc6bfecae8883dd85c5a7979eaa9db53eef4f1"
+      "sha256": "sha256:4ced044ba27cf3e0d508d00ac29dc02ba19073358dae2e96936b258e1601c473"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/astro-state/astro-state-R10-forbidden-state/fixture.toml",
-      "sha256": "sha256:b64ee5f95f7b330f334d90674556cce223900b944457787aeb410ef4c2f85250"
+      "sha256": "sha256:9bc00fe65634a3c083811ad2d7869d1e0aa48fb32cf2ab1388031fb19e0e60a0"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:fccee9d5459b89e948b1eb9730e7d3f1f228da157f74d7e4aae845b01c370873"
+      "sha256": "sha256:a9859dd74092f3887542b1126a10c30e4b5d8789d201b1e1ddd6b91c57ecc2f9"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R10-missing-config/fixture.toml",
-      "sha256": "sha256:218d17291f09fe0670563f00b1036c35bfeffd84be1db0effe5c643afd3ad3aa"
+      "sha256": "sha256:b8725a694ac6a1b007dd59f64393870bd620b381282fc1b20f0484a5a0a1f096"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R20-parse-error/fixture.toml",
-      "sha256": "sha256:60dc73cf604652044d6f6f182b3f9ccccd9077c0e43b8a5081a73bf0ace75a4b"
+      "sha256": "sha256:4db04bd165f5a1a02ec3c8a80f33c90bfba6e892b939712f7b6b210138b35f8b"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R30-weak-baseline/fixture.toml",
-      "sha256": "sha256:4c082a2b51ae1c7491bc2920247f4acdef6c9dd70b0a6343acfee481b5351e5e"
+      "sha256": "sha256:8305cecd326cf6564725673541fd7332678b7a95bcd3e2d8e43a30af5504c607"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R40-broken-carveouts/fixture.toml",
-      "sha256": "sha256:27b95c578dc3ab02efe0dc3b5ee3c09270d0185bcabd749d31dfc381ad6435d0"
+      "sha256": "sha256:110c98d2d067130b503f78376fac5a31ddb6ce6d7f9d46f9a93a1af78d8af2f8"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:f879bb4e7fa48c26da3801e1984cb47dfab315fdf6397008159f1170ff415f14"
+      "sha256": "sha256:a422d6137ce9f0504dfd48393f4cf8872d0af9b0eff974a7b92578d8ccab5672"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R10-policy-root-missing/fixture.toml",
-      "sha256": "sha256:a04277aaf5782c92b42d0341f4521e4125a70082113c9b0aaefaa44c6c4d732d"
+      "sha256": "sha256:c1aac218397ef1a009fdb947b224a61b0b7bf6589ea3a27b1ddecfdbe80834b4"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:0b26bbb7778af48d5902c8084917b5ffc11f748cd79f59fb386fbf81a4ae09ad"
+      "sha256": "sha256:11636cc8555412802db4e24a5217603bfd8a837c632e7e32bf242671ba31bbad"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R30-validate-not-wired/fixture.toml",
-      "sha256": "sha256:9fedb86e514544b47dc31552d5807492482455f0ca1df2c8e6f7d0b292840798"
+      "sha256": "sha256:6e53f62e7434ac040974820037da28115a3bebe91aaae4a033f72eadc98bf58b"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:5f500b047ef71d546f613e7c97b6f80af20384ec4c20a648c3798ee0a16f9a19"
+      "sha256": "sha256:35aa8e017fe838c0df8c334446793c96f040ca3cbf538ffac52d8c9a7142f6fd"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R10-missing-surface/fixture.toml",
-      "sha256": "sha256:9b1b3b6c036bd2fa8d8c67111a0c6d5430e4252192e90a2c5a941c8d67c24f65"
+      "sha256": "sha256:2b59720fda6a82565f85ce54cd1e8d6c0fd74cd061fc838e43dd77e7fe09bff0"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R20-not-executable/fixture.toml",
-      "sha256": "sha256:50df7186e255cf689f786eaca1afc39d1624a69d70cd1b911e43aacb8f9fefd8"
+      "sha256": "sha256:e1d2f2afbd98cd06e6af8c56705804300143be669001418a6505d0be79170e49"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R30-empty-hook/fixture.toml",
-      "sha256": "sha256:fc0397f19939ff15dbd2a3c6a68037310f0c18e7ee11c7e79a20eff15654cb6a"
+      "sha256": "sha256:be747d77fa658376d5aecd87116da2e2f14f52d581aac86273afb306e5544e1a"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R40-direct-toolchain/fixture.toml",
-      "sha256": "sha256:00c7e1f70244ece237e1d62e2e07ccf6ce365b1e819dc0209797e8d8e23d01b3"
+      "sha256": "sha256:5b8705163b27428560cc8e072ab2404e39271e5d94ad3dc73e8a5abfa5557f53"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R50-routing-violations/fixture.toml",
-      "sha256": "sha256:f0e570134984a5c90a21d0c4a97cab1f7582724cfbca87f13ba6e16248ec2b5f"
+      "sha256": "sha256:5ca9c0fb0462bb7146e7ee7da3389e902f6ea3aee85331e30d559739fa3765e4"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R60-binary-unavailable/fixture.toml",
-      "sha256": "sha256:60c135d7f7e3fd16b8828e27ca71f90bdc07a4d8b2a09f2e041df908bf3e2a75"
+      "sha256": "sha256:216c338215f850bcdc127bc808989850f0e6e757cbd2102553355637d7799261"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:b6d768c745efbc7da59213c5f2376d009c0b9f903d041644137cd8969101439d"
+      "sha256": "sha256:f56852cf1358e33f0510e9751242a0164d5d9359603b0c8e5a69dc0a3894ae26"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R10-missing-root/fixture.toml",
-      "sha256": "sha256:c29276c9e4b20a3408f136833fb194cad5e1935785815ad04585e2e8f3fd584e"
+      "sha256": "sha256:b27f237b9e066f8a614fa1bda054f125cfe601bcd09bad391425e2973dcd5842"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R20-parse-error/fixture.toml",
-      "sha256": "sha256:2318286f0a5590f7996014f5447159c316974ab7d77197fc8896254666df645d"
+      "sha256": "sha256:5f9004a45d24b93138fa14f538432268da9e06e2847838e009c7c20239d2e253"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/jscpd/jscpd-R30-policy-violations/fixture.toml",
-      "sha256": "sha256:012c7bc4a4cf93d56e76c44e8f4e320bfa77beb9674de796617bf8d1a3c5df2a"
+      "sha256": "sha256:7b60c42faf1cd1ab5fc4313e38a353ccd7c96668a0a4c1096dcfdd58d16793a1"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:d8273242b26455fe1cfb1d1f64222348470f7dc356210a9a09b82a37b6b76d34"
+      "sha256": "sha256:1b69e19894760fc07930fe2e83f2a7d56b4fcfb0ed4de57c6f0b44e952a86815"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R10-missing-root/fixture.toml",
-      "sha256": "sha256:2751c98df52cb6ba9ac165743f67f1cb1c910c0fb4d84ee719b61ddfc1cfe19b"
+      "sha256": "sha256:fae080d6eaf3a8ecf4e956e891c64dac660da244fec5ca903f1e3da7c61bc6b0"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R20-parse-error/fixture.toml",
-      "sha256": "sha256:69e99603b422531785842e153e429d95e8889c95c2d441c6c7480496120f70d3"
+      "sha256": "sha256:97da014c73ec13ff7ce145ab7a2f40ced7a9587c6102b3eb25c268f397136136"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/npmrc/npmrc-R30-policy-violations/fixture.toml",
-      "sha256": "sha256:ba18913b4bb4f4b732f4ed3f01c9a8331a7d2b56b3e4a8b5f94f4fa0ca2eb8fe"
+      "sha256": "sha256:e954374ff35f2ca9fb1a617b469f3b544705272b2a19984e741bccdf61818340"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:f073e8d665a73987128bf73738ad64a87b2bc48673bf0b935cfe4bc0bdc684da"
+      "sha256": "sha256:d7104168cf3f91c7143b5104bc2bd7894dbd09b4a84d8d39190588af71628172"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R10-policy-violations/fixture.toml",
-      "sha256": "sha256:5b6520353cbf3057413e9311dc3d10a21d5ed4de3ad6a50c412b671626acd1b6"
+      "sha256": "sha256:c2b318cff24d45c2eae9853a04d712ac248bb033cf6d135a8606ea6260f5df56"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R20-input-failures/fixture.toml",
-      "sha256": "sha256:e6e0fa8d2eeddaacd1bd5165276ad313ca3bb342939439f8741505e142b51dac"
+      "sha256": "sha256:a44d4685d1e56fb447d72b6dce1aa788abfa0ae31719cbf2e7383656edbbec48"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R30-root-parse-error/fixture.toml",
-      "sha256": "sha256:3ecd104924246e7876566f310432352e2efc5bbc2473f347ceb6a2d3ff9cb327"
+      "sha256": "sha256:11f35e6959716d6e0bed10ed21227f6fe726b5e2aaefe8d5b8c26e161a3f5e48"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R40-validate-fail-open/fixture.toml",
-      "sha256": "sha256:09ce213996d7ddc6418566f48967d2802d82eb50655864291e4956a9d67772f2"
+      "sha256": "sha256:c70ceda133be07196c65548273487f985e2c6a75945ff21f231bcbf7bf31b27d"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:baa119f6c2c4c13d6b1a7f8f7316e6ab3ea544372ba73a7ecbfbb3006c470147"
+      "sha256": "sha256:9b59010f0bd8393fe3417014568db068aa40925aa849c495a14eda1efaa84db8"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R10-policy-root-missing/fixture.toml",
-      "sha256": "sha256:5a4ff9826e17a04995c735efbe087c23b92dbf7d3cc16cabc56e4defe80c6cca"
+      "sha256": "sha256:793554aa1d5e85aa10a8f26155c7ddecddcb3e79090670cfc9595c37d1653227"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:c219c3c5b434519c9f77dc83c1159f9f1b65ad255e1b9b0a1d6d0da2030a9729"
+      "sha256": "sha256:bf99de1f59b841ee6d1a4ea7e6bbd8dbc705597089a0028b892dde35011aea78"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R30-script-not-wired/fixture.toml",
-      "sha256": "sha256:d5c90d171d4768aa91e77ba6c832588f06fc4684ba49c9fa0829acf51b222c05"
+      "sha256": "sha256:1603ec6a0fde314d57f56d6409be5e5c3cd3a589f353c6fea8dcdcc0ce122bf8"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:952d04f36a292cac77e30752c7cab6c89ebf2a97416cc3db95b3f931ad2edf1a"
+      "sha256": "sha256:7cbaf9b8207f7a0c6ddb6b86bde1f384e9c675a02a2e00a2b5042c73a9594753"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R10-missing-policy/fixture.toml",
-      "sha256": "sha256:8974b3849058bf0bf2e6600d0f960917a806cf2aa1a3072408be322d39d33772"
+      "sha256": "sha256:f2a9434dc921c5eb9312980f75d655b75c00b1e27496dc20b9829eff38140429"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R20-invalid-policy-paths/fixture.toml",
-      "sha256": "sha256:19586dcfecbad7979f6738e7178e7b360dfb5db24744f0ed659c039c06fa335f"
+      "sha256": "sha256:b1e577943a9aabe12c935541b8dcffe7a88f163ea1e2f62b1a24111e62121b6d"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R30-missing-tooling/fixture.toml",
-      "sha256": "sha256:4a784e973ea05c8d0a41afcd20b13a21d4e300d2e0b6902de5b4e86b7cad6c7d"
+      "sha256": "sha256:e72cc9614494da923023d21d2e92d1208ae23342874fbecfc5f361828f2042c7"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R40-incomplete-stylelint/fixture.toml",
-      "sha256": "sha256:e109f43ec9f36d58935b234d19667bec71ac05bcbda03d9e093df7c1b662c95f"
+      "sha256": "sha256:605c3db071b322cdec5c0e33a086c3b59832d85981990c551727076b5e5eebd2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R50-eslint-disable-inventory/fixture.toml",
-      "sha256": "sha256:00962ac1289630933af07512721358b100296e0fb2c3125252b2b35ab5602287"
+      "sha256": "sha256:f8d02194761d655855b2e19fab6c0c31e347ed960ad87fd2e05963cfe736807f"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/topology/topology-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:57e1e1196d69ba809ab796b4007d8bbcf6cc46071659a89936dae16c074c6f9f"
+      "sha256": "sha256:7216aee96a48a8fcfd281510d62d50a2ddc80fa0a24ccb44a6642bbf72406d43"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/topology/topology-R10-nested-guardrail-config/fixture.toml",
-      "sha256": "sha256:2514dc89920bd8defa0e74ffdda09e6a74a02a2567f6db06567a4732d1b051b7"
+      "sha256": "sha256:433266cf2dd56cd4ec1c8f15293c7dba159d5e4ccad62a85b6507750ba633b59"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:f0eec8107ff23b233cafb24dac68d60f5f1b5e7f987948df23f78b0903143efb"
+      "sha256": "sha256:d24767a2df193fb5941275a4a2ebef3d00d5c11270d715ce149f0dbccdfa5c6c"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R10-missing-root/fixture.toml",
-      "sha256": "sha256:74e7799c58c33b07c2bdf560c4e0fbc1907b570f54331bbfddf3350aaeb11b1a"
+      "sha256": "sha256:9dad18b58f793e1d8ec33ce0a98e279a1101817b8afb0e474bdbfd4d507e08b2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R20-parse-error/fixture.toml",
-      "sha256": "sha256:6977e1a7d551ef537f86ead7380fdafef204f08fc4bd983ba0507c1942c0cb09"
+      "sha256": "sha256:e44e9046332e9f249568076c28de36ff1cef48952f0e9060a5de5eae6045d67a"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R30-extends-chain-violation/fixture.toml",
-      "sha256": "sha256:c511f33f0aad9fec5b0bf2b7bb6e859abd56bd4e473debe1fd89208258ad7f8d"
+      "sha256": "sha256:f0856fd10a6ccc4a189b629768cf13effd2bab21395ad654618e19150abd796e"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/tsconfig/tsconfig-R40-strict-baseline-violations/fixture.toml",
-      "sha256": "sha256:4c9b9b9f2c155b05d61b6c88596ced8fcba52ad3ea6541114043079a6febaae9"
+      "sha256": "sha256:2cedd8eee2302d07d678ef80c46b823080c5fbc81bda4092ae64405d96a329b2"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R00-clean-golden/fixture.toml",
-      "sha256": "sha256:921adc1a1255a226d982032978752ca4482dbf47fcfb0449ba7bda36f12fe07e"
+      "sha256": "sha256:55d6af1d2523b82c75faf15e6dddd958faff16ce231882bff675e6dc18899046"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R10-policy-root-missing/fixture.toml",
-      "sha256": "sha256:ceb8ae2a06b1e7e168e4db38a1e6eb880755058dc8ac6707824df9fd2169dc6e"
+      "sha256": "sha256:8e8d8ee57e07e4b594662067ab6ed2d7592374ad9bbc8402c660a76f8a54465b"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:acfce307a39371def2304c94ce4615d67247dfa133d2a3d147d42dc589070d28"
+      "sha256": "sha256:4764cf3b8784e4b5ef06d77693c57e430b9e0e136e1a92650646b598b138a733"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R30-script-not-wired/fixture.toml",
-      "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
+      "sha256": "sha256:0a9f28b793299368348f6b21a139ba8a2c30507d96ad3dec56f0ef47bff0ee78"
     }
   ],
-  "comment": "add package node engine install contract"
+  "comment": ".plans/2026-05-18-141200-g3ts-validate-command-surface.md"
 }

@@ -1,0 +1,117 @@
+plan = ".plans/2026-05-18-141200-g3ts-validate-command-surface.md"
+
+[[cli_command]]
+binary = "g3ts"
+argv = ["validate", "repo"]
+required_flags = ["--path"]
+path_optional = true
+purpose = "validate repo-level invariants"
+
+[[cli_command]]
+binary = "g3ts"
+argv = ["validate", "workspace"]
+required_flags = ["--path"]
+optional_flags = ["--family", "--inventory", "--staged", "--rules-only"]
+purpose = "validate one adopted TypeScript workspace"
+
+[[cli_command]]
+binary = "g3ts"
+argv = ["--version"]
+purpose = "print installed G3TS version"
+
+[[forbidden_cli_command]]
+binary = "g3ts"
+argv = ["validate-repo"]
+reason = "old flat repo validation command must be removed"
+
+[[forbidden_cli_command]]
+binary = "g3ts"
+argv = ["validate", "--path"]
+reason = "bare validate workspace command must be replaced by validate workspace"
+
+[[source_update]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/cli.rs"
+must_define = ["validate repo", "validate workspace", "--version"]
+must_not_define = ["validate-repo"]
+
+[[source_update]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/execute.rs"
+must_route = [
+  "validate repo -> existing repo validation behavior",
+  "validate workspace -> existing workspace validation behavior",
+]
+
+[[source_update]]
+path = "packages/ts/hooks/g3ts-hooks-source-checks/crates/runtime/src/run.rs"
+must_require = [
+  "g3ts validate repo",
+  "g3ts validate workspace --path <unit> --staged",
+]
+must_not_require = [
+  "g3ts validate-repo",
+  "g3ts validate --path <unit> --staged",
+]
+
+[[doc_update]]
+scope = "G3TS CLI docs"
+must_document = [
+  "g3ts validate repo --path <repo>",
+  "g3ts validate workspace --path <workspace>",
+  "g3ts --version",
+]
+must_not_document = [
+  "g3ts validate-repo",
+  "guardrail3 ts hooks-install",
+]
+
+[[fixture_update]]
+scope = "G3TS repo validation fixtures"
+must_cover = [
+  "g3ts validate repo reports repo-level hook/topology/tooling findings",
+]
+
+[[fixture_update]]
+scope = "G3TS workspace validation fixtures"
+must_cover = [
+  "g3ts validate workspace reports workspace family findings",
+]
+
+[[fixture_update]]
+scope = "G3TS hook source fixtures"
+must_cover = [
+  "valid hook calls g3ts validate repo",
+  "valid hook dispatches g3ts validate workspace --path <unit> --staged",
+]
+
+[[non_goal]]
+description = "Do not implement a G3TS hook generator in this plan."
+
+[[non_goal]]
+description = "Do not change Slopless files in this plan."
+
+[[non_goal]]
+description = "Do not decide Drizzle migration policy in this plan."
+
+[[non_goal]]
+description = "Do not make repo validation recursively run every workspace."
+
+[[verification]]
+command = "python3 scripts/verify-g3ts-validate-command-surface.py"
+
+[[verification]]
+command = "cargo test --workspace --manifest-path apps/guardrail3-ts/Cargo.toml"
+
+[[verification]]
+command = "fixture3 check --all"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-g3ts-family-rule-fixtures.py"
+
+[[verification]]
+command = "g3ts --help"
+
+[[verification]]
+command = "g3ts --version"
+
+[[verification]]
+command = "g3ts validate repo --path ."

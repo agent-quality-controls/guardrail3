@@ -1,19 +1,19 @@
 {
   "suite": "g3ts-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-17T18-03-17.979569Z-61c3969f",
-  "run_commit": "43440ea5e",
+  "run_id": "2026-05-18T13-51-01.334825Z-d06b5496",
+  "run_commit": "9494d1251",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:03:17.979569Z",
-  "fixture_hash": "sha256:1ecf1c3159f02dff36c5136dde8a91cf5438a4ed1510f01d8d52e046d357ee0a",
-  "manifest_hash": "sha256:61c3969f02975dcd8e39dd0ec4a79e15824841973eddaee18b839ad0228259c5",
+  "recorded_at": "2026-05-18T13:51:01.334825Z",
+  "fixture_hash": "sha256:26f827ef9d554aa7589525057feb969d4ab990440edc5df0e5a51e8c3438529d",
+  "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
       "path": "behavior/fixtures/g3ts-validate-repo/R00-invalid-repo-root/fixture.toml",
-      "sha256": "sha256:d2600df185293b711dfcec7913d58a5cfb653c17f4bf0584add7ae194b83d66f"
+      "sha256": "sha256:c5d1e7a40e18ba057502e6c74cfbc0575d43a7d61a58ef11a526730e0eec7870"
     }
   ],
-  "comment": "initial G3TS validate-repo fixture baseline"
+  "comment": ".plans/2026-05-18-141200-g3ts-validate-command-surface.md"
 }

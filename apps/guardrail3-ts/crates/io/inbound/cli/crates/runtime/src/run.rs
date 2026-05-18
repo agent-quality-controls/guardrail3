@@ -1,4 +1,4 @@
-//! CLI command dispatch glue. The validate / validate-repo pipeline lives
+//! CLI command dispatch glue. The validate repo / validate workspace pipeline lives
 //! in dedicated sibling modules (`execute`, `marker_pairs`, `toolchain_gates`,
 //! `tool_presence`, `topology`); this file holds the top-level entry points
 //! and the shared `CliOutput` payload.
@@ -6,6 +6,7 @@
 use guardrail3_ts_app_types::{FamilyRunner, ReportRenderer, WorkspaceCrawler};
 
 pub(crate) use crate::cli::Command;
+use crate::cli::ValidateCommand;
 use crate::execute;
 use crate::topology::CliFamilyRunner;
 
@@ -28,7 +29,21 @@ pub fn run_command(
     renderer: &dyn ReportRenderer,
 ) -> CliOutput {
     match command {
-        Command::Validate {
+        Command::Validate { command } => {
+            run_validate_command(command, crawler, family_runner, renderer)
+        }
+    }
+}
+
+/// Runs the selected validate subcommand and maps it into CLI output.
+fn run_validate_command(
+    command: ValidateCommand,
+    crawler: &dyn WorkspaceCrawler,
+    family_runner: &dyn FamilyRunner,
+    renderer: &dyn ReportRenderer,
+) -> CliOutput {
+    match command {
+        ValidateCommand::Workspace {
             path,
             family,
             inventory,
@@ -44,7 +59,7 @@ pub fn run_command(
             family_runner,
             renderer,
         ),
-        Command::ValidateRepo { path } => {
+        ValidateCommand::Repo { path } => {
             execute::run_validate_repo(path.as_deref(), crawler, family_runner, renderer)
         }
     }

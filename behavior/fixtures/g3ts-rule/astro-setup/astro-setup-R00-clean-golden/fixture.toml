@@ -2,7 +2,7 @@ id = "astro-setup-R00-clean-golden"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "astro-setup", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "astro-setup", "--rules-only", "--inventory"],
 ]
 expected_exit = "zero"
 level = "family_rule_clean_golden"

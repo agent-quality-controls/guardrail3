@@ -6,7 +6,24 @@ use guardrail3_ts_app_types::SupportedFamily;
 
 /// Top-level CLI parser for the g3ts binary.
 #[derive(Parser, Debug)]
-#[command(name = "g3ts")]
+#[command(
+    name = "g3ts",
+    version,
+    after_help = "G3TS enforces TypeScript repo setup and TypeScript workspace guardrails.
+
+Start here:
+  g3ts validate repo
+  g3ts validate workspace --path <path>
+
+Concepts:
+  repo       Git repository surface: hooks, repo-level topology, marker pairs.
+  workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.
+
+Rules:
+  validate only reports.
+  validate repo checks that Git will run G3TS.
+  validate workspace checks one TypeScript unit."
+)]
 pub struct Cli {
     /// Parsed subcommand payload.
     #[command(subcommand)]
@@ -16,9 +33,26 @@ pub struct Cli {
 /// Supported CLI subcommands.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Command {
-    /// Validates one TypeScript package root against the selected families.
+    /// Reports repo or workspace validation findings.
     Validate {
-        /// Package root to validate.
+        /// Selected validation scope.
+        #[command(subcommand)]
+        command: ValidateCommand,
+    },
+}
+
+/// Supported validate subcommands.
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
+pub enum ValidateCommand {
+    /// Validates repository-level invariants (hooks, tools, topology, marker pairs).
+    Repo {
+        /// Optional repo root override; defaults to git rev-parse --show-toplevel.
+        #[arg(long = "path")]
+        path: Option<PathBuf>,
+    },
+    /// Validates one TypeScript workspace root against the selected families.
+    Workspace {
+        /// Workspace root to validate.
         #[arg(long = "path")]
         path: PathBuf,
         /// Optional family filter.
@@ -33,13 +67,6 @@ pub enum Command {
         /// Skips toolchain gates and runs only the static rule families.
         #[arg(long = "rules-only", default_value_t = false)]
         rules_only: bool,
-    },
-    /// Validates repository-level invariants (hooks, tools, topology, marker pairs).
-    #[command(name = "validate-repo")]
-    ValidateRepo {
-        /// Optional repo root override; defaults to git rev-parse --show-toplevel.
-        #[arg(long = "path")]
-        path: Option<PathBuf>,
     },
 }
 

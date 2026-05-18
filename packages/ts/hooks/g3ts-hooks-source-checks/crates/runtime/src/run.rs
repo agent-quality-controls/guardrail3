@@ -65,11 +65,12 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
     results
 }
 
-/// Records a finding when the hook does not call `g3ts validate-repo`.
+/// Records a finding when the hook does not call `g3ts validate repo`.
 fn check_calls_validate_repo(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3CheckResult>) {
     let found = any_resolved_command(input.parsed(), |command| {
         command.command_name() == "g3ts"
-            && command.args().first().map(String::as_str) == Some("validate-repo")
+            && command.args().first().map(String::as_str) == Some("validate")
+            && command.args().get(1).map(String::as_str) == Some("repo")
     });
     if found {
         return;
@@ -77,8 +78,8 @@ fn check_calls_validate_repo(input: &G3TsHooksSourceChecksInput, results: &mut V
     results.push(G3CheckResult::new(
         CALLS_VALIDATE_REPO_ID.to_owned(),
         G3Severity::Error,
-        "hook does not call g3ts validate-repo".to_owned(),
-        ".githooks/pre-commit must invoke `g3ts validate-repo` to enforce repo-level invariants \
+        "hook does not call g3ts validate repo".to_owned(),
+        ".githooks/pre-commit must invoke `g3ts validate repo` to enforce repo-level invariants \
          (hook shape, tool presence, repo-wide topology, marker-pair completeness)."
             .to_owned(),
         Some(input.rel_path().to_owned()),
@@ -86,7 +87,7 @@ fn check_calls_validate_repo(input: &G3TsHooksSourceChecksInput, results: &mut V
     ));
 }
 
-/// Records a finding when the hook does not invoke per-unit `g3ts validate --staged` from a loop.
+/// Records a finding when the hook does not invoke per-unit `g3ts validate workspace --staged` from a loop.
 fn check_dispatches_per_unit_validate_staged(
     input: &G3TsHooksSourceChecksInput,
     results: &mut Vec<G3CheckResult>,
@@ -123,21 +124,23 @@ fn check_dispatches_per_unit_validate_staged(
     results.push(G3CheckResult::new(
         DISPATCHES_PER_UNIT_VALIDATE_STAGED_ID.to_owned(),
         G3Severity::Error,
-        "hook does not dispatch per-unit g3ts validate --staged".to_owned(),
-        ".githooks/pre-commit must invoke `g3ts validate --path <unit> --staged` from a discovery loop over staged files."
+        "hook does not dispatch per-unit g3ts validate workspace --staged".to_owned(),
+        ".githooks/pre-commit must invoke `g3ts validate workspace --path <unit> --staged` from a discovery loop over staged files."
             .to_owned(),
         Some(input.rel_path().to_owned()),
         None,
     ));
 }
 
-/// Returns true when `line` invokes `g3ts validate --path ... --staged`.
+/// Returns true when `line` invokes `g3ts validate workspace --path ... --staged`.
 fn line_is_g3ts_validate_path_staged(line: &str) -> bool {
     let words = hook_shell_parser::command_query::shell_words(line);
-    for (idx, pair) in words.windows(2).enumerate() {
-        let [first, second] = pair else { continue };
-        if first == "g3ts" && second == "validate" {
-            let tail_start = idx.saturating_add(2);
+    for (idx, triple) in words.windows(3).enumerate() {
+        let [first, second, third] = triple else {
+            continue;
+        };
+        if first == "g3ts" && second == "validate" && third == "workspace" {
+            let tail_start = idx.saturating_add(3);
             let tail = words.get(tail_start..).unwrap_or(&[]);
             let has_staged = tail.iter().any(|w| w == "--staged");
             let has_path = tail
@@ -237,7 +240,7 @@ fn check_no_toolchain_invocation(
                 G3Severity::Error,
                 "hook invokes pnpm directly".to_owned(),
                 format!(
-                    "`.githooks/pre-commit` invokes `{text}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate --path <unit> --staged`; only `pnpm install --frozen-lockfile` (lockfile integrity) and `pnpm exec drizzle-kit generate` (error-message hint) are allowed."
+                    "`.githooks/pre-commit` invokes `{text}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate workspace --path <unit> --staged`; only `pnpm install --frozen-lockfile` (lockfile integrity) and `pnpm exec drizzle-kit generate` (error-message hint) are allowed."
                 ),
                 Some(input.rel_path().to_owned()),
                 Some(line.line_no),
@@ -250,7 +253,7 @@ fn check_no_toolchain_invocation(
                 G3Severity::Error,
                 format!("hook invokes {name} directly"),
                 format!(
-                    "`.githooks/pre-commit` invokes `{}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate --path <unit> --staged`.",
+                    "`.githooks/pre-commit` invokes `{}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate workspace --path <unit> --staged`.",
                     line.command_text
                 ),
                 Some(input.rel_path().to_owned()),

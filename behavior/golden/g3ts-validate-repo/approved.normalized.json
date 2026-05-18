@@ -4,14 +4,15 @@
     {
       "command": [
         "g3ts",
-        "validate-repo",
+        "validate",
+        "repo",
         "--path",
         "missing"
       ],
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 1,
-      "fixture_hash": "sha256:bcfe2c865123296212fae4c35dfb86a4ffbeb4972b5fbca0c1ce6f81fcc264ce",
+      "fixture_hash": "sha256:6cfcccc4c578445d34109466f75a96ea13b388aa2208ba2c8288766013db3a01",
       "fixture_id": "R00-invalid-repo-root",
       "stderr": "InvalidRoot(\"$REPO/missing\")\n",
       "stdout": ""
@@ -19,14 +20,15 @@
     {
       "command": [
         "g3ts",
-        "validate-repo",
+        "validate",
+        "repo",
         "--path",
         "README.md"
       ],
       "command_index": 1,
       "cwd": "repo",
       "exit_code": 1,
-      "fixture_hash": "sha256:bcfe2c865123296212fae4c35dfb86a4ffbeb4972b5fbca0c1ce6f81fcc264ce",
+      "fixture_hash": "sha256:6cfcccc4c578445d34109466f75a96ea13b388aa2208ba2c8288766013db3a01",
       "fixture_id": "R00-invalid-repo-root",
       "stderr": "InvalidRoot(\"$REPO/README.md\")\n",
       "stdout": ""

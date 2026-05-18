@@ -5,7 +5,7 @@ pub enum G3TsHookTriggerPattern {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum G3TsHookCommandRequirement {
-    /// Meta-reference: hook delegates to the in-binary `g3ts validate --path` entry.
+    /// Meta-reference: hook delegates to the in-binary `g3ts validate workspace --path` entry.
     G3TsValidatePath,
     /// Meta-reference: hook delegates to the unit's `validate` package script.
     AppValidateScript,
@@ -40,8 +40,8 @@ impl G3TsHookCommandRequirement {
     /// a runnable toolchain gate command.
     ///
     /// Variants that return `None`:
-    /// - `G3TsValidatePath`: the in-binary validator IS the entry point that
-    ///   receives this delegation, so it does not re-invoke itself.
+    /// - `G3TsValidatePath`: the in-binary workspace validator IS the entry
+    ///   point that receives this delegation, so it does not re-invoke itself.
     /// - `AppValidateScript`: the hook executes the unit-level `validate` npm
     ///   script directly; there is no toolchain-gate equivalent.
     #[must_use]

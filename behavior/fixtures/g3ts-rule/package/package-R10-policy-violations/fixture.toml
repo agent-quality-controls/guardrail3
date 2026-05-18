@@ -2,7 +2,7 @@ id = "package-R10-policy-violations"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "package", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "package", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_policy"

@@ -14,15 +14,15 @@ if [ -f "apps/landing/package.json" ] && [ -f "apps/landing/guardrail3-ts.toml" 
     TS_UNIQUE_UNITS="$(printf '%s\n' apps/landing | awk 'NF' | sort -u)"
 fi
 TS_PKG="${GUARDRAIL3_TS_SCOPE:-apps/landing}"
-g3ts validate-repo
+g3ts validate repo
 if [ -n "$TS_UNIQUE_UNITS" ]; then
     for unit in $TS_UNIQUE_UNITS; do
         if [ -z "$unit" ]; then
             continue
         fi
         parent_dir="$(dirname "$unit")"
-        g3ts validate --path "$TS_PKG" --staged
-        g3ts validate --path "$parent_dir" --staged
-        g3ts validate --path "apps/landing" --staged
+        g3ts validate workspace --path "$TS_PKG" --staged
+        g3ts validate workspace --path "$parent_dir" --staged
+        g3ts validate workspace --path "apps/landing" --staged
     done
 fi

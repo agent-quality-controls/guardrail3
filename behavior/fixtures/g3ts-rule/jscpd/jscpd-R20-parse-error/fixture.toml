@@ -2,7 +2,7 @@ id = "jscpd-R20-parse-error"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate", "--path", ".", "--family", "jscpd", "--rules-only", "--inventory"],
+  ["validate", "workspace", "--path", ".", "--family", "jscpd", "--rules-only", "--inventory"],
 ]
 expected_exit = "nonzero"
 level = "family_rule_input_failure"

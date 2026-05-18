@@ -2,7 +2,7 @@ id = "topology-R10-nested-guardrail-config"
 tool = "g3ts"
 run_from = "repo"
 commands = [
-  ["validate-repo", "--path", "."],
+  ["validate", "repo", "--path", "."],
 ]
 expected_exit = "nonzero"
 level = "family_rule_filetree"

@@ -16,7 +16,7 @@ api = []
 workspace = true
 
 [workspace]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 edition = "2024"
@@ -81,4 +81,3 @@ ref_option_ref = "deny"
 trivially_copy_pass_by_ref = "deny"
 multiple_crate_versions = "deny"
 redundant_pub_crate = "allow"
-

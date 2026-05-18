@@ -1,10 +1,10 @@
 //! Required-tool presence checks: ensure the host has the binaries that the
-//! validate-repo command relies on (e.g. `pnpm`, `gitleaks`).
+//! validate repo command relies on (e.g. `pnpm`, `gitleaks`).
 
 use crate::process::run_env_which;
 
 /// Returns one finding line per required tool that is missing from PATH.
-/// Used by `validate-repo` to surface host-setup failures before the
+/// Used by `validate repo` to surface host-setup failures before the
 /// repo-level checks run.
 pub(crate) fn check_required_tools_present() -> Vec<String> {
     let mut findings = Vec::new();
