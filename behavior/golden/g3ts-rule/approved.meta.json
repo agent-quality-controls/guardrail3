@@ -1,10 +1,10 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-18T13-50-40.635652Z-d06b5496",
-  "run_commit": "9494d1251",
+  "run_id": "2026-05-18T14-22-08.828322Z-d06b5496",
+  "run_commit": "0129d56bf",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T13:50:40.635652Z",
+  "recorded_at": "2026-05-18T14:22:08.828322Z",
   "fixture_hash": "sha256:f6977cc7c2d1b89a43ac0d87d95f90d17a9769f8116189d8bc3ac6e2950cc99f",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -339,5 +339,5 @@
       "sha256": "sha256:0a9f28b793299368348f6b21a139ba8a2c30507d96ad3dec56f0ef47bff0ee78"
     }
   ],
-  "comment": ".plans/2026-05-18-141200-g3ts-validate-command-surface.md"
+  "comment": "Remove generic Drizzle hook requirement"
 }

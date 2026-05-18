@@ -1,18 +1,18 @@
 {
   "suite": "g3rs-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-18T11-25-58.601496Z-d06b5496",
-  "run_commit": "cf3fad18d",
+  "run_id": "2026-05-18T14-21-18.689866Z-d06b5496",
+  "run_commit": "0129d56bf",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T11:25:58.601496Z",
-  "fixture_hash": "sha256:3b747845ecd4c6e9fb1bdec8bd154c36c9e85719e2aa9696d66882e10247e278",
+  "recorded_at": "2026-05-18T14:21:18.689866Z",
+  "fixture_hash": "sha256:010a7f55abcc511c94e41fe4850618528470e17a3f6ee5ed41e369e8c7de831a",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
       "path": "behavior/fixtures/g3rs-cli-output/C10-help-contract/fixture.toml",
-      "sha256": "sha256:3562c28825ee525a23a2b14ad492baeebfa0bba5313290d0494d8ccbb3dc1e8f"
+      "sha256": "sha256:7cd40b0d28461a9d487dd91f74a26371f6b5e50ac4434c135e5aff639de6e36a"
     },
     {
       "path": "behavior/fixtures/g3rs-cli-output/C20-reject-old-command-shapes/fixture.toml",
@@ -39,5 +39,5 @@
       "sha256": "sha256:aba14c1fadb6e36ec638b879f0d61fe8be442e24a3c1f7b88a7fb5b28c0d3b22"
     }
   ],
-  "comment": "runtime contract guardrails current G3RS CLI output"
+  "comment": "Add g3rs version output"
 }

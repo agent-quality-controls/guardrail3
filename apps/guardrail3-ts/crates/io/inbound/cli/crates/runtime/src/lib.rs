@@ -21,7 +21,7 @@ mod tool_presence;
 mod topology;
 
 #[cfg(feature = "api")]
-pub use cli::{Cli, Command, FamilyArg, ValidateCommand, parse_command_from};
+pub use cli::{Cli, Command, FamilyArg, InitCommand, ValidateCommand, parse_command_from};
 #[cfg(feature = "api")]
 pub use guardrail3_ts_packages::PackageRuntime;
 #[cfg(feature = "api")]

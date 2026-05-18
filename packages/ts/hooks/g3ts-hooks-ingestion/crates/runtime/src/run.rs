@@ -40,7 +40,14 @@ pub fn ingest_for_source_checks(
     else {
         return Vec::new();
     };
-    let selected_content = read_to_string(selected.abs_path.as_path());
+    let effective =
+        select_effective_g3ts_surface(hook_root.as_path(), &selected).unwrap_or_else(|| {
+            HookScriptSurface {
+                rel_path: selected.rel_path.clone(),
+                abs_path: selected.abs_path.clone(),
+            }
+        });
+    let selected_content = read_to_string(effective.abs_path.as_path());
     let selected_parsed = parse_script(selected_content.as_str());
     let app_package_roots = app_package_roots(crawl);
     let category_roots = category_roots_for_selected_hook(
@@ -52,7 +59,7 @@ pub fn ingest_for_source_checks(
     let enabled_categories = enabled_categories(crawl, &category_roots);
     let mut inputs = Vec::new();
     inputs.push(hook_types::G3TsHooksSourceChecksInput::new(
-        selected.rel_path.clone(),
+        effective.rel_path,
         hook_types::G3TsHookScriptKind::PreCommit,
         selected_parsed,
         selected.has_modular_dir,
@@ -151,9 +158,14 @@ pub fn ingest_for_config_checks_with_path(
         active,
         select_pre_commit_surface(crawl, hook_root.as_path(), hooks_path.as_deref()).map(
             |surface| {
+                let effective = select_effective_g3ts_surface(hook_root.as_path(), &surface)
+                    .unwrap_or(HookScriptSurface {
+                        rel_path: surface.rel_path,
+                        abs_path: surface.abs_path,
+                    });
                 hook_types::G3TsHooksSelectedHookConfigFact::new(
-                    surface.rel_path,
-                    parse_script(read_to_string(surface.abs_path.as_path()).as_str()),
+                    effective.rel_path,
+                    parse_script(read_to_string(effective.abs_path.as_path()).as_str()),
                 )
             },
         ),
@@ -188,6 +200,24 @@ fn select_pre_commit_surface(
         rel_path: surface.rel_path,
         abs_path: surface.abs_path,
     })
+}
+
+/// Selects the managed G3TS modular hook as the effective G3TS source when the
+/// pre-commit dispatcher references it.
+fn select_effective_g3ts_surface(
+    hook_root: &Path,
+    selected: &SelectedHookSurface,
+) -> Option<HookScriptSurface> {
+    if selected.rel_path != ".githooks/pre-commit"
+        || !read_to_string(selected.abs_path.as_path()).contains(".githooks/pre-commit.d/g3ts")
+    {
+        return None;
+    }
+    let rel_path = ".githooks/pre-commit.d/g3ts".to_owned();
+    let abs_path = hook_root.join(rel_path.as_str());
+    abs_path
+        .is_file()
+        .then_some(HookScriptSurface { rel_path, abs_path })
 }
 
 /// Internal function `hook_surface`.

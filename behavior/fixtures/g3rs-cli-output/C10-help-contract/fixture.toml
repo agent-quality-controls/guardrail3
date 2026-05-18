@@ -4,9 +4,9 @@ run_from = "repo"
 git_init = true
 commands = [
   ["--help"],
+  ["--version"],
   ["validate", "--help"],
   ["init", "--help"],
 ]
 expected_exit = "zero"
 level = "cli_help_contract"
-

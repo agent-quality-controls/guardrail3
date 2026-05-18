@@ -6,7 +6,7 @@
 use guardrail3_ts_app_types::{FamilyRunner, ReportRenderer, WorkspaceCrawler};
 
 pub(crate) use crate::cli::Command;
-use crate::cli::ValidateCommand;
+use crate::cli::{InitCommand, ValidateCommand};
 use crate::execute;
 use crate::topology::CliFamilyRunner;
 
@@ -29,9 +29,32 @@ pub fn run_command(
     renderer: &dyn ReportRenderer,
 ) -> CliOutput {
     match command {
+        Command::Init { command } => run_init_command(command),
         Command::Validate { command } => {
             run_validate_command(command, crawler, family_runner, renderer)
         }
+    }
+}
+
+/// Runs the selected init subcommand and maps it into CLI output.
+fn run_init_command(command: InitCommand) -> CliOutput {
+    let output = match command {
+        InitCommand::Repo { path, force } => guardrail3_ts_validate_command::execute_init_repo(
+            &guardrail3_ts_app_types::InitRepoRequest { path, force },
+        ),
+        InitCommand::Workspace { path, force } => {
+            guardrail3_ts_validate_command::execute_init_workspace(
+                &guardrail3_ts_app_types::InitWorkspaceRequest {
+                    workspace_root: path,
+                    force,
+                },
+            )
+        }
+    };
+    CliOutput {
+        stdout: output.stdout().to_owned(),
+        stderr: output.stderr().to_owned(),
+        exit_code: output.exit_code(),
     }
 }
 

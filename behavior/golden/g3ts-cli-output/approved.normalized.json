@@ -9,10 +9,10 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:a05d90a715e98ec8f517c5b788f00871f3a0b4ac5a81c7b89f8a3e213c168f70",
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
-      "stdout": "Top-level CLI parser for the g3ts binary\n\nUsage: g3ts <COMMAND>\n\nCommands:\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3TS enforces TypeScript repo setup and TypeScript workspace guardrails.\n\nStart here:\n  g3ts validate repo\n  g3ts validate workspace --path <path>\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.\n\nRules:\n  validate only reports.\n  validate repo checks that Git will run G3TS.\n  validate workspace checks one TypeScript unit.\n"
+      "stdout": "Top-level CLI parser for the g3ts binary\n\nUsage: g3ts <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3TS enforces TypeScript repo setup and TypeScript workspace guardrails.\n\nStart here:\n  g3ts init repo\n  g3ts init workspace --path <path>\n  g3ts validate repo\n  g3ts validate workspace --path <path>\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3TS.\n  validate workspace checks one TypeScript unit.\n"
     },
     {
       "command": [
@@ -22,7 +22,7 @@
       "command_index": 1,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:a05d90a715e98ec8f517c5b788f00871f3a0b4ac5a81c7b89f8a3e213c168f70",
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
       "stdout": "g3ts 0.1.0\n"
@@ -30,13 +30,57 @@
     {
       "command": [
         "g3ts",
-        "validate",
+        "init",
         "--help"
       ],
       "command_index": 2,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:a05d90a715e98ec8f517c5b788f00871f3a0b4ac5a81c7b89f8a3e213c168f70",
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Writes repo or workspace setup\n\nUsage: g3ts init <COMMAND>\n\nCommands:\n  repo       Bootstraps repo-level hook guardrails\n  workspace  Bootstraps one adopted TypeScript workspace or package root\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "init",
+        "repo",
+        "--help"
+      ],
+      "command_index": 3,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Bootstraps repo-level hook guardrails\n\nUsage: g3ts init repo [OPTIONS]\n\nOptions:\n      --path <PATH>  Path inside the repo to initialize. Defaults to the current directory [default: .]\n      --force        Allows bounded managed-file rewrites and managed-block insertion\n  -h, --help         Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "init",
+        "workspace",
+        "--help"
+      ],
+      "command_index": 4,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
+      "fixture_id": "C10-help-contract",
+      "stderr": "",
+      "stdout": "Bootstraps one adopted TypeScript workspace or package root\n\nUsage: g3ts init workspace [OPTIONS] --path <PATH>\n\nOptions:\n      --path <PATH>  Workspace root to initialize\n      --force        Allows bounded generated rewrites\n  -h, --help         Print help\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "--help"
+      ],
+      "command_index": 5,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
       "stdout": "Reports repo or workspace validation findings\n\nUsage: g3ts validate <COMMAND>\n\nCommands:\n  repo       Validates repository-level invariants (hooks, tools, topology, marker pairs)\n  workspace  Validates one TypeScript workspace root against the selected families\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
@@ -48,10 +92,10 @@
         "workspace",
         "--help"
       ],
-      "command_index": 3,
+      "command_index": 6,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:a05d90a715e98ec8f517c5b788f00871f3a0b4ac5a81c7b89f8a3e213c168f70",
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
       "stdout": "Validates one TypeScript workspace root against the selected families\n\nUsage: g3ts validate workspace [OPTIONS] --path <PATH>\n\nOptions:\n      --path <PATH>      Workspace root to validate\n      --family <FAMILY>  Optional family filter [possible values: eslint, astro, astro-setup, astro-content, astro-mdx, astro-i18n, astro-media, astro-seo, astro-state, arch, apparch, tsconfig, package, npmrc, jscpd, style, fmt, spelling, typecov, hooks, topology]\n      --inventory        Includes inventory findings in the rendered output\n      --staged           Filters toolchain gates by staged files\n      --rules-only       Skips toolchain gates and runs only the static rule families\n  -h, --help             Print help\n"
@@ -63,10 +107,10 @@
         "repo",
         "--help"
       ],
-      "command_index": 4,
+      "command_index": 7,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:a05d90a715e98ec8f517c5b788f00871f3a0b4ac5a81c7b89f8a3e213c168f70",
+      "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
       "stdout": "Validates repository-level invariants (hooks, tools, topology, marker pairs)\n\nUsage: g3ts validate repo [OPTIONS]\n\nOptions:\n      --path <PATH>  Optional repo root override; defaults to git rev-parse --show-toplevel\n  -h, --help         Print help\n"
@@ -98,6 +142,38 @@
       "fixture_hash": "sha256:25282198f5e5b499172ef52db30d94e5b3730a34d9c7624a6dc56c074c8471b5",
       "fixture_id": "C20-reject-old-command-shapes",
       "stderr": "error: unexpected argument '--path' found\n\nUsage: g3ts validate <COMMAND>\n\nFor more information, try '--help'.\n",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "g3ts",
+        "init",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:1dc17ab3f1af74ee4f0c5c386cd4136562c9fc5de648e4ed94dd04acf8c521db",
+      "fixture_id": "C30-init-repo-managed-hooks",
+      "stderr": "",
+      "stdout": "initialized repo\ncreated .githooks\ncreated .githooks/pre-commit.d\ncreated .githooks/pre-commit.d/g3ts\ncreated .githooks/pre-commit\nvalidate with: g3ts validate repo --path $REPO\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "init",
+        "repo",
+        "--path",
+        "."
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 1,
+      "fixture_hash": "sha256:5b5bce0e2628785d00a0b7ffb024912746f9ac13b843b36637da43204272ba9b",
+      "fixture_id": "C40-init-repo-refuses-owned-hook",
+      "stderr": "refused to modify .githooks/pre-commit\nreason: hook needs explicit managed-block insertion\nrerun with --force to insert the G3TS managed block\n",
       "stdout": ""
     }
   ],

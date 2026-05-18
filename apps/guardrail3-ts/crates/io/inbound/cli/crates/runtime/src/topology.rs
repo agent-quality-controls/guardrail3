@@ -106,10 +106,7 @@ fn collect_adopted_ts_units(dir: &Path, out: &mut Vec<PathBuf>) {
         if !path.is_dir() {
             continue;
         }
-        if matches!(
-            name,
-            "node_modules" | "target" | ".git" | ".cargo-target" | "dist" | "build"
-        ) {
+        if repo_walk_should_skip_dir(name) {
             continue;
         }
         subdirs.push(path);
@@ -120,4 +117,20 @@ fn collect_adopted_ts_units(dir: &Path, out: &mut Vec<PathBuf>) {
     for sub in subdirs {
         collect_adopted_ts_units(sub.as_path(), out);
     }
+}
+
+/// Returns true for generated, vendor, VCS, and fixture roots that repo-level
+/// validation must not treat as live adopted TypeScript units.
+pub(crate) fn repo_walk_should_skip_dir(name: &str) -> bool {
+    matches!(
+        name,
+        ".fixture3"
+            | "behavior"
+            | "node_modules"
+            | "target"
+            | ".git"
+            | ".cargo-target"
+            | "dist"
+            | "build"
+    )
 }

@@ -14,7 +14,10 @@ pub use errors::{FamilyRunError, WorkspaceCrawlError};
 #[cfg(feature = "api")]
 pub use report::{FamilyResults, FamilyRun, ValidateReport};
 #[cfg(feature = "api")]
-pub use request::ValidateRequest;
+pub use request::{
+    AppCommand, InitCommand, InitRepoRequest, InitWorkspaceRequest, ValidateCommand,
+    ValidateRepoRequest, ValidateRequest,
+};
 #[cfg(feature = "api")]
 pub use supported_family::{SUPPORTED_FAMILIES, SupportedFamily};
 #[cfg(feature = "api")]

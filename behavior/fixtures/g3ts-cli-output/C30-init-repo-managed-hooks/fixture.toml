@@ -1,0 +1,9 @@
+id = "C30-init-repo-managed-hooks"
+tool = "g3ts"
+run_from = "repo"
+git_init = true
+commands = [
+  ["init", "repo", "--path", "."],
+]
+expected_exit = "zero"
+level = "cli_init_repo_managed_hooks"

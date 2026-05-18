@@ -4,6 +4,9 @@ run_from = "repo"
 commands = [
   ["--help"],
   ["--version"],
+  ["init", "--help"],
+  ["init", "repo", "--help"],
+  ["init", "workspace", "--help"],
   ["validate", "--help"],
   ["validate", "workspace", "--help"],
   ["validate", "repo", "--help"],

@@ -5,7 +5,7 @@
 use std::path::Path;
 
 use crate::fs as g3ts_fs;
-use crate::topology::{GUARDRAIL3_TS_TOML, PACKAGE_JSON};
+use crate::topology::{GUARDRAIL3_TS_TOML, PACKAGE_JSON, repo_walk_should_skip_dir};
 
 /// Walks `repo_root` and returns one finding line per directory that has
 /// `guardrail3-ts.toml` without a sibling `package.json`.
@@ -43,10 +43,7 @@ fn walk_marker_pair(repo_root: &Path, dir: &Path, findings: &mut Vec<String>) {
         if !path.is_dir() {
             continue;
         }
-        if matches!(
-            name,
-            "node_modules" | "target" | ".git" | ".cargo-target" | "dist" | "build"
-        ) {
+        if repo_walk_should_skip_dir(name) {
             continue;
         }
         subdirs.push(path);

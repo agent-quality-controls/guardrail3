@@ -1,0 +1,9 @@
+id = "C40-init-repo-refuses-owned-hook"
+tool = "g3ts"
+run_from = "repo"
+git_init = true
+commands = [
+  ["init", "repo", "--path", "."],
+]
+expected_exit = "nonzero"
+level = "cli_init_repo_project_owned_hook_refusal"

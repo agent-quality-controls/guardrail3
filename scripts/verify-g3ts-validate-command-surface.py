@@ -51,7 +51,10 @@ def build_g3ts(failures: list[str]) -> None:
 
 def verify_cli(failures: list[str]) -> None:
     expect_success(failures, ["--version"], ["g3ts "])
-    expect_success(failures, ["--help"], ["validate", "-V, --version"])
+    expect_success(failures, ["--help"], ["init", "validate", "-V, --version"])
+    expect_success(failures, ["init", "--help"], ["repo", "workspace"])
+    expect_success(failures, ["init", "repo", "--help"], ["--path <PATH>", "--force"])
+    expect_success(failures, ["init", "workspace", "--help"], ["--path <PATH>", "--force"])
     expect_success(failures, ["validate", "--help"], ["repo", "workspace"])
     expect_success(
         failures,
@@ -96,6 +99,16 @@ def verify_source_text(failures: list[str]) -> None:
     ):
         if required not in hook_source:
             failures.append(f"hook source missing required text: {required}")
+    init_source = (
+        REPO_ROOT / "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/init.rs"
+    ).read_text(encoding="utf-8")
+    for required in (
+        ".githooks/pre-commit.d/g3ts",
+        'g3ts validate repo --path "$repo_root"',
+        'g3ts validate workspace --path "$unit" --staged',
+    ):
+        if required not in init_source:
+            failures.append(f"init source missing required text: {required}")
 
 
 def verify_fixture_commands(failures: list[str]) -> None:
@@ -103,6 +116,15 @@ def verify_fixture_commands(failures: list[str]) -> None:
         text = fixture.read_text(encoding="utf-8")
         if '["validate", "--path",' in text:
             failures.append(f"{fixture.relative_to(REPO_ROOT)}: uses removed workspace command")
+    cli_fixture = REPO_ROOT / "behavior/fixtures/g3ts-cli-output/C10-help-contract/fixture.toml"
+    cli_text = cli_fixture.read_text(encoding="utf-8")
+    for required in (
+        '["init", "--help"]',
+        '["init", "repo", "--help"]',
+        '["init", "workspace", "--help"]',
+    ):
+        if required not in cli_text:
+            failures.append(f"{cli_fixture.relative_to(REPO_ROOT)}: missing {required}")
     repo_fixture = REPO_ROOT / "behavior/fixtures/g3ts-validate-repo/R00-invalid-repo-root/fixture.toml"
     if '["validate", "repo", "--path",' not in repo_fixture.read_text(encoding="utf-8"):
         failures.append(f"{repo_fixture.relative_to(REPO_ROOT)}: does not use validate repo")

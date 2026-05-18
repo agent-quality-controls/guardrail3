@@ -8,6 +8,7 @@ use guardrail3_rs_app_types::SupportedFamily;
 #[derive(Parser, Debug)]
 #[command(
     name = "g3rs",
+    version,
     after_help = "G3RS enforces Rust repo setup and Rust workspace guardrails.
 
 Start here:

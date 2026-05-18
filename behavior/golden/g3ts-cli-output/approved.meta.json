@@ -1,23 +1,31 @@
 {
   "suite": "g3ts-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-18T13-49-52.636488Z-d06b5496",
-  "run_commit": "9494d1251",
+  "run_id": "2026-05-18T14-23-21.810206Z-d06b5496",
+  "run_commit": "0129d56bf",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T13:49:52.636488Z",
-  "fixture_hash": "sha256:57625d8de1457d61743e91f60794a7ba1cc51fe5eebd9dad6983f8b7daece793",
+  "recorded_at": "2026-05-18T14:23:21.810206Z",
+  "fixture_hash": "sha256:2a1014e5298d0e69e1dd25755c8258efc3d38e3c349ad42b7aa97df3d9a48564",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
       "path": "behavior/fixtures/g3ts-cli-output/C10-help-contract/fixture.toml",
-      "sha256": "sha256:ae3ca7d26a5a5fa9deddf59469d97380f12bdbabb82b3dab5658b13cf09e2753"
+      "sha256": "sha256:08b03c15a11fabbd20bcfc6b1476d7b5d786c8913cb5740b404a33018a170058"
     },
     {
       "path": "behavior/fixtures/g3ts-cli-output/C20-reject-old-command-shapes/fixture.toml",
       "sha256": "sha256:90517d7fc2b80753010dbba287006084dde2725ed055e847984fd2bd38dde038"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-cli-output/C30-init-repo-managed-hooks/fixture.toml",
+      "sha256": "sha256:eac8b718adfbd5e6e3dbacbade2f8403736a295d1b8a4d87b36366447390d763"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-cli-output/C40-init-repo-refuses-owned-hook/fixture.toml",
+      "sha256": "sha256:ad61af8adf0ea6b493942ea0973271771116304c14fa1f7b48bd4c2749f52d45"
     }
   ],
-  "comment": ".plans/2026-05-18-141200-g3ts-validate-command-surface.md"
+  "comment": "Add g3ts init command output"
 }

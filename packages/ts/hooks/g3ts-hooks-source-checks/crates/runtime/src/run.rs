@@ -19,8 +19,6 @@ const MERGE_CONFLICT_SCAN_ID: &str = "g3ts-hooks/merge-conflict-scan";
 const GITLEAKS_SCAN_ID: &str = "g3ts-hooks/gitleaks-scan";
 /// Result identifier for the staged-file size-cap rule.
 const FILE_SIZE_CAP_ID: &str = "g3ts-hooks/file-size-cap";
-/// Result identifier for the migration-consistency rule.
-const MIGRATION_CONSISTENCY_ID: &str = "g3ts-hooks/migration-consistency";
 /// Result identifier for the lockfile-integrity rule.
 const LOCKFILE_INTEGRITY_ID: &str = "g3ts-hooks/lockfile-integrity";
 
@@ -59,7 +57,6 @@ pub fn check_effective(inputs: &[G3TsHooksSourceChecksInput]) -> Vec<G3CheckResu
     check_merge_conflict_scan(primary, &mut results);
     check_gitleaks_scan(primary, &mut results);
     check_file_size_cap(primary, &mut results);
-    check_migration_consistency(primary, &mut results);
     check_lockfile_integrity(primary, &mut results);
 
     results
@@ -214,10 +211,7 @@ fn check_skips_when_no_owning_unit(
 const FORBIDDEN_TOOLCHAIN_COMMANDS: &[&str] = &["tsc", "eslint", "prettier", "cspell", "stylelint"];
 
 /// Pnpm command prefixes that are exempt from the forbidden-toolchain rule.
-const PNPM_ALLOWED_PREFIXES: &[&str] = &[
-    "pnpm install --frozen-lockfile",
-    "pnpm exec drizzle-kit generate",
-];
+const PNPM_ALLOWED_PREFIXES: &[&str] = &["pnpm install --frozen-lockfile"];
 
 /// Records a finding when the hook directly invokes the TS toolchain.
 fn check_no_toolchain_invocation(
@@ -228,7 +222,7 @@ fn check_no_toolchain_invocation(
         let name = line.command_name.as_str();
         if name == "pnpm" {
             let text = line.command_text.as_str();
-            // Skip allowed contexts (lockfile-integrity inline check, drizzle generate).
+            // Skip the lockfile-integrity inline check.
             if PNPM_ALLOWED_PREFIXES
                 .iter()
                 .any(|prefix| text.starts_with(prefix) || text.contains(prefix))
@@ -240,7 +234,7 @@ fn check_no_toolchain_invocation(
                 G3Severity::Error,
                 "hook invokes pnpm directly".to_owned(),
                 format!(
-                    "`.githooks/pre-commit` invokes `{text}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate workspace --path <unit> --staged`; only `pnpm install --frozen-lockfile` (lockfile integrity) and `pnpm exec drizzle-kit generate` (error-message hint) are allowed."
+                    "`.githooks/pre-commit` invokes `{text}` directly. The hook must delegate all TypeScript toolchain work to `g3ts validate workspace --path <unit> --staged`; only `pnpm install --frozen-lockfile` is allowed for lockfile integrity."
                 ),
                 Some(input.rel_path().to_owned()),
                 Some(line.line_no),
@@ -344,27 +338,6 @@ fn check_file_size_cap(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3C
         G3Severity::Error,
         "pre-commit hook does not enforce a staged-file size cap".to_owned(),
         "The pre-commit hook must enforce a staged-file size cap (e.g. via `git cat-file -s` and a configured maximum).".to_owned(),
-        Some(input.rel_path().to_owned()),
-        None,
-    ));
-}
-
-/// Records a finding when the hook does not enforce drizzle-migration consistency.
-fn check_migration_consistency(
-    input: &G3TsHooksSourceChecksInput,
-    results: &mut Vec<G3CheckResult>,
-) {
-    let body = source_text(input.parsed());
-    let mentions_drizzle = has_uncommented_substring(&body, "drizzle/");
-    let mentions_schema = has_uncommented_substring(&body, "db/schema/");
-    if mentions_drizzle && mentions_schema {
-        return;
-    }
-    results.push(G3CheckResult::new(
-        MIGRATION_CONSISTENCY_ID.to_owned(),
-        G3Severity::Error,
-        "pre-commit hook does not enforce migration consistency".to_owned(),
-        "The pre-commit hook must enforce migration consistency: forbid modifying existing `drizzle/*` files and require a new `drizzle/*.sql` file when `db/schema/*.ts` is staged.".to_owned(),
         Some(input.rel_path().to_owned()),
         None,
     ));

@@ -1,0 +1,78 @@
+[[cli_command]]
+tool = "g3rs"
+argv = ["--version"]
+expect_exit = 0
+stdout_contains = ["g3rs "]
+
+[[cli_command]]
+tool = "g3ts"
+argv = ["--version"]
+expect_exit = 0
+stdout_contains = ["g3ts "]
+
+[[cli_command]]
+tool = "g3ts"
+argv = ["init", "--help"]
+expect_exit = 0
+stdout_contains = ["repo", "workspace"]
+
+[[cli_command]]
+tool = "g3ts"
+argv = ["init", "repo", "--help"]
+expect_exit = 0
+stdout_contains = ["--path", "--force"]
+
+[[cli_command]]
+tool = "g3ts"
+argv = ["init", "workspace", "--help"]
+expect_exit = 0
+stdout_contains = ["--path", "--force"]
+
+[[source_contains]]
+path = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/cli.rs"
+required = ["name = \"g3rs\"", "version"]
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/cli.rs"
+required = ["Init", "g3ts init repo", "g3ts init workspace --path <path>"]
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/init.rs"
+required = [
+  ".githooks/pre-commit.d/g3ts",
+  "g3ts validate repo --path \"$repo_root\"",
+  "g3ts validate workspace --path \"$unit\" --staged",
+  "git diff --cached --name-only --diff-filter=ACM",
+  "gitleaks protect --staged",
+  "git cat-file -s",
+  "package.json",
+  "guardrail3-ts.toml",
+]
+
+[[source_forbidden]]
+path = "packages/ts/hooks/g3ts-hooks-source-checks/crates/runtime/src/run.rs"
+forbidden = ["MIGRATION_CONSISTENCY_ID", "check_migration_consistency", "drizzle-kit"]
+
+[[source_contains]]
+path = "packages/ts/hooks/g3ts-hooks-ingestion/crates/runtime/src/run.rs"
+required = [".githooks/pre-commit.d/g3ts"]
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/marker_pairs.rs"
+required = ["repo_walk_should_skip_dir"]
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/topology.rs"
+required = [".fixture3", "behavior"]
+
+[[fixture_command]]
+path = "behavior/fixtures/g3ts-cli-output"
+required_commands = [
+  "[\"init\", \"--help\"]",
+  "[\"init\", \"repo\", \"--help\"]",
+  "[\"init\", \"workspace\", \"--help\"]",
+]
+
+[[fixture_command]]
+path = "behavior/fixtures/g3rs-cli-output"
+required_commands = ["[\"--version\"]"]

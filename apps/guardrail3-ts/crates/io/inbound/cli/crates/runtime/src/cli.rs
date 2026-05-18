@@ -12,6 +12,8 @@ use guardrail3_ts_app_types::SupportedFamily;
     after_help = "G3TS enforces TypeScript repo setup and TypeScript workspace guardrails.
 
 Start here:
+  g3ts init repo
+  g3ts init workspace --path <path>
   g3ts validate repo
   g3ts validate workspace --path <path>
 
@@ -20,6 +22,7 @@ Concepts:
   workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.
 
 Rules:
+  init writes setup.
   validate only reports.
   validate repo checks that Git will run G3TS.
   validate workspace checks one TypeScript unit."
@@ -33,11 +36,40 @@ pub struct Cli {
 /// Supported CLI subcommands.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Command {
+    /// Writes repo or workspace setup.
+    Init {
+        /// Selected init scope.
+        #[command(subcommand)]
+        command: InitCommand,
+    },
     /// Reports repo or workspace validation findings.
     Validate {
         /// Selected validation scope.
         #[command(subcommand)]
         command: ValidateCommand,
+    },
+}
+
+/// Supported init subcommands.
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
+pub enum InitCommand {
+    /// Bootstraps repo-level hook guardrails.
+    Repo {
+        /// Path inside the repo to initialize. Defaults to the current directory.
+        #[arg(long = "path", default_value = ".")]
+        path: PathBuf,
+        /// Allows bounded managed-file rewrites and managed-block insertion.
+        #[arg(long = "force", default_value_t = false)]
+        force: bool,
+    },
+    /// Bootstraps one adopted TypeScript workspace or package root.
+    Workspace {
+        /// Workspace root to initialize.
+        #[arg(long = "path")]
+        path: PathBuf,
+        /// Allows bounded generated rewrites.
+        #[arg(long = "force", default_value_t = false)]
+        force: bool,
     },
 }
 
