@@ -1,8 +1,5 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
-use g3ts_typecov_types::{
-    G3TsTypecovSyncpackSnapshot, G3TsTypecovSyncpackSurfaceState,
-    G3TsTypecovSyncpackVersionGroupSnapshot,
-};
+use g3ts_typecov_types::{G3TsTypecovSyncpackSnapshot, G3TsTypecovSyncpackSurfaceState};
 
 /// `ingest_syncpack_config`: ingest syncpack config.
 pub(crate) fn ingest_syncpack_config(
@@ -48,12 +45,7 @@ pub(crate) fn ingest_syncpack_config(
         snapshot: G3TsTypecovSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
             source: typed.source.clone(),
-            version_groups: typed
-                .version_groups
-                .iter()
-                .cloned()
-                .map(syncpack_version_group)
-                .collect(),
+            version_groups: typed.version_groups.clone(),
         },
     }
 }
@@ -62,19 +54,4 @@ pub(crate) fn ingest_syncpack_config(
 fn included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
     entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
         && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
-}
-
-/// `syncpack_version_group`: syncpack version group.
-fn syncpack_version_group(
-    group: syncpack_config_parser::types::SyncpackVersionGroup,
-) -> G3TsTypecovSyncpackVersionGroupSnapshot {
-    G3TsTypecovSyncpackVersionGroupSnapshot {
-        dependencies: group.dependencies,
-        dependency_types: group.dependency_types,
-        packages: group.packages,
-        specifier_types: group.specifier_types,
-        is_ignored: group.is_ignored,
-        is_banned: group.is_banned,
-        pin_version: group.pin_version,
-    }
 }

@@ -1,0 +1,12 @@
+{
+  "name": "spelling-indirect-script",
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell .",
+    "indirect": "cspell .",
+    "validate": "pnpm run indirect"
+  },
+  "devDependencies": {
+    "cspell": "9.2.1"
+  }
+}

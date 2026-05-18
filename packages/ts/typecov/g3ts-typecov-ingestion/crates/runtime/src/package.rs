@@ -1,8 +1,8 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_typecov_types::{
-    G3TsTypecovPackageScriptCommandSeparator, G3TsTypecovPackageScriptParseBlocker,
-    G3TsTypecovPackageScriptToolInvocation, G3TsTypecovPackageSurfaceSnapshot,
-    G3TsTypecovPackageSurfaceState,
+    G3TsTypecovDependencyDeclarationSnapshot, G3TsTypecovPackageScriptCommandSeparator,
+    G3TsTypecovPackageScriptParseBlocker, G3TsTypecovPackageScriptToolInvocation,
+    G3TsTypecovPackageSurfaceSnapshot, G3TsTypecovPackageSurfaceState,
 };
 use package_script_command_parser::types::{
     PackageScriptCommandSeparator, PackageScriptParseFact, PackageScriptParseState,
@@ -60,8 +60,17 @@ pub(crate) fn ingest_package_surface(
     G3TsTypecovPackageSurfaceState::Parsed {
         snapshot: G3TsTypecovPackageSurfaceSnapshot {
             rel_path: entry.path.rel_path.clone(),
+            name: typed.name.clone(),
             dependencies: typed.dependencies.clone(),
             dev_dependencies: typed.dev_dependencies.clone(),
+            dependency_declarations: package_json_parser::dependency_declarations(&document.raw)
+                .into_iter()
+                .map(|declaration| G3TsTypecovDependencyDeclarationSnapshot {
+                    name: declaration.name,
+                    lane: declaration.lane,
+                    specifier_type: declaration.specifier_type,
+                })
+                .collect(),
             script_names: typed.scripts.keys().cloned().collect(),
             script_tool_invocations: script_facts
                 .iter()
@@ -107,6 +116,7 @@ fn script_tool_invocation(
 ) -> G3TsTypecovPackageScriptToolInvocation {
     G3TsTypecovPackageScriptToolInvocation {
         script_name: invocation.script_name.clone(),
+        invocation: invocation.invocation.clone(),
         executable: invocation.executable.clone(),
         args: invocation.args.clone(),
         preceded_by: invocation.preceded_by.map(script_command_separator),

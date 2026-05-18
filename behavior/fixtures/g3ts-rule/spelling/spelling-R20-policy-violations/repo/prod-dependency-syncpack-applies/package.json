@@ -1,0 +1,11 @@
+{
+  "name": "spelling-prod-dependency-syncpack-applies",
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell .",
+    "validate": "pnpm run spellcheck"
+  },
+  "dependencies": {
+    "cspell": "^9.2.1"
+  }
+}

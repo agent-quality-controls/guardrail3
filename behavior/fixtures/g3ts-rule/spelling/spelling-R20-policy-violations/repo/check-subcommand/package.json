@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell check words",
+    "validate": "pnpm run spellcheck"
+  },
+  "devDependencies": {
+    "cspell": "9.2.1"
+  }
+}

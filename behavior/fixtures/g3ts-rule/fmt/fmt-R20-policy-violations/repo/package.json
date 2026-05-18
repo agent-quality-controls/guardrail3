@@ -1,7 +1,6 @@
 {
   "private": true,
   "scripts": {
-    "format": "echo format",
     "validate": "prettier --check ."
   },
   "devDependencies": {}

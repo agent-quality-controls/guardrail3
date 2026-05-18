@@ -35,3 +35,10 @@ pub struct SyncpackVersionGroup {
     pub is_banned: Option<bool>,
     pub is_ignored: Option<bool>,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SyncpackDependencyDeclarationRef<'a> {
+    pub name: &'a str,
+    pub lane: &'a str,
+    pub specifier_type: &'a str,
+}

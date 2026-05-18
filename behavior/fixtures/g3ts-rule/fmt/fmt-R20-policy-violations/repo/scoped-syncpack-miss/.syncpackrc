@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+      "packages": ["!fmt-scoped-syncpack-miss"],
+      "dependencies": ["prettier"],
+      "pinVersion": "3.6.2"
+    }
+  ]
+}

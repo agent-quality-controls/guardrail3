@@ -1,0 +1,11 @@
+{
+  "name": "typecov-runner-direct",
+  "private": true,
+  "scripts": {
+    "typecov": "pnpm exec type-coverage --strict --at-least 90",
+    "validate": "pnpm run typecov"
+  },
+  "devDependencies": {
+    "type-coverage": "2.29.7"
+  }
+}

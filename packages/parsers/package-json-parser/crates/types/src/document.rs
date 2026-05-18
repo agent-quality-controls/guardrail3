@@ -34,6 +34,14 @@ pub struct PackageJsonSnapshot {
     pub dev_dependencies: Vec<String>,
     pub optional_dependencies: Vec<String>,
     pub peer_dependencies: Vec<String>,
+    pub dependency_declarations: Vec<PackageJsonDependencyDeclarationSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PackageJsonDependencyDeclarationSnapshot {
+    pub name: String,
+    pub lane: String,
+    pub specifier_type: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

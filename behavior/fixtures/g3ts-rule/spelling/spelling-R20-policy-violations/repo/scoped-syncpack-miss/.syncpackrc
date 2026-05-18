@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+      "packages": ["!spelling-scoped-syncpack-miss"],
+      "dependencies": ["cspell"],
+      "pinVersion": "9.2.1"
+    }
+  ]
+}

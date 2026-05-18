@@ -1,0 +1,10 @@
+{
+  "versionGroups": [
+    {
+      "dependencyTypes": ["prod"],
+      "specifierTypes": ["range"],
+      "dependencies": ["type-coverage"],
+      "pinVersion": "2.29.7"
+    }
+  ]
+}

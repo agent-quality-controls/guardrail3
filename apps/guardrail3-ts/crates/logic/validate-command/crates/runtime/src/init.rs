@@ -348,7 +348,7 @@ while IFS= read -r file; do
     fi
 done <<< "$staged_files"
 
-if printf '%s\n' "$staged_files" | grep -qE '(^|/)package\.json$'; then
+if printf '%s\n' "$validation_staged_files" | grep -qE '(^|/)package\.json$'; then
     pnpm install --frozen-lockfile
 fi
 
@@ -380,7 +380,7 @@ staged_file_dir() {{
     fi
 }}
 
-ts_relevant_pattern='(\.(ts|tsx|mts|cts|js|jsx|mjs|cjs|css)$|(^|/)package\.json$|(^|/)guardrail3-ts\.toml$|(^|/)tsconfig\.json$)'
+ts_relevant_pattern='(\.(ts|tsx|mts|cts|js|jsx|mjs|cjs|css)$|(^|/)package\.json$|(^|/)guardrail3-ts\.toml$|(^|/)\.syncpackrc$|(^|/)tsconfig[^/]*\.json$|(^|/)prettier\.config\.[^/]+$|(^|/)\.prettierrc(\.[^/]+)?$|(^|/)cspell\.json$|(^|/)\.cspell\.json$|(^|/)cspell\.config\.[^/]+$|(^|/)cspell\.ya?ml$)'
 ts_relevant_files=$(echo "$validation_staged_files" | grep -E "$ts_relevant_pattern" || true)
 
 ts_owning_units=""

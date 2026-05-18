@@ -1,9 +1,9 @@
 {
+  "name": "fmt-clean-golden",
   "private": true,
   "scripts": {
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "validate": "pnpm run format:check"
+    "format:check": "prettier --check --cache .",
+    "validate": "pnpm format:check"
   },
   "devDependencies": {
     "prettier": "3.6.2"

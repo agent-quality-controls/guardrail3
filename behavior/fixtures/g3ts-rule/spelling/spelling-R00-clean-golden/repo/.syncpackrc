@@ -1,6 +1,9 @@
 {
   "versionGroups": [
     {
+      "packages": ["**"],
+      "dependencyTypes": ["**"],
+      "specifierTypes": ["exact"],
       "dependencies": ["cspell"],
       "pinVersion": "9.2.1"
     }

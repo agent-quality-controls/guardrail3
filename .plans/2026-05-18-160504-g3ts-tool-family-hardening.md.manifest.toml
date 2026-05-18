@@ -1,0 +1,222 @@
+plan = ".plans/2026-05-18-160504-g3ts-tool-family-hardening.md"
+
+[[family]]
+name = "fmt"
+owned_paths = [
+  "packages/ts/fmt",
+  "packages/parsers/package-json-parser",
+  "packages/parsers/syncpack-config-parser",
+  "behavior/fixtures/g3ts-rule/fmt",
+]
+forbidden_paths = [
+  "behavior/golden",
+  "packages/ts/spelling",
+  "packages/ts/typecov",
+]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/prettier-package-present"
+requires = ["direct package dependency: prettier"]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/prettier-config-present"
+requires = ["Prettier config file at app/package root"]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/format-check-script"
+requires = ["script: format:check", "command reaches prettier --check", "prettier invocation has explicit target", "Prettier option values are not counted as targets", "no || fallback"]
+forbids = ["requiring script: format", "requiring prettier --write"]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/validate-runs-format-check"
+requires = ["validate reaches format:check through package-manager run or direct package-manager script shortcut, or direct prettier --check", "bare format:check command does not count", "no || fallback"]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/syncpack-prettier-pin"
+requires = ["syncpack non-ignored pin for prettier", "Syncpack package scope applies", "Syncpack specifier type scope is not narrow", "Syncpack dependency type matches actual dependency lane"]
+
+[[rule_contract]]
+family = "fmt"
+rule = "g3ts-fmt/hook-trigger-coverage"
+requires = ["generated hook recognizes .syncpackrc", "generated hook recognizes prettier.config.*", "generated hook recognizes .prettierrc*", "CLI --staged filter recognizes the same files"]
+
+[[fixture_contract]]
+family = "fmt"
+fixture = "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden"
+requires = ["passes without package.json script: format", "passes package-scoped Syncpack dev pin", "passes direct package-manager script shortcut", "passes boolean Prettier option before checked target"]
+
+[[fixture_contract]]
+family = "fmt"
+fixture = "behavior/fixtures/g3ts-rule/fmt/fmt-R20-policy-violations"
+requires = ["fails missing prettier", "fails missing format:check", "fails targetless prettier --check", "fails Prettier option value without target", "fails hidden || fallback", "fails missing config", "fails missing syncpack pin", "fails inapplicable Syncpack package scope", "fails inapplicable Syncpack specifier scope", "fails inapplicable Syncpack dependency type scope", "passes applicable prod dependency Syncpack scope"]
+
+[[family]]
+name = "spelling"
+owned_paths = [
+  "packages/ts/spelling",
+  "packages/parsers/package-json-parser",
+  "packages/parsers/syncpack-config-parser",
+  "behavior/fixtures/g3ts-rule/spelling",
+]
+forbidden_paths = [
+  "behavior/golden",
+  "packages/ts/fmt",
+  "packages/ts/typecov",
+]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/cspell-package-present"
+requires = ["direct package dependency: cspell"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/cspell-config-present"
+requires = ["CSpell config file at app/package root", "JSON CSpell config parses when JSON config is used"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/spellcheck-script"
+requires = ["script: spellcheck"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/spellcheck-fail-closed"
+requires = ["spellcheck reaches cspell", "cspell invocation has explicit target", "CSpell option values are not counted as targets", "no || fallback"]
+forbids = ["bare cspell command with no file/directory/glob target"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/validate-runs-spellcheck"
+requires = ["validate reaches spellcheck through package-manager run or direct package-manager script shortcut, or direct target-bearing cspell", "bare spellcheck command does not count", "no || fallback"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/syncpack-cspell-pin"
+requires = ["syncpack non-ignored pin for cspell", "Syncpack package scope applies", "Syncpack specifier type scope is not narrow", "Syncpack dependency type matches actual dependency lane"]
+
+[[rule_contract]]
+family = "spelling"
+rule = "g3ts-spelling/hook-trigger-coverage"
+requires = ["generated hook recognizes .syncpackrc", "generated hook recognizes cspell.json", "generated hook recognizes .cspell.json", "generated hook recognizes cspell.config.*", "generated hook recognizes cspell.yaml", "generated hook recognizes cspell.yml", "CLI --staged filter recognizes the same files"]
+
+[[fixture_contract]]
+family = "spelling"
+fixture = "behavior/fixtures/g3ts-rule/spelling/spelling-R20-policy-violations"
+requires = ["fails missing cspell", "fails bad spellcheck", "fails invalid JSON cspell config", "fails hidden || fallback", "fails validate direct bare cspell", "fails CSpell option value without target", "fails missing cspell config", "fails missing syncpack pin", "fails inapplicable Syncpack package scope", "fails inapplicable Syncpack specifier scope", "fails inapplicable Syncpack dependency type scope", "passes applicable prod dependency Syncpack scope"]
+
+[[fixture_contract]]
+family = "spelling"
+fixture = "behavior/fixtures/g3ts-rule/spelling/spelling-R40-bare-cspell"
+requires = ["fails bare cspell with no explicit target"]
+
+[[family]]
+name = "typecov"
+owned_paths = [
+  "packages/ts/typecov",
+  "packages/parsers/g3ts-toml-parser",
+  "packages/parsers/package-json-parser",
+  "packages/parsers/syncpack-config-parser",
+  "behavior/fixtures/g3ts-rule/typecov",
+]
+forbidden_paths = [
+  "behavior/golden",
+  "packages/ts/fmt",
+  "packages/ts/spelling",
+]
+
+[[parser_contract]]
+parser = "g3ts-toml-parser"
+table = "typecov"
+fields = ["minimum"]
+minimum_range = "0..=100"
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/package-present"
+requires = ["direct package dependency: type-coverage"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/policy-configured"
+requires = ["guardrail3-ts.toml exists", "[typecov] exists", "minimum is integer 0..=100"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/script-present"
+requires = ["script: typecov"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/threshold-fail-closed"
+requires = ["typecov reaches type-coverage", "type-coverage invocation has --strict", "type-coverage invocation has --at-least <n>", "every --at-least n is parseable, >= [typecov].minimum, and <= 100", "attached --at-least=<n> values count", "no || fallback"]
+forbids = ["hardcoded threshold 100 as the only accepted value"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/validate-runs-typecov"
+requires = ["validate reaches typecov through package-manager run or direct package-manager script shortcut, or direct type-coverage command", "bare typecov command does not count", "effective type-coverage command satisfies threshold-fail-closed"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/syncpack-type-coverage-pin"
+requires = ["syncpack non-ignored pin for type-coverage", "Syncpack package scope applies", "Syncpack specifier type scope is not narrow", "Syncpack dependency type matches actual dependency lane"]
+
+[[rule_contract]]
+family = "typecov"
+rule = "g3ts-typecov/hook-trigger-coverage"
+requires = ["generated hook recognizes .syncpackrc", "generated hook recognizes tsconfig*.json", "CLI --staged filter recognizes the same files"]
+
+[[parser_contract]]
+parser = "package-json-parser"
+owns = ["dependency declaration extraction", "dependency specifier type classification"]
+
+[[parser_contract]]
+parser = "syncpack-config-parser"
+owns = ["first matching version-group selector behavior", "package selector matching", "dependency selector matching", "dependency type selector matching", "specifier type selector matching"]
+
+[[fixture_contract]]
+family = "typecov"
+fixture = "behavior/fixtures/g3ts-rule/typecov/typecov-R00-clean-golden"
+requires = ["passes with [typecov] minimum = 100 and type-coverage --strict --at-least 100", "passes package-scoped Syncpack dev pin"]
+
+[[fixture_contract]]
+family = "typecov"
+fixture = "behavior/fixtures/g3ts-rule/typecov/typecov-R20-policy-violations"
+requires = ["fails missing type-coverage", "fails missing [typecov]", "fails missing --strict", "fails threshold below policy", "fails threshold above 100", "fails duplicate --at-least with lower threshold", "fails duplicate --at-least with invalid threshold value", "fails attached --at-least below policy", "fails missing syncpack pin", "fails inapplicable Syncpack package scope", "fails inapplicable Syncpack specifier scope", "fails inapplicable Syncpack dependency type scope", "passes applicable prod dependency Syncpack scope"]
+
+[[fixture_contract]]
+family = "typecov"
+fixture = "behavior/fixtures/g3ts-rule/typecov/typecov-R40-policy-threshold"
+requires = ["fails [typecov] minimum outside 0..=100", "fails negative minimum", "fails string minimum", "fails float minimum"]
+
+[[fixture_contract]]
+family = "typecov"
+fixture = "behavior/fixtures/g3ts-rule/typecov/typecov-R30-script-not-wired"
+requires = ["fails validate not reaching typecov", "fails validate bare package-script shortcut"]
+
+[[fixture_contract]]
+family = "typecov"
+fixture = "behavior/fixtures/g3ts-rule/typecov/typecov-R50-non100-policy-clean"
+requires = ["passes with non-100 [typecov] minimum and matching direct validate type-coverage threshold"]
+
+[[verifier]]
+path = "scripts/verify-g3ts-tool-family-hardening.py"
+checks = [
+  "manifest contracts exist in source",
+  "fmt does not require format/prettier --write",
+  "spelling rejects bare cspell fixture",
+  "typecov reads [typecov].minimum",
+  "typecov requires --strict",
+  "typecov compares script threshold against policy threshold",
+  "generated hook does not run pnpm install for fixture package.json files",
+  "generated hook does not route behavior/fixtures files as live workspaces",
+  "generated hook and CLI staged filters include family hook contract config files",
+  "package-json-parser owns dependency declaration and specifier classification",
+  "syncpack-config-parser owns Syncpack selector matching",
+]

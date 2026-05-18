@@ -5,6 +5,7 @@ allowed_deps = [
   "g3ts-typecov-config-checks-assertions",
   "g3ts-typecov-types",
   "guardrail3-check-types",
+  "syncpack-config-parser",
 ]
 
 [checks]

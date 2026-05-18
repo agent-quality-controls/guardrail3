@@ -1,0 +1,11 @@
+{
+  "name": "spelling-filtered-shortcut",
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell .",
+    "validate": "pnpm --filter other spellcheck"
+  },
+  "devDependencies": {
+    "cspell": "9.2.1"
+  }
+}

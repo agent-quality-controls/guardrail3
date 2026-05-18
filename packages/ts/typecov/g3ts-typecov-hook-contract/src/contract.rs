@@ -9,8 +9,13 @@ pub fn hook_contract() -> Vec<G3TsHookRequirement> {
         "typecov".to_owned(),
         vec![
             G3TsHookTriggerPattern::Glob("package.json".to_owned()),
+            G3TsHookTriggerPattern::Glob("**/package.json".to_owned()),
+            G3TsHookTriggerPattern::Glob("guardrail3-ts.toml".to_owned()),
+            G3TsHookTriggerPattern::Glob("**/guardrail3-ts.toml".to_owned()),
             G3TsHookTriggerPattern::Glob(".syncpackrc".to_owned()),
+            G3TsHookTriggerPattern::Glob("**/.syncpackrc".to_owned()),
             G3TsHookTriggerPattern::Glob("tsconfig*.json".to_owned()),
+            G3TsHookTriggerPattern::Glob("**/tsconfig*.json".to_owned()),
             G3TsHookTriggerPattern::Glob("**/*.ts".to_owned()),
             G3TsHookTriggerPattern::Glob("**/*.tsx".to_owned()),
             G3TsHookTriggerPattern::Glob("**/*.astro".to_owned()),

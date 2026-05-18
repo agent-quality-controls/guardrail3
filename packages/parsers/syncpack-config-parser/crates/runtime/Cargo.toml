@@ -21,6 +21,7 @@ all = ["api"]
 api = []
 
 [dependencies]
+globset = "0.4"
 serde_json = "1"
 syncpack-config-parser-types = { path = "../types", version = "0.1.0" }
 

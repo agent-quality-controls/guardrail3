@@ -1,0 +1,10 @@
+{
+  "versionGroups": [
+    {
+      "dependencyTypes": ["prod"],
+      "specifierTypes": ["range"],
+      "dependencies": ["prettier"],
+      "pinVersion": "3.6.2"
+    }
+  ]
+}

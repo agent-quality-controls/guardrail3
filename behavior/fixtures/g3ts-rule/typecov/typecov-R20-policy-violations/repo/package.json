@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "typecov": "echo typecov",
-    "validate": "type-coverage --at-least 100"
+    "typecov": "type-coverage --at-least 99",
+    "validate": "type-coverage --at-least 99"
   },
   "devDependencies": {}
 }

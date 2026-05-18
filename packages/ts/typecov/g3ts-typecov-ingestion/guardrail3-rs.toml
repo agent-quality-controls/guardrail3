@@ -2,6 +2,7 @@ profile = "library"
 
 allowed_deps = [
   "g3-workspace-crawl",
+  "g3ts-toml-parser",
   "g3ts-typecov-ingestion-runtime",
   "g3ts-typecov-ingestion-assertions",
   "g3ts-typecov-types",

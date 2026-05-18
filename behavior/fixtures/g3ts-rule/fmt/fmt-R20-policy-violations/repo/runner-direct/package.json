@@ -1,0 +1,11 @@
+{
+  "name": "fmt-runner-direct",
+  "private": true,
+  "scripts": {
+    "format:check": "pnpm exec prettier --check .",
+    "validate": "pnpm run format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

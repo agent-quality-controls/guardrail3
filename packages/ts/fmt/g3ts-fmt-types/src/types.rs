@@ -1,16 +1,26 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsFmtPackageSurfaceSnapshot {
     pub rel_path: String,
+    pub name: Option<String>,
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
+    pub dependency_declarations: Vec<G3TsFmtDependencyDeclarationSnapshot>,
     pub script_names: Vec<String>,
     pub script_tool_invocations: Vec<G3TsFmtPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsFmtPackageScriptParseBlocker>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsFmtDependencyDeclarationSnapshot {
+    pub name: String,
+    pub lane: String,
+    pub specifier_type: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsFmtPackageScriptToolInvocation {
     pub script_name: String,
+    pub invocation: String,
     pub executable: String,
     pub args: Vec<String>,
     pub preceded_by: Option<G3TsFmtPackageScriptCommandSeparator>,
@@ -59,18 +69,7 @@ pub enum G3TsFmtConfigSurfaceState {
 pub struct G3TsFmtSyncpackSnapshot {
     pub rel_path: String,
     pub source: Vec<String>,
-    pub version_groups: Vec<G3TsFmtSyncpackVersionGroupSnapshot>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsFmtSyncpackVersionGroupSnapshot {
-    pub dependencies: Vec<String>,
-    pub dependency_types: Vec<String>,
-    pub packages: Option<Vec<String>>,
-    pub specifier_types: Option<Vec<String>>,
-    pub is_ignored: Option<bool>,
-    pub is_banned: Option<bool>,
-    pub pin_version: Option<String>,
+    pub version_groups: Vec<syncpack_config_parser::types::SyncpackVersionGroup>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

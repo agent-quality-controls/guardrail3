@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-18T14-23-21.810206Z-d06b5496",
-  "run_commit": "0129d56bf",
+  "run_id": "2026-05-18T16-06-13.6374Z-d06b5496",
+  "run_commit": "68745c957",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T14:23:21.810206Z",
-  "fixture_hash": "sha256:2a1014e5298d0e69e1dd25755c8258efc3d38e3c349ad42b7aa97df3d9a48564",
+  "recorded_at": "2026-05-18T16:06:13.6374Z",
+  "fixture_hash": "sha256:5a7e7da415f507163f7e2b4019fc81c5b32365634fc16a1f72bf8c1aed2749e2",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -20,12 +20,12 @@
     },
     {
       "path": "behavior/fixtures/g3ts-cli-output/C30-init-repo-managed-hooks/fixture.toml",
-      "sha256": "sha256:eac8b718adfbd5e6e3dbacbade2f8403736a295d1b8a4d87b36366447390d763"
+      "sha256": "sha256:c1e7b08aba26b5e6fc2affad8fea0f581d63ebc4e55c590783eb9cfffe17f8b3"
     },
     {
       "path": "behavior/fixtures/g3ts-cli-output/C40-init-repo-refuses-owned-hook/fixture.toml",
-      "sha256": "sha256:ad61af8adf0ea6b493942ea0973271771116304c14fa1f7b48bd4c2749f52d45"
+      "sha256": "sha256:d49d1c1005e5c17ea2c29dfb23709d7c3797f25cb26bbd49e3855dcc85f2da95"
     }
   ],
-  "comment": "Add g3ts init command output"
+  "comment": "approve hash-only fixture metadata drift with unchanged g3ts cli output"
 }

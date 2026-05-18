@@ -1,6 +1,8 @@
 profile = "library"
 
-allowed_deps = []
+allowed_deps = [
+  "syncpack-config-parser",
+]
 
 [checks]
 garde = false
@@ -27,12 +29,6 @@ reason = "Type package exposes typed DTOs consumed by separate ingestion and che
 rule = "g3rs-code/public-struct-named-fields"
 file = "src/types.rs"
 selector = "struct:G3TsTypecovSyncpackSnapshot"
-reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
-
-[[waivers]]
-rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
-selector = "struct:G3TsTypecovSyncpackVersionGroupSnapshot"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]

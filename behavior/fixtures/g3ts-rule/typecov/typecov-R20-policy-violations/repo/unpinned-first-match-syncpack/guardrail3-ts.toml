@@ -1,0 +1,5 @@
+[checks]
+typecov = true
+
+[typecov]
+minimum = 90

@@ -1,0 +1,12 @@
+{
+  "versionGroups": [
+    {
+      "dependencies": ["cspell"],
+      "isIgnored": true
+    },
+    {
+      "dependencies": ["cspell"],
+      "pinVersion": "9.2.1"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "typecov-prod-dependency-syncpack-applies",
+  "private": true,
+  "scripts": {
+    "typecov": "type-coverage --strict --at-least 90",
+    "validate": "pnpm run typecov"
+  },
+  "dependencies": {
+    "type-coverage": "^2.29.7"
+  }
+}

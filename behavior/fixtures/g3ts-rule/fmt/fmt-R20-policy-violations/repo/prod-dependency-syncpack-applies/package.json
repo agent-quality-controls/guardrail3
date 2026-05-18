@@ -1,0 +1,11 @@
+{
+  "name": "fmt-prod-dependency-syncpack-applies",
+  "private": true,
+  "scripts": {
+    "format:check": "prettier --check .",
+    "validate": "pnpm run format:check"
+  },
+  "dependencies": {
+    "prettier": "^3.6.2"
+  }
+}

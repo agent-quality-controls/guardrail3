@@ -6,7 +6,7 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
     let rel_path = crate::common::package_rel_path(&contract.package);
     let Some(package) = crate::common::parsed_package(&contract.package) else {
         return crate::common::error(
-            "g3ts-fmt/format-check-fail-closed",
+            "g3ts-fmt/format-check-script",
             "Format check script cannot be checked",
             format!(
                 "`{rel_path}` must be readable and parseable so G3TS can prove `format:check` runs Prettier fail-closed."
@@ -16,8 +16,8 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
     };
     if crate::common::script_invokes_prettier(package, "format:check", "--check") {
         crate::common::info(
-            "g3ts-fmt/format-check-fail-closed",
-            "Format check script is fail-closed",
+            "g3ts-fmt/format-check-script",
+            "Format check script is configured",
             format!(
                 "`{}` defines `format:check` with a fail-closed `prettier --check` invocation.",
                 package.rel_path
@@ -26,8 +26,8 @@ pub(crate) fn check(contract: &G3TsFmtContractInput) -> G3CheckResult {
         )
     } else {
         crate::common::error(
-            "g3ts-fmt/format-check-fail-closed",
-            "Format check script is not fail-closed",
+            "g3ts-fmt/format-check-script",
+            "Format check script is missing or not fail-closed",
             format!(
                 "`{}` must define `format:check` as a fail-closed `prettier --check ...` invocation without `||` fallback.",
                 package.rel_path

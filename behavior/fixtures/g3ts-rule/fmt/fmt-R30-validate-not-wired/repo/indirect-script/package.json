@@ -1,0 +1,12 @@
+{
+  "name": "fmt-indirect-script",
+  "private": true,
+  "scripts": {
+    "format:check": "prettier --check .",
+    "indirect": "prettier --check .",
+    "validate": "pnpm run indirect"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

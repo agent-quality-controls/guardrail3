@@ -155,7 +155,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 0,
-      "fixture_hash": "sha256:1dc17ab3f1af74ee4f0c5c386cd4136562c9fc5de648e4ed94dd04acf8c521db",
+      "fixture_hash": "sha256:8e697a85f60cba61efb3b72b8bdecf6169164a55b4960d96874c83985697a910",
       "fixture_id": "C30-init-repo-managed-hooks",
       "stderr": "",
       "stdout": "initialized repo\ncreated .githooks\ncreated .githooks/pre-commit.d\ncreated .githooks/pre-commit.d/g3ts\ncreated .githooks/pre-commit\nvalidate with: g3ts validate repo --path $REPO\n"
@@ -171,7 +171,7 @@
       "command_index": 0,
       "cwd": "repo",
       "exit_code": 1,
-      "fixture_hash": "sha256:5b5bce0e2628785d00a0b7ffb024912746f9ac13b843b36637da43204272ba9b",
+      "fixture_hash": "sha256:157e2c508dc03f29e091e10948a7aba75b4d96511f763fcbb5e66c9315bf3f14",
       "fixture_id": "C40-init-repo-refuses-owned-hook",
       "stderr": "refused to modify .githooks/pre-commit\nreason: hook needs explicit managed-block insertion\nrerun with --force to insert the G3TS managed block\n",
       "stdout": ""

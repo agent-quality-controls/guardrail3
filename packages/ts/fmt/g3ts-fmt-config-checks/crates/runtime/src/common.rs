@@ -1,8 +1,9 @@
 use std::collections::BTreeSet;
 
 use g3ts_fmt_types::{
-    G3TsFmtPackageScriptCommandSeparator, G3TsFmtPackageScriptToolInvocation,
-    G3TsFmtPackageSurfaceSnapshot, G3TsFmtPackageSurfaceState, G3TsFmtSyncpackSurfaceState,
+    G3TsFmtDependencyDeclarationSnapshot, G3TsFmtPackageScriptCommandSeparator,
+    G3TsFmtPackageScriptToolInvocation, G3TsFmtPackageSurfaceSnapshot, G3TsFmtPackageSurfaceState,
+    G3TsFmtSyncpackSurfaceState,
 };
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -62,6 +63,18 @@ pub(crate) fn package_has_dependency(
         .any(|candidate| candidate == dependency)
 }
 
+/// Returns the dependency declarations for `dependency`.
+pub(crate) fn package_dependency_declarations<'package>(
+    package: &'package G3TsFmtPackageSurfaceSnapshot,
+    dependency: &str,
+) -> Vec<&'package G3TsFmtDependencyDeclarationSnapshot> {
+    package
+        .dependency_declarations
+        .iter()
+        .filter(|declaration| declaration.name == dependency)
+        .collect()
+}
+
 /// Returns true when `script_name` invokes prettier with `required_arg` fail-closed.
 pub(crate) fn script_invokes_prettier(
     package: &G3TsFmtPackageSurfaceSnapshot,
@@ -72,11 +85,10 @@ pub(crate) fn script_invokes_prettier(
         .script_parse_blockers
         .iter()
         .all(|blocker| blocker.script_name != script_name)
+        && script_has_no_or_separator(package, script_name)
         && package.script_tool_invocations.iter().any(|invocation| {
             invocation.script_name == script_name
-                && prettier_invocation_has_arg(invocation, required_arg)
-                && invocation.preceded_by != Some(G3TsFmtPackageScriptCommandSeparator::Or)
-                && invocation.followed_by != Some(G3TsFmtPackageScriptCommandSeparator::Or)
+                && prettier_invocation_has_arg_and_target(invocation, required_arg)
         })
 }
 
@@ -102,7 +114,7 @@ pub(crate) fn validate_runs_format_check(package: &G3TsFmtPackageSurfaceSnapshot
     }
     package.script_tool_invocations.iter().any(|invocation| {
         reachable.contains(&invocation.script_name)
-            && prettier_invocation_has_arg(invocation, "--check")
+            && prettier_invocation_has_arg_and_target(invocation, "--check")
     })
 }
 
@@ -132,30 +144,134 @@ pub(crate) fn error(id: &str, title: &str, message: String, file: Option<&str>) 
     )
 }
 
-/// Returns true when the prettier invocation contains `required_arg`.
-fn prettier_invocation_has_arg(
+/// Returns true when the prettier invocation contains `required_arg` and a checked target.
+fn prettier_invocation_has_arg_and_target(
     invocation: &G3TsFmtPackageScriptToolInvocation,
     required_arg: &str,
 ) -> bool {
     let Some(args) = prettier_args(invocation) else {
         return false;
     };
-    args.iter().any(|arg| arg == required_arg)
+    args.iter().any(|arg| arg == required_arg) && prettier_args_have_target(args, required_arg)
 }
+
+/// Returns true when no invocation in `script_name` uses an `||` separator.
+fn script_has_no_or_separator(package: &G3TsFmtPackageSurfaceSnapshot, script_name: &str) -> bool {
+    package
+        .script_tool_invocations
+        .iter()
+        .filter(|invocation| invocation.script_name == script_name)
+        .all(|invocation| {
+            invocation.preceded_by != Some(G3TsFmtPackageScriptCommandSeparator::Or)
+                && invocation.followed_by != Some(G3TsFmtPackageScriptCommandSeparator::Or)
+        })
+}
+
+/// Returns true when prettier args include a positional file, directory, or glob target.
+fn prettier_args_have_target(args: &[String], required_arg: &str) -> bool {
+    let mut idx = 0;
+    while idx < args.len() {
+        let Some(arg) = args.get(idx) else {
+            break;
+        };
+        if arg == "--" {
+            return args
+                .get(idx.saturating_add(1)..)
+                .is_some_and(|rest| rest.iter().any(|candidate| !candidate.trim().is_empty()));
+        }
+        if arg == required_arg {
+            idx = idx.saturating_add(1);
+            continue;
+        }
+        if let Some(option) = arg.strip_prefix("--") {
+            if option.contains('=') || prettier_boolean_option(arg) {
+                idx = idx.saturating_add(1);
+            } else {
+                idx = idx.saturating_add(2);
+            }
+            continue;
+        }
+        if arg.starts_with('-') {
+            if prettier_option_takes_value(arg) {
+                idx = idx.saturating_add(2);
+            } else {
+                idx = idx.saturating_add(1);
+            }
+            continue;
+        }
+        return !arg.trim().is_empty();
+    }
+    false
+}
+
+/// Returns true for Prettier options whose value is the next argv token.
+fn prettier_option_takes_value(arg: &str) -> bool {
+    PRETTIER_VALUE_OPTIONS.contains(&arg)
+}
+
+/// Returns true for Prettier boolean options that do not consume the next argv token.
+fn prettier_boolean_option(arg: &str) -> bool {
+    PRETTIER_BOOLEAN_OPTIONS.contains(&arg)
+}
+
+/// Prettier options whose value is supplied by the next argv token.
+const PRETTIER_VALUE_OPTIONS: &[&str] = &[
+    "--arrow-parens",
+    "--cache-location",
+    "--cache-strategy",
+    "--config",
+    "--config-precedence",
+    "--embedded-language-formatting",
+    "--end-of-line",
+    "--find-config-path",
+    "--html-whitespace-sensitivity",
+    "--ignore-path",
+    "--log-level",
+    "--object-wrap",
+    "--parser",
+    "--plugin",
+    "--plugin-search-dir",
+    "--print-width",
+    "--prose-wrap",
+    "--quote-props",
+    "--range-end",
+    "--range-start",
+    "--stdin-filepath",
+    "--tab-width",
+    "--trailing-comma",
+];
+
+/// Prettier boolean options that do not consume the next argv token.
+const PRETTIER_BOOLEAN_OPTIONS: &[&str] = &[
+    "--bracket-same-line",
+    "--bracket-spacing",
+    "--cache",
+    "--check",
+    "--debug-check",
+    "--ignore-unknown",
+    "--jsx-single-quote",
+    "--list-different",
+    "--no-bracket-spacing",
+    "--no-config",
+    "--no-editorconfig",
+    "--no-error-on-unmatched-pattern",
+    "--no-semi",
+    "--no-vue-indent-script-and-style",
+    "--require-pragma",
+    "--semi",
+    "--single-attribute-per-line",
+    "--single-quote",
+    "--support-info",
+    "--version",
+    "--vue-indent-script-and-style",
+    "--with-node-modules",
+    "--write",
+];
 
 /// Returns the prettier args slice when the invocation is `prettier` directly or via a runner.
 fn prettier_args(invocation: &G3TsFmtPackageScriptToolInvocation) -> Option<&[String]> {
-    if invocation.executable == "prettier" {
+    if invocation.executable == "prettier" && original_command_starts_with(invocation, "prettier") {
         return Some(&invocation.args);
-    }
-    if matches!(
-        invocation.executable.as_str(),
-        "pnpm" | "npm" | "yarn" | "bun" | "npx" | "bunx"
-    ) {
-        let (tool, args) = invocation.args.split_first()?;
-        if tool == "prettier" {
-            return Some(args);
-        }
     }
     None
 }
@@ -187,17 +303,54 @@ fn reachable_script_names(
 /// Returns the script name targeted by a package-script invocation, when applicable.
 fn package_script_target(invocation: &G3TsFmtPackageScriptToolInvocation) -> Option<String> {
     if invocation.executable == "package-script" {
-        return invocation.args.first().cloned();
+        let target = invocation.args.first()?;
+        if target == "format:check"
+            && invocation_uses_package_manager_script_invocation(invocation, target)
+        {
+            return Some(target.clone());
+        }
+        return None;
     }
-    if invocation.executable == "format:check" {
+    if invocation.executable == "format:check"
+        && invocation_uses_package_manager_script_invocation(invocation, "format:check")
+    {
         return Some("format:check".to_owned());
     }
-    if matches!(invocation.executable.as_str(), "pnpm" | "yarn" | "bun") {
-        return invocation
-            .args
-            .first()
-            .filter(|script_name| *script_name == "format:check")
-            .cloned();
-    }
     None
+}
+
+/// Returns true when the original command is an approved package-manager script invocation.
+fn invocation_uses_package_manager_script_invocation(
+    invocation: &G3TsFmtPackageScriptToolInvocation,
+    script_name: &str,
+) -> bool {
+    let tokens = command_tokens(&invocation.invocation);
+    if tokens.len() == 2
+        && matches!(tokens.first().copied(), Some("pnpm" | "yarn" | "bun"))
+        && tokens.get(1).is_some_and(|token| *token == script_name)
+    {
+        return true;
+    }
+    tokens.len() == 3
+        && matches!(tokens.first().copied(), Some("pnpm" | "yarn" | "bun"))
+        && tokens.get(1).is_some_and(|token| *token == "run")
+        && tokens.get(2).is_some_and(|token| *token == script_name)
+}
+
+/// Returns true when the original command starts with `command` after env wrappers.
+fn original_command_starts_with(
+    invocation: &G3TsFmtPackageScriptToolInvocation,
+    command: &str,
+) -> bool {
+    command_tokens(&invocation.invocation)
+        .first()
+        .is_some_and(|token| *token == command)
+}
+
+/// Returns command tokens after env wrappers and env assignments.
+fn command_tokens(invocation: &str) -> Vec<&str> {
+    invocation
+        .split_whitespace()
+        .skip_while(|token| matches!(*token, "env" | "cross-env") || token.contains('='))
+        .collect()
 }

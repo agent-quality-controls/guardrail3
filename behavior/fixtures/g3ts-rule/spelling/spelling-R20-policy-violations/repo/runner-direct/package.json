@@ -1,0 +1,11 @@
+{
+  "name": "spelling-runner-direct",
+  "private": true,
+  "scripts": {
+    "spellcheck": "pnpm exec cspell .",
+    "validate": "pnpm run spellcheck"
+  },
+  "devDependencies": {
+    "cspell": "9.2.1"
+  }
+}

@@ -21,11 +21,15 @@ pub mod error;
 #[cfg(feature = "api")]
 pub mod fs;
 #[cfg(feature = "api")]
+pub mod matcher;
+#[cfg(feature = "api")]
 pub mod parser;
 #[cfg(feature = "api")]
 pub mod types;
 
 #[cfg(feature = "api")]
 pub use error::Error;
+#[cfg(feature = "api")]
+pub use matcher::{first_matching_group_pins_dependency, pattern_list_matches};
 #[cfg(feature = "api")]
 pub use parser::{from_path, from_path_document, parse, parse_document, parse_error_reason, typed};

@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+  "dependencies":["cspell"],
+    "isBanned":true},{
+  "dependencies":["cspell"],
+    "pinVersion":"9.2.1"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "fmt-filtered-shortcut",
+  "private": true,
+  "scripts": {
+    "format:check": "prettier --check .",
+    "validate": "pnpm --filter other format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

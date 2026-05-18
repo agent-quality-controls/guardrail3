@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell",
+    "validate": "cspell . --no-progress --no-summary"
+  },
+  "devDependencies": {
+    "cspell": "9.2.1"
+  }
+}

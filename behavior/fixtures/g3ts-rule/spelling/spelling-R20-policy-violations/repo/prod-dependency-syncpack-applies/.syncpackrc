@@ -1,0 +1,10 @@
+{
+  "versionGroups": [
+    {
+      "dependencyTypes": ["prod"],
+      "specifierTypes": ["range"],
+      "dependencies": ["cspell"],
+      "pinVersion": "9.2.1"
+    }
+  ]
+}

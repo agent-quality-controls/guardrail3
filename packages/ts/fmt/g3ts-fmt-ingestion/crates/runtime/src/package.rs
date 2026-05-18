@@ -1,7 +1,8 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_fmt_types::{
-    G3TsFmtPackageScriptCommandSeparator, G3TsFmtPackageScriptParseBlocker,
-    G3TsFmtPackageScriptToolInvocation, G3TsFmtPackageSurfaceSnapshot, G3TsFmtPackageSurfaceState,
+    G3TsFmtDependencyDeclarationSnapshot, G3TsFmtPackageScriptCommandSeparator,
+    G3TsFmtPackageScriptParseBlocker, G3TsFmtPackageScriptToolInvocation,
+    G3TsFmtPackageSurfaceSnapshot, G3TsFmtPackageSurfaceState,
 };
 use package_script_command_parser::types::{
     PackageScriptCommandSeparator, PackageScriptParseFact, PackageScriptParseState,
@@ -59,8 +60,17 @@ pub(crate) fn ingest_package_surface(
     G3TsFmtPackageSurfaceState::Parsed {
         snapshot: G3TsFmtPackageSurfaceSnapshot {
             rel_path: entry.path.rel_path.clone(),
+            name: typed.name.clone(),
             dependencies: typed.dependencies.clone(),
             dev_dependencies: typed.dev_dependencies.clone(),
+            dependency_declarations: package_json_parser::dependency_declarations(&document.raw)
+                .into_iter()
+                .map(|declaration| G3TsFmtDependencyDeclarationSnapshot {
+                    name: declaration.name,
+                    lane: declaration.lane,
+                    specifier_type: declaration.specifier_type,
+                })
+                .collect(),
             script_names: typed.scripts.keys().cloned().collect(),
             script_tool_invocations: script_facts
                 .iter()
@@ -94,7 +104,7 @@ fn parse_package_script(name: &str, body: &str) -> PackageScriptParseFact {
 fn script_tool_invocations(
     fact: &PackageScriptParseFact,
 ) -> Vec<G3TsFmtPackageScriptToolInvocation> {
-    fact.all_tool_invocations
+    fact.tool_invocations
         .iter()
         .map(script_tool_invocation)
         .collect()
@@ -106,6 +116,7 @@ fn script_tool_invocation(
 ) -> G3TsFmtPackageScriptToolInvocation {
     G3TsFmtPackageScriptToolInvocation {
         script_name: invocation.script_name.clone(),
+        invocation: invocation.invocation.clone(),
         executable: invocation.executable.clone(),
         args: invocation.args.clone(),
         preceded_by: invocation.preceded_by.map(script_command_separator),

@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+      "dependencyTypes": ["prod"],
+      "dependencies": ["type-coverage"],
+      "pinVersion": "2.29.7"
+    }
+  ]
+}

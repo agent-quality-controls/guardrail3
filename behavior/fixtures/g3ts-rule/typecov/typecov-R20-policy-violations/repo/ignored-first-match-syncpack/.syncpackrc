@@ -1,0 +1,12 @@
+{
+  "versionGroups": [
+    {
+      "dependencies": ["type-coverage"],
+      "isIgnored": true
+    },
+    {
+      "dependencies": ["type-coverage"],
+      "pinVersion": "2.29.7"
+    }
+  ]
+}

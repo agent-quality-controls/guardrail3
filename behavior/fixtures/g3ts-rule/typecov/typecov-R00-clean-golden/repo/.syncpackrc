@@ -1,6 +1,9 @@
 {
   "versionGroups": [
     {
+      "packages": ["**"],
+      "dependencyTypes": ["**"],
+      "specifierTypes": ["exact"],
       "dependencies": ["type-coverage"],
       "pinVersion": "2.29.7"
     }

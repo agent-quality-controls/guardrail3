@@ -21,8 +21,7 @@ pub fn check(input: &G3TsFmtConfigChecksInput) -> Vec<G3CheckResult> {
         }
         results.push(crate::prettier_package_present::check(contract));
         results.push(crate::prettier_config_present::check(contract));
-        results.push(crate::format_scripts::check(contract));
-        results.push(crate::format_check_fail_closed::check(contract));
+        results.push(crate::format_check_script::check(contract));
         results.push(crate::validate_runs_format_check::check(contract));
         results.push(crate::syncpack_prettier_pin::check(contract));
     }

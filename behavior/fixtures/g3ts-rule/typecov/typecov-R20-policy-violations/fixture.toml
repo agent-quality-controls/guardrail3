@@ -9,12 +9,16 @@ level = "family_rule_policy"
 
 rule_family = "typecov"
 target_rules = [
+  "g3ts-typecov/policy-configured",
   "g3ts-typecov/package-present",
   "g3ts-typecov/threshold-fail-closed",
+  "g3ts-typecov/validate-runs-typecov",
   "g3ts-typecov/syncpack-type-coverage-pin"
 ]
 expected_findings = [
+  "g3ts-typecov/policy-configured",
   "g3ts-typecov/package-present",
   "g3ts-typecov/threshold-fail-closed",
+  "g3ts-typecov/validate-runs-typecov",
   "g3ts-typecov/syncpack-type-coverage-pin"
 ]

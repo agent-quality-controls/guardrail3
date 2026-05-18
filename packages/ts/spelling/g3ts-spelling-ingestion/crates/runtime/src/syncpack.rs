@@ -1,8 +1,5 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
-use g3ts_spelling_types::{
-    G3TsSpellingSyncpackSnapshot, G3TsSpellingSyncpackSurfaceState,
-    G3TsSpellingSyncpackVersionGroupSnapshot,
-};
+use g3ts_spelling_types::{G3TsSpellingSyncpackSnapshot, G3TsSpellingSyncpackSurfaceState};
 
 /// Read and parse the `.syncpackrc` at `app_root_rel_path` from `crawl`,
 /// returning a surface-state describing what was found.
@@ -49,12 +46,7 @@ pub(crate) fn ingest_syncpack_config(
         snapshot: G3TsSpellingSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
             source: typed.source.clone(),
-            version_groups: typed
-                .version_groups
-                .iter()
-                .cloned()
-                .map(syncpack_version_group)
-                .collect(),
+            version_groups: typed.version_groups.clone(),
         },
     }
 }
@@ -64,20 +56,4 @@ pub(crate) fn ingest_syncpack_config(
 fn included_file(entry: &g3_workspace_crawl::G3WorkspaceEntry) -> bool {
     entry.kind == g3_workspace_crawl::G3WorkspaceEntryKind::File
         && entry.ignore_state == g3_workspace_crawl::G3WorkspaceIgnoreState::Included
-}
-
-/// Project a parsed Syncpack version-group into the spelling-specific
-/// snapshot variant retained for downstream checks.
-fn syncpack_version_group(
-    group: syncpack_config_parser::types::SyncpackVersionGroup,
-) -> G3TsSpellingSyncpackVersionGroupSnapshot {
-    G3TsSpellingSyncpackVersionGroupSnapshot {
-        dependencies: group.dependencies,
-        dependency_types: group.dependency_types,
-        packages: group.packages,
-        specifier_types: group.specifier_types,
-        is_ignored: group.is_ignored,
-        is_banned: group.is_banned,
-        pin_version: group.pin_version,
-    }
 }

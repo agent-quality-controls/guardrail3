@@ -110,6 +110,9 @@ dependencies = [
 [[package]]
 name = "g3ts-fmt-types"
 version = "0.1.0"
+dependencies = [
+ "syncpack-config-parser",
+]
 
 [[package]]
 name = "globset"
@@ -349,6 +352,7 @@ dependencies = [
 name = "syncpack-config-parser-runtime"
 version = "0.1.0"
 dependencies = [
+ "globset",
  "serde_json",
  "syncpack-config-parser-types",
 ]

@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "format:check": "prettier --check --find-config-path src/foo.ts",
+    "validate": "pnpm run format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

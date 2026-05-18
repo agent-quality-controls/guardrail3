@@ -1,0 +1,11 @@
+{
+  "name": "spelling-specifier-syncpack-miss",
+  "private": true,
+  "scripts": {
+    "spellcheck": "cspell .",
+    "validate": "pnpm run spellcheck"
+  },
+  "devDependencies": {
+    "cspell": "^9.2.1"
+  }
+}

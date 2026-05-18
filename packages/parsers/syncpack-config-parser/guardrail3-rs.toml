@@ -1,6 +1,7 @@
 profile = "library"
 
 allowed_deps = [
+  "globset",
   "serde_json",
   "syncpack-config-parser-runtime",
   "syncpack-config-parser-types",

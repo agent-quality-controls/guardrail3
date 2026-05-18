@@ -1,0 +1,11 @@
+{
+  "name": "typecov-filtered-shortcut",
+  "private": true,
+  "scripts": {
+    "typecov": "type-coverage --strict --at-least 100",
+    "validate": "pnpm --filter other typecov"
+  },
+  "devDependencies": {
+    "type-coverage": "2.29.7"
+  }
+}

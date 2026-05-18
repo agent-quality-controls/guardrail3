@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+      "packages": ["!typecov-scoped-syncpack-miss"],
+      "dependencies": ["type-coverage"],
+      "pinVersion": "2.29.7"
+    }
+  ]
+}

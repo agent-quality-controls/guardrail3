@@ -23,6 +23,7 @@ pub struct Guardrail3TsToml {
     pub checks: Option<TsChecksConfig>,
     pub astro: Option<TsAstroPolicyConfig>,
     pub style: Option<TsStylePolicyConfig>,
+    pub typecov: Option<TsTypecovPolicyConfig>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }
@@ -61,6 +62,14 @@ pub struct TsStylePolicyConfig {
     pub source_globs: Vec<String>,
     #[serde(default)]
     pub stylelint_css_globs: Vec<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct TsTypecovPolicyConfig {
+    pub minimum: Option<Value>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

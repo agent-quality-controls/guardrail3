@@ -12,11 +12,13 @@ target_rules = [
   "g3ts-spelling/cspell-package-present",
   "g3ts-spelling/cspell-config-present",
   "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/validate-runs-spellcheck",
   "g3ts-spelling/syncpack-cspell-pin"
 ]
 expected_findings = [
   "g3ts-spelling/cspell-package-present",
   "g3ts-spelling/cspell-config-present",
   "g3ts-spelling/spellcheck-fail-closed",
+  "g3ts-spelling/validate-runs-spellcheck",
   "g3ts-spelling/syncpack-cspell-pin"
 ]

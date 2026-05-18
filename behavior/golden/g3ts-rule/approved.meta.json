@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
-  "kind": "approved",
-  "run_id": "2026-05-18T14-22-08.828322Z-d06b5496",
-  "run_commit": "0129d56bf",
+  "kind": "received",
+  "run_id": "2026-05-18T18-57-35.49679Z-d06b5496",
+  "run_commit": "68745c957",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T14:22:08.828322Z",
-  "fixture_hash": "sha256:f6977cc7c2d1b89a43ac0d87d95f90d17a9769f8116189d8bc3ac6e2950cc99f",
+  "recorded_at": "2026-05-18T18:57:35.49679Z",
+  "fixture_hash": "sha256:3ebf216101f41fb0afa7b85c2a1b63e75170c8b6cdba9a762c1fac4eaf661615",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -168,7 +168,7 @@
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:11636cc8555412802db4e24a5217603bfd8a837c632e7e32bf242671ba31bbad"
+      "sha256": "sha256:b181de10e016eb2d500c01ff9ab4d666d7d38809925eab26b1f67271a9b02a03"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R30-validate-not-wired/fixture.toml",
@@ -264,11 +264,15 @@
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:bf99de1f59b841ee6d1a4ea7e6bbd8dbc705597089a0028b892dde35011aea78"
+      "sha256": "sha256:3786d1d006b0a31263f57547275e72322ec73acdc9f908a8da2defaf8638ac61"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R30-script-not-wired/fixture.toml",
       "sha256": "sha256:1603ec6a0fde314d57f56d6409be5e5c3cd3a589f353c6fea8dcdcc0ce122bf8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/spelling/spelling-R40-bare-cspell/fixture.toml",
+      "sha256": "sha256:c96a0c770b206a1a40f1f892f725230ffe7a3b5d0fed683c2a432810370b3122"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/style/style-R00-clean-golden/fixture.toml",
@@ -332,12 +336,19 @@
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R20-policy-violations/fixture.toml",
-      "sha256": "sha256:4764cf3b8784e4b5ef06d77693c57e430b9e0e136e1a92650646b598b138a733"
+      "sha256": "sha256:97479fd6f5e721b93db885fc6450b0b0fa74dd256eedfcdddec2c27d247bf15a"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R30-script-not-wired/fixture.toml",
-      "sha256": "sha256:0a9f28b793299368348f6b21a139ba8a2c30507d96ad3dec56f0ef47bff0ee78"
+      "sha256": "sha256:c4987c12375e16752c1c6c2293452205a0bf4f506bb4356d02ec197f14390ee7"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R40-policy-threshold/fixture.toml",
+      "sha256": "sha256:28c27da7efa1ee476122673fd918230e48c9f7231e0e339784e4ef0b7d41a244"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R50-non100-policy-clean/fixture.toml",
+      "sha256": "sha256:b1fa8c953aeba6cad6a7e2523197cb5979d706f0caebee73ffd476337589873d"
     }
-  ],
-  "comment": "Remove generic Drizzle hook requirement"
+  ]
 }

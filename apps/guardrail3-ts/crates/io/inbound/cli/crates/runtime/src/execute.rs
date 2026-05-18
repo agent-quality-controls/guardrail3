@@ -162,14 +162,22 @@ fn has_relevant_staged_files(path: &Path) -> bool {
     stdout.lines().any(is_ts_relevant_path)
 }
 
-/// Recognized TypeScript source / config extensions and well-known config
-/// filenames for the `--staged` filter.
+/// Recognized TypeScript source / config extensions for the `--staged`
+/// filter.
 const TS_RELEVANT_EXTENSIONS: &[&str] =
     &["ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "css"];
 
 /// Recognized workspace config filenames that should also force the validate
 /// pipeline to run when staged.
-const TS_RELEVANT_FILENAMES: &[&str] = &["package.json", "guardrail3-ts.toml", "tsconfig.json"];
+const TS_RELEVANT_FILENAMES: &[&str] = &[
+    "package.json",
+    "guardrail3-ts.toml",
+    ".syncpackrc",
+    "cspell.json",
+    ".cspell.json",
+    "cspell.yaml",
+    "cspell.yml",
+];
 
 /// Returns true when `p` names a file the validate pipeline cares about.
 fn is_ts_relevant_path(p: &str) -> bool {
@@ -188,11 +196,26 @@ fn is_ts_relevant_path(p: &str) -> bool {
             TS_RELEVANT_FILENAMES
                 .iter()
                 .any(|candidate| name.eq_ignore_ascii_case(candidate))
+                || ts_relevant_pattern_filename(name)
         })
     {
         return true;
     }
     false
+}
+
+/// Returns true for config filename families that are defined by tool
+/// conventions rather than one exact filename.
+fn ts_relevant_pattern_filename(name: &str) -> bool {
+    let name = name.to_ascii_lowercase();
+    (name.starts_with("tsconfig")
+        && Path::new(&name)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("json")))
+        || (name.starts_with("prettier.config.") && name.len() > "prettier.config.".len())
+        || name == ".prettierrc"
+        || name.starts_with(".prettierrc.")
+        || (name.starts_with("cspell.config.") && name.len() > "cspell.config.".len())
 }
 
 /// Returns the absolute repo root reported by `git rev-parse --show-toplevel`

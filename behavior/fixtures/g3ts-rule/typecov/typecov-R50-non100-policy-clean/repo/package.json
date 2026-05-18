@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "typecov": "type-coverage --strict --at-least 95",
+    "validate": "type-coverage --strict --at-least 95"
+  },
+  "devDependencies": {
+    "type-coverage": "2.29.7"
+  }
+}

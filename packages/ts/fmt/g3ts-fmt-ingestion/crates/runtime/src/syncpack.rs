@@ -1,7 +1,5 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
-use g3ts_fmt_types::{
-    G3TsFmtSyncpackSnapshot, G3TsFmtSyncpackSurfaceState, G3TsFmtSyncpackVersionGroupSnapshot,
-};
+use g3ts_fmt_types::{G3TsFmtSyncpackSnapshot, G3TsFmtSyncpackSurfaceState};
 
 /// Ingests the Syncpack config under `app_root_rel_path` into a surface state.
 pub(crate) fn ingest_syncpack_config(
@@ -47,27 +45,7 @@ pub(crate) fn ingest_syncpack_config(
         snapshot: G3TsFmtSyncpackSnapshot {
             rel_path: entry.path.rel_path.clone(),
             source: typed.source.clone(),
-            version_groups: typed
-                .version_groups
-                .iter()
-                .cloned()
-                .map(syncpack_version_group)
-                .collect(),
+            version_groups: typed.version_groups.clone(),
         },
-    }
-}
-
-/// Maps a parser version group into the contract snapshot shape.
-fn syncpack_version_group(
-    group: syncpack_config_parser::types::SyncpackVersionGroup,
-) -> G3TsFmtSyncpackVersionGroupSnapshot {
-    G3TsFmtSyncpackVersionGroupSnapshot {
-        dependencies: group.dependencies,
-        dependency_types: group.dependency_types,
-        packages: group.packages,
-        specifier_types: group.specifier_types,
-        is_ignored: group.is_ignored,
-        is_banned: group.is_banned,
-        pin_version: group.pin_version,
     }
 }

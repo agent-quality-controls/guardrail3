@@ -1,0 +1,16 @@
+id = "typecov-R40-policy-threshold"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "typecov", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "typecov"
+target_rules = [
+  "g3ts-typecov/policy-configured"
+]
+expected_findings = [
+  "g3ts-typecov/policy-configured"
+]

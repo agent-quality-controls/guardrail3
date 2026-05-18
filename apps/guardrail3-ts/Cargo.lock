@@ -936,6 +936,7 @@ version = "0.1.0"
 dependencies = [
  "g3ts-fmt-types",
  "guardrail3-check-types",
+ "syncpack-config-parser",
 ]
 
 [[package]]
@@ -966,6 +967,9 @@ dependencies = [
 [[package]]
 name = "g3ts-fmt-types"
 version = "0.1.0"
+dependencies = [
+ "syncpack-config-parser",
+]
 
 [[package]]
 name = "g3ts-hooks-config-checks"
@@ -1185,6 +1189,7 @@ version = "0.1.0"
 dependencies = [
  "g3ts-spelling-types",
  "guardrail3-check-types",
+ "syncpack-config-parser",
 ]
 
 [[package]]
@@ -1216,6 +1221,9 @@ dependencies = [
 [[package]]
 name = "g3ts-spelling-types"
 version = "0.1.0"
+dependencies = [
+ "syncpack-config-parser",
+]
 
 [[package]]
 name = "g3ts-style-config-checks"
@@ -1398,6 +1406,7 @@ version = "0.1.0"
 dependencies = [
  "g3ts-typecov-types",
  "guardrail3-check-types",
+ "syncpack-config-parser",
 ]
 
 [[package]]
@@ -1419,6 +1428,7 @@ name = "g3ts-typecov-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
  "g3-workspace-crawl",
+ "g3ts-toml-parser",
  "g3ts-typecov-types",
  "package-json-parser",
  "package-script-command-parser",
@@ -1428,6 +1438,9 @@ dependencies = [
 [[package]]
 name = "g3ts-typecov-types"
 version = "0.1.0"
+dependencies = [
+ "syncpack-config-parser",
+]
 
 [[package]]
 name = "globset"
@@ -2418,6 +2431,7 @@ dependencies = [
 name = "syncpack-config-parser-runtime"
 version = "0.1.0"
 dependencies = [
+ "globset",
  "serde_json",
  "syncpack-config-parser-types",
 ]

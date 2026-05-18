@@ -21,4 +21,6 @@ pub use document::{bool_field_state, parse_error_reason, typed};
 #[cfg(feature = "api")]
 pub use error::Error;
 #[cfg(feature = "api")]
-pub use parser::{from_path, from_path_document, parse, parse_document};
+pub use parser::{
+    dependency_declarations, from_path, from_path_document, parse, parse_document, specifier_type,
+};

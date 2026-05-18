@@ -1,0 +1,12 @@
+{
+  "versionGroups": [
+    {
+      "dependencies": ["prettier"],
+      "isIgnored": true
+    },
+    {
+      "dependencies": ["prettier"],
+      "pinVersion": "3.6.2"
+    }
+  ]
+}

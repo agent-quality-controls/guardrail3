@@ -9,12 +9,8 @@ level = "family_rule_policy"
 
 rule_family = "typecov"
 target_rules = [
-  "g3ts-typecov/script-present",
-  "g3ts-typecov/threshold-fail-closed",
   "g3ts-typecov/validate-runs-typecov"
 ]
 expected_findings = [
-  "g3ts-typecov/script-present",
-  "g3ts-typecov/threshold-fail-closed",
   "g3ts-typecov/validate-runs-typecov"
 ]

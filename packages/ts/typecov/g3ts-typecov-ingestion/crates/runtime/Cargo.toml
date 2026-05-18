@@ -13,6 +13,7 @@ shared = true
 
 [dependencies]
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", features = ["api"] }
+g3ts-toml-parser = { path = "../../../../../parsers/g3ts-toml-parser", version = "0.1.0", features = ["api"] }
 g3ts-typecov-types = { path = "../../../g3ts-typecov-types", version = "0.1.0" }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0" }
 package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0" }

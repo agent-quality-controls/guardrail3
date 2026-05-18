@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 
 use package_json_parser_types::document::{
-    PackageJsonDocument, PackageJsonParseState, PackageJsonSnapshot,
+    PackageJsonDependencyDeclarationSnapshot, PackageJsonDocument, PackageJsonParseState,
+    PackageJsonSnapshot,
 };
 use serde_json::{Map, Value};
 
@@ -70,7 +71,125 @@ fn normalize_snapshot(raw: &Value) -> Result<PackageJsonSnapshot, String> {
             root.get("peerDependencies"),
             "peerDependencies",
         )?,
+        dependency_declarations: dependency_declarations(raw),
     })
+}
+
+pub fn dependency_declarations(raw: &Value) -> Vec<PackageJsonDependencyDeclarationSnapshot> {
+    let mut declarations = Vec::new();
+    collect_dependency_declarations(raw, "dependencies", "prod", &mut declarations);
+    collect_dependency_declarations(raw, "devDependencies", "dev", &mut declarations);
+    declarations
+}
+
+fn collect_dependency_declarations(
+    raw: &Value,
+    field: &str,
+    lane: &str,
+    declarations: &mut Vec<PackageJsonDependencyDeclarationSnapshot>,
+) {
+    let Some(object) = raw.get(field).and_then(Value::as_object) else {
+        return;
+    };
+    declarations.extend(object.iter().filter_map(|(name, value)| {
+        value
+            .as_str()
+            .map(|specifier| PackageJsonDependencyDeclarationSnapshot {
+                name: name.clone(),
+                lane: lane.to_owned(),
+                specifier_type: specifier_type(specifier).to_owned(),
+            })
+    }));
+}
+
+pub fn specifier_type(specifier: &str) -> &'static str {
+    let specifier = specifier.trim();
+    if specifier.is_empty() {
+        return "unsupported";
+    }
+    if specifier.starts_with("npm:") {
+        return "alias";
+    }
+    if specifier.starts_with("catalog:") {
+        return "catalog";
+    }
+    if specifier.starts_with("file:") {
+        return "file";
+    }
+    if specifier.starts_with("link:") {
+        return "link";
+    }
+    if specifier.starts_with("workspace:") {
+        return "workspace-protocol";
+    }
+    if specifier.starts_with("git+")
+        || specifier.starts_with("git:")
+        || specifier.starts_with("github:")
+        || specifier.starts_with("gitlab:")
+        || specifier.starts_with("bitbucket:")
+    {
+        return "git";
+    }
+    if specifier.starts_with("http://") || specifier.starts_with("https://") {
+        return "url";
+    }
+    if matches!(specifier, "*" | "latest") {
+        return "latest";
+    }
+    if specifier.contains("||") || specifier.contains(" - ") {
+        return "range-complex";
+    }
+    if let Some(range_tail) = specifier.strip_prefix(['^', '~', '>', '<', '=']) {
+        return range_specifier_type(range_tail.trim_start_matches(['=', ' ']));
+    }
+    if exact_semver_like(specifier) {
+        return "exact";
+    }
+    match numeric_part_count(specifier) {
+        Some(1) => "major",
+        Some(2) => "minor",
+        _ if tag_like(specifier) => "tag",
+        _ => "unsupported",
+    }
+}
+
+fn range_specifier_type(range_tail: &str) -> &'static str {
+    if exact_semver_like(range_tail) {
+        return "range";
+    }
+    match numeric_part_count(range_tail) {
+        Some(1) => "range-major",
+        Some(2) => "range-minor",
+        _ => "range-complex",
+    }
+}
+
+fn numeric_part_count(specifier: &str) -> Option<usize> {
+    let parts = specifier.split('.').collect::<Vec<_>>();
+    if parts.is_empty() || parts.iter().any(|part| part.is_empty()) {
+        return None;
+    }
+    if parts
+        .iter()
+        .all(|part| part.chars().all(|ch| ch.is_ascii_digit()))
+    {
+        return Some(parts.len());
+    }
+    None
+}
+
+fn tag_like(specifier: &str) -> bool {
+    specifier
+        .chars()
+        .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_' | '.'))
+}
+
+fn exact_semver_like(specifier: &str) -> bool {
+    let parts = specifier.split('.').collect::<Vec<_>>();
+    parts.len() == 3
+        && parts
+            .iter()
+            .all(|part| !part.is_empty() && part.chars().all(|ch| ch.is_ascii_digit()))
 }
 
 fn normalize_optional_bool(

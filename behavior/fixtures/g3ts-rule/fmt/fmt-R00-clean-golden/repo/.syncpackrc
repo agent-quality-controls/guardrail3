@@ -1,6 +1,9 @@
 {
   "versionGroups": [
     {
+      "packages": ["**"],
+      "dependencyTypes": ["**"],
+      "specifierTypes": ["exact"],
       "dependencies": ["prettier"],
       "pinVersion": "3.6.2"
     }

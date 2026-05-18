@@ -1,0 +1,9 @@
+{
+  "versionGroups": [
+    {
+  "dependencies":["prettier"],
+    "isBanned":true},{
+  "dependencies":["prettier"],
+    "pinVersion":"3.6.2"}
+  ]
+}

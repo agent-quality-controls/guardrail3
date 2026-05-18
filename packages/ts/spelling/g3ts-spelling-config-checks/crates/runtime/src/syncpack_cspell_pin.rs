@@ -1,5 +1,6 @@
 use g3ts_spelling_types::G3TsSpellingContractInput;
 use guardrail3_check_types::G3CheckResult;
+use syncpack_config_parser::types::SyncpackDependencyDeclarationRef;
 
 /// `check`: check.
 pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
@@ -14,15 +15,31 @@ pub(crate) fn check(contract: &G3TsSpellingContractInput) -> G3CheckResult {
             Some(rel_path),
         );
     };
-    if snapshot.version_groups.iter().any(|group| {
-        group.is_ignored != Some(true)
-            && group.is_banned != Some(true)
-            && group
-                .dependencies
-                .iter()
-                .any(|dependency| dependency == "cspell")
-            && group.pin_version.is_some()
-    }) {
+    let Some(package) = crate::common::parsed_package(&contract.package) else {
+        return crate::common::error(
+            "g3ts-spelling/syncpack-cspell-pin",
+            "cspell Syncpack pin cannot be checked",
+            format!(
+                "`{}` must be readable and parseable so G3TS can prove `cspell` is pinned by Syncpack.",
+                crate::common::package_rel_path(&contract.package)
+            ),
+            Some(crate::common::package_rel_path(&contract.package)),
+        );
+    };
+    let declarations = crate::common::package_dependency_declarations(package, "cspell")
+        .into_iter()
+        .map(|declaration| SyncpackDependencyDeclarationRef {
+            name: &declaration.name,
+            lane: &declaration.lane,
+            specifier_type: &declaration.specifier_type,
+        })
+        .collect::<Vec<_>>();
+    if syncpack_config_parser::first_matching_group_pins_dependency(
+        &snapshot.version_groups,
+        package.name.as_deref(),
+        &declarations,
+        "cspell",
+    ) {
         crate::common::info(
             "g3ts-spelling/syncpack-cspell-pin",
             "cspell is pinned by Syncpack",

@@ -1,8 +1,9 @@
 {
+  "name": "spelling-clean-golden",
   "private": true,
   "scripts": {
     "spellcheck": "cspell . --no-progress --no-summary",
-    "validate": "pnpm run spellcheck"
+    "validate": "pnpm spellcheck"
   },
   "devDependencies": {
     "cspell": "9.2.1"

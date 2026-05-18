@@ -1,0 +1,16 @@
+id = "spelling-R40-bare-cspell"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "spelling", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy"
+
+rule_family = "spelling"
+target_rules = [
+  "g3ts-spelling/spellcheck-fail-closed"
+]
+expected_findings = [
+  "g3ts-spelling/spellcheck-fail-closed"
+]

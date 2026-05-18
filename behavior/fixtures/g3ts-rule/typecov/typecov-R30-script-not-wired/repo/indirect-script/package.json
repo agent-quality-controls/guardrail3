@@ -1,0 +1,12 @@
+{
+  "name": "typecov-indirect-script",
+  "private": true,
+  "scripts": {
+    "typecov": "type-coverage --strict --at-least 100",
+    "indirect": "type-coverage --strict --at-least 100",
+    "validate": "pnpm run indirect"
+  },
+  "devDependencies": {
+    "type-coverage": "2.29.7"
+  }
+}

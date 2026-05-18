@@ -1,16 +1,26 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsSpellingPackageSurfaceSnapshot {
     pub rel_path: String,
+    pub name: Option<String>,
     pub dependencies: Vec<String>,
     pub dev_dependencies: Vec<String>,
+    pub dependency_declarations: Vec<G3TsSpellingDependencyDeclarationSnapshot>,
     pub script_names: Vec<String>,
     pub script_tool_invocations: Vec<G3TsSpellingPackageScriptToolInvocation>,
     pub script_parse_blockers: Vec<G3TsSpellingPackageScriptParseBlocker>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsSpellingDependencyDeclarationSnapshot {
+    pub name: String,
+    pub lane: String,
+    pub specifier_type: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsSpellingPackageScriptToolInvocation {
     pub script_name: String,
+    pub invocation: String,
     pub executable: String,
     pub args: Vec<String>,
     pub preceded_by: Option<G3TsSpellingPackageScriptCommandSeparator>,
@@ -59,18 +69,7 @@ pub enum G3TsSpellingConfigSurfaceState {
 pub struct G3TsSpellingSyncpackSnapshot {
     pub rel_path: String,
     pub source: Vec<String>,
-    pub version_groups: Vec<G3TsSpellingSyncpackVersionGroupSnapshot>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct G3TsSpellingSyncpackVersionGroupSnapshot {
-    pub dependencies: Vec<String>,
-    pub dependency_types: Vec<String>,
-    pub packages: Option<Vec<String>>,
-    pub specifier_types: Option<Vec<String>>,
-    pub is_ignored: Option<bool>,
-    pub is_banned: Option<bool>,
-    pub pin_version: Option<String>,
+    pub version_groups: Vec<syncpack_config_parser::types::SyncpackVersionGroup>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -8,6 +8,10 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsTypecovConfigCh
             .into_iter()
             .map(|app_root_rel_path| G3TsTypecovContractInput {
                 package: crate::package::ingest_package_surface(crawl, &app_root_rel_path),
+                typecov_policy: crate::policy::ingest_typecov_policy_surface(
+                    crawl,
+                    &app_root_rel_path,
+                ),
                 syncpack_config: crate::syncpack::ingest_syncpack_config(crawl, &app_root_rel_path),
                 app_root_rel_path,
             })

@@ -1,7 +1,8 @@
 {
+  "name": "typecov-clean-golden",
   "private": true,
   "scripts": {
-    "typecov": "type-coverage --at-least 100 --detail",
+    "typecov": "type-coverage --strict --at-least 100 --detail",
     "validate": "pnpm run typecov"
   },
   "devDependencies": {

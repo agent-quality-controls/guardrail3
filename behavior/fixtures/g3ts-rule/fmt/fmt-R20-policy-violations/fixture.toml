@@ -11,14 +11,14 @@ rule_family = "fmt"
 target_rules = [
   "g3ts-fmt/prettier-package-present",
   "g3ts-fmt/prettier-config-present",
-  "g3ts-fmt/format-scripts",
-  "g3ts-fmt/format-check-fail-closed",
+  "g3ts-fmt/format-check-script",
+  "g3ts-fmt/validate-runs-format-check",
   "g3ts-fmt/syncpack-prettier-pin"
 ]
 expected_findings = [
   "g3ts-fmt/prettier-package-present",
   "g3ts-fmt/prettier-config-present",
-  "g3ts-fmt/format-scripts",
-  "g3ts-fmt/format-check-fail-closed",
+  "g3ts-fmt/format-check-script",
+  "g3ts-fmt/validate-runs-format-check",
   "g3ts-fmt/syncpack-prettier-pin"
 ]

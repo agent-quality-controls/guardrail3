@@ -1,8 +1,8 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3ts_spelling_types::{
-    G3TsSpellingPackageScriptCommandSeparator, G3TsSpellingPackageScriptParseBlocker,
-    G3TsSpellingPackageScriptToolInvocation, G3TsSpellingPackageSurfaceSnapshot,
-    G3TsSpellingPackageSurfaceState,
+    G3TsSpellingDependencyDeclarationSnapshot, G3TsSpellingPackageScriptCommandSeparator,
+    G3TsSpellingPackageScriptParseBlocker, G3TsSpellingPackageScriptToolInvocation,
+    G3TsSpellingPackageSurfaceSnapshot, G3TsSpellingPackageSurfaceState,
 };
 use package_script_command_parser::types::{
     PackageScriptCommandSeparator, PackageScriptParseFact, PackageScriptParseState,
@@ -61,8 +61,17 @@ pub(crate) fn ingest_package_surface(
     G3TsSpellingPackageSurfaceState::Parsed {
         snapshot: G3TsSpellingPackageSurfaceSnapshot {
             rel_path: entry.path.rel_path.clone(),
+            name: typed.name.clone(),
             dependencies: typed.dependencies.clone(),
             dev_dependencies: typed.dev_dependencies.clone(),
+            dependency_declarations: package_json_parser::dependency_declarations(&document.raw)
+                .into_iter()
+                .map(|declaration| G3TsSpellingDependencyDeclarationSnapshot {
+                    name: declaration.name,
+                    lane: declaration.lane,
+                    specifier_type: declaration.specifier_type,
+                })
+                .collect(),
             script_names: typed.scripts.keys().cloned().collect(),
             script_tool_invocations: script_facts
                 .iter()
@@ -110,6 +119,7 @@ fn script_tool_invocation(
 ) -> G3TsSpellingPackageScriptToolInvocation {
     G3TsSpellingPackageScriptToolInvocation {
         script_name: invocation.script_name.clone(),
+        invocation: invocation.invocation.clone(),
         executable: invocation.executable.clone(),
         args: invocation.args.clone(),
         preceded_by: invocation.preceded_by.map(script_command_separator),
