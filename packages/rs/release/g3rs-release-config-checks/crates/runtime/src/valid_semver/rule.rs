@@ -13,7 +13,7 @@ pub(crate) fn check(krate: &G3RsReleaseConfigCrate, results: &mut Vec<G3CheckRes
     }
 
     match crate::support::crate_version_string(krate) {
-        Some(version) if crate::support::crate_version_valid(krate) => {
+        Some(_) if crate::support::crate_version_valid(krate) => {
             results.push(info(
                 ID,
                 format!("{}: valid semver", krate.name),
