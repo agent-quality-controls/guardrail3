@@ -93,14 +93,14 @@ fn parse_ban_table_entry(
 ) {
     match table.get("path") {
         Some(Value::String(path)) => {
-            if let Some(reason) = table.get("reason")
-                && !reason.is_str()
-            {
-                malformed_messages.push(format!(
-                    "`{key}[{index}].reason` must be a string when present, found {}.",
-                    value_kind(reason)
-                ));
-                return;
+            if let Some(reason) = table.get("reason") {
+                if !reason.is_str() {
+                    malformed_messages.push(format!(
+                        "`{key}[{index}].reason` must be a string when present, found {}.",
+                        value_kind(reason)
+                    ));
+                    return;
+                }
             }
             parsed_entries.push(ClippyBanEntry {
                 path: path.to_owned(),

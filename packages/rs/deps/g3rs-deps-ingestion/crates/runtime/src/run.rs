@@ -272,7 +272,13 @@ fn cargo_lock_ignore_match(line: &str) -> Option<bool> {
 /// Implements `discover installed tools`.
 fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
     let mut installed = BTreeSet::new();
-    for tool in ["cargo-deny", "cargo-machete", "cargo-dupes", "gitleaks"] {
+    for tool in [
+        "cargo-deny",
+        "cargo-machete",
+        "cargo-dupes",
+        "cargo-msrv",
+        "gitleaks",
+    ] {
         if tool_is_available(tool, path_env) {
             let _ = installed.insert(tool.to_owned());
         }

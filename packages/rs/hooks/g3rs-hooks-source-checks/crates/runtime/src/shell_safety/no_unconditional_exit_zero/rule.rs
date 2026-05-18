@@ -108,21 +108,19 @@ fn first_top_level_exit_zero_line(
         };
 
         if is_function_definition_line(local, source_line.line_no) {
-            if if_depth == 0
-                && case_depth == 0
-                && loop_depth == 0
-                && let Some(tail) = function_definition_tail(&source_line.raw)
-            {
-                if let Some(line_no) = scan_tail_for_unconditional_exit_zero(
-                    local,
-                    root,
-                    tail,
-                    source_line.line_no,
-                    absolute_base,
-                    visible_root_line_no,
-                    visiting,
-                ) {
-                    return Some(line_no);
+            if if_depth == 0 && case_depth == 0 && loop_depth == 0 {
+                if let Some(tail) = function_definition_tail(&source_line.raw) {
+                    if let Some(line_no) = scan_tail_for_unconditional_exit_zero(
+                        local,
+                        root,
+                        tail,
+                        source_line.line_no,
+                        absolute_base,
+                        visible_root_line_no,
+                        visiting,
+                    ) {
+                        return Some(line_no);
+                    }
                 }
             }
 

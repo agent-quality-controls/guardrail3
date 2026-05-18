@@ -174,17 +174,21 @@ const TS_RELEVANT_FILENAMES: &[&str] = &["package.json", "guardrail3-ts.toml", "
 /// Returns true when `p` names a file the validate pipeline cares about.
 fn is_ts_relevant_path(p: &str) -> bool {
     let path = Path::new(p);
-    if let Some(extension) = path.extension()
-        && TS_RELEVANT_EXTENSIONS
+    if path.extension().is_some_and(|extension| {
+        TS_RELEVANT_EXTENSIONS
             .iter()
             .any(|candidate| extension.eq_ignore_ascii_case(candidate))
-    {
+    }) {
         return true;
     }
-    if let Some(name) = path.file_name().and_then(|n| n.to_str())
-        && TS_RELEVANT_FILENAMES
-            .iter()
-            .any(|candidate| name.eq_ignore_ascii_case(candidate))
+    if path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .is_some_and(|name| {
+            TS_RELEVANT_FILENAMES
+                .iter()
+                .any(|candidate| name.eq_ignore_ascii_case(candidate))
+        })
     {
         return true;
     }

@@ -32,10 +32,10 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         }
     }
 
-    if violation.is_none()
-        && let Some(detail) = ancestor_walk_assignment(input.parsed)
-    {
-        violation = Some(detail);
+    if violation.is_none() {
+        if let Some(detail) = ancestor_walk_assignment(input.parsed) {
+            violation = Some(detail);
+        }
     }
 
     if let Some(detail) = violation {

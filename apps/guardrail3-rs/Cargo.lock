@@ -526,6 +526,7 @@ dependencies = [
 name = "g3rs-cargo-ingestion-runtime"
 version = "0.1.0"
 dependencies = [
+ "cargo-config-toml-parser",
  "cargo-toml-parser",
  "g3-workspace-crawl",
  "g3rs-cargo-ingestion-types",
@@ -1892,6 +1893,7 @@ dependencies = [
 name = "guardrail3-rs-validate-command"
 version = "0.1.0"
 dependencies = [
+ "cargo-toml-parser",
  "g3rs-hooks-contract-types",
  "g3rs-rust-family-contracts",
  "g3rs-toml-parser-runtime",

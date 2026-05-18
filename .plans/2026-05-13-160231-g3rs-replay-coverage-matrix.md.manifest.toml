@@ -2,14 +2,15 @@
 path = "behavior/coverage/g3rs-rule-coverage.toml"
 source_roots = [ "packages/rs", "apps/guardrail3-rs",]
 golden_outputs = [ "behavior/golden/g3rs-validate/approved.normalized.json", "behavior/golden/g3rs-validate-repo/approved.normalized.json",]
+state_golden_outputs = [ "behavior/golden/g3rs-validate/approved.normalized.json", "behavior/golden/g3rs-validate-repo/approved.normalized.json", "behavior/golden/g3rs-rule/approved.normalized.json",]
 fixture_manifests = [ ".plans/2026-05-12-183156-guardrail3-behavior-replay-fixture-migration.md.manifest.toml", ".plans/2026-05-12-222909-g3rs-validate-repo-fixtures.md.manifest.toml", ".plans/2026-05-16-185717-family-rule-cli-fixtures.md.manifest.toml",]
 
 [expected_counts]
-source_rule_ids = 267
-baseline_rule_ids = 250
-baseline_error_warn_rule_ids = 219
-info_only_rule_ids = 31
-absent_rule_ids = 17
+source_rule_ids = 269
+baseline_rule_ids = 255
+baseline_error_warn_rule_ids = 225
+info_only_rule_ids = 30
+absent_rule_ids = 14
 
 [allowed_values]
 coverage_status = [ "covered", "planned_fixture", "planned_existing_fixture_expansion", "planned_cli_surface", "replaced_by_managed_hook",]

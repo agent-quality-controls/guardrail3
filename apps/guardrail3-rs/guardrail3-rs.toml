@@ -2,6 +2,7 @@ profile = "service"
 
 allowed_deps = [
   "clap",
+  "cargo-toml-parser",
   "g3rs-apparch-config-checks",
   "g3rs-apparch-hook-contract",
   "g3rs-apparch-ingestion",

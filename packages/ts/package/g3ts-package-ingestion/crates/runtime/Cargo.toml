@@ -31,4 +31,6 @@ g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", versio
 g3ts-package-types = { path = "../../../g3ts-package-types", version = "0.1.0" }
 package-json-parser = { path = "../../../../../parsers/package-json-parser", version = "0.1.0", features = ["api"] }
 package-script-command-parser = { path = "../../../../../parsers/package-script-command-parser", version = "0.1.0", features = ["api"] }
+serde = { version = "1", features = ["derive"] }
+serde_norway = "0.9.42"
 syncpack-config-parser = { path = "../../../../../parsers/syncpack-config-parser", version = "0.1.0", features = ["api"] }

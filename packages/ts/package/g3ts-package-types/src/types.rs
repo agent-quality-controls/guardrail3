@@ -109,9 +109,36 @@ pub enum G3TsPackageSyncpackConfigState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct G3TsPackagePnpmWorkspaceSnapshot {
+    pub rel_path: String,
+    pub node_version: Option<String>,
+    pub engine_strict: Option<bool>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum G3TsPackagePnpmWorkspaceState {
+    NotRequired,
+    Missing {
+        rel_path: String,
+    },
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        snapshot: G3TsPackagePnpmWorkspaceSnapshot,
+    },
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct G3TsPackageChecksInput {
     pub root: G3TsPackageRootState,
     pub locals: Vec<G3TsPackageLocalState>,
+    pub pnpm_workspace: G3TsPackagePnpmWorkspaceState,
     pub syncpack_config: G3TsPackageSyncpackConfigState,
     pub forbidden_syncpack_deps: Vec<String>,
 }

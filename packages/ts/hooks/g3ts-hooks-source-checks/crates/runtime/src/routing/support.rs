@@ -18,10 +18,10 @@ pub(crate) fn collect_precommit_scope_values(parsed: &ParsedShellScript) -> Vec<
         EmptyEnv,
         CommandQueryOptions::default(),
         |command, _| {
-            if is_g3ts_validate_command(command)
-                && let Some(value) = scope_arg_value(command.args())
-            {
-                values.push(value);
+            if is_g3ts_validate_command(command) {
+                if let Some(value) = scope_arg_value(command.args()) {
+                    values.push(value);
+                }
             }
             CommandVisit::Continue
         },
@@ -70,10 +70,10 @@ pub(crate) fn unquote_scope(value: &str) -> &str {
 /// Returns true when the scope token resolves wholly to a single shell variable expansion.
 pub(crate) fn scope_is_wholly_variable(value: &str) -> bool {
     let body = unquote_scope(value);
-    if let Some(rest) = body.strip_prefix("${")
-        && let Some(name) = rest.strip_suffix('}')
-    {
-        return is_shell_identifier(name);
+    if let Some(rest) = body.strip_prefix("${") {
+        if let Some(name) = rest.strip_suffix('}') {
+            return is_shell_identifier(name);
+        }
     }
     if let Some(name) = body.strip_prefix('$') {
         return is_shell_identifier(name);
@@ -251,10 +251,10 @@ fn extract_variable_names(value: &str, out: &mut Vec<String>) {
 /// Pushes the leading shell-identifier (if any) from `text` into `out`, returning its length.
 fn push_identifier_prefix(text: &str, out: &mut Vec<String>) -> usize {
     let identifier_len = identifier_run_len(text);
-    if identifier_len > 0
-        && let Some(name) = text.get(..identifier_len)
-    {
-        out.push(name.to_owned());
+    if identifier_len > 0 {
+        if let Some(name) = text.get(..identifier_len) {
+            out.push(name.to_owned());
+        }
     }
     identifier_len
 }
@@ -276,10 +276,10 @@ pub(crate) fn contains_command_substitution_default(text: &str) -> bool {
             return false;
         };
         let inner = after.get(..close_offset).unwrap_or("");
-        if let Some((_, rhs_part)) = inner.split_once("||")
-            && rhs_is_literal_default(rhs_part.trim())
-        {
-            return true;
+        if let Some((_, rhs_part)) = inner.split_once("||") {
+            if rhs_is_literal_default(rhs_part.trim()) {
+                return true;
+            }
         }
         rest = after.get(close_offset.saturating_add(1)..).unwrap_or("");
     }

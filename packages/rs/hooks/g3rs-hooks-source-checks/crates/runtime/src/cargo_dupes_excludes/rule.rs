@@ -113,11 +113,12 @@ fn cargo_dupes_subcommand_exclude_state(args: &[String]) -> Option<bool> {
         if is_help_or_version_flag(token) {
             return None;
         }
-        if let Some((flag_name, _)) = token.split_once('=')
-            && cargo_global_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
+        match token.split_once('=') {
+            Some((flag_name, _)) if cargo_global_flag_takes_value(flag_name) => {
+                index += 1;
+                continue;
+            }
+            _ => {}
         }
         if matches!(token.strip_prefix("-j"), Some(value) if !value.is_empty()) {
             index += 1;
@@ -164,11 +165,12 @@ fn dupes_flag_state(args: &[String]) -> Option<bool> {
             index += 1;
             continue;
         }
-        if let Some((flag_name, _)) = token.split_once('=')
-            && dupes_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
+        match token.split_once('=') {
+            Some((flag_name, _)) if dupes_flag_takes_value(flag_name) => {
+                index += 1;
+                continue;
+            }
+            _ => {}
         }
         if dupes_flag_takes_value(token) {
             index += 2;

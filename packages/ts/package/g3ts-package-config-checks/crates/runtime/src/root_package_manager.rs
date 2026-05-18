@@ -12,16 +12,16 @@ pub(crate) fn check(input: &G3TsPackageChecksInput, results: &mut Vec<G3CheckRes
         return;
     };
 
-    if let Some(package_manager) = snapshot.package_manager.as_deref()
-        && is_pinned_pnpm_package_manager(Some(package_manager))
-    {
-        results.push(info(
-            ID,
-            "root packageManager is pinned to pnpm",
-            format!("The root package manifest pins `packageManager` to `{package_manager}`.",),
-            &snapshot.rel_path,
-        ));
-        return;
+    if let Some(package_manager) = snapshot.package_manager.as_deref() {
+        if is_pinned_pnpm_package_manager(Some(package_manager)) {
+            results.push(info(
+                ID,
+                "root packageManager is pinned to pnpm",
+                format!("The root package manifest pins `packageManager` to `{package_manager}`.",),
+                &snapshot.rel_path,
+            ));
+            return;
+        }
     }
 
     results.push(error(

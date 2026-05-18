@@ -1,7 +1,8 @@
 use cargo_toml_parser::types::CargoTomlDocument;
 use g3rs_cargo_types::{
-    G3RsCargoFileTreeRoot, G3RsCargoInputFailure, G3RsCargoMissingMember, G3RsCargoPolicyRoot,
-    G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoWorkspaceMember,
+    G3RsCargoConfigTomlState, G3RsCargoFileTreeRoot, G3RsCargoInputFailure, G3RsCargoMissingMember,
+    G3RsCargoPolicyRoot, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState,
+    G3RsCargoWorkspaceMember,
 };
 
 /// build root fn.
@@ -9,6 +10,7 @@ pub(crate) fn build_root(
     cargo_rel_path: String,
     cargo: CargoTomlDocument,
     rust_policy: G3RsCargoRustPolicyState,
+    cargo_config: G3RsCargoConfigTomlState,
 ) -> G3RsCargoPolicyRoot {
     let kind = match cargo_toml_parser::document::kind(&cargo) {
         cargo_toml_parser::types::CargoTomlDocumentKind::WorkspaceRoot => {
@@ -26,6 +28,7 @@ pub(crate) fn build_root(
         cargo_rel_path,
         cargo,
         rust_policy,
+        cargo_config,
     }
 }
 

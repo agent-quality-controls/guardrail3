@@ -50,13 +50,13 @@ pub(crate) fn ingest_manifest_state(crawl: &G3WorkspaceCrawl) -> G3TsArchManifes
 fn declared_entrypoints(raw: &Value) -> Vec<G3TsArchDeclaredEntryPoint> {
     let mut entrypoints = Vec::new();
 
-    if let Some(types) = raw.get("types").and_then(Value::as_str)
-        && let Some(rel_path) = normalize_source_entrypoint(types)
-    {
-        entrypoints.push(G3TsArchDeclaredEntryPoint {
-            source: G3TsArchEntryPointSource::Types,
-            rel_path,
-        });
+    if let Some(types) = raw.get("types").and_then(Value::as_str) {
+        if let Some(rel_path) = normalize_source_entrypoint(types) {
+            entrypoints.push(G3TsArchDeclaredEntryPoint {
+                source: G3TsArchEntryPointSource::Types,
+                rel_path,
+            });
+        }
     }
 
     if let Some(exports_dot) = raw.get("exports").and_then(|exports| exports.get(".")) {

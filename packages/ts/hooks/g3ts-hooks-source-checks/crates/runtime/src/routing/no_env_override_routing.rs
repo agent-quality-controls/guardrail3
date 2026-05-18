@@ -43,10 +43,13 @@ pub(crate) fn check(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3Chec
                 line.line_no
             ));
         }
-        if contains_command_substitution_default(line.raw.as_str())
-            && let Some(lhs) = extract_assignment_lhs(trimmed)
-            && scope_var_names.iter().any(|name| name == &lhs)
-        {
+        if !contains_command_substitution_default(line.raw.as_str()) {
+            continue;
+        }
+        let Some(lhs) = extract_assignment_lhs(trimmed) else {
+            continue;
+        };
+        if scope_var_names.iter().any(|name| name == &lhs) {
             findings.push(format!(
                 "`.githooks/pre-commit` line {} assigns `{lhs}` from a command-substitution default (`$(... || ...)`) and later passes `${lhs}` as the verifier `--path`. Routing must not rely on default scopes.",
                 line.line_no

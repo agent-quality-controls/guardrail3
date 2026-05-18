@@ -358,6 +358,7 @@ fn discover_installed_tools(path_env: Option<&OsStr>) -> Vec<String> {
         "gitleaks",
         "cargo-deny",
         "cargo-machete",
+        "cargo-msrv",
         "g3rs",
         "cargo-dupes",
     ] {

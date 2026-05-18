@@ -5,6 +5,8 @@ mod types;
 #[cfg(feature = "api")]
 pub use types::G3RsCargoConfigChecksInput;
 #[cfg(feature = "api")]
+pub use types::G3RsCargoConfigTomlState;
+#[cfg(feature = "api")]
 pub use types::G3RsCargoFileTreeChecksInput;
 #[cfg(feature = "api")]
 pub use types::G3RsCargoFileTreeRoot;

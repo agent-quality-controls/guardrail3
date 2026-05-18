@@ -25,6 +25,7 @@ DELEGATED_TOOL_NAMES = {
     "cargo-deny",
     "cargo-dupes",
     "cargo-machete",
+    "cargo-msrv",
     "cargo-mutants",
     "cargo-semver-checks",
     "g3rs",

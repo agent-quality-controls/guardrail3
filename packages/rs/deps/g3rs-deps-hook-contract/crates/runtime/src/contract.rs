@@ -15,12 +15,15 @@ pub fn hook_contract() -> Vec<G3HookRequirement> {
             G3HookCommandRequirement::CargoMachete,
             G3HookCommandRequirement::CargoDupes,
             G3HookCommandRequirement::CargoDupesExcludeTests,
+            G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked,
         ],
         critical_commands: vec![
             G3HookCriticalCommand::CargoSubcommand("machete".to_owned()),
             G3HookCriticalCommand::Binary("cargo-machete".to_owned()),
             G3HookCriticalCommand::CargoSubcommand("dupes".to_owned()),
             G3HookCriticalCommand::Binary("cargo-dupes".to_owned()),
+            G3HookCriticalCommand::CargoSubcommand("msrv".to_owned()),
+            G3HookCriticalCommand::Binary("cargo-msrv".to_owned()),
         ],
     }]
 }

@@ -62,13 +62,13 @@ pub(super) fn collect_logical_lines(content: &str) -> Vec<(usize, String)> {
         continuation_line_no = None;
     }
 
-    if let Some(start) = continuation_start
-        && start < content.len()
-    {
-        logical_lines.push((
-            continuation_line_no.unwrap_or(1),
-            content[start..].to_owned(),
-        ));
+    if let Some(start) = continuation_start {
+        if start < content.len() {
+            logical_lines.push((
+                continuation_line_no.unwrap_or(1),
+                content[start..].to_owned(),
+            ));
+        }
     }
 
     logical_lines
@@ -375,12 +375,12 @@ fn function_definition_closer_index(fragment: &str) -> Option<usize> {
             Some(ShellTailContext::DoubleQuote) => {
                 if ch == '"' {
                     let _ = contexts.pop();
-                } else if ch == '$'
-                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
-                {
-                    contexts.push(next);
-                    index += 2;
-                    continue;
+                } else if ch == '$' {
+                    if let Some(next) = start_shell_tail_context(chars.as_slice(), index) {
+                        contexts.push(next);
+                        index += 2;
+                        continue;
+                    }
                 }
             }
             Some(ShellTailContext::CommandSubstitution) => {
@@ -388,12 +388,12 @@ fn function_definition_closer_index(fragment: &str) -> Option<usize> {
                     contexts.push(ShellTailContext::SingleQuote);
                 } else if ch == '"' {
                     contexts.push(ShellTailContext::DoubleQuote);
-                } else if ch == '$'
-                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
-                {
-                    contexts.push(next);
-                    index += 2;
-                    continue;
+                } else if ch == '$' {
+                    if let Some(next) = start_shell_tail_context(chars.as_slice(), index) {
+                        contexts.push(next);
+                        index += 2;
+                        continue;
+                    }
                 } else if ch == ')' {
                     let _ = contexts.pop();
                 }
@@ -403,12 +403,12 @@ fn function_definition_closer_index(fragment: &str) -> Option<usize> {
                     contexts.push(ShellTailContext::SingleQuote);
                 } else if ch == '"' {
                     contexts.push(ShellTailContext::DoubleQuote);
-                } else if ch == '$'
-                    && let Some(next) = start_shell_tail_context(chars.as_slice(), index)
-                {
-                    contexts.push(next);
-                    index += 2;
-                    continue;
+                } else if ch == '$' {
+                    if let Some(next) = start_shell_tail_context(chars.as_slice(), index) {
+                        contexts.push(next);
+                        index += 2;
+                        continue;
+                    }
                 } else if ch == '}' {
                     let _ = contexts.pop();
                 }

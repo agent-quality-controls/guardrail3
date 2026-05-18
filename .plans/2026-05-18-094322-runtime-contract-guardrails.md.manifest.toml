@@ -1,0 +1,74 @@
+[[rule]]
+id = "g3ts-package/node-engine-install-contract"
+family = "g3ts-package"
+lane = "config"
+owner = "packages/ts/package/g3ts-package-config-checks"
+required_inputs = ["package.json", "pnpm-workspace.yaml"]
+expected_severity = "Error"
+
+[[parser_contract]]
+owner = "packages/ts/package/g3ts-package-ingestion"
+file = "pnpm-workspace.yaml"
+parser = "serde_norway"
+fields = ["nodeVersion", "engineStrict"]
+
+[[fixture_contract]]
+suite = "g3ts-rule"
+family = "package"
+clean_fixture = "package-R00-clean-golden"
+broken_fixture = "package-R10-policy-violations"
+required_rule = "g3ts-package/node-engine-install-contract"
+
+[[rule]]
+id = "g3rs-cargo/rust-version-aware-resolver"
+family = "g3rs-cargo"
+lane = "config"
+owner = "packages/rs/cargo/g3rs-cargo-config-checks"
+required_inputs = ["Cargo.toml", ".cargo/config.toml"]
+expected_severity = "Error"
+
+[[parser_contract]]
+owner = "packages/rs/cargo/g3rs-cargo-ingestion"
+file = ".cargo/config.toml"
+parser = "cargo-config-toml-parser"
+fields = ["resolver.incompatible-rust-versions"]
+
+[[rule]]
+id = "g3rs-deps/cargo-msrv-verify-installed"
+family = "g3rs-deps"
+lane = "config"
+owner = "packages/rs/deps/g3rs-deps-config-checks"
+required_inputs = ["PATH"]
+expected_severity = "Error"
+
+[[hook_contract]]
+family = "g3rs-deps"
+required_command = "CargoMsrvVerifyCargoCheckLocked"
+critical_command = "cargo-msrv"
+triggers = ["Cargo.toml", "Cargo.lock"]
+
+[[fixture_contract]]
+suite = "g3rs-rule"
+family = "cargo"
+clean_fixture = "cargo-R00-clean-golden"
+broken_fixture = "cargo-R10-policy-violations"
+required_rule = "g3rs-cargo/rust-version-aware-resolver"
+
+[[fixture_contract]]
+suite = "g3rs-rule"
+family = "deps"
+clean_fixture = "deps-R00-clean-golden"
+broken_fixture = "deps-R10-required-files-and-tools"
+required_rule = "g3rs-deps/cargo-msrv-verify-installed"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-runtime-contract-guardrails.py"
+
+[[verification]]
+command = "fixture3 check --suite g3ts-rule"
+
+[[verification]]
+command = "fixture3 check --suite g3rs-rule"
+
+[[verification]]
+command = "python3 scripts/behavior/verify-g3rs-rule-fixture-coverage.py"

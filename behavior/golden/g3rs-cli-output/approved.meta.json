@@ -1,13 +1,13 @@
 {
   "suite": "g3rs-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-16T20-59-24.515124Z-078cb096",
-  "run_commit": "5a07e8a51",
+  "run_id": "2026-05-18T11-25-58.601496Z-d06b5496",
+  "run_commit": "cf3fad18d",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T20:59:24.515124Z",
+  "recorded_at": "2026-05-18T11:25:58.601496Z",
   "fixture_hash": "sha256:3b747845ecd4c6e9fb1bdec8bd154c36c9e85719e2aa9696d66882e10247e278",
-  "manifest_hash": "sha256:9a2e74a675e4d91068521c3ba11aeae7cca32394223a361d108605ff6575f618",
-  "tool_version": "0.1.7",
+  "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
+  "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -39,5 +39,5 @@
       "sha256": "sha256:aba14c1fadb6e36ec638b879f0d61fe8be442e24a3c1f7b88a7fb5b28c0d3b22"
     }
   ],
-  "comment": "Refresh fixture manifest metadata after suite split"
+  "comment": "runtime contract guardrails current G3RS CLI output"
 }

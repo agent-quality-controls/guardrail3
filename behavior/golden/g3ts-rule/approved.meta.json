@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T19-34-05.502257Z-d06b5496",
-  "run_commit": "cd4d46076",
+  "run_id": "2026-05-18T09-04-04.897484Z-d06b5496",
+  "run_commit": "cf3fad18d",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T19:34:05.502257Z",
-  "fixture_hash": "sha256:e08f954cd56f1f406b8a2cfdafbda964cdf8c8044f8748a83cd3f009992f7c8f",
+  "recorded_at": "2026-05-18T09:04:04.897484Z",
+  "fixture_hash": "sha256:4d1fbf999981e368c0ab3bb66c45d25fccc03fedeb95f253c434eaa08dd893f7",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -240,7 +240,7 @@
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R10-policy-violations/fixture.toml",
-      "sha256": "sha256:fc1207128f7a4d567af4e436be923be0cacf00d42e5c990f79b00bd4913499d7"
+      "sha256": "sha256:5b6520353cbf3057413e9311dc3d10a21d5ed4de3ad6a50c412b671626acd1b6"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/package/package-R20-input-failures/fixture.toml",
@@ -339,5 +339,5 @@
       "sha256": "sha256:beca73e240066a9f93b84d8749df9e8111738390ba35dba355fba2e5968fbff4"
     }
   ],
-  "comment": "Update Astro MDX fixture target metadata"
+  "comment": "add package node engine install contract"
 }

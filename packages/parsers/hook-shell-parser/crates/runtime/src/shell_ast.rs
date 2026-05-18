@@ -267,35 +267,36 @@ fn child_words(input: &str, node: Node<'_>) -> Vec<String> {
             words.push(normalize_shell_word(text.trim()));
         }
     }
-    if words.is_empty()
-        && let Some(text) = node_text(input, node)
-    {
-        words.extend(
-            text.split_whitespace()
-                .map(normalize_shell_word)
-                .filter(|word| !word.is_empty()),
-        );
+    if words.is_empty() {
+        if let Some(text) = node_text(input, node) {
+            words.extend(
+                text.split_whitespace()
+                    .map(normalize_shell_word)
+                    .filter(|word| !word.is_empty()),
+            );
+        }
     }
     words
 }
 
 fn keyword_command_words(input: &str, node: Node<'_>) -> Vec<String> {
     let mut words = Vec::new();
-    if let Some(first_named) = node.named_child(0)
-        && let Some(prefix) = input.get(node.start_byte()..first_named.start_byte())
-        && let Some(keyword) = prefix.split_whitespace().next()
-    {
-        words.push(normalize_shell_word(keyword));
+    if let Some(first_named) = node.named_child(0) {
+        if let Some(prefix) = input.get(node.start_byte()..first_named.start_byte()) {
+            if let Some(keyword) = prefix.split_whitespace().next() {
+                words.push(normalize_shell_word(keyword));
+            }
+        }
     }
     words.extend(child_words(input, node));
-    if words.is_empty()
-        && let Some(text) = node_text(input, node)
-    {
-        words.extend(
-            text.split_whitespace()
-                .map(normalize_shell_word)
-                .filter(|word| !word.is_empty()),
-        );
+    if words.is_empty() {
+        if let Some(text) = node_text(input, node) {
+            words.extend(
+                text.split_whitespace()
+                    .map(normalize_shell_word)
+                    .filter(|word| !word.is_empty()),
+            );
+        }
     }
     words
 }

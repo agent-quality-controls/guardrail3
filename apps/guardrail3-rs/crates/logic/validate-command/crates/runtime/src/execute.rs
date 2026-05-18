@@ -78,8 +78,12 @@ pub fn execute(
 
         if should_run_gates {
             let rust_source_present = cargo_gates::any_rust_source(&in_scope);
-            let commands =
-                cargo_gates::cargo_gate_commands(&families, request.staged, rust_source_present);
+            let commands = cargo_gates::cargo_gate_commands(
+                &request.workspace_root,
+                &families,
+                request.staged,
+                rust_source_present,
+            );
             let target_dir = repo_root.join(".cargo-target");
             let outcomes =
                 cargo_gates::run_cargo_gates(&request.workspace_root, &target_dir, &commands);

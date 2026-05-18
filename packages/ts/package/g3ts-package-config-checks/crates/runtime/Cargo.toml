@@ -29,3 +29,4 @@ all-features = true
 [dependencies]
 g3ts-package-types = { path = "../../../g3ts-package-types", version = "0.1.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }
+js-semver = "0.3"

@@ -1,16 +1,14 @@
 use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind, root_file};
-use g3ts_package_types::{
-    G3TsPackageChecksInput, G3TsPackageLocalState, G3TsPackageRootState, G3TsPackageScriptCommand,
-    G3TsPackageScriptCommandSeparator, G3TsPackageScriptParseBlocker,
-    G3TsPackageScriptToolInvocation, G3TsPackageSyncpackConfigSnapshot,
-    G3TsPackageSyncpackConfigState, local_snapshot, root_snapshot,
-};
+use g3ts_package_types as package_types;
 use package_script_command_parser::types as parser_types;
+use serde::Deserialize;
 use std::collections::BTreeSet;
 use syncpack_config_parser::types::SyncpackVersionGroup;
 
 /// Workspace-relative path of the workspace-root `package.json` manifest.
 const PACKAGE_JSON_REL_PATH: &str = "package.json";
+/// Workspace-relative path of the pnpm workspace policy file.
+const PNPM_WORKSPACE_REL_PATH: &str = "pnpm-workspace.yaml";
 /// Workspace-relative path of the Syncpack config file.
 const SYNCPACK_CONFIG_REL_PATH: &str = ".syncpackrc";
 /// Dependency names whose use must be forbidden via Syncpack version groups.
@@ -41,10 +39,20 @@ const BAN_DEPENDENCY_TYPES: [&str; 4] = ["prod", "dev", "optional", "peer"];
 /// every forbidden dependency is banned.
 const SYNCPACK_PACKAGE_POLICY_PREFIX_LEN: usize = FORBIDDEN_SYNCPACK_DEPS.len();
 
-/// Ingest the workspace crawl into a `G3TsPackageChecksInput` describing
+/// Typed projection of the root pnpm workspace policy fields used by G3TS.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PnpmWorkspacePolicy {
+    /// Exact Node runtime version enforced by pnpm during install.
+    node_version: Option<String>,
+    /// Whether pnpm fails installs when dependency `engines` are incompatible.
+    engine_strict: Option<bool>,
+}
+
+/// Ingest the workspace crawl into a `package_types::G3TsPackageChecksInput` describing
 /// the package family inputs (root manifest, syncpack config, locals).
 #[must_use]
-pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsPackageChecksInput {
+pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> package_types::G3TsPackageChecksInput {
     let root_policy_applies = root_policy_applies(crawl);
     let locals = crawl
         .entries
@@ -53,16 +61,21 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsPackageChecksIn
         .map(ingest_local)
         .collect::<Vec<_>>();
 
-    G3TsPackageChecksInput {
+    package_types::G3TsPackageChecksInput {
         root: if root_policy_applies {
             ingest_root(crawl)
         } else {
-            G3TsPackageRootState::NotPackageManagerRoot
+            package_types::G3TsPackageRootState::NotPackageManagerRoot
+        },
+        pnpm_workspace: if root_policy_applies {
+            ingest_pnpm_workspace(crawl)
+        } else {
+            package_types::G3TsPackagePnpmWorkspaceState::NotRequired
         },
         syncpack_config: if root_policy_applies {
             ingest_syncpack_config(crawl, &locals)
         } else {
-            G3TsPackageSyncpackConfigState::NotRequired
+            package_types::G3TsPackageSyncpackConfigState::NotRequired
         },
         forbidden_syncpack_deps: FORBIDDEN_SYNCPACK_DEPS
             .into_iter()
@@ -73,15 +86,15 @@ pub fn ingest_for_config_checks(crawl: &G3WorkspaceCrawl) -> G3TsPackageChecksIn
 }
 
 /// Ingest the workspace-root `package.json` into the corresponding
-/// `G3TsPackageRootState` variant, populating script-derived facts when the
+/// `package_types::G3TsPackageRootState` variant, populating script-derived facts when the
 /// manifest parses successfully.
-fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
+fn ingest_root(crawl: &G3WorkspaceCrawl) -> package_types::G3TsPackageRootState {
     let Some(entry) = root_file(crawl, "package.json") else {
-        return G3TsPackageRootState::Missing;
+        return package_types::G3TsPackageRootState::Missing;
     };
 
     if !entry.readable {
-        return G3TsPackageRootState::Unreadable {
+        return package_types::G3TsPackageRootState::Unreadable {
             rel_path: entry.path.rel_path.clone(),
             reason: "workspace crawl marked the selected root manifest unreadable".to_owned(),
         };
@@ -90,7 +103,7 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
     let document = match package_json_parser::from_path_document(&entry.path.abs_path) {
         Ok(document) => document,
         Err(err) => {
-            return G3TsPackageRootState::ParseError {
+            return package_types::G3TsPackageRootState::ParseError {
                 rel_path: entry.path.rel_path.clone(),
                 reason: err.to_string(),
             };
@@ -98,14 +111,14 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
     };
 
     if let Some(reason) = package_json_parser::parse_error_reason(&document) {
-        return G3TsPackageRootState::ParseError {
+        return package_types::G3TsPackageRootState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: reason.to_owned(),
         };
     }
 
     let Some(snapshot) = package_json_parser::typed(&document) else {
-        return G3TsPackageRootState::ParseError {
+        return package_types::G3TsPackageRootState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: "parsed package.json document did not yield a typed snapshot".to_owned(),
         };
@@ -115,7 +128,7 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
         .iter()
         .map(|(name, body)| parse_package_script(name, body))
         .collect::<Vec<_>>();
-    let mut root = root_snapshot(&entry.path.rel_path, snapshot);
+    let mut root = package_types::root_snapshot(&entry.path.rel_path, snapshot);
     root.script_commands = script_facts.iter().flat_map(script_commands).collect();
     root.script_tool_invocations = script_facts
         .iter()
@@ -138,7 +151,7 @@ fn ingest_root(crawl: &G3WorkspaceCrawl) -> G3TsPackageRootState {
     root.safely_runs_syncpack_lint =
         package_script_command_parser::has_safe_tool_invocation(&script_facts, "syncpack", "lint");
 
-    G3TsPackageRootState::Parsed { snapshot: root }
+    package_types::G3TsPackageRootState::Parsed { snapshot: root }
 }
 
 /// Parse a single `package.json` script, returning the parser's
@@ -160,7 +173,9 @@ fn parse_package_script(name: &str, body: &str) -> parser_types::PackageScriptPa
 
 /// Convert the commands carried by `fact` into the public types-crate
 /// representation.
-fn script_commands(fact: &parser_types::PackageScriptParseFact) -> Vec<G3TsPackageScriptCommand> {
+fn script_commands(
+    fact: &parser_types::PackageScriptParseFact,
+) -> Vec<package_types::G3TsPackageScriptCommand> {
     fact.commands
         .iter()
         .map(|command| script_command(&fact.script_name, command))
@@ -172,8 +187,8 @@ fn script_commands(fact: &parser_types::PackageScriptParseFact) -> Vec<G3TsPacka
 fn script_command(
     script_name: &str,
     command: &parser_types::PackageScriptCommand,
-) -> G3TsPackageScriptCommand {
-    G3TsPackageScriptCommand {
+) -> package_types::G3TsPackageScriptCommand {
+    package_types::G3TsPackageScriptCommand {
         script_name: script_name.to_owned(),
         invocation: command.invocation.clone(),
         executable: command.executable.clone(),
@@ -185,10 +200,14 @@ fn script_command(
 /// Convert the parser separator enum into the public types-crate enum.
 const fn script_command_separator(
     separator: parser_types::PackageScriptCommandSeparator,
-) -> G3TsPackageScriptCommandSeparator {
+) -> package_types::G3TsPackageScriptCommandSeparator {
     match separator {
-        parser_types::PackageScriptCommandSeparator::And => G3TsPackageScriptCommandSeparator::And,
-        parser_types::PackageScriptCommandSeparator::Or => G3TsPackageScriptCommandSeparator::Or,
+        parser_types::PackageScriptCommandSeparator::And => {
+            package_types::G3TsPackageScriptCommandSeparator::And
+        }
+        parser_types::PackageScriptCommandSeparator::Or => {
+            package_types::G3TsPackageScriptCommandSeparator::Or
+        }
     }
 }
 
@@ -196,7 +215,7 @@ const fn script_command_separator(
 /// types-crate representation.
 fn script_tool_invocations(
     fact: &parser_types::PackageScriptParseFact,
-) -> Vec<G3TsPackageScriptToolInvocation> {
+) -> Vec<package_types::G3TsPackageScriptToolInvocation> {
     fact.tool_invocations
         .iter()
         .map(script_tool_invocation)
@@ -207,8 +226,8 @@ fn script_tool_invocations(
 /// representation.
 fn script_tool_invocation(
     invocation: &parser_types::PackageScriptToolInvocation,
-) -> G3TsPackageScriptToolInvocation {
-    G3TsPackageScriptToolInvocation {
+) -> package_types::G3TsPackageScriptToolInvocation {
+    package_types::G3TsPackageScriptToolInvocation {
         script_name: invocation.script_name.clone(),
         command_index: invocation.command_index,
         invocation: invocation.invocation.clone(),
@@ -219,16 +238,16 @@ fn script_tool_invocation(
     }
 }
 
-/// Project a script parse fact into a `G3TsPackageScriptParseBlocker` when
+/// Project a script parse fact into a `package_types::G3TsPackageScriptParseBlocker` when
 /// the parser reports an unsupported or error state, returning `None` when
 /// the script parsed successfully.
 fn script_parse_blocker(
     fact: &parser_types::PackageScriptParseFact,
-) -> Option<G3TsPackageScriptParseBlocker> {
+) -> Option<package_types::G3TsPackageScriptParseBlocker> {
     match &fact.state {
         parser_types::PackageScriptParseState::Unsupported { reason }
         | parser_types::PackageScriptParseState::ParseError { reason } => {
-            Some(G3TsPackageScriptParseBlocker {
+            Some(package_types::G3TsPackageScriptParseBlocker {
                 script_name: fact.script_name.clone(),
                 reason: reason.clone(),
             })
@@ -239,10 +258,10 @@ fn script_parse_blocker(
 }
 
 /// Ingest a single non-root `package.json` manifest into the corresponding
-/// `G3TsPackageLocalState` variant.
-fn ingest_local(entry: &G3WorkspaceEntry) -> G3TsPackageLocalState {
+/// `package_types::G3TsPackageLocalState` variant.
+fn ingest_local(entry: &G3WorkspaceEntry) -> package_types::G3TsPackageLocalState {
     if !entry.readable {
-        return G3TsPackageLocalState::Unreadable {
+        return package_types::G3TsPackageLocalState::Unreadable {
             rel_path: entry.path.rel_path.clone(),
             reason: "workspace crawl marked the local manifest unreadable".to_owned(),
         };
@@ -251,7 +270,7 @@ fn ingest_local(entry: &G3WorkspaceEntry) -> G3TsPackageLocalState {
     let document = match package_json_parser::from_path_document(&entry.path.abs_path) {
         Ok(document) => document,
         Err(err) => {
-            return G3TsPackageLocalState::ParseError {
+            return package_types::G3TsPackageLocalState::ParseError {
                 rel_path: entry.path.rel_path.clone(),
                 reason: err.to_string(),
             };
@@ -259,20 +278,20 @@ fn ingest_local(entry: &G3WorkspaceEntry) -> G3TsPackageLocalState {
     };
 
     if let Some(reason) = package_json_parser::parse_error_reason(&document) {
-        return G3TsPackageLocalState::ParseError {
+        return package_types::G3TsPackageLocalState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: reason.to_owned(),
         };
     }
 
     let Some(snapshot) = package_json_parser::typed(&document) else {
-        return G3TsPackageLocalState::ParseError {
+        return package_types::G3TsPackageLocalState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: "parsed package.json document did not yield a typed snapshot".to_owned(),
         };
     };
-    G3TsPackageLocalState::Parsed {
-        snapshot: local_snapshot(&entry.path.rel_path, snapshot),
+    package_types::G3TsPackageLocalState::Parsed {
+        snapshot: package_types::local_snapshot(&entry.path.rel_path, snapshot),
     }
 }
 
@@ -290,8 +309,51 @@ fn is_local_package_json(entry: &G3WorkspaceEntry, root_policy_applies: bool) ->
 /// Returns `true` when the workspace is a pnpm package-manager root that
 /// the package family policy applies to.
 fn root_policy_applies(crawl: &G3WorkspaceCrawl) -> bool {
-    root_file(crawl, "pnpm-workspace.yaml").is_some()
+    root_file(crawl, PNPM_WORKSPACE_REL_PATH).is_some()
         || root_file(crawl, "pnpm-lock.yaml").is_some()
+}
+
+/// Ingest the workspace-root `pnpm-workspace.yaml` policy file.
+fn ingest_pnpm_workspace(crawl: &G3WorkspaceCrawl) -> package_types::G3TsPackagePnpmWorkspaceState {
+    let Some(entry) = root_file(crawl, PNPM_WORKSPACE_REL_PATH) else {
+        return package_types::G3TsPackagePnpmWorkspaceState::Missing {
+            rel_path: PNPM_WORKSPACE_REL_PATH.to_owned(),
+        };
+    };
+
+    if !entry.readable {
+        return package_types::G3TsPackagePnpmWorkspaceState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "workspace crawl marked the pnpm workspace file unreadable".to_owned(),
+        };
+    }
+
+    let content = match crate::fs::read_to_string(&entry.path.abs_path) {
+        Ok(content) => content,
+        Err(error) => {
+            return package_types::G3TsPackagePnpmWorkspaceState::Unreadable {
+                rel_path: entry.path.rel_path.clone(),
+                reason: error.to_string(),
+            };
+        }
+    };
+    let policy = match serde_norway::from_str::<PnpmWorkspacePolicy>(&content) {
+        Ok(policy) => policy,
+        Err(error) => {
+            return package_types::G3TsPackagePnpmWorkspaceState::ParseError {
+                rel_path: entry.path.rel_path.clone(),
+                reason: error.to_string(),
+            };
+        }
+    };
+
+    package_types::G3TsPackagePnpmWorkspaceState::Parsed {
+        snapshot: package_types::G3TsPackagePnpmWorkspaceSnapshot {
+            rel_path: entry.path.rel_path.clone(),
+            node_version: policy.node_version,
+            engine_strict: policy.engine_strict,
+        },
+    }
 }
 
 /// Ingest the workspace-root `.syncpackrc` config file, capturing the
@@ -299,16 +361,16 @@ fn root_policy_applies(crawl: &G3WorkspaceCrawl) -> bool {
 /// for downstream checks.
 fn ingest_syncpack_config(
     crawl: &G3WorkspaceCrawl,
-    locals: &[G3TsPackageLocalState],
-) -> G3TsPackageSyncpackConfigState {
+    locals: &[package_types::G3TsPackageLocalState],
+) -> package_types::G3TsPackageSyncpackConfigState {
     let Some(entry) = root_file(crawl, SYNCPACK_CONFIG_REL_PATH) else {
-        return G3TsPackageSyncpackConfigState::Missing {
+        return package_types::G3TsPackageSyncpackConfigState::Missing {
             rel_path: SYNCPACK_CONFIG_REL_PATH.to_owned(),
         };
     };
 
     if !entry.readable {
-        return G3TsPackageSyncpackConfigState::Unreadable {
+        return package_types::G3TsPackageSyncpackConfigState::Unreadable {
             rel_path: entry.path.rel_path.clone(),
             reason: "workspace crawl marked the Syncpack config unreadable".to_owned(),
         };
@@ -317,7 +379,7 @@ fn ingest_syncpack_config(
     let document = match syncpack_config_parser::from_path_document(&entry.path.abs_path) {
         Ok(document) => document,
         Err(error) => {
-            return G3TsPackageSyncpackConfigState::ParseError {
+            return package_types::G3TsPackageSyncpackConfigState::ParseError {
                 rel_path: entry.path.rel_path.clone(),
                 reason: error.to_string(),
             };
@@ -325,14 +387,14 @@ fn ingest_syncpack_config(
     };
 
     if let Some(reason) = syncpack_config_parser::parse_error_reason(&document) {
-        return G3TsPackageSyncpackConfigState::ParseError {
+        return package_types::G3TsPackageSyncpackConfigState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: reason.to_owned(),
         };
     }
 
     let Some(typed) = syncpack_config_parser::typed(&document) else {
-        return G3TsPackageSyncpackConfigState::ParseError {
+        return package_types::G3TsPackageSyncpackConfigState::ParseError {
             rel_path: entry.path.rel_path.clone(),
             reason: "parsed Syncpack config document did not yield a typed snapshot".to_owned(),
         };
@@ -356,8 +418,8 @@ fn ingest_syncpack_config(
         .map(|dependency| (*dependency).to_owned())
         .collect();
 
-    G3TsPackageSyncpackConfigState::Parsed {
-        snapshot: G3TsPackageSyncpackConfigSnapshot {
+    package_types::G3TsPackageSyncpackConfigState::Parsed {
+        snapshot: package_types::G3TsPackageSyncpackConfigSnapshot {
             rel_path: entry.path.rel_path.clone(),
             missing_source_entries,
             missing_forbidden_bans,
@@ -367,13 +429,15 @@ fn ingest_syncpack_config(
 
 /// Collect the set of `source` entries the Syncpack config must declare:
 /// the workspace root manifest plus every local manifest path.
-fn required_syncpack_source_entries(locals: &[G3TsPackageLocalState]) -> Vec<String> {
+fn required_syncpack_source_entries(
+    locals: &[package_types::G3TsPackageLocalState],
+) -> Vec<String> {
     let mut sources = BTreeSet::from([PACKAGE_JSON_REL_PATH.to_owned()]);
     for local in locals {
         let path = match local {
-            G3TsPackageLocalState::Unreadable { rel_path, .. }
-            | G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path.clone(),
-            G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path.clone(),
+            package_types::G3TsPackageLocalState::Unreadable { rel_path, .. }
+            | package_types::G3TsPackageLocalState::ParseError { rel_path, .. } => rel_path.clone(),
+            package_types::G3TsPackageLocalState::Parsed { snapshot } => snapshot.rel_path.clone(),
         };
         let _ = sources.insert(path);
     }

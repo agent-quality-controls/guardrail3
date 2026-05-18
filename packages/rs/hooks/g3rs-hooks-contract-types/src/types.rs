@@ -47,6 +47,8 @@ pub enum G3HookCommandRequirement {
     CargoDupes,
     /// `cargo dupes check` with tests excluded.
     CargoDupesExcludeTests,
+    /// `cargo msrv verify --rust-version <workspace rust-version> -- cargo check --locked`.
+    CargoMsrvVerifyCargoCheckLocked,
     /// `gitleaks protect --staged` (executed inline by the hook).
     Gitleaks,
     /// `g3rs validate --path <ws>` (the in-binary validator entry point).
@@ -54,12 +56,15 @@ pub enum G3HookCommandRequirement {
 }
 
 impl G3HookCommandRequirement {
-    /// Returns the concrete argv that satisfies this requirement, or `None`
-    /// when the requirement does not map to a runnable cargo gate command.
+    /// Returns the static argv that satisfies this requirement, or `None`
+    /// when the requirement has no context-free argv.
     ///
     /// Variants that return `None`:
     /// - `Gitleaks`: the hook runs `gitleaks protect --staged` inline before
     ///   per-unit dispatch; the in-binary validator does not invoke gitleaks.
+    /// - `CargoMsrvVerifyCargoCheckLocked`: the concrete command needs the
+    ///   adopted workspace `rust-version`, so the validator resolves it from
+    ///   the workspace root before execution.
     /// - `G3RsValidatePath`: the in-binary validator IS the entry point that
     ///   receives this delegation, so it does not re-invoke itself.
     #[must_use]
@@ -105,7 +110,7 @@ impl G3HookCommandRequirement {
                 "10",
                 "--exclude-tests",
             ]),
-            Self::Gitleaks | Self::G3RsValidatePath => None,
+            Self::CargoMsrvVerifyCargoCheckLocked | Self::Gitleaks | Self::G3RsValidatePath => None,
         }
     }
 }

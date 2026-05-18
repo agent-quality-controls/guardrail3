@@ -34,10 +34,10 @@ pub(crate) fn collect_precommit_scope_values(parsed: &ParsedShellScript) -> Vec<
         EmptyEnv,
         CommandQueryOptions::default(),
         |command, _| {
-            if is_g3rs_validate_command(command)
-                && let Some(value) = scope_arg_value(command.args())
-            {
-                values.push(value);
+            if is_g3rs_validate_command(command) {
+                if let Some(value) = scope_arg_value(command.args()) {
+                    values.push(value);
+                }
             }
             CommandVisit::Continue
         },
@@ -87,10 +87,10 @@ pub(crate) fn unquote_scope(value: &str) -> &str {
 /// A token like `$REPO_ROOT/apps/guardrail3-rs` is not a wholly-variable token.
 pub(crate) fn scope_is_wholly_variable(value: &str) -> bool {
     let body = unquote_scope(value);
-    if let Some(rest) = body.strip_prefix("${")
-        && let Some(name) = rest.strip_suffix('}')
-    {
-        return is_shell_identifier(name);
+    if let Some(rest) = body.strip_prefix("${") {
+        if let Some(name) = rest.strip_suffix('}') {
+            return is_shell_identifier(name);
+        }
     }
     if let Some(name) = body.strip_prefix('$') {
         return is_shell_identifier(name);
@@ -151,15 +151,15 @@ pub(crate) fn precommit_scope_feeder_variable_names(parsed: &ParsedShellScript) 
             }
         }
         // `for X in $VAR; do ... done` -- the iterated `$VAR` feeds the loop body.
-        if trimmed.starts_with("for ")
-            && let Some(in_idx) = trimmed.find(" in ")
-        {
-            let after_in = trimmed[in_idx + 4..].trim();
-            let payload = after_in.trim_end_matches("do").trim_end_matches(';').trim();
-            if loop_block_below_calls_validate(&lines, idx) {
-                let mut buf = Vec::new();
-                extract_variable_names(payload, &mut buf);
-                names.extend(buf);
+        if trimmed.starts_with("for ") {
+            if let Some(in_idx) = trimmed.find(" in ") {
+                let after_in = trimmed[in_idx + 4..].trim();
+                let payload = after_in.trim_end_matches("do").trim_end_matches(';').trim();
+                if loop_block_below_calls_validate(&lines, idx) {
+                    let mut buf = Vec::new();
+                    extract_variable_names(payload, &mut buf);
+                    names.extend(buf);
+                }
             }
         }
     }

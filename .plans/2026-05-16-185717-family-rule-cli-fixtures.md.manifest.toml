@@ -330,6 +330,7 @@ required_results = [
   "Error|g3rs-cargo/lint-levels|lint `redundant_pub_crate` must be allow|Cargo.toml",
   "Warn|g3rs-cargo/priority-order|specific lint `unwrap_used` has negative priority|Cargo.toml",
   "Error|g3rs-cargo/resolver|unsupported workspace resolver|Cargo.toml",
+  "Error|g3rs-cargo/rust-version-aware-resolver|workspace resolver is not rust-version aware|Cargo.toml",
   "Error|g3rs-cargo/disallowed-macros-deny|disallowed macros lint weakened|Cargo.toml",
   "Error|g3rs-cargo/approved-allow-inventory|approved allow entry reason too weak|Cargo.toml",
   "Error|g3rs-cargo/approved-allow-inventory|approved allow entry missing reason|Cargo.toml",
@@ -362,7 +363,14 @@ id = "cargo-R21-root-metadata-missing"
 required_results = [
   "Error|g3rs-cargo/workspace-metadata|edition missing|Cargo.toml",
   "Error|g3rs-cargo/resolver|workspace resolver missing|Cargo.toml",
+  "Error|g3rs-cargo/rust-version-aware-resolver|workspace resolver is not rust-version aware|Cargo.toml",
   "Error|g3rs-cargo/rust-version-policy|library rust-version missing|Cargo.toml",
+]
+
+[[fixture]]
+id = "cargo-R22-resolver2-missing-fallback"
+required_results = [
+  "Error|g3rs-cargo/rust-version-aware-resolver|resolver 2 lacks rust-version fallback|Cargo.toml",
 ]
 
 [[fixture]]
@@ -419,6 +427,7 @@ required_results = [
   "Error|g3rs-deps/cargo-deny-installed|cargo-deny missing|Cargo.toml",
   "Error|g3rs-deps/cargo-machete-installed|cargo-machete missing|Cargo.toml",
   "Warn|g3rs-deps/cargo-dupes-installed|cargo-dupes missing|Cargo.toml",
+  "Error|g3rs-deps/cargo-msrv-verify-installed|cargo-msrv missing|Cargo.toml",
   "Error|g3rs-deps/gitleaks-installed|gitleaks missing|Cargo.toml",
   "Error|g3rs-deps/cargo-lock-present|Cargo.lock missing|Cargo.lock",
   "Error|g3rs-deps/gitignore-not-ignoring-cargo-lock|Cargo.lock ignored in gitignore|.gitignore",
@@ -532,7 +541,7 @@ required_results = [
   "Error|g3rs-deny/license-allow-baseline|licenses.private.ignore must be true|deny.toml",
   "Warn|g3rs-deny/confidence-threshold|confidence-threshold weaker than baseline|deny.toml",
   "Warn|g3rs-deny/copyleft-allowlist|copyleft license allowed|deny.toml",
-  "Error|g3rs-deny/license-exceptions-inventory|license exception reason too weak|deny.toml",
+  "Warn|g3rs-deny/license-exceptions-inventory|license exception entry|deny.toml",
   "Warn|g3rs-deny/license-exceptions-inventory|license exception count|-",
 ]
 
@@ -576,6 +585,14 @@ required_results = [
   "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
   "Warn|g3rs-deny/unknown-keys|unknown sources key|deny.toml",
   "Warn|g3rs-deny/ignore-accumulation|advisory ignore list is large|deny.toml",
+]
+
+[[fixture]]
+id = "hooks-R50-managed-script-workflow-missing"
+required_results = [
+  "Error|g3rs-hooks/merge-conflict-step-present|missing merge-conflict marker scan in `.githooks/pre-commit`|.githooks/pre-commit.d/g3rs",
+  "Error|g3rs-hooks/file-size-step-present|file-size check step missing|.githooks/pre-commit.d/g3rs",
+  "Warn|g3rs-hooks/concrete-lockfile-command|missing concrete lockfile integrity command in `.githooks/pre-commit`|.githooks/pre-commit.d/g3rs",
 ]
 
 [[fixture]]

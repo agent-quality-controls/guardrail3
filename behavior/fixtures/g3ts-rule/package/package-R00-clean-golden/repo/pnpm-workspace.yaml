@@ -1,2 +1,4 @@
 packages:
   - apps/*
+nodeVersion: 24.0.0
+engineStrict: true

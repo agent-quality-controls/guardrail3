@@ -13,6 +13,7 @@ pub fn check(input: &G3RsDepsConfigChecksInput) -> Vec<G3CheckResult> {
     crate::cargo_deny_installed::check(input, &mut results);
     crate::cargo_machete_installed::check(input, &mut results);
     crate::cargo_dupes_installed::check(input, &mut results);
+    crate::cargo_msrv_verify_installed::check(input, &mut results);
     crate::gitleaks_installed::check(input, &mut results);
     results
 }

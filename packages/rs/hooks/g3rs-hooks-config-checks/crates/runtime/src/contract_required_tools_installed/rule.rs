@@ -72,6 +72,9 @@ fn add_required_command_tools(tools: &mut BTreeSet<String>, command: G3HookComma
         G3HookCommandRequirement::CargoDupes | G3HookCommandRequirement::CargoDupesExcludeTests => {
             let _ = tools.insert("cargo-dupes".to_owned());
         }
+        G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked => {
+            let _ = tools.insert("cargo-msrv".to_owned());
+        }
         G3HookCommandRequirement::Gitleaks => {
             let _ = tools.insert("gitleaks".to_owned());
         }
@@ -102,6 +105,9 @@ fn add_critical_command_tools(tools: &mut BTreeSet<String>, command: &G3HookCrit
             }
             "dupes" => {
                 let _ = tools.insert("cargo-dupes".to_owned());
+            }
+            "msrv" => {
+                let _ = tools.insert("cargo-msrv".to_owned());
             }
             _ => {}
         },

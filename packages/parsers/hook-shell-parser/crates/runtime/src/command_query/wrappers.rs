@@ -38,15 +38,16 @@ where
         if flag == "--" {
             break;
         }
-        if let Some((flag_name, value)) = flag.split_once('=')
-            && lex::env_flag_takes_value(flag_name)
-        {
-            match flag_name {
-                "-u" | "--unset" => state.unset(value),
-                "-S" | "--split-string" => split_string = Some(value.to_owned()),
-                _ => {}
+        match flag.split_once('=') {
+            Some((flag_name, value)) if lex::env_flag_takes_value(flag_name) => {
+                match flag_name {
+                    "-u" | "--unset" => state.unset(value),
+                    "-S" | "--split-string" => split_string = Some(value.to_owned()),
+                    _ => {}
+                }
+                continue;
             }
-            continue;
+            _ => {}
         }
         if lex::env_flag_without_value(flag) {
             if matches!(flag, "-i" | "--ignore-environment") {
@@ -73,9 +74,9 @@ where
     }
 
     if let Some(script) = split_string {
-        if !cursor.remaining().is_empty()
-            && let Some((name, value)) = assignment_parts(&script)
-        {
+        if cursor.remaining().is_empty() {
+            // Keep the split string as the command below.
+        } else if let Some((name, value)) = assignment_parts(&script) {
             state.apply_assignment(name, value);
             let Some(next) = cursor.next() else {
                 return false;
@@ -160,13 +161,14 @@ where
             return false;
         }
 
-        if let Some((flag_name, value)) = flag.split_once('=')
-            && lex::shell_flag_takes_value(flag_name)
-        {
-            if flag_name == "-c" {
-                script = Some(value.to_owned());
+        match flag.split_once('=') {
+            Some((flag_name, value)) if lex::shell_flag_takes_value(flag_name) => {
+                if flag_name == "-c" {
+                    script = Some(value.to_owned());
+                }
+                continue;
             }
-            continue;
+            _ => {}
         }
 
         if shell_cluster_uses_next_script(flag) {

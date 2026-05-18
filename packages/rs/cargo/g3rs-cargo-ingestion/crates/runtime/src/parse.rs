@@ -2,7 +2,7 @@
 use std::path::Path;
 
 use cargo_toml_parser::types::CargoTomlDocument;
-use g3rs_cargo_types::{G3RsCargoRustPolicyState, G3RsCargoWaiver};
+use g3rs_cargo_types::{G3RsCargoConfigTomlState, G3RsCargoRustPolicyState, G3RsCargoWaiver};
 
 use crate::run::IngestionError;
 
@@ -99,5 +99,34 @@ pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsCa
                 reason: waiver.reason,
             })
             .collect(),
+    }
+}
+
+/// Parse Cargo's workspace config file into the cargo-family policy snapshot.
+pub(crate) fn parse_cargo_config_state(
+    rel_path: &str,
+    abs_path: &Path,
+) -> G3RsCargoConfigTomlState {
+    let parsed = match cargo_config_toml_parser::from_path(abs_path) {
+        Ok(parsed) => parsed,
+        Err(cargo_config_toml_parser::Error::Io(err)) => {
+            return G3RsCargoConfigTomlState::Unreadable {
+                rel_path: rel_path.to_owned(),
+                reason: err.to_string(),
+            };
+        }
+        Err(cargo_config_toml_parser::Error::Toml(err)) => {
+            return G3RsCargoConfigTomlState::ParseError {
+                rel_path: rel_path.to_owned(),
+                reason: err.to_string(),
+            };
+        }
+    };
+
+    G3RsCargoConfigTomlState::Parsed {
+        rel_path: rel_path.to_owned(),
+        incompatible_rust_versions: parsed
+            .resolver
+            .and_then(|resolver| resolver.incompatible_rust_versions),
     }
 }

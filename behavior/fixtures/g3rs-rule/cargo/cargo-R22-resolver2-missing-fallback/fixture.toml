@@ -1,0 +1,19 @@
+id = "cargo-R22-resolver2-missing-fallback"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "cargo", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_rule_policy_invalid"
+
+rule_family = "cargo"
+target_rules = [
+  "g3rs-cargo/rust-version-aware-resolver",
+]
+intentionally_invalid = [
+  "resolver2_without_incompatible_rust_versions_fallback",
+]
+expected_findings = [
+  "g3rs-cargo/rust-version-aware-resolver",
+]

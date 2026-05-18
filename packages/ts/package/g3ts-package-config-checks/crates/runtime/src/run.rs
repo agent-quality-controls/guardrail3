@@ -9,6 +9,7 @@ pub fn check(input: &G3TsPackageChecksInput) -> Vec<G3CheckResult> {
     crate::root_private::check(input, &mut results);
     crate::root_package_manager::check(input, &mut results);
     crate::root_engines::check(input, &mut results);
+    crate::node_engine_install_contract::check(input, &mut results);
     crate::root_scripts::check(input, &mut results);
     crate::validate_script_present::check(input, &mut results);
     crate::validate_script_fail_closed::check(input, &mut results);

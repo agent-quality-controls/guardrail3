@@ -93,11 +93,13 @@ fn collect_step(step: &serde_yaml::Value) -> WorkflowStepFacts {
     }
     if let Some(with) = yaml_mapping_value(step, "with").and_then(serde_yaml::Value::as_mapping) {
         for (key, value) in with {
-            if let Some(key) = key.as_str()
-                && let Some(value) = scalar_as_string(value)
-            {
-                let _ = facts.with_bindings.insert(key.to_owned(), value);
-            }
+            let Some(key) = key.as_str() else {
+                continue;
+            };
+            let Some(value) = scalar_as_string(value) else {
+                continue;
+            };
+            let _ = facts.with_bindings.insert(key.to_owned(), value);
         }
     }
     facts

@@ -1,13 +1,13 @@
 {
   "suite": "g3rs-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-16T20-59-24.350815Z-078cb096",
-  "run_commit": "5a07e8a51",
+  "run_id": "2026-05-18T11-54-10.507856Z-d06b5496",
+  "run_commit": "cf3fad18d",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-16T20:59:24.350815Z",
+  "recorded_at": "2026-05-18T11:54:10.507856Z",
   "fixture_hash": "sha256:1a814577a7223e059dbc1b15ccd62bfba5847b31f377f760b12bf5430fadda3f",
-  "manifest_hash": "sha256:9a2e74a675e4d91068521c3ba11aeae7cca32394223a361d108605ff6575f618",
-  "tool_version": "0.1.7",
+  "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
+  "tool_version": "0.1.8",
   "output_schema_version": "1",
   "fixtures": [
     {
@@ -47,5 +47,5 @@
       "sha256": "sha256:3c2b4868f05c5d19489e4ec07a0da07590a7f018b981579ce38dadd67b9beff7"
     }
   ],
-  "comment": "Refresh fixture manifest metadata after suite split"
+  "comment": "Approve dynamic workspace rust-version wording for cargo-msrv hook contract."
 }

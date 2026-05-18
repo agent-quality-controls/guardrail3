@@ -1,11 +1,5 @@
-#![expect(
-    clippy::too_many_lines,
-    reason = "classify_exception_entry walks the full schema (name resolution, blank-allow detection, missing-reason detection, weak-reason detection) for a single [[licenses.exceptions]] entry. Each branch builds a verbose G3CheckResult inline because the rule id, severity, title, message, and file path are all part of the contract under test; extracting per-branch helpers would multiply the surface and obscure that contract"
-)]
-
 use g3rs_deny_types::G3RsDenyConfigChecksInput;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_reason_policy::validate_reason_text;
 
 /// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deny/license-exceptions-inventory";
@@ -13,12 +7,10 @@ const ID: &str = "g3rs-deny/license-exceptions-inventory";
 /// Counter triple updated as `[[licenses.exceptions]]` entries are classified.
 #[derive(Default)]
 struct ExceptionCounts {
-    /// Entries with reasons accepted by `validate_reason_text`.
-    documented: usize,
-    /// Entries missing reasons or otherwise malformed.
-    missing_or_invalid_reason: usize,
-    /// Entries whose reasons failed validation.
-    weak_reason: usize,
+    /// Entries that match cargo-deny's license exception schema.
+    valid: usize,
+    /// Entries with missing crate names or blank allowed licenses.
+    malformed: usize,
 }
 
 /// Runs the rule and appends any findings to `results`.
@@ -35,20 +27,16 @@ pub(crate) fn check(input: &G3RsDenyConfigChecksInput, results: &mut Vec<G3Check
         classify_exception_entry(input, entry, &mut counts, results);
     }
 
-    let total = counts
-        .documented
-        .saturating_add(counts.missing_or_invalid_reason)
-        .saturating_add(counts.weak_reason);
+    let total = counts.valid.saturating_add(counts.malformed);
     if total > 0 {
-        let documented = counts.documented;
-        let missing = counts.missing_or_invalid_reason;
-        let weak = counts.weak_reason;
+        let valid = counts.valid;
+        let malformed = counts.malformed;
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Warn,
             "license exception count".to_owned(),
             format!(
-                "`{}` has {total} license exceptions ({documented} documented, {missing} missing or invalid reasons, {weak} weak reasons).",
+                "`{}` has {total} license exceptions ({valid} valid, {malformed} malformed).",
                 input.deny_rel_path
             ),
             None,
@@ -72,6 +60,7 @@ fn classify_exception_entry(
         .filter(|value| !value.is_empty())
         .map(str::to_owned)
     else {
+        counts.malformed = counts.malformed.saturating_add(1);
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -87,6 +76,7 @@ fn classify_exception_entry(
     };
 
     if entry.allow.iter().any(|license| license.trim().is_empty()) {
+        counts.malformed = counts.malformed.saturating_add(1);
         results.push(G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
@@ -101,51 +91,16 @@ fn classify_exception_entry(
         return;
     }
 
-    let Some(reason) = entry.reason.as_deref() else {
-        counts.missing_or_invalid_reason = counts.missing_or_invalid_reason.saturating_add(1);
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Error,
-            "license exception missing reason".to_owned(),
-            format!(
-                "`{}` has license exception `{name}` without a `reason`.",
-                input.deny_rel_path
-            ),
-            Some(input.deny_rel_path.clone()),
-            None,
-        ));
-        return;
-    };
-
-    match validate_reason_text(reason) {
-        Ok(()) => {
-            counts.documented = counts.documented.saturating_add(1);
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Warn,
-                "license exception entry".to_owned(),
-                format!(
-                    "`{}` has documented license exception for `{name}`.",
-                    input.deny_rel_path
-                ),
-                Some(input.deny_rel_path.clone()),
-                None,
-            ));
-        }
-        Err(issue) => {
-            counts.weak_reason = counts.weak_reason.saturating_add(1);
-            results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                "license exception reason too weak".to_owned(),
-                format!(
-                    "`{}` has license exception `{name}` with a weak `reason`: {}.",
-                    input.deny_rel_path,
-                    issue.message()
-                ),
-                Some(input.deny_rel_path.clone()),
-                None,
-            ));
-        }
-    }
+    counts.valid = counts.valid.saturating_add(1);
+    results.push(G3CheckResult::new(
+        ID.to_owned(),
+        G3Severity::Warn,
+        "license exception entry".to_owned(),
+        format!(
+            "`{}` has license exception for `{name}`.",
+            input.deny_rel_path
+        ),
+        Some(input.deny_rel_path.clone()),
+        None,
+    ));
 }

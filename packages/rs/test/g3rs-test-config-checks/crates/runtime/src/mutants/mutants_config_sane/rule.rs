@@ -31,21 +31,21 @@ pub(crate) fn check(input: &G3RsTestConfigChecksInput, results: &mut Vec<G3Check
         ));
     }
 
-    if let Some(timeout_multiplier) = mutants.timeout_multiplier
-        && timeout_multiplier < 1.0
-    {
-        pushed = true;
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Error,
-            "mutants timeout multiplier too low".to_owned(),
-            format!(
-                "`{}` sets `timeout_multiplier = {timeout_multiplier}`. Set `timeout_multiplier` to 1.0 or higher.",
-                input.mutants_rel_path
-            ),
-            Some(input.mutants_rel_path.clone()),
-            None,
-        ));
+    if let Some(timeout_multiplier) = mutants.timeout_multiplier {
+        if timeout_multiplier < 1.0 {
+            pushed = true;
+            results.push(G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Error,
+                "mutants timeout multiplier too low".to_owned(),
+                format!(
+                    "`{}` sets `timeout_multiplier = {timeout_multiplier}`. Set `timeout_multiplier` to 1.0 or higher.",
+                    input.mutants_rel_path
+                ),
+                Some(input.mutants_rel_path.clone()),
+                None,
+            ));
+        }
     }
 
     if !pushed {

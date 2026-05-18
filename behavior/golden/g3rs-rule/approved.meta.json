@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-rule",
   "kind": "approved",
-  "run_id": "2026-05-17T18-20-21.278179Z-d06b5496",
-  "run_commit": "9cdd1fb87",
+  "run_id": "2026-05-18T11-54-06.241276Z-d06b5496",
+  "run_commit": "cf3fad18d",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-17T18:20:21.278179Z",
-  "fixture_hash": "sha256:7e1b89ac1f107d30f2aea17ccce4605bfb897df14b8ed418ef9e1284ee140d74",
+  "recorded_at": "2026-05-18T11:54:06.241276Z",
+  "fixture_hash": "sha256:388712ad5a7e2580830d8ef3ebbf62ea13beb801542040b552c07b64a8dddb74",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -40,11 +40,15 @@
     },
     {
       "path": "behavior/fixtures/g3rs-rule/cargo/cargo-R10-policy-violations/fixture.toml",
-      "sha256": "sha256:00f95cae96f1a47513d9057cb8c78a642b7741e6c3ab1ccc2eb7fbb9772f0501"
+      "sha256": "sha256:00812fbb367e39308df73308a7cacd2d34783d8063d6c0cc64b8fb02647c2a5d"
     },
     {
       "path": "behavior/fixtures/g3rs-rule/cargo/cargo-R21-root-metadata-missing/fixture.toml",
-      "sha256": "sha256:3f0f89c580b0058c16827abd7dcc49fdc1ad569661f8e25ae6baa4c18b91c362"
+      "sha256": "sha256:5e7b58f6320ca65ee6aaaa37b29a37a622c2d453f34693f1d1417f228a9a2089"
+    },
+    {
+      "path": "behavior/fixtures/g3rs-rule/cargo/cargo-R22-resolver2-missing-fallback/fixture.toml",
+      "sha256": "sha256:4f17afc215ffdc55f01b800da2257c0da06c56832ff5d79ea6566d9aa9eb0ebe"
     },
     {
       "path": "behavior/fixtures/g3rs-rule/cargo/cargo-R30-structure-and-input-violations/fixture.toml",
@@ -120,7 +124,7 @@
     },
     {
       "path": "behavior/fixtures/g3rs-rule/deps/deps-R10-required-files-and-tools/fixture.toml",
-      "sha256": "sha256:df6a13630a0705b9eb8254a88097c67eae68d26bb5cd26b62deba2d60e4cc29d"
+      "sha256": "sha256:c87a5b6119b7be581e6d8a840021f59c5d0ca37d3c7ed7a0dbbca969506dddce"
     },
     {
       "path": "behavior/fixtures/g3rs-rule/deps/deps-R20-allowlist-and-count-violations/fixture.toml",
@@ -255,5 +259,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "rename G3RS rule fixture suite and folders"
+  "comment": "Approve dynamic workspace rust-version wording for cargo-msrv hook contract."
 }

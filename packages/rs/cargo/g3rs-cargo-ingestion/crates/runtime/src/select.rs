@@ -14,6 +14,12 @@ pub(crate) fn select_root_rust_policy_toml(crawl: &G3WorkspaceCrawl) -> Option<&
     g3_workspace_crawl::root_file(crawl, "guardrail3-rs.toml")
 }
 
+/// select root cargo config toml fn.
+pub(crate) fn select_root_cargo_config_toml(crawl: &G3WorkspaceCrawl) -> Option<&G3WorkspaceEntry> {
+    g3_workspace_crawl::root_file(crawl, ".cargo/config.toml")
+        .or_else(|| g3_workspace_crawl::root_file(crawl, ".cargo/config"))
+}
+
 /// select member manifest fn.
 pub(crate) fn select_member_manifest<'a>(
     crawl: &'a G3WorkspaceCrawl,

@@ -57,10 +57,10 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
         if let Some(current) = current_function.as_mut() {
             append_function_body_line(&mut current.body, raw);
             function_brace_depth = update_function_scope_depth(function_brace_depth, trimmed);
-            if function_brace_depth == 0
-                && let Some(function) = current_function.take()
-            {
-                functions.push(finish_function(function));
+            if function_brace_depth == 0 {
+                if let Some(function) = current_function.take() {
+                    functions.push(finish_function(function));
+                }
             }
             continue;
         }
@@ -100,10 +100,10 @@ pub fn parse_script(content: &str) -> ParsedShellScript {
             };
             if function_brace_depth == 0 {
                 functions.push(finish_function(function));
-                if let Some(tail) = inline_command_after_function_definition(raw)
-                    && let Some(executable) = parse_executable_line(tail, line_no)
-                {
-                    executable_lines.push(executable);
+                if let Some(tail) = inline_command_after_function_definition(raw) {
+                    if let Some(executable) = parse_executable_line(tail, line_no) {
+                        executable_lines.push(executable);
+                    }
                 }
             } else {
                 current_function = Some(function);

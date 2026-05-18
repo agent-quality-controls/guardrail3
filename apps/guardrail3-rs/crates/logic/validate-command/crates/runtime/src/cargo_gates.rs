@@ -1,16 +1,17 @@
 //! Cargo gate execution: derives gate commands from family hook contracts.
 //!
 //! Cargo gate commands are emitted by walking each enabled family's
-//! `hook_contract()` and resolving each `G3HookCommandRequirement` to its
-//! concrete argv via `G3HookCommandRequirement::concrete_command`. Adding a
-//! new required command to a family's contract automatically appears here.
-//! Variants whose `concrete_command()` returns `None` (e.g. `Gitleaks`,
-//! `G3RsValidatePath`) are skipped because the hook executes them inline or
-//! they map to the in-binary validator entry point itself.
+//! `hook_contract()` and resolving each `G3HookCommandRequirement` to the argv
+//! that must run for the adopted workspace. Adding a new required command to a
+//! family's contract automatically appears here. Variants with no cargo-gate
+//! command (e.g. `Gitleaks`, `G3RsValidatePath`) are skipped because the hook
+//! executes them inline or they map to the in-binary validator entry point
+//! itself.
 
 use std::path::Path;
 use std::process::{Command, Stdio};
 
+use cargo_toml_parser::types::CargoStringFieldState;
 use g3rs_hooks_contract_types::G3HookCommandRequirement;
 use g3rs_rust_family_contracts::{RustFamily, family_hook_contract};
 use guardrail3_rs_app_types::SupportedFamily;
@@ -28,17 +29,24 @@ use guardrail3_rs_app_types::SupportedFamily;
 /// families.
 #[must_use]
 pub fn cargo_gate_commands(
+    workspace_root: &Path,
     enabled_families: &[SupportedFamily],
     staged: bool,
     rust_source_staged: bool,
-) -> Vec<&'static [&'static str]> {
+) -> Vec<Vec<String>> {
     let dupes_excluded_skipped = staged && !rust_source_staged;
-    let mut seen: Vec<&'static [&'static str]> = Vec::new();
+    let workspace_msrv = workspace_rust_version(workspace_root);
+    let mut seen: Vec<Vec<String>> = Vec::new();
     for family in enabled_families {
         let Some(rust_family) = rust_family_for(*family) else {
             continue;
         };
-        collect_family_commands(rust_family, dupes_excluded_skipped, &mut seen);
+        collect_family_commands(
+            rust_family,
+            dupes_excluded_skipped,
+            workspace_msrv.as_deref(),
+            &mut seen,
+        );
     }
     seen
 }
@@ -48,11 +56,17 @@ pub fn cargo_gate_commands(
 fn collect_family_commands(
     rust_family: RustFamily,
     dupes_excluded_skipped: bool,
-    seen: &mut Vec<&'static [&'static str]>,
+    workspace_msrv: Option<&str>,
+    seen: &mut Vec<Vec<String>>,
 ) {
     for requirement in family_hook_contract(rust_family) {
         for command_requirement in requirement.required_commands {
-            push_command(command_requirement, dupes_excluded_skipped, seen);
+            push_command(
+                command_requirement,
+                dupes_excluded_skipped,
+                workspace_msrv,
+                seen,
+            );
         }
     }
 }
@@ -62,18 +76,50 @@ fn collect_family_commands(
 fn push_command(
     command_requirement: G3HookCommandRequirement,
     dupes_excluded_skipped: bool,
-    seen: &mut Vec<&'static [&'static str]>,
+    workspace_msrv: Option<&str>,
+    seen: &mut Vec<Vec<String>>,
 ) {
     if dupes_excluded_skipped
         && command_requirement == G3HookCommandRequirement::CargoDupesExcludeTests
     {
         return;
     }
-    let Some(argv) = command_requirement.concrete_command() else {
+    let Some(argv) = concrete_gate_command(command_requirement, workspace_msrv) else {
         return;
     };
     if !seen.contains(&argv) {
         seen.push(argv);
+    }
+}
+
+/// Resolves a hook command requirement to the argv used by in-binary cargo gates.
+fn concrete_gate_command(
+    command_requirement: G3HookCommandRequirement,
+    workspace_msrv: Option<&str>,
+) -> Option<Vec<String>> {
+    if command_requirement == G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked {
+        let mut argv = vec!["cargo", "msrv", "verify"];
+        if let Some(msrv) = workspace_msrv {
+            argv.extend(["--rust-version", msrv]);
+        }
+        argv.extend(["--", "cargo", "check", "--locked"]);
+        return Some(argv.into_iter().map(str::to_owned).collect());
+    }
+
+    command_requirement
+        .concrete_command()
+        .map(|argv| argv.iter().map(|token| (*token).to_owned()).collect())
+}
+
+/// Reads the workspace root Cargo.toml rust-version used by the MSRV gate.
+fn workspace_rust_version(workspace_root: &Path) -> Option<String> {
+    let cargo_toml = crate::fs::read_to_string(&workspace_root.join("Cargo.toml")).ok()?;
+    let document = cargo_toml_parser::parse_document(&cargo_toml).ok()?;
+    match cargo_toml_parser::document::root_package_string_field(&document, "rust-version") {
+        CargoStringFieldState::Value(version) => Some(version.to_owned()),
+        CargoStringFieldState::Missing
+        | CargoStringFieldState::Inherit
+        | CargoStringFieldState::WrongType(_) => None,
     }
 }
 
@@ -143,7 +189,7 @@ impl CargoGateOutcome {
 pub fn run_cargo_gates(
     cwd: &Path,
     cargo_target_dir: &Path,
-    commands: &[&[&str]],
+    commands: &[Vec<String>],
 ) -> Vec<CargoGateOutcome> {
     let mut outcomes = Vec::new();
     for cmd in commands {
@@ -151,13 +197,13 @@ pub fn run_cargo_gates(
             continue;
         };
         let mut command = Command::new(program);
-        let stdout = if suppress_gate_stdout(cmd) {
+        let stdout = if suppress_gate_stdout(cmd.as_slice()) {
             Stdio::null()
         } else {
             Stdio::inherit()
         };
         let _ = command
-            .args(args.iter().copied())
+            .args(args)
             .current_dir(cwd)
             .env("CARGO_TARGET_DIR", cargo_target_dir)
             .env("CARGO_TERM_COLOR", "never")
@@ -171,7 +217,7 @@ pub fn run_cargo_gates(
             .status()
             .map_or(127, |status| status.code().unwrap_or(1));
         let outcome = CargoGateOutcome {
-            command: cmd.iter().map(|s| (*s).to_owned()).collect(),
+            command: cmd.clone(),
             exit_code,
         };
         let failed = !outcome.ok();
@@ -186,7 +232,7 @@ pub fn run_cargo_gates(
 /// Returns true when a cargo gate's output should not be shown in normal
 /// validator output.
 #[must_use]
-pub(crate) const fn suppress_gate_stdout(cmd: &[&str]) -> bool {
+pub(crate) const fn suppress_gate_stdout(cmd: &[String]) -> bool {
     !cmd.is_empty()
 }
 

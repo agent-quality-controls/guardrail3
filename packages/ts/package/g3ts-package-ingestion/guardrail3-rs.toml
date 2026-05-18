@@ -5,6 +5,8 @@ allowed_deps = [
   "g3ts-package-types",
   "package-json-parser",
   "package-script-command-parser",
+  "serde",
+  "serde_norway",
   "syncpack-config-parser",
   "tempfile",
 ]

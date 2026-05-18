@@ -8,6 +8,8 @@ mod cargo_deny_installed;
 mod cargo_dupes_installed;
 /// Rule implementation for `cargo machete installed`.
 mod cargo_machete_installed;
+/// Rule implementation for `cargo msrv verify installed`.
+mod cargo_msrv_verify_installed;
 /// Rule implementation for `dependencies allowlisted`.
 mod dependencies_allowlisted;
 /// Rule implementation for `dev dependencies allowlisted`.

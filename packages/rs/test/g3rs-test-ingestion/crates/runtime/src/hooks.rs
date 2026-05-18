@@ -144,11 +144,11 @@ fn cargo_mutants_subcommand(args: &[String]) -> bool {
         if is_help_or_version_flag(token) {
             return false;
         }
-        if let Some((flag_name, _)) = token.split_once('=')
-            && cargo_global_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
+        if let Some((flag_name, _)) = token.split_once('=') {
+            if cargo_global_flag_takes_value(flag_name) {
+                index += 1;
+                continue;
+            }
         }
         if cargo_global_flag_takes_value(token) {
             index += 2;

@@ -5,6 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
+cargo-toml-parser = { path = "../../../../../../../packages/parsers/cargo-toml-parser", features = ["api"] }
 guardrail3-rs-app-types = { path = "../../../../types/app-types" }
 guardrail3-check-types.workspace = true
 g3rs-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3rs-toml-parser/crates/runtime", features = ["api"] }

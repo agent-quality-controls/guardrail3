@@ -1,5 +1,7 @@
 /// Internal `local_banned_dependencies` module.
 mod local_banned_dependencies;
+/// Internal `node_engine_install_contract` module.
+mod node_engine_install_contract;
 /// Internal `root_engines` module.
 mod root_engines;
 /// Internal `root_exists` module.

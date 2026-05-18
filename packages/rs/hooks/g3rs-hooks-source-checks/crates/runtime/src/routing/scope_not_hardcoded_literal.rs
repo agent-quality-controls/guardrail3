@@ -110,10 +110,12 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
 /// `scope_is_disallowed_ambient_variable` function.
 fn scope_is_disallowed_ambient_variable(value: &str) -> bool {
     let body = unquote_scope(value).trim();
-    let name = if let Some(rest) = body.strip_prefix("${")
-        && let Some(name) = rest.strip_suffix('}')
-    {
-        name
+    let name = if let Some(rest) = body.strip_prefix("${") {
+        if let Some(name) = rest.strip_suffix('}') {
+            name
+        } else {
+            return false;
+        }
     } else if let Some(name) = body.strip_prefix('$') {
         name
     } else {

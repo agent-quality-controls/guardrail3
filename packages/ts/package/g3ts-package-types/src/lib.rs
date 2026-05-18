@@ -15,6 +15,10 @@ pub use types::G3TsPackageLocalSnapshot;
 #[cfg(feature = "api")]
 pub use types::G3TsPackageLocalState;
 #[cfg(feature = "api")]
+pub use types::G3TsPackagePnpmWorkspaceSnapshot;
+#[cfg(feature = "api")]
+pub use types::G3TsPackagePnpmWorkspaceState;
+#[cfg(feature = "api")]
 pub use types::G3TsPackageRootSnapshot;
 #[cfg(feature = "api")]
 pub use types::G3TsPackageRootState;

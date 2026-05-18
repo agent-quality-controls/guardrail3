@@ -46,6 +46,23 @@ pub enum G3RsCargoRustPolicyState {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub enum G3RsCargoConfigTomlState {
+    Missing,
+    Unreadable {
+        rel_path: String,
+        reason: String,
+    },
+    ParseError {
+        rel_path: String,
+        reason: String,
+    },
+    Parsed {
+        rel_path: String,
+        incompatible_rust_versions: Option<String>,
+    },
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct G3RsCargoPolicyRoot {
     pub kind: G3RsCargoPolicyRootKind,
@@ -53,6 +70,7 @@ pub struct G3RsCargoPolicyRoot {
     pub cargo_rel_path: String,
     pub cargo: CargoTomlDocument,
     pub rust_policy: G3RsCargoRustPolicyState,
+    pub cargo_config: G3RsCargoConfigTomlState,
 }
 
 #[derive(Debug, Clone, Serialize)]

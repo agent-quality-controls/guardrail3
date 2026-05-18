@@ -1,8 +1,8 @@
 use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_cargo_types::{
-    G3RsCargoConfigChecksInput, G3RsCargoFileTreeChecksInput, G3RsCargoInputFailure,
-    G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState, G3RsCargoSourceChecksInput,
-    G3RsCargoWorkspaceMember,
+    G3RsCargoConfigChecksInput, G3RsCargoConfigTomlState, G3RsCargoFileTreeChecksInput,
+    G3RsCargoInputFailure, G3RsCargoPolicyRootKind, G3RsCargoRustPolicyState,
+    G3RsCargoSourceChecksInput, G3RsCargoWorkspaceMember,
 };
 
 pub use g3rs_cargo_ingestion_types::G3RsCargoIngestionError as IngestionError;
@@ -32,7 +32,13 @@ pub fn ingest_for_config_checks(
     let raw_cargo = crate::parse::parse_raw_toml(&root_entry.path.abs_path)?;
     let cargo = crate::parse::parse_root_cargo_toml(&root_entry.path.abs_path)?;
     let rust_policy = read_rust_policy_state(crawl);
-    let root = crate::ingest::build_root(root_entry.path.rel_path.clone(), cargo, rust_policy);
+    let cargo_config = read_cargo_config_state(crawl);
+    let root = crate::ingest::build_root(
+        root_entry.path.rel_path.clone(),
+        cargo,
+        rust_policy,
+        cargo_config,
+    );
 
     let workspace_members = if root.kind == G3RsCargoPolicyRootKind::WorkspaceRoot {
         collect_config_members(crawl, &raw_cargo)?
@@ -314,4 +320,18 @@ fn read_rust_policy_state(crawl: &G3WorkspaceCrawl) -> G3RsCargoRustPolicyState 
         };
     }
     crate::parse::parse_rust_policy_state(&entry.path.rel_path, &entry.path.abs_path)
+}
+
+/// Read the root Cargo config state for resolver compatibility policy.
+fn read_cargo_config_state(crawl: &G3WorkspaceCrawl) -> G3RsCargoConfigTomlState {
+    let Some(entry) = crate::select::select_root_cargo_config_toml(crawl) else {
+        return G3RsCargoConfigTomlState::Missing;
+    };
+    if !entry.readable {
+        return G3RsCargoConfigTomlState::Unreadable {
+            rel_path: entry.path.rel_path.clone(),
+            reason: "file is not readable".to_owned(),
+        };
+    }
+    crate::parse::parse_cargo_config_state(&entry.path.rel_path, &entry.path.abs_path)
 }

@@ -15,6 +15,7 @@ target_rules = [
   "g3rs-deps/cargo-deny-installed",
   "g3rs-deps/cargo-machete-installed",
   "g3rs-deps/cargo-dupes-installed",
+  "g3rs-deps/cargo-msrv-verify-installed",
   "g3rs-deps/gitleaks-installed",
 ]
 intentionally_invalid = [
@@ -28,5 +29,6 @@ expected_findings = [
   "g3rs-deps/cargo-deny-installed",
   "g3rs-deps/cargo-machete-installed",
   "g3rs-deps/cargo-dupes-installed",
+  "g3rs-deps/cargo-msrv-verify-installed",
   "g3rs-deps/gitleaks-installed",
 ]

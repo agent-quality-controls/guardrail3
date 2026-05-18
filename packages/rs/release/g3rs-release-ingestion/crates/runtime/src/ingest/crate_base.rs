@@ -155,10 +155,10 @@ fn binary_target_names(
             let _ = names.insert(name);
             continue;
         }
-        if let Some(path) = bin.path.as_deref()
-            && let Some(name) = binary_name_from_path(path)
-        {
-            let _ = names.insert(name);
+        if let Some(path) = bin.path.as_deref() {
+            if let Some(name) = binary_name_from_path(path) {
+                let _ = names.insert(name);
+            }
         }
     }
 
@@ -174,12 +174,14 @@ fn binary_target_names(
     if super::paths::file_exists(
         crawl,
         &super::paths::join_under_root(rel_dir, "src/main.rs"),
-    ) && let Some(package_name) = cargo
-        .package
-        .as_ref()
-        .and_then(|package| package.name.as_ref())
-    {
-        let _ = names.insert(package_name.clone());
+    ) {
+        if let Some(package_name) = cargo
+            .package
+            .as_ref()
+            .and_then(|package| package.name.as_ref())
+        {
+            let _ = names.insert(package_name.clone());
+        }
     }
 
     let src_bin_rel = super::paths::join_under_root(rel_dir, "src/bin");

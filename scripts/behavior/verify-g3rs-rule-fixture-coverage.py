@@ -86,6 +86,7 @@ def verify_rule_coverage(plan_manifest: dict[str, Any]) -> list[str]:
     )
     failures.extend(
         verify_error_warn_fixture_closure(
+            plan_manifest,
             rows,
             baseline_findings_by_fixture,
             required_results_by_fixture,
@@ -121,7 +122,11 @@ def baseline_rule_state_by_fixture(
 ) -> tuple[dict[str, dict[str, set[str]]], dict[str, Counter[tuple[str, str, str, str]]]]:
     states: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     findings: dict[str, Counter[tuple[str, str, str, str]]] = defaultdict(Counter)
-    for golden_output in plan_manifest["coverage_matrix"]["golden_outputs"]:
+    state_outputs = plan_manifest["coverage_matrix"].get(
+        "state_golden_outputs",
+        plan_manifest["coverage_matrix"]["golden_outputs"],
+    )
+    for golden_output in state_outputs:
         path = REPO_ROOT / golden_output
         data = json.loads(path.read_text(encoding="utf-8"))
         for record in data.get("records", []):
@@ -138,7 +143,20 @@ def baseline_rule_state_by_fixture(
                 if finding_match:
                     finding_severity, finding_rule_id, file_path, title = finding_match.groups()
                     findings[fixture_id][(finding_severity, finding_rule_id, title, file_path)] += 1
+
     return states, findings
+
+
+def fixture_ids_for_exact_closure(plan_manifest: dict[str, Any]) -> set[str]:
+    fixture_ids: set[str] = set()
+    for golden_output in plan_manifest["coverage_matrix"]["golden_outputs"]:
+        path = REPO_ROOT / golden_output
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for record in data.get("records", []):
+            fixture_id = record.get("fixture_id")
+            if isinstance(fixture_id, str):
+                fixture_ids.add(fixture_id)
+    return fixture_ids
 
 
 def aggregate_rule_state(
@@ -246,12 +264,14 @@ def verify_rows(
 
 
 def verify_error_warn_fixture_closure(
+    plan_manifest: dict[str, Any],
     rows: list[Any],
     baseline_findings_by_fixture: dict[str, Counter[tuple[str, str, str, str]]],
     required_results_by_fixture: dict[str, Counter[tuple[str, str, str, str]]],
 ) -> list[str]:
     del rows
-    fixtures = sorted(baseline_findings_by_fixture)
+    closure_fixtures = fixture_ids_for_exact_closure(plan_manifest)
+    fixtures = sorted(set(baseline_findings_by_fixture) & closure_fixtures)
     failures: list[str] = []
     severities = {"Error", "Warn"}
     for fixture in fixtures:

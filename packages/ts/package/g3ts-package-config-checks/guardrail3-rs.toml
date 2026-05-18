@@ -3,6 +3,7 @@ profile = "library"
 allowed_deps = [
   "g3ts-package-types",
   "guardrail3-check-types",
+  "js-semver",
   "package-json-parser",
 ]
 

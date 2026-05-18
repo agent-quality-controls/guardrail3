@@ -16,6 +16,8 @@ mod priority_order;
 mod resolver;
 /// Orchestrates the cargo config rule fan-out.
 mod run;
+/// Checks that resolver 2 keeps rust-version-aware dependency fallback.
+mod rust_version_aware_resolver;
 /// Checks that member rust-version values match policy.
 mod rust_version_policy;
 /// Shared matching tables and helper logic for the rule implementations.

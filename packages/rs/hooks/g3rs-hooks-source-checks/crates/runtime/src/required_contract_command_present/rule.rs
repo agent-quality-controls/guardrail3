@@ -138,6 +138,7 @@ const fn requirement_is_satisfied_by_validate_staged_delegation(
             | G3HookCommandRequirement::CargoMachete
             | G3HookCommandRequirement::CargoDupes
             | G3HookCommandRequirement::CargoDupesExcludeTests
+            | G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked
             | G3HookCommandRequirement::G3RsValidatePath
     )
 }
@@ -201,6 +202,9 @@ fn command_satisfies_requirement(
             cargo_dupes_command(command).is_some_and(|args| !args_have_help_or_version(args))
         }
         G3HookCommandRequirement::CargoDupesExcludeTests => false,
+        G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked => {
+            cargo_msrv_verify_cargo_check_locked(command)
+        }
         G3HookCommandRequirement::Gitleaks => binary_command(command, "gitleaks"),
         G3HookCommandRequirement::G3RsValidatePath => g3rs_validate_path(command),
     }
@@ -252,6 +256,50 @@ fn cargo_deny_check(command: &ResolvedCommand) -> bool {
     cargo_subcommand_tail(command, "deny").is_some_and(|args| {
         args.first().is_some_and(|arg| arg == "check") && !args_have_help_or_version(args)
     })
+}
+
+/// `cargo_msrv_verify_cargo_check_locked` function.
+fn cargo_msrv_verify_cargo_check_locked(command: &ResolvedCommand) -> bool {
+    let args = if command.command_name() == "cargo-msrv" {
+        command.args()
+    } else if let Some(args) = cargo_subcommand_tail(command, "msrv") {
+        args
+    } else {
+        return false;
+    };
+
+    if args_have_help_or_version(args) || args.first().map(String::as_str) != Some("verify") {
+        return false;
+    }
+
+    let Some(separator_index) = args.iter().position(|arg| arg == "--") else {
+        return false;
+    };
+    if !has_rust_version_arg(&args[..separator_index]) {
+        return false;
+    }
+    let custom_check = &args[(separator_index + 1)..];
+    custom_check.first().map(String::as_str) == Some("cargo")
+        && custom_check.get(1).map(String::as_str) == Some("check")
+        && custom_check.iter().any(|arg| arg == "--locked")
+        && !args_have_help_or_version(custom_check)
+}
+
+/// `has_rust_version_arg` function.
+fn has_rust_version_arg(args: &[String]) -> bool {
+    let mut index = 0usize;
+    while let Some(arg) = args.get(index).map(String::as_str) {
+        if let Some(value) = arg.strip_prefix("--rust-version=") {
+            return !value.is_empty();
+        }
+        if arg == "--rust-version" {
+            return args
+                .get(index + 1)
+                .is_some_and(|value| !value.is_empty() && !value.starts_with('-'));
+        }
+        index += 1;
+    }
+    false
 }
 
 /// `cargo_dupes_command` function.
@@ -373,9 +421,14 @@ const fn alias_shadowed_commands(requirement: G3HookCommandRequirement) -> &'sta
         | G3HookCommandRequirement::CargoTest
         | G3HookCommandRequirement::CargoMachete
         | G3HookCommandRequirement::CargoDupes
-        | G3HookCommandRequirement::CargoDupesExcludeTests => {
-            &["cargo", "cargo-deny", "cargo-machete", "cargo-dupes"]
-        }
+        | G3HookCommandRequirement::CargoDupesExcludeTests
+        | G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked => &[
+            "cargo",
+            "cargo-deny",
+            "cargo-machete",
+            "cargo-dupes",
+            "cargo-msrv",
+        ],
         G3HookCommandRequirement::Gitleaks => &["gitleaks"],
         G3HookCommandRequirement::G3RsValidatePath => &["g3rs"],
     }
@@ -425,6 +478,9 @@ const fn requirement_label(requirement: G3HookCommandRequirement) -> &'static st
         G3HookCommandRequirement::CargoMachete => "cargo machete",
         G3HookCommandRequirement::CargoDupes => "cargo dupes",
         G3HookCommandRequirement::CargoDupesExcludeTests => "cargo dupes --exclude-tests",
+        G3HookCommandRequirement::CargoMsrvVerifyCargoCheckLocked => {
+            "cargo msrv verify --rust-version <workspace rust-version> -- cargo check --locked"
+        }
         G3HookCommandRequirement::Gitleaks => "gitleaks",
         G3HookCommandRequirement::G3RsValidatePath => "g3rs validate --path",
     }

@@ -12,6 +12,7 @@ target_rules = [
   "g3rs-cargo/workspace-metadata",
   "g3rs-cargo/rust-version-policy",
   "g3rs-cargo/resolver",
+  "g3rs-cargo/rust-version-aware-resolver",
 ]
 intentionally_invalid = [
   "cargo_root_edition_missing",
@@ -22,4 +23,5 @@ expected_findings = [
   "g3rs-cargo/workspace-metadata",
   "g3rs-cargo/rust-version-policy",
   "g3rs-cargo/resolver",
+  "g3rs-cargo/rust-version-aware-resolver",
 ]

@@ -10,6 +10,7 @@ pub fn check(input: &G3RsCargoConfigChecksInput) -> Vec<G3CheckResult> {
         crate::workspace_metadata::check(&input.root.cargo_rel_path, cargo, &mut results);
         crate::priority_order::check(&input.root.cargo_rel_path, cargo, &mut results);
         crate::resolver::check(&input.root.cargo_rel_path, cargo, &mut results);
+        crate::rust_version_aware_resolver::check(&input.root, cargo, &mut results);
         crate::disallowed_macros_deny::check(&input.root.cargo_rel_path, cargo, &mut results);
     }
     crate::approved_allow_inventory::check(&input.root, &mut results);

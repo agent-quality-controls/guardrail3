@@ -33,10 +33,10 @@ pub(crate) fn check(input: &G3TsHooksSourceChecksInput, results: &mut Vec<G3Chec
         }
     }
 
-    if violation.is_none()
-        && let Some(detail) = ancestor_walk_assignment(parsed)
-    {
-        violation = Some(detail);
+    if violation.is_none() {
+        if let Some(detail) = ancestor_walk_assignment(parsed) {
+            violation = Some(detail);
+        }
     }
 
     if let Some(detail) = violation {

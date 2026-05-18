@@ -136,11 +136,12 @@ fn cargo_subcommand_is_guardrail_critical(command: &ResolvedCommand) -> bool {
             break;
         }
 
-        if let Some((flag_name, _)) = token.split_once('=')
-            && cargo_global_flag_takes_value(flag_name)
-        {
-            index += 1;
-            continue;
+        match token.split_once('=') {
+            Some((flag_name, _)) if cargo_global_flag_takes_value(flag_name) => {
+                index += 1;
+                continue;
+            }
+            _ => {}
         }
         if matches!(token.strip_prefix("-j"), Some(value) if !value.is_empty()) {
             index += 1;

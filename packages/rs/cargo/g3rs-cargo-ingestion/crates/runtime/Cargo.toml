@@ -23,6 +23,7 @@ workspace = true
 shared = true
 
 [dependencies]
+cargo-config-toml-parser = { path = "../../../../../parsers/cargo-config-toml-parser", version = "0.1.0" }
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-cargo-ingestion-types = { path = "../types", version = "0.1.0" }
@@ -30,4 +31,3 @@ g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", versio
 glob = "0.3"
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 toml = "0.8"
-

@@ -104,6 +104,11 @@ allow = [
 ]
 confidence-threshold = 0.8
 
+[[licenses.exceptions]]
+name = "js-semver"
+version = "*"
+allow = ["MIT-0"]
+
 # Workspace crates with `publish = false` don't need a license field
 [licenses.private]
 ignore = true
