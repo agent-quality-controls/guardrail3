@@ -1,0 +1,12 @@
+id = "family-enablement-fmt-disabled-hooks"
+tool = "g3rs"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "hooks", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_enablement"
+
+rule_family = "family-enablement"
+target_rules = []
+expected_findings = []

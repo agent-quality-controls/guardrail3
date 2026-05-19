@@ -24,9 +24,12 @@ impl FamilyRunner for CliFamilyRunner {
         &self,
         family: SupportedFamily,
         crawl: &G3WorkspaceCrawl,
+        enabled_families: &[SupportedFamily],
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
-            SupportedFamily::Hooks => guardrail3_ts_family_runner_hooks::run(family, crawl),
+            SupportedFamily::Hooks => {
+                guardrail3_ts_family_runner_hooks::run(family, crawl, enabled_families)
+            }
             SupportedFamily::Topology => Ok(run_topology_family(crawl)),
             SupportedFamily::AstroSetup
             | SupportedFamily::AstroContent

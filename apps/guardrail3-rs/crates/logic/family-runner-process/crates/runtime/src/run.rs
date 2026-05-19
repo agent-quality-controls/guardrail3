@@ -10,10 +10,11 @@ use guardrail3_rs_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 pub fn run(
     family: SupportedFamily,
     crawl: &G3WorkspaceCrawl,
+    enabled_families: &[SupportedFamily],
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Hooks => {
-            let requirements = rust_hook_requirements();
+            let requirements = rust_hook_requirements(enabled_families);
             let mut config_input =
                 g3rs_hooks_ingestion::ingest_for_config_checks(crawl).map_err(|error| {
                     FamilyRunError {
@@ -90,24 +91,49 @@ pub fn run(
     }
 }
 
-/// Collects Rust family hook requirements from each family-owned hook contract package.
-pub(crate) fn rust_hook_requirements() -> Vec<G3HookRequirement> {
-    [
-        g3rs_topology_hook_contract::hook_contract(),
-        g3rs_toolchain_hook_contract::hook_contract(),
-        g3rs_fmt_hook_contract::hook_contract(),
-        g3rs_cargo_hook_contract::hook_contract(),
-        g3rs_clippy_hook_contract::hook_contract(),
-        g3rs_deny_hook_contract::hook_contract(),
-        g3rs_code_hook_contract::hook_contract(),
-        g3rs_arch_hook_contract::hook_contract(),
-        g3rs_deps_hook_contract::hook_contract(),
-        g3rs_garde_hook_contract::hook_contract(),
-        g3rs_test_hook_contract::hook_contract(),
-        g3rs_release_hook_contract::hook_contract(),
-        g3rs_apparch_hook_contract::hook_contract(),
-    ]
-    .into_iter()
-    .flatten()
-    .collect()
+/// Collects Rust family hook requirements from enabled family-owned hook contract packages.
+pub(crate) fn rust_hook_requirements(
+    enabled_families: &[SupportedFamily],
+) -> Vec<G3HookRequirement> {
+    let mut requirements = Vec::new();
+    if enabled_families.contains(&SupportedFamily::Topology) {
+        requirements.extend(g3rs_topology_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Toolchain) {
+        requirements.extend(g3rs_toolchain_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Fmt) {
+        requirements.extend(g3rs_fmt_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Cargo) {
+        requirements.extend(g3rs_cargo_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Clippy) {
+        requirements.extend(g3rs_clippy_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Deny) {
+        requirements.extend(g3rs_deny_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Code) {
+        requirements.extend(g3rs_code_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Arch) {
+        requirements.extend(g3rs_arch_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Deps) {
+        requirements.extend(g3rs_deps_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Garde) {
+        requirements.extend(g3rs_garde_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Test) {
+        requirements.extend(g3rs_test_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Release) {
+        requirements.extend(g3rs_release_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Apparch) {
+        requirements.extend(g3rs_apparch_hook_contract::hook_contract());
+    }
+    requirements
 }

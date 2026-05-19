@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-19T13-49-39.844935Z-d06b5496",
-  "run_commit": "ad4969b4e",
+  "run_id": "2026-05-19T19-29-37.241785Z-d06b5496",
+  "run_commit": "802b8b832",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T13:49:39.844935Z",
-  "fixture_hash": "sha256:e4a5683c6a75c770699872382c6b27f399b0729336d8855590943e4bb1091eea",
+  "recorded_at": "2026-05-19T19:29:37.241785Z",
+  "fixture_hash": "sha256:d7a5cfadbfd9f6dd3ef40cf98c61a2eb94307603c75c17245ee5c2205b466d30",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -157,6 +157,26 @@
     {
       "path": "behavior/fixtures/g3ts-rule/eslint/eslint-R40-broken-carveouts/fixture.toml",
       "sha256": "sha256:110c98d2d067130b503f78376fac5a31ddb6ce6d7f9d46f9a93a1af78d8af2f8"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/family-enablement/astro-disabled/fixture.toml",
+      "sha256": "sha256:8b3b5b3ddf97871f649cd7a147ea3dbaea35cb7c07af75dacbd66d5b78c92bb9"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/family-enablement/default-on-non-astro/fixture.toml",
+      "sha256": "sha256:a0272f6c961e86740717882ff627e16358eb9e2785f122caa56f08adde1ba08e"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/family-enablement/invalid-config/fixture.toml",
+      "sha256": "sha256:b5516db2bec8d4133369b9d86eec3491dca070d38bf25e9b788745ba0148a4a3"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/family-enablement/missing-config/fixture.toml",
+      "sha256": "sha256:07ad6ad9835fe49929ddc8e86c9adc37fbd94fcf181843f686769985bad4d2e6"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/family-enablement/style-disabled-hooks/fixture.toml",
+      "sha256": "sha256:27aeb58debad3485a8f3508101ad907dc7065677137b3b242858beb66dda21e4"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R00-clean-golden/fixture.toml",
@@ -355,5 +375,5 @@
       "sha256": "sha256:b1fa8c953aeba6cad6a7e2523197cb5979d706f0caebee73ffd476337589873d"
     }
   ],
-  "comment": "central-waiver-engine"
+  "comment": "family enablement contract and disable hint"
 }

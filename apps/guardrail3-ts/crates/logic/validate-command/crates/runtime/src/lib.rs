@@ -16,7 +16,7 @@ mod selection;
 #[cfg(feature = "api")]
 pub use execute::execute;
 #[cfg(feature = "api")]
-pub use family_opt_out::disabled_families;
+pub use family_opt_out::{GuardrailConfigError, disabled_families};
 #[cfg(feature = "api")]
 pub use init::{execute_init_repo, execute_init_workspace};
 #[cfg(feature = "api")]

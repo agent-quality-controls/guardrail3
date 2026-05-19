@@ -1882,6 +1882,7 @@ dependencies = [
 name = "guardrail3-rs-report"
 version = "0.1.0"
 dependencies = [
+ "guardrail3-check-types",
  "guardrail3-rs-app-types",
 ]
 

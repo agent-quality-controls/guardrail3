@@ -10,10 +10,11 @@ use guardrail3_ts_app_types::{FamilyResults, FamilyRunError, SupportedFamily};
 pub fn run(
     family: SupportedFamily,
     crawl: &G3WorkspaceCrawl,
+    enabled_families: &[SupportedFamily],
 ) -> Result<FamilyResults, FamilyRunError> {
     match family {
         SupportedFamily::Hooks => {
-            let requirements = hook_contracts();
+            let requirements = hook_contracts(enabled_families);
             let mut config_input = g3ts_hooks_ingestion::ingest_for_config_checks(crawl);
             config_input.replace_requirements(requirements.clone());
             let file_tree_input = g3ts_hooks_ingestion::ingest_for_file_tree_checks(crawl);
@@ -52,18 +53,38 @@ pub fn run(
     }
 }
 
-/// Collects hook contracts from families that own TypeScript hook requirements.
-fn hook_contracts() -> Vec<G3TsHookRequirement> {
+/// Collects hook contracts from enabled families that own TypeScript hook requirements.
+fn hook_contracts(enabled_families: &[SupportedFamily]) -> Vec<G3TsHookRequirement> {
     let mut requirements = Vec::new();
-    requirements.extend(g3ts_astro_setup_hook_contract::hook_contract());
-    requirements.extend(g3ts_astro_content_hook_contract::hook_contract());
-    requirements.extend(g3ts_astro_mdx_hook_contract::hook_contract());
-    requirements.extend(g3ts_astro_i18n_hook_contract::hook_contract());
-    requirements.extend(g3ts_astro_media_hook_contract::hook_contract());
-    requirements.extend(g3ts_astro_seo_hook_contract::hook_contract());
-    requirements.extend(g3ts_fmt_hook_contract::hook_contract());
-    requirements.extend(g3ts_spelling_hook_contract::hook_contract());
-    requirements.extend(g3ts_typecov_hook_contract::hook_contract());
-    requirements.extend(g3ts_style_hook_contract::hook_contract());
+    if enabled_families.contains(&SupportedFamily::AstroSetup) {
+        requirements.extend(g3ts_astro_setup_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::AstroContent) {
+        requirements.extend(g3ts_astro_content_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::AstroMdx) {
+        requirements.extend(g3ts_astro_mdx_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::AstroI18n) {
+        requirements.extend(g3ts_astro_i18n_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::AstroMedia) {
+        requirements.extend(g3ts_astro_media_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::AstroSeo) {
+        requirements.extend(g3ts_astro_seo_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Fmt) {
+        requirements.extend(g3ts_fmt_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Spelling) {
+        requirements.extend(g3ts_spelling_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Typecov) {
+        requirements.extend(g3ts_typecov_hook_contract::hook_contract());
+    }
+    if enabled_families.contains(&SupportedFamily::Style) {
+        requirements.extend(g3ts_style_hook_contract::hook_contract());
+    }
     requirements
 }

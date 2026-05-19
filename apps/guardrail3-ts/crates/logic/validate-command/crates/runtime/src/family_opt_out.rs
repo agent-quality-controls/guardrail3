@@ -6,20 +6,52 @@ use g3ts_toml_parser_runtime::{Error, from_path};
 use g3ts_toml_parser_types::guardrail3_ts_toml::{Guardrail3TsToml, TsChecksConfig};
 use guardrail3_ts_app_types::SupportedFamily;
 
+/// Failure to load the required `guardrail3-ts.toml` file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GuardrailConfigError {
+    Missing,
+    Invalid(String),
+}
+
+/// Families disabled by the workspace-level guardrail config.
+type DisabledFamilies = Vec<SupportedFamily>;
+
+impl std::fmt::Display for GuardrailConfigError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Missing => write!(
+                formatter,
+                "guardrail3-ts.toml missing at workspace root. Create `guardrail3-ts.toml` before running `g3ts validate workspace`."
+            ),
+            Self::Invalid(message) => {
+                write!(
+                    formatter,
+                    "guardrail3-ts.toml invalid at workspace root. {message}"
+                )
+            }
+        }
+    }
+}
+
 /// Returns the list of disabled families based on a per-package `guardrail3-ts.toml`.
 ///
-/// Missing file or unreadable file is treated as "no opt-outs".
-#[must_use]
-pub fn disabled_families(package_root: &Path) -> Vec<SupportedFamily> {
+/// The config file is required because it is the adoption marker for a G3TS
+/// workspace. Missing or invalid config must fail before family checks run.
+///
+/// # Errors
+///
+/// Returns [`GuardrailConfigError`] when `guardrail3-ts.toml` is missing or invalid.
+pub fn disabled_families(package_root: &Path) -> Result<DisabledFamilies, GuardrailConfigError> {
     let path = package_root.join("guardrail3-ts.toml");
+    if !path.is_file() {
+        return Err(GuardrailConfigError::Missing);
+    }
     let parsed: Result<Guardrail3TsToml, Error> = from_path(&path);
-    let Ok(toml) = parsed else {
-        return Vec::new();
-    };
+    let toml = parsed.map_err(|error| GuardrailConfigError::Invalid(error.to_string()))?;
     let Some(checks) = toml.checks else {
-        return Vec::new();
+        return Ok(Vec::new());
     };
-    collect_disabled(&checks)
+    Ok(collect_disabled(&checks))
 }
 
 /// Walks the typed `[checks]` table and returns the disabled families in

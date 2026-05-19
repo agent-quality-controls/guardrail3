@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-18T14-21-18.689866Z-d06b5496",
-  "run_commit": "0129d56bf",
+  "run_id": "2026-05-19T19-28-44.28361Z-d06b5496",
+  "run_commit": "802b8b832",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T14:21:18.689866Z",
+  "recorded_at": "2026-05-19T19:28:44.28361Z",
   "fixture_hash": "sha256:010a7f55abcc511c94e41fe4850618528470e17a3f6ee5ed41e369e8c7de831a",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -39,5 +39,5 @@
       "sha256": "sha256:aba14c1fadb6e36ec638b879f0d61fe8be442e24a3c1f7b88a7fb5b28c0d3b22"
     }
   ],
-  "comment": "Add g3rs version output"
+  "comment": "family disable hint"
 }

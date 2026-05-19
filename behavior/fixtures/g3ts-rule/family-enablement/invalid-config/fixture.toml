@@ -1,0 +1,12 @@
+id = "family-enablement-invalid-config"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--rules-only", "--inventory"],
+]
+expected_exit = "nonzero"
+level = "family_enablement"
+
+rule_family = "family-enablement"
+target_rules = []
+expected_findings = ["guardrail3-ts.toml"]

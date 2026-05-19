@@ -8,7 +8,7 @@ use guardrail3_ts_app_types::{
     FamilyRunner, ReportRenderer, SupportedFamily, ValidateRequest, WorkspaceCrawler,
 };
 use guardrail3_ts_family_runner_hooks::run_toolchain_gates;
-use guardrail3_ts_validate_command::{disabled_families, execute};
+use guardrail3_ts_validate_command::{disabled_families, execute, selected_families_with_opt_out};
 
 use crate::cli::FamilyArg;
 use crate::fs as g3ts_fs;
@@ -63,8 +63,19 @@ pub(crate) fn run_validate(
     let mut exit_code = static_outcome.exit_code();
 
     if !rules_only {
-        let disabled = disabled_families(path);
-        let toolchain = run_toolchain_gates(path, &disabled, inventory);
+        let disabled = match disabled_families(path) {
+            Ok(disabled) => disabled,
+            Err(error) => {
+                let _ = writeln!(&mut stderr, "{error}");
+                return CliOutput {
+                    stdout,
+                    stderr,
+                    exit_code: 1,
+                };
+            }
+        };
+        let enabled_families = selected_families_with_opt_out(&request, &disabled);
+        let toolchain = run_toolchain_gates(path, &enabled_families, inventory);
         if !toolchain.stdout.is_empty() && stdout.trim() == "No findings." {
             stdout.clear();
         }

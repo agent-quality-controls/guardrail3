@@ -35,6 +35,7 @@ pub trait FamilyRunner {
         &self,
         family: SupportedFamily,
         crawl: &G3WorkspaceCrawl,
+        enabled_families: &[SupportedFamily],
     ) -> Result<FamilyResults, FamilyRunError>;
 }
 

@@ -1,0 +1,86 @@
+[[forbidden_symbol]]
+scope = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src"
+symbol = "is_astro_workspace"
+reason = "family enablement must not infer Astro applicability from workspace files"
+
+[[forbidden_symbol]]
+scope = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src"
+symbol = "default_disabled_families"
+reason = "disabled families must come only from guardrail config"
+
+[[required_signature]]
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/family_opt_out.rs"
+function = "disabled_families"
+must_contain = "Result<"
+reason = "G3TS workspace config parsing must fail on missing or invalid config like G3RS"
+
+[[required_symbol]]
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/family_opt_out.rs"
+symbol = "GuardrailConfigError"
+reason = "G3TS must expose a typed workspace guardrail config error"
+
+[[required_symbol]]
+path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/family_opt_out.rs"
+symbol = "GuardrailConfigError"
+reason = "G3RS must keep typed workspace guardrail config errors"
+
+[[required_behavior]]
+id = "g3ts-family-selection-default-on"
+cli = "g3ts"
+fixture = "behavior/fixtures/g3ts-rule/family-enablement/default-on-non-astro"
+must_emit = ["g3ts-astro-setup"]
+reason = "non-Astro workspaces still run Astro families unless disabled"
+
+[[required_behavior]]
+id = "g3ts-family-selection-checks-opt-out"
+cli = "g3ts"
+fixture = "behavior/fixtures/g3ts-rule/family-enablement/astro-disabled"
+must_not_emit = ["g3ts-astro-setup", "g3ts-astro-content", "g3ts-astro-mdx", "g3ts-astro-i18n", "g3ts-astro-media", "g3ts-astro-seo", "g3ts-astro-state"]
+reason = "[checks] false disables Astro families"
+
+[[required_behavior]]
+id = "g3ts-missing-config-fails"
+cli = "g3ts"
+fixture = "behavior/fixtures/g3ts-rule/family-enablement/missing-config"
+must_fail = true
+must_emit = ["guardrail3-ts.toml"]
+reason = "workspace validation must not silently ignore missing guardrail config"
+
+[[required_behavior]]
+id = "g3ts-invalid-config-fails"
+cli = "g3ts"
+fixture = "behavior/fixtures/g3ts-rule/family-enablement/invalid-config"
+must_fail = true
+must_emit = ["guardrail3-ts.toml"]
+reason = "workspace validation must not silently ignore invalid guardrail config"
+
+[[required_behavior]]
+id = "g3ts-disabled-family-no-hook-contract"
+cli = "g3ts"
+fixture = "behavior/fixtures/g3ts-rule/family-enablement/style-disabled-hooks"
+must_not_emit = ["g3ts-style"]
+reason = "disabled families must not contribute hook requirements"
+
+[[required_behavior]]
+id = "g3rs-disabled-family-no-hook-contract"
+cli = "g3rs"
+fixture = "behavior/fixtures/g3rs-rule/family-enablement/fmt-disabled-hooks"
+must_not_emit = ["g3rs-fmt"]
+reason = "G3RS hooks must respect the same enabled family set as rules"
+
+[[required_message_fragment]]
+scope = "packages/ts"
+fragment = "set"
+fragment_2 = "false under [checks]"
+reason = "G3TS missing-setup findings must explain the disable path"
+
+[[required_message_fragment]]
+scope = "packages/rs"
+fragment = "set"
+fragment_2 = "false under [checks]"
+reason = "G3RS missing-setup findings must explain the disable path"
+
+[[forbidden_pattern]]
+scope = "apps/guardrail3-ts apps/guardrail3-rs packages/ts packages/rs"
+pattern = "default framework"
+reason = "no runner should auto-disable families by framework detection"

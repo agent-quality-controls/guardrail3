@@ -1,7 +1,8 @@
 use guardrail3_check_types::G3Severity;
 use guardrail3_rs_app_types::{
-    FamilyRun, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRepoRequest, ValidateReport,
-    ValidateWorkspaceRequest, WorkspaceCrawlError, WorkspaceCrawler,
+    FamilyRun, FamilyRunner, ReportRenderer, SUPPORTED_FAMILIES, SupportedFamily,
+    ValidateRepoRequest, ValidateReport, ValidateWorkspaceRequest, WorkspaceCrawlError,
+    WorkspaceCrawler,
 };
 use guardrail3_waivers::WaiverConfig;
 
@@ -40,9 +41,10 @@ pub fn execute(
     let mut family_errors = Vec::new();
 
     let families = selected_families_with_opt_out(request, &disabled);
+    let enabled_contract_families = enabled_hook_contract_families(&families, &disabled);
 
     for family in &families {
-        match family_runner.run_family(*family, &crawl) {
+        match family_runner.run_family(*family, &crawl, &enabled_contract_families) {
             Ok(mut results) => {
                 guardrail3_waivers::apply_waivers(&mut results, &waivers);
                 report.runs.push(FamilyRun {
@@ -108,6 +110,20 @@ pub fn execute(
     Ok(ExecutionOutcome::new(stdout, stderr, exit_code))
 }
 
+/// Returns the family set whose hook contracts should be enforced for this run.
+fn enabled_hook_contract_families(
+    families: &[SupportedFamily],
+    disabled: &[SupportedFamily],
+) -> Vec<SupportedFamily> {
+    if families.contains(&SupportedFamily::Hooks) {
+        return SUPPORTED_FAMILIES
+            .into_iter()
+            .filter(|family| !disabled.contains(family))
+            .collect();
+    }
+    families.to_vec()
+}
+
 /// Validates only the explicit workspace root marker before config parsing.
 fn validate_workspace_root(workspace_root: &std::path::Path) -> Result<(), WorkspaceCrawlError> {
     if !crate::fs::is_dir(workspace_root) {
@@ -154,7 +170,7 @@ pub fn execute_repo(
         if matches!(family, SupportedFamily::Topology) && !has_root_cargo_toml {
             continue;
         }
-        match family_runner.run_family(*family, &crawl) {
+        match family_runner.run_family(*family, &crawl, &SUPPORTED_FAMILIES) {
             Ok(mut results) => {
                 guardrail3_waivers::apply_waivers(&mut results, &waivers);
                 report.runs.push(FamilyRun {

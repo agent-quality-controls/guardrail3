@@ -1,0 +1,8 @@
+[checks]
+astro_setup = false
+astro_content = false
+astro_mdx = false
+astro_i18n = false
+astro_media = false
+astro_seo = false
+astro_state = false

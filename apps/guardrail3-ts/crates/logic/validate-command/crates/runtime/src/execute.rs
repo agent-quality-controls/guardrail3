@@ -1,7 +1,7 @@
 use guardrail3_check_types::G3Severity;
 use guardrail3_ts_app_types::{
-    FamilyRun, FamilyRunner, ReportRenderer, SupportedFamily, ValidateReport, ValidateRequest,
-    WorkspaceCrawlError, WorkspaceCrawler,
+    FamilyRun, FamilyRunner, ReportRenderer, SUPPORTED_FAMILIES, SupportedFamily, ValidateReport,
+    ValidateRequest, WorkspaceCrawlError, WorkspaceCrawler,
 };
 use guardrail3_waivers::WaiverConfig;
 
@@ -23,16 +23,33 @@ pub fn execute(
     let mut report = ValidateReport::default();
     let mut family_errors = Vec::new();
 
-    let disabled = default_disabled_families(request);
+    let disabled = if is_repo_only_request(request) {
+        Vec::new()
+    } else {
+        match family_opt_out::disabled_families(&request.workspace_root) {
+            Ok(disabled) => disabled,
+            Err(error) => {
+                return Ok(ExecutionOutcome::new(
+                    String::new(),
+                    format!("{error}\n"),
+                    1,
+                ));
+            }
+        }
+    };
     let families = selected_families_with_opt_out(request, &disabled);
+    let enabled_contract_families = enabled_hook_contract_families(&families, &disabled);
 
-    for family in families {
-        match family_runner.run_family(family, &crawl) {
+    for family in &families {
+        match family_runner.run_family(*family, &crawl, &enabled_contract_families) {
             Ok(mut results) => {
                 guardrail3_waivers::apply_waivers(&mut results, &waivers);
-                report.runs.push(FamilyRun { family, results });
+                report.runs.push(FamilyRun {
+                    family: *family,
+                    results,
+                });
             }
-            Err(error) => family_errors.push(format!("{}: {}", family_cli_name(family), error)),
+            Err(error) => family_errors.push(format!("{}: {}", family_cli_name(*family), error)),
         }
     }
 
@@ -58,73 +75,27 @@ pub fn execute(
     Ok(ExecutionOutcome::new(stdout, stderr, exit_code))
 }
 
-/// Returns disabled families from user opt-outs plus default framework
-/// suppression. Astro families are default-on only when the workspace declares
-/// Astro; explicit `--family astro-*` still runs those families.
-fn default_disabled_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
-    let mut disabled = family_opt_out::disabled_families(&request.workspace_root);
-    if request.families.is_empty() && !is_astro_workspace(&request.workspace_root) {
-        disabled.extend(astro_families());
+/// Returns the family set whose hook contracts should be enforced for this run.
+fn enabled_hook_contract_families(
+    families: &[SupportedFamily],
+    disabled: &[SupportedFamily],
+) -> Vec<SupportedFamily> {
+    if families.contains(&SupportedFamily::Hooks) {
+        return SUPPORTED_FAMILIES
+            .into_iter()
+            .filter(|family| !disabled.contains(family))
+            .collect();
     }
-    disabled
+    families.to_vec()
 }
 
-/// Returns every Astro-specific family.
-const fn astro_families() -> [SupportedFamily; 7] {
-    [
-        SupportedFamily::AstroSetup,
-        SupportedFamily::AstroContent,
-        SupportedFamily::AstroMdx,
-        SupportedFamily::AstroI18n,
-        SupportedFamily::AstroMedia,
-        SupportedFamily::AstroSeo,
-        SupportedFamily::AstroState,
-    ]
-}
-
-/// Returns true when a workspace declares Astro by config, package metadata, or
-/// G3TS Astro policy.
-fn is_astro_workspace(workspace_root: &std::path::Path) -> bool {
-    has_astro_config_file(workspace_root)
-        || package_json_declares_astro(workspace_root)
-        || guardrail_config_declares_astro(workspace_root)
-}
-
-/// Returns true when an Astro config file exists at the workspace root.
-fn has_astro_config_file(workspace_root: &std::path::Path) -> bool {
-    [
-        "astro.config.mjs",
-        "astro.config.js",
-        "astro.config.ts",
-        "astro.config.cjs",
-    ]
-    .iter()
-    .any(|filename| workspace_root.join(filename).is_file())
-}
-
-/// Returns true when `package.json` declares the `astro` package.
-fn package_json_declares_astro(workspace_root: &std::path::Path) -> bool {
-    let Ok(package_json) = package_json_parser::from_path(workspace_root.join("package.json"))
-    else {
-        return false;
-    };
-    package_json
-        .dependencies
-        .iter()
-        .chain(&package_json.dev_dependencies)
-        .chain(&package_json.peer_dependencies)
-        .any(|dependency| dependency == "astro")
-}
-
-/// Returns true when `guardrail3-ts.toml` contains an `[astro]` policy.
-fn guardrail_config_declares_astro(workspace_root: &std::path::Path) -> bool {
-    g3ts_toml_parser_runtime::from_path(workspace_root.join("guardrail3-ts.toml"))
-        .map(
-            |config: g3ts_toml_parser_types::guardrail3_ts_toml::Guardrail3TsToml| {
-                config.astro.is_some()
-            },
-        )
-        .unwrap_or(false)
+/// Returns true for repo-level requests routed through the shared TS executor.
+fn is_repo_only_request(request: &ValidateRequest) -> bool {
+    !request.families.is_empty()
+        && request
+            .families
+            .iter()
+            .all(|family| matches!(family, SupportedFamily::Hooks | SupportedFamily::Topology))
 }
 
 /// Loads central waivers from the workspace config when it can be parsed.

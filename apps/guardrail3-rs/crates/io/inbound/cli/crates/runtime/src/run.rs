@@ -19,6 +19,7 @@ impl FamilyRunner for CliFamilyRunner {
         &self,
         family: SupportedFamily,
         crawl: &G3WorkspaceCrawl,
+        enabled_families: &[SupportedFamily],
     ) -> Result<FamilyResults, FamilyRunError> {
         match family {
             SupportedFamily::Toolchain | SupportedFamily::Fmt | SupportedFamily::Cargo => {
@@ -31,7 +32,7 @@ impl FamilyRunner for CliFamilyRunner {
                 guardrail3_rs_family_runner_quality::run(family, crawl)
             }
             SupportedFamily::Hooks | SupportedFamily::Release => {
-                guardrail3_rs_family_runner_process::run(family, crawl)
+                guardrail3_rs_family_runner_process::run(family, crawl, enabled_families)
             }
             SupportedFamily::Test => guardrail3_rs_family_runner_test::run(family, crawl),
             SupportedFamily::Topology | SupportedFamily::Arch | SupportedFamily::Apparch => {

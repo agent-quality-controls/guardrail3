@@ -38,13 +38,12 @@ pub struct ToolchainGate {
 /// Invokes TS toolchain gates from inside `path`.
 ///
 /// Best-effort: missing tools surface via stderr but do not crash the CLI.
-/// Gates whose owning family is listed in `disabled` are skipped so opt-out
-/// via `guardrail3-ts.toml` covers both the static rule families and the
-/// toolchain gates.
+/// Gates are sourced only from enabled families, so `[checks]` opt-outs cover
+/// both static rules and external toolchain gates.
 #[must_use]
 pub fn run_toolchain_gates(
     path: &Path,
-    disabled: &[SupportedFamily],
+    enabled_families: &[SupportedFamily],
     include_inventory: bool,
 ) -> ToolchainOutcome {
     let mut outcome = ToolchainOutcome::default();
@@ -61,7 +60,7 @@ pub fn run_toolchain_gates(
             package_manager_name(manager)
         );
     }
-    for gate in toolchain_gate_list(path, manager, disabled) {
+    for gate in toolchain_gate_list(path, manager, enabled_families) {
         let label = gate.label;
         let argv = gate.argv;
         if include_inventory {
@@ -238,7 +237,7 @@ const LEGACY_HARDCODED_GATES_FOR_MISSING_CONTRACTS: &[LegacyGateEntry] = &[
     ),
 ];
 
-/// Walks each non-disabled family's `hook_contract()` and resolves each
+/// Walks each enabled family's `hook_contract()` and resolves each
 /// `G3TsHookCommandRequirement` to its concrete argv.
 ///
 /// Resolution goes through `G3TsHookCommandRequirement::concrete_command`.
@@ -253,13 +252,10 @@ const LEGACY_HARDCODED_GATES_FOR_MISSING_CONTRACTS: &[LegacyGateEntry] = &[
 pub fn toolchain_gate_list(
     path: &Path,
     manager: PackageManager,
-    disabled: &[SupportedFamily],
+    enabled_families: &[SupportedFamily],
 ) -> Vec<ToolchainGate> {
     let mut gates: Vec<ToolchainGate> = Vec::new();
-    let mut push_for_family = |family: SupportedFamily, requirement: G3TsHookCommandRequirement| {
-        if disabled.contains(&family) {
-            return;
-        }
+    let mut push_requirement = |requirement: G3TsHookCommandRequirement| {
         if requirement_disabled_for_path(requirement, path) {
             return;
         }
@@ -280,15 +276,18 @@ pub fn toolchain_gate_list(
         gates.push(ToolchainGate { label, argv });
     };
 
-    for family in guardrail3_ts_app_types::SUPPORTED_FAMILIES {
-        for requirement in family_hook_contract(family) {
+    for family in enabled_families {
+        for requirement in family_hook_contract(*family) {
             for command_requirement in requirement.required_commands() {
-                push_for_family(family, *command_requirement);
+                push_requirement(*command_requirement);
             }
         }
     }
     for (family, requirement) in LEGACY_HARDCODED_GATES_FOR_MISSING_CONTRACTS {
-        push_for_family(*family, *requirement);
+        if !enabled_families.contains(family) {
+            continue;
+        }
+        push_requirement(*requirement);
     }
     gates
 }

@@ -5,6 +5,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
+guardrail3-check-types.workspace = true
 guardrail3-ts-app-types = { path = "../../../../../types/app-types" }
 
 [features]
