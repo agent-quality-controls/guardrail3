@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-validate-repo",
   "kind": "approved",
-  "run_id": "2026-05-19T19-29-07.841982Z-d06b5496",
-  "run_commit": "802b8b832",
+  "run_id": "2026-05-19T21-03-06.096725Z-d06b5496",
+  "run_commit": "6ea73ac94",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T19:29:07.841982Z",
+  "recorded_at": "2026-05-19T21:03:06.096725Z",
   "fixture_hash": "sha256:1a814577a7223e059dbc1b15ccd62bfba5847b31f377f760b12bf5430fadda3f",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -47,5 +47,5 @@
       "sha256": "sha256:3c2b4868f05c5d19489e4ec07a0da07590a7f018b981579ce38dadd67b9beff7"
     }
   ],
-  "comment": "family disable hint"
+  "comment": "G3RS repo validation output now treats satisfied hook inventory as info."
 }

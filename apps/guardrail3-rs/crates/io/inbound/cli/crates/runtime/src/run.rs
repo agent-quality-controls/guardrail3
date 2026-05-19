@@ -61,34 +61,19 @@ pub fn run_command(
     renderer: &dyn ReportRenderer,
 ) -> CliOutput {
     match command {
-        Command::Init { command } => run_init(command, crawler, family_runner, renderer),
+        Command::Init { command } => run_init(command),
         Command::Validate { command } => run_validate(command, crawler, family_runner, renderer),
     }
 }
 
 /// Runs the selected init command and maps it into CLI output.
-fn run_init(
-    command: InitCommand,
-    crawler: &dyn WorkspaceCrawler,
-    family_runner: &dyn FamilyRunner,
-    renderer: &dyn ReportRenderer,
-) -> CliOutput {
+fn run_init(command: InitCommand) -> CliOutput {
     let outcome = match command {
-        InitCommand::Repo { path, force } => execute_init_repo(
-            &InitRepoRequest { path, force },
-            crawler,
-            family_runner,
-            renderer,
-        ),
-        InitCommand::Workspace { path, force } => execute_init_workspace(
-            &InitWorkspaceRequest {
-                workspace_root: path,
-                force,
-            },
-            crawler,
-            family_runner,
-            renderer,
-        ),
+        InitCommand::Repo { path, force } => execute_init_repo(&InitRepoRequest { path, force }),
+        InitCommand::Workspace { path, force } => execute_init_workspace(&InitWorkspaceRequest {
+            workspace_root: path,
+            force,
+        }),
     };
     CliOutput {
         stdout: outcome.stdout().to_owned(),

@@ -23,7 +23,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "`.githooks/pre-commit` enables fail-closed shell options".to_owned(),
                 "`.githooks/pre-commit` enables `set -e`-style shell error handling before running checks.".to_owned(),
                 Some(input.rel_path.to_owned()),

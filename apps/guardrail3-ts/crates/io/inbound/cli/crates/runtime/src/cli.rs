@@ -11,7 +11,7 @@ use guardrail3_ts_app_types::SupportedFamily;
     version,
     after_help = "G3TS enforces TypeScript repo setup and TypeScript workspace guardrails.
 
-Package manager:
+Ecosystem requirement:
   G3TS requires pnpm-managed TypeScript workspaces.
 
 Adoption order:

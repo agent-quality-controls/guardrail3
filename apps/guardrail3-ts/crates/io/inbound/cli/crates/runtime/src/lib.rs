@@ -9,14 +9,10 @@ mod cli;
 mod execute;
 /// Centralized filesystem boundary used by the CLI runtime.
 mod fs;
-/// Marker-pair completeness walker for validate repo.
-mod marker_pairs;
 /// Centralized process-spawn boundary used by the CLI runtime.
 mod process;
 /// CLI dispatch entry points and shared CliOutput type.
 mod run;
-/// Required-tool presence checks for validate repo.
-mod tool_presence;
 /// Topology family dispatch and CLI family runner.
 mod topology;
 

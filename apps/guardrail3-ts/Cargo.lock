@@ -1568,8 +1568,13 @@ dependencies = [
 name = "guardrail3-ts-validate-command"
 version = "0.1.0"
 dependencies = [
+ "g3ts-fmt-hook-contract",
+ "g3ts-hooks-contract-types",
+ "g3ts-spelling-hook-contract",
+ "g3ts-style-hook-contract",
  "g3ts-toml-parser-runtime",
  "g3ts-toml-parser-types",
+ "g3ts-typecov-hook-contract",
  "guardrail3-check-types",
  "guardrail3-ts-app-types",
  "guardrail3-waivers",

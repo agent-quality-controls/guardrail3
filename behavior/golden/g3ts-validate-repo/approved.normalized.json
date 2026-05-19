@@ -14,7 +14,7 @@
       "exit_code": 1,
       "fixture_hash": "sha256:6cfcccc4c578445d34109466f75a96ea13b388aa2208ba2c8288766013db3a01",
       "fixture_id": "R00-invalid-repo-root",
-      "stderr": "InvalidRoot(\"$REPO/missing\")\n",
+      "stderr": "path is not a directory: missing\n",
       "stdout": ""
     },
     {
@@ -30,7 +30,7 @@
       "exit_code": 1,
       "fixture_hash": "sha256:6cfcccc4c578445d34109466f75a96ea13b388aa2208ba2c8288766013db3a01",
       "fixture_id": "R00-invalid-repo-root",
-      "stderr": "InvalidRoot(\"$REPO/README.md\")\n",
+      "stderr": "path is not a directory: README.md\n",
       "stdout": ""
     }
   ],

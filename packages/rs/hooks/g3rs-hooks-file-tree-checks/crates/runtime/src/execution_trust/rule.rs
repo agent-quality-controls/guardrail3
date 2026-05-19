@@ -9,7 +9,7 @@ pub(crate) fn check(trust_risks: &[String], results: &mut Vec<G3CheckResult>) {
         results.push(
             G3CheckResult::new(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "no competing hook systems detected".to_owned(),
                 "No obvious alternate hook system or shadowing risk was found.".to_owned(),
                 None,

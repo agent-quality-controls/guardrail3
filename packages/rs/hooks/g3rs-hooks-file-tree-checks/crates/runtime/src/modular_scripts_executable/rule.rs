@@ -11,7 +11,7 @@ pub(crate) fn check(scripts: &[G3RsHooksScriptFileFact], results: &mut Vec<G3Che
             Some(true) => results.push(
                 G3CheckResult::new(
                     ID.to_owned(),
-                    G3Severity::Warn,
+                    G3Severity::Info,
                     "modular hook script is executable".to_owned(),
                     "Modular hook script has the executable bit set.".to_owned(),
                     Some(script.rel_path.clone()),

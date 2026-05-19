@@ -37,12 +37,12 @@ def main() -> int:
         failures,
     )
     assert_contains(
-        REPO / "apps/guardrail3-ts/crates/logic/family-runner-hooks/crates/runtime/src/toolchain_gates.rs",
+        REPO / "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/toolchain_gates.rs",
         "enabled_families: &[SupportedFamily]",
         failures,
     )
     assert_not_contains(
-        REPO / "apps/guardrail3-ts/crates/logic/family-runner-hooks/crates/runtime/src/toolchain_gates.rs",
+        REPO / "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/toolchain_gates.rs",
         "disabled: &[SupportedFamily]",
         failures,
     )

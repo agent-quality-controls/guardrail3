@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-rule",
   "kind": "approved",
-  "run_id": "2026-05-19T19-29-03.59221Z-d06b5496",
-  "run_commit": "802b8b832",
+  "run_id": "2026-05-19T21-03-01.589598Z-d06b5496",
+  "run_commit": "6ea73ac94",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T19:29:03.59221Z",
+  "recorded_at": "2026-05-19T21:03:01.589598Z",
   "fixture_hash": "sha256:36281348c7cf3f47cfde67967549f0137014c7c5bc8efa225f959ae4ff2ff59e",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -267,5 +267,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "family disable hint"
+  "comment": "G3RS rule output now treats satisfied hook inventory as info and preserves scope/root rendering."
 }

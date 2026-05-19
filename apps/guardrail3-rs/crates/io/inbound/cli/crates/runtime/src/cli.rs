@@ -11,11 +11,20 @@ use guardrail3_rs_app_types::SupportedFamily;
     version,
     after_help = "G3RS enforces Rust repo setup and Rust workspace guardrails.
 
-Start here:
-  g3rs init repo
-  g3rs init workspace --path <path>
-  g3rs validate repo
-  g3rs validate workspace --path <path>
+Ecosystem requirement:
+  G3RS requires Cargo-managed Rust workspaces or package roots.
+
+Adoption order:
+  1. From the Git repo root, run: g3rs init repo
+  2. Choose every top-level Cargo.toml root that G3RS should manage.
+  3. For each chosen root, run: g3rs init workspace --path <path>
+  4. For each chosen root, run: g3rs validate workspace --path <path>
+  5. After workspace adoption, run: g3rs validate repo
+
+Workspace path choices:
+  Root-only package: use .
+  App with I/O: use apps/<name> for CLIs, APIs, servers, UI apps, and other executable surfaces.
+  Library without I/O: use packages/<name> for reusable packages consumed by other software.
 
 Concepts:
   repo       Git repository surface: hooks, repo-level topology, marker pairs.
@@ -26,10 +35,7 @@ Rules:
   validate only reports.
   validate repo checks that Git will run G3RS.
   validate workspace checks one Rust unit.
-
-Deleted command shapes:
-  g3rs validate-repo
-  g3rs validate --path <path>"
+  Each top-level Cargo.toml should be managed by G3RS unless it is intentionally outside the Rust guardrail surface."
 )]
 pub struct Cli {
     /// Parsed subcommand payload.
@@ -78,9 +84,9 @@ pub enum InitCommand {
 /// Supported validate subcommands.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum ValidateCommand {
-    /// Validates repository-level guardrails.
+    /// Validates repository-level invariants (hooks, tools, topology, marker pairs).
     Repo {
-        /// Path inside the repo to validate. Defaults to the current directory.
+        /// Optional repo root override; defaults to git rev-parse --show-toplevel.
         #[arg(long = "path", default_value = ".")]
         path: PathBuf,
         /// Includes inventory findings in the rendered output.

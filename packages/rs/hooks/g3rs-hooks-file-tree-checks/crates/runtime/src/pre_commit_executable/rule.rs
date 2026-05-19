@@ -10,7 +10,7 @@ pub(crate) fn check(input: &G3RsHooksScriptFileFact, results: &mut Vec<G3CheckRe
         Some(true) => results.push(
             G3CheckResult::new(
                 ID.to_owned(),
-                G3Severity::Error,
+                G3Severity::Info,
                 "pre-commit hook is executable".to_owned(),
                 "Dispatcher hook has the executable bit set.".to_owned(),
                 Some(input.rel_path.clone()),

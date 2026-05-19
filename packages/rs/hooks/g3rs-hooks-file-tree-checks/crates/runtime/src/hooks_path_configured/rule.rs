@@ -9,7 +9,7 @@ pub(crate) fn check(hooks_path: Option<&str>, results: &mut Vec<G3CheckResult>) 
         Some(".githooks") => results.push(
             G3CheckResult::new(
                 ID.to_owned(),
-                G3Severity::Error,
+                G3Severity::Info,
                 "core.hooksPath configured".to_owned(),
                 "git config core.hooksPath points to `.githooks`.".to_owned(),
                 None,

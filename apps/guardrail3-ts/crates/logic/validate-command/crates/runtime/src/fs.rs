@@ -1,6 +1,6 @@
 //! Centralized filesystem boundary for the validate-command runtime.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Creates a directory and all missing parents.
 #[allow(
@@ -19,6 +19,18 @@ pub(crate) fn create_dir_all(path: &Path) -> std::io::Result<()> {
 )]
 pub(crate) fn read_to_string(path: &Path) -> std::io::Result<String> {
     std::fs::read_to_string(path)
+}
+
+/// Lists the immediate child paths of `dir`.
+#[allow(
+    clippy::disallowed_methods,
+    reason = "this module IS the centralized filesystem boundary for validate-command"
+)]
+pub(crate) fn read_dir_paths(dir: &Path) -> Vec<PathBuf> {
+    let Ok(iter) = std::fs::read_dir(dir) else {
+        return Vec::new();
+    };
+    iter.flatten().map(|entry| entry.path()).collect()
 }
 
 /// Writes a full file.

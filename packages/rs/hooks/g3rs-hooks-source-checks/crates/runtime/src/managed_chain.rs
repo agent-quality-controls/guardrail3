@@ -72,7 +72,7 @@ fn pre_commit_does_not_run_managed_result(rel_path: &str) -> G3CheckResult {
 fn managed_chain_present_result(rel_path: &str) -> G3CheckResult {
     CompatResult::from_parts(
         MANAGED_G3RS_HOOK_CHAIN_ID.to_owned(),
-        G3Severity::Warn,
+        G3Severity::Info,
         "managed g3rs hook chain present".to_owned(),
         "`.githooks/pre-commit` runs `.githooks/pre-commit.d/g3rs`, and the managed G3RS hook contains repo and workspace validation commands."
             .to_owned(),

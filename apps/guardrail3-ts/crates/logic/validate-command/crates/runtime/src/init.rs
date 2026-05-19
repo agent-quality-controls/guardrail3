@@ -173,13 +173,18 @@ pub fn execute_init_workspace(request: &InitWorkspaceRequest) -> ExecutionOutcom
         return refusal_outcome(&refusals);
     }
 
-    let stdout = if changes.is_empty() {
+    let mut stdout = if changes.is_empty() {
         "workspace already initialized\n".to_owned()
     } else {
         let mut lines = vec!["initialized workspace".to_owned()];
         lines.extend(changes);
         format!("{}\n", lines.join("\n"))
     };
+    let _ = writeln!(
+        stdout,
+        "validate with: g3ts validate workspace --path {}",
+        root.display()
+    );
     ExecutionOutcome::new(stdout, String::new(), 0)
 }
 

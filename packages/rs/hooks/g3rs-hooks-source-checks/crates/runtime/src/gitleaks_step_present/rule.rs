@@ -15,7 +15,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "gitleaks step present".to_owned(),
                 "Hook runs gitleaks as an executable command.".to_owned(),
                 Some(input.rel_path.to_owned()),

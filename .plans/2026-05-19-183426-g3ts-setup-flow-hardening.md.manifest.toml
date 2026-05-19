@@ -35,17 +35,10 @@ case = "workspace_inventory_commands"
 command = ["validate", "workspace", "--path", "{repo}", "--inventory"]
 expect_stdout_contains = ["== toolchain ==", "g3ts-toolchain/package-manager", "g3ts-toolchain/gate"]
 
-[[workspace_validation]]
-case = "non_astro_workspace_skips_astro_by_default"
-files = ["package.json", "guardrail3-ts.toml"]
-command = ["validate", "workspace", "--path", "{repo}", "--rules-only", "--inventory"]
-expect_exit = 1
-expect_stdout_not_contains = ["== astro-content ==", "== astro-mdx ==", "== astro-seo =="]
-
 [[source_contains]]
-path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/execute.rs"
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/workspace_adoption.rs"
 text = "g3ts-repo/unadopted-workspace"
 
 [[source_contains]]
-path = "apps/guardrail3-ts/crates/logic/family-runner-hooks/crates/runtime/src/toolchain_gates.rs"
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/toolchain_gates.rs"
 text = "g3ts-toolchain/gate"

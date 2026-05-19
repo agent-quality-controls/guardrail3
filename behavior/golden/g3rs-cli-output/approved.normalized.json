@@ -12,7 +12,7 @@
       "fixture_hash": "sha256:dcb4cac755289f19cc795b18931ea59f15222ee99bc43e29146e7d4b1bac21f6",
       "fixture_id": "C10-help-contract",
       "stderr": "",
-      "stdout": "Top-level CLI parser for the guardrail3-rs binary\n\nUsage: g3rs <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3RS enforces Rust repo setup and Rust workspace guardrails.\n\nStart here:\n  g3rs init repo\n  g3rs init workspace --path <path>\n  g3rs validate repo\n  g3rs validate workspace --path <path>\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted Rust unit: Cargo.toml plus guardrail3-rs.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3RS.\n  validate workspace checks one Rust unit.\n\nDeleted command shapes:\n  g3rs validate-repo\n  g3rs validate --path <path>\n"
+      "stdout": "Top-level CLI parser for the guardrail3-rs binary\n\nUsage: g3rs <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3RS enforces Rust repo setup and Rust workspace guardrails.\n\nEcosystem requirement:\n  G3RS requires Cargo-managed Rust workspaces or package roots.\n\nAdoption order:\n  1. From the Git repo root, run: g3rs init repo\n  2. Choose every top-level Cargo.toml root that G3RS should manage.\n  3. For each chosen root, run: g3rs init workspace --path <path>\n  4. For each chosen root, run: g3rs validate workspace --path <path>\n  5. After workspace adoption, run: g3rs validate repo\n\nWorkspace path choices:\n  Root-only package: use .\n  App with I/O: use apps/<name> for CLIs, APIs, servers, UI apps, and other executable surfaces.\n  Library without I/O: use packages/<name> for reusable packages consumed by other software.\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted Rust unit: Cargo.toml plus guardrail3-rs.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3RS.\n  validate workspace checks one Rust unit.\n  Each top-level Cargo.toml should be managed by G3RS unless it is intentionally outside the Rust guardrail surface.\n"
     },
     {
       "command": [
@@ -39,7 +39,7 @@
       "fixture_hash": "sha256:dcb4cac755289f19cc795b18931ea59f15222ee99bc43e29146e7d4b1bac21f6",
       "fixture_id": "C10-help-contract",
       "stderr": "",
-      "stdout": "Reports repo or workspace validation findings\n\nUsage: g3rs validate <COMMAND>\n\nCommands:\n  repo       Validates repository-level guardrails\n  workspace  Validates one workspace root against the selected families\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
+      "stdout": "Reports repo or workspace validation findings\n\nUsage: g3rs validate <COMMAND>\n\nCommands:\n  repo       Validates repository-level invariants (hooks, tools, topology, marker pairs)\n  workspace  Validates one workspace root against the selected families\n  help       Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help  Print help\n"
     },
     {
       "command": [
@@ -97,7 +97,7 @@
       "fixture_hash": "sha256:446a47608c5bbec9505bdc3ffc8516c84930c262a9d9dbff83ebb1ebbcf5ccb5",
       "fixture_id": "C30-init-repo-managed-hooks",
       "stderr": "",
-      "stdout": "initialized repo\ncreated .githooks\ncreated .githooks/pre-commit.d\ncreated .githooks/pre-commit.d/g3rs\ncreated .githooks/pre-commit\nvalidated with: g3rs validate repo --path $REPO\nscope: repo\nroot: $REPO\n\nNo findings.\n"
+      "stdout": "initialized repo\ncreated .githooks\ncreated .githooks/pre-commit.d\ncreated .githooks/pre-commit.d/g3rs\ncreated .githooks/pre-commit\nvalidate with: g3rs validate repo --path $REPO\n"
     },
     {
       "command": [
@@ -125,11 +125,11 @@
       ],
       "command_index": 0,
       "cwd": "repo",
-      "exit_code": 1,
+      "exit_code": 0,
       "fixture_hash": "sha256:876c1674e43d9264c7fa4b71f061aa13a7e182158e2188eba98c440995e83fdb",
       "fixture_id": "C50-workspace-command-shapes",
       "stderr": "",
-      "stdout": "initialized workspace\ncreated guardrail3-rs.toml\nvalidated with: g3rs validate workspace --path .\nscope: workspace\nroot: .\n\n== toolchain ==\n[Error] g3rs-toolchain/exists rust-toolchain.toml rust-toolchain.toml missing\n  Expected rust-toolchain.toml at workspace root. Create a `rust-toolchain.toml` with a `[toolchain]` section containing `channel` and `components`.\n  family: configure this family or set toolchain = false under [checks] in guardrail3-rs.toml.\n== fmt ==\n[Error] g3rs-fmt/rustfmt-config-exists rustfmt.toml rustfmt config missing\n  Expected `rustfmt.toml` at workspace root. Create one with the required formatting settings.\n  family: configure this family or set fmt = false under [checks] in guardrail3-rs.toml.\n== cargo ==\n[Error] g3rs-cargo/workspace-lints Cargo.toml rust lint table missing\n  `Cargo.toml` must define `[lints.rust]`. Add the required lint entries to `[lints.rust]`.\n[Error] g3rs-cargo/workspace-lints Cargo.toml clippy lint table missing\n  `Cargo.toml` must define `[lints.clippy]`. Add the required lint entries to `[lints.clippy]`.\n[Error] g3rs-cargo/workspace-metadata Cargo.toml edition missing\n  `Cargo.toml` must declare an edition for this workspace root. Add `edition = \"2024\"` to the package metadata.\n[Error] g3rs-cargo/rust-version-aware-resolver Cargo.toml resolver 2 lacks rust-version fallback\n  `Cargo.toml` uses `resolver = \"2\"`. Add `.cargo/config.toml` with `[resolver] incompatible-rust-versions = \"fallback\"`, or move the workspace to `resolver = \"3\"`.\n[Error] g3rs-cargo/rust-version-policy Cargo.toml library rust-version missing\n  Library crates must declare `rust-version` (minimum supported Rust version). Add `rust-version = \"1.75\"` (or appropriate version) to `[package]`.\n  family: configure this family or set cargo = false under [checks] in guardrail3-rs.toml.\n== clippy ==\n[Error] g3rs-clippy/coverage-exists clippy.toml workspace root uncovered by clippy config\n  Add `clippy.toml` or `.clippy.toml` at the workspace root so clippy policy is not left to defaults.\n  family: configure this family or set clippy = false under [checks] in guardrail3-rs.toml.\n== deny ==\n[Error] g3rs-deny/coverage - workspace root uncovered by deny config\n  workspace root `.` is not covered by any allowed deny config.\n  family: configure this family or set deny = false under [checks] in guardrail3-rs.toml.\n== deps ==\n[Info] g3rs-deps/cargo-lock-present Cargo.lock Cargo.lock missing\n  Library-profile workspace is missing `Cargo.lock`.\n== release ==\n[Warn] g3rs-release/release-plz-workflow Cargo.toml Release-plz workflow missing\n  No workflow contains an actual release-plz execution step. Add a release-plz step to a GitHub Actions workflow.\n[Warn] g3rs-release/publish-dry-run-workflow Cargo.toml Publish dry-run workflow missing\n  No workflow contains an actual `cargo publish --dry-run` step. Add a `cargo publish --dry-run` step to a CI workflow.\n[Warn] g3rs-release/registry-token Cargo.toml CARGO_REGISTRY_TOKEN missing from workflows\n  No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps. Add `CARGO_REGISTRY_TOKEN` as a secret in the release workflow.\n"
+      "stdout": "initialized workspace\ncreated guardrail3-rs.toml\nvalidate with: g3rs validate workspace --path .\n"
     },
     {
       "command": [

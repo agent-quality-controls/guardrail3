@@ -1,4 +1,4 @@
-use guardrail3_ts_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateRequest};
+use guardrail3_ts_app_types::{SUPPORTED_FAMILIES, SupportedFamily, ValidateWorkspaceRequest};
 
 #[must_use]
 pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
@@ -26,15 +26,36 @@ pub const fn family_cli_name(family: SupportedFamily) -> &'static str {
     }
 }
 
+/// Per-workspace default families (Hooks and Topology run from validate-repo).
+pub const PER_WORKSPACE_DEFAULT_FAMILIES: &[SupportedFamily] = &[
+    SupportedFamily::Eslint,
+    SupportedFamily::AstroSetup,
+    SupportedFamily::AstroContent,
+    SupportedFamily::AstroMdx,
+    SupportedFamily::AstroI18n,
+    SupportedFamily::AstroMedia,
+    SupportedFamily::AstroSeo,
+    SupportedFamily::AstroState,
+    SupportedFamily::Arch,
+    SupportedFamily::Apparch,
+    SupportedFamily::Tsconfig,
+    SupportedFamily::Package,
+    SupportedFamily::Npmrc,
+    SupportedFamily::Jscpd,
+    SupportedFamily::Style,
+    SupportedFamily::Fmt,
+    SupportedFamily::Spelling,
+    SupportedFamily::Typecov,
+];
+
+/// Repo-level families (validate-repo runs only these).
+pub const REPO_LEVEL_FAMILIES: &[SupportedFamily] =
+    &[SupportedFamily::Hooks, SupportedFamily::Topology];
+
 #[must_use]
-pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
+pub fn selected_families(request: &ValidateWorkspaceRequest) -> Vec<SupportedFamily> {
     if request.families.is_empty() {
-        // reason: per-package validate excludes repo-only families like Hooks
-        // and Topology; those run from validate repo.
-        return SUPPORTED_FAMILIES
-            .into_iter()
-            .filter(|family| !is_repo_only_family(*family))
-            .collect();
+        return PER_WORKSPACE_DEFAULT_FAMILIES.to_vec();
     }
 
     SUPPORTED_FAMILIES
@@ -43,17 +64,11 @@ pub fn selected_families(request: &ValidateRequest) -> Vec<SupportedFamily> {
         .collect()
 }
 
-/// Returns true when `family` only runs from `validate repo` and is excluded
-/// from per-workspace `validate workspace --path` defaults.
-const fn is_repo_only_family(family: SupportedFamily) -> bool {
-    matches!(family, SupportedFamily::Hooks | SupportedFamily::Topology,)
-}
-
 /// Returns the families to run for a per-package validate, after applying the
 /// package's `guardrail3-ts.toml` opt-out for disabled families.
 #[must_use]
 pub fn selected_families_with_opt_out(
-    request: &ValidateRequest,
+    request: &ValidateWorkspaceRequest,
     disabled: &[SupportedFamily],
 ) -> Vec<SupportedFamily> {
     selected_families(request)

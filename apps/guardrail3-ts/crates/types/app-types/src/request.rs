@@ -26,7 +26,7 @@ pub enum ValidateCommand {
     /// Repo-level validation.
     Repo(ValidateRepoRequest),
     /// Workspace-level validation.
-    Workspace(ValidateRequest),
+    Workspace(ValidateWorkspaceRequest),
 }
 
 /// Full validated input for one repo init command.
@@ -50,17 +50,23 @@ pub struct InitWorkspaceRequest {
 /// Full validated input for one repo-level validate command.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidateRepoRequest {
-    /// Repository root, when explicitly provided.
-    pub repo_root: Option<PathBuf>,
+    /// Repository root.
+    pub repo_root: PathBuf,
+    /// Whether inventory findings should be included in the output.
+    pub include_inventory: bool,
 }
 
 /// Full validated input for one CLI validate command.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ValidateRequest {
+pub struct ValidateWorkspaceRequest {
     /// Workspace root requested by the user.
     pub workspace_root: PathBuf,
     /// Families selected for this run.
     pub families: Vec<SupportedFamily>,
     /// Whether inventory findings should be included in the output.
     pub include_inventory: bool,
+    /// When true, filter toolchain gates by staged files; skip if no TypeScript-relevant staged paths inside the workspace root.
+    pub staged: bool,
+    /// When true, skip toolchain gates entirely; only run static rule families.
+    pub rules_only: bool,
 }

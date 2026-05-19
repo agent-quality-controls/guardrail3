@@ -1,10 +1,10 @@
 {
   "suite": "g3ts-rule",
   "kind": "approved",
-  "run_id": "2026-05-19T19-29-37.241785Z-d06b5496",
-  "run_commit": "802b8b832",
+  "run_id": "2026-05-19T21-03-37.706879Z-d06b5496",
+  "run_commit": "6ea73ac94",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T19:29:37.241785Z",
+  "recorded_at": "2026-05-19T21:03:37.706879Z",
   "fixture_hash": "sha256:d7a5cfadbfd9f6dd3ef40cf98c61a2eb94307603c75c17245ee5c2205b466d30",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -375,5 +375,5 @@
       "sha256": "sha256:b1fa8c953aeba6cad6a7e2523197cb5979d706f0caebee73ffd476337589873d"
     }
   ],
-  "comment": "family enablement contract and disable hint"
+  "comment": "G3TS workspace rule output now includes scope/root and shared inventory semantics."
 }

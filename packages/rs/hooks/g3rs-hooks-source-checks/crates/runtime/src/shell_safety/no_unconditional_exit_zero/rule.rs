@@ -47,7 +47,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "no unconditional `exit 0` bypass in `.githooks/pre-commit`".to_owned(),
                 "`.githooks/pre-commit` does not contain an unconditional early `exit 0` path."
                     .to_owned(),

@@ -1,0 +1,199 @@
+plan = ".plans/2026-05-19-213005-g3ts-g3rs-infrastructure-parity.md"
+
+[[cli_surface]]
+tool = "g3ts"
+commands = [
+  "init repo",
+  "init workspace",
+  "validate repo",
+  "validate workspace",
+]
+workspace_flags = ["--path", "--family", "--inventory", "--staged", "--rules-only"]
+repo_validate_flags = ["--path", "--inventory"]
+
+[[cli_surface]]
+tool = "g3rs"
+commands = [
+  "init repo",
+  "init workspace",
+  "validate repo",
+  "validate workspace",
+]
+workspace_flags = ["--path", "--family", "--inventory", "--staged", "--rules-only"]
+repo_validate_flags = ["--path", "--inventory"]
+
+[[help_section]]
+tool = "g3ts"
+required_sections = [
+  "G3TS enforces",
+  "Ecosystem requirement:",
+  "Adoption order:",
+  "Workspace path choices:",
+  "Concepts:",
+  "Rules:",
+]
+forbidden_text = ["Deleted command shapes:"]
+
+[[help_section]]
+tool = "g3rs"
+required_sections = [
+  "G3RS enforces",
+  "Ecosystem requirement:",
+  "Adoption order:",
+  "Workspace path choices:",
+  "Concepts:",
+  "Rules:",
+]
+forbidden_text = ["Deleted command shapes:"]
+
+[[request_type]]
+crate = "guardrail3_ts_app_types"
+file = "apps/guardrail3-ts/crates/types/app-types/src/request.rs"
+type = "ValidateRepoRequest"
+fields = ["repo_root: PathBuf", "include_inventory: bool"]
+
+[[request_type]]
+crate = "guardrail3_rs_app_types"
+file = "apps/guardrail3-rs/crates/types/app-types/src/request.rs"
+type = "ValidateRepoRequest"
+fields = ["repo_root: PathBuf", "include_inventory: bool"]
+
+[[request_type]]
+crate = "guardrail3_ts_app_types"
+file = "apps/guardrail3-ts/crates/types/app-types/src/request.rs"
+type = "ValidateWorkspaceRequest"
+fields = [
+  "workspace_root: PathBuf",
+  "families: Vec<SupportedFamily>",
+  "include_inventory: bool",
+  "staged: bool",
+  "rules_only: bool",
+]
+
+[[request_type]]
+crate = "guardrail3_rs_app_types"
+file = "apps/guardrail3-rs/crates/types/app-types/src/request.rs"
+type = "ValidateWorkspaceRequest"
+fields = [
+  "workspace_root: PathBuf",
+  "families: Vec<SupportedFamily>",
+  "include_inventory: bool",
+  "staged: bool",
+  "rules_only: bool",
+]
+
+[[report_type]]
+crate = "guardrail3_ts_app_types"
+file = "apps/guardrail3-ts/crates/types/app-types/src/report.rs"
+type = "ValidateReport"
+fields = ["scope: Option<&'static str>", "root: Option<PathBuf>", "runs: Vec<FamilyRun>"]
+constructor = "scoped"
+
+[[report_type]]
+crate = "guardrail3_rs_app_types"
+file = "apps/guardrail3-rs/crates/types/app-types/src/report.rs"
+type = "ValidateReport"
+fields = ["scope: Option<&'static str>", "root: Option<PathBuf>", "runs: Vec<FamilyRun>"]
+constructor = "scoped"
+
+[[init_contract]]
+tool = "g3ts"
+file = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/init.rs"
+must_print = ["validate with: g3ts validate repo --path", "validate with: g3ts validate workspace --path"]
+forbidden_calls = ["execute_repo(", "execute("]
+
+[[init_contract]]
+tool = "g3rs"
+file = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/init.rs"
+must_print = ["validate with: g3rs validate repo --path", "validate with: g3rs validate workspace --path"]
+forbidden_calls = ["execute_repo(", "execute("]
+
+[[execution_ownership]]
+tool = "g3ts"
+validate_command_file = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/execute.rs"
+cli_runtime_file = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/execute.rs"
+validate_command_must_own = ["workspace-adoption", "marker-pairs", "tool-presence", "exit-code"]
+cli_runtime_forbidden = ["check_workspace_adoption", "check_marker_pair_completeness", "check_required_tools_present"]
+
+[[execution_ownership]]
+tool = "g3rs"
+validate_command_file = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/execute.rs"
+cli_runtime_file = "apps/guardrail3-rs/crates/io/inbound/cli/crates/runtime/src/run.rs"
+validate_command_must_own = ["marker-pairs", "exit-code"]
+cli_runtime_forbidden = ["marker_pairs::check_repo", "cargo_gates::"]
+
+[[inventory_exit_contract]]
+tool = "g3ts"
+commands = [
+  "g3ts validate repo --path . --inventory",
+]
+must_exit = 0
+
+[[inventory_exit_contract]]
+tool = "g3rs"
+commands = [
+  "g3rs validate repo --path . --inventory",
+]
+must_exit = 0
+
+[[selection_contract]]
+tool = "g3ts"
+file = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/selection.rs"
+required_items = ["REPO_LEVEL_FAMILIES", "PER_WORKSPACE_DEFAULT_FAMILIES", "selected_families", "selected_families_with_opt_out"]
+
+[[selection_contract]]
+tool = "g3rs"
+file = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/selection.rs"
+required_items = ["REPO_LEVEL_FAMILIES", "PER_WORKSPACE_DEFAULT_FAMILIES", "selected_families", "selected_families_with_opt_out"]
+
+[[hook_contract]]
+tool = "g3ts"
+file = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/init.rs"
+required_fragments = [
+  "set -euo pipefail",
+  "gitleaks protect --staged --no-banner",
+  "max_file_size=1048576",
+  "g3ts validate repo --path \"$repo_root\"",
+  "g3ts validate workspace --path \"$unit\" --staged",
+  "guardrail3-ts.toml",
+]
+
+[[hook_contract]]
+tool = "g3rs"
+file = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/init.rs"
+required_fragments = [
+  "set -euo pipefail",
+  "gitleaks protect --staged --no-banner",
+  "max_file_size=1048576",
+  "g3rs validate repo --path \"$repo_root\"",
+  "g3rs validate workspace --path \"$unit\" --staged",
+  "guardrail3-rs.toml",
+]
+
+[[fixture_contract]]
+tool = "g3ts"
+root = "behavior/fixtures/g3ts-rule/family-enablement"
+required_public_cases = [
+  "missing workspace config fails before families run",
+  "disabled family does not run",
+  "disabled family hook contract does not run",
+  "repo inventory exits zero when inventory-only",
+  "workspace inventory renders scope and root",
+]
+
+[[fixture_contract]]
+tool = "g3rs"
+root = "behavior/fixtures/g3rs-rule/family-enablement"
+required_public_cases = [
+  "missing workspace config fails before families run",
+  "disabled family does not run",
+  "disabled family hook contract does not run",
+  "repo inventory exits zero when inventory-only",
+  "workspace inventory renders scope and root",
+]
+
+[[verifier]]
+path = "scripts/verify-g3ts-g3rs-infrastructure-parity.py"
+must_read_manifest = true
+must_print_pass_fail = true
+

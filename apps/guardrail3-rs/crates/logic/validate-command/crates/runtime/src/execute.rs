@@ -100,7 +100,7 @@ pub fn execute(
 
     let stderr = build_stderr(&family_errors, &gate_failures);
     let exit_code = match (
-        highest_severity(&report, request.include_inventory),
+        highest_severity(&report, false),
         family_errors.is_empty() && gate_failures.is_empty(),
     ) {
         (Some(G3Severity::Error), _) | (_, false) => 1,
@@ -196,10 +196,7 @@ pub fn execute_repo(
 
     let stdout = renderer.render(&report, request.include_inventory);
     let stderr = build_stderr(&family_errors, &[]);
-    let exit_code = match (
-        highest_severity(&report, request.include_inventory),
-        family_errors.is_empty(),
-    ) {
+    let exit_code = match (highest_severity(&report, false), family_errors.is_empty()) {
         (Some(G3Severity::Error), _) | (_, false) => 1,
         (Some(_) | None, true) => 0,
     };

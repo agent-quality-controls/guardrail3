@@ -1,10 +1,10 @@
 {
   "suite": "g3ts-cli-output",
   "kind": "approved",
-  "run_id": "2026-05-19T17-45-45.186522Z-d06b5496",
-  "run_commit": "dd08366c5",
+  "run_id": "2026-05-19T21-03-11.985856Z-d06b5496",
+  "run_commit": "6ea73ac94",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T17:45:45.186522Z",
+  "recorded_at": "2026-05-19T21:03:11.985856Z",
   "fixture_hash": "sha256:5a7e7da415f507163f7e2b4019fc81c5b32365634fc16a1f72bf8c1aed2749e2",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -27,5 +27,5 @@
       "sha256": "sha256:d49d1c1005e5c17ea2c29dfb23709d7c3797f25cb26bbd49e3855dcc85f2da95"
     }
   ],
-  "comment": "Update G3TS help and repo inventory CLI output"
+  "comment": "G3TS CLI help now uses the shared ecosystem requirement section name."
 }

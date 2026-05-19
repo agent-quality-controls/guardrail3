@@ -10,7 +10,7 @@ pub(crate) fn check(input: Option<&G3RsHooksScriptFileFact>, results: &mut Vec<G
         Some(script) => results.push(
             G3CheckResult::new(
                 ID.to_owned(),
-                G3Severity::Error,
+                G3Severity::Info,
                 "pre-commit hook exists".to_owned(),
                 "Found cached pre-commit hook.".to_owned(),
                 Some(script.rel_path.clone()),

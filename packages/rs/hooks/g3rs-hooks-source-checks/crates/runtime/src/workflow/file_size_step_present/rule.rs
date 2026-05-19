@@ -14,7 +14,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "file-size check step present".to_owned(),
                 "Hook contains a real file-size check step.".to_owned(),
                 Some(input.rel_path.to_owned()),

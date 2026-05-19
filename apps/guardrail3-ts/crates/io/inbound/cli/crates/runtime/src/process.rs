@@ -19,15 +19,3 @@ pub(crate) fn run_git(args: &[&str], cwd: &Path) -> std::io::Result<Output> {
         .current_dir(cwd)
         .output()
 }
-
-/// Runs `/usr/bin/env which <command>` and returns its `Output`. Returns the
-/// raw `std::io::Error` when the spawn itself fails.
-#[expect(
-    clippy::disallowed_methods,
-    reason = "this module IS the centralized process-spawn boundary for the CLI runtime; argv is a fixed-shape env-which invocation, not user-supplied shell input"
-)]
-pub(crate) fn run_env_which(command: &str) -> std::io::Result<Output> {
-    std::process::Command::new("/usr/bin/env")
-        .args(["which", command])
-        .output()
-}

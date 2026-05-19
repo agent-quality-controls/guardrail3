@@ -16,7 +16,7 @@ type LegacyGateEntry = (SupportedFamily, G3TsHookCommandRequirement);
 
 /// Aggregated stdout/stderr/exit-code of all gate spawns inside one validate run.
 #[derive(Debug, Default)]
-pub struct ToolchainOutcome {
+pub(crate) struct ToolchainOutcome {
     /// Text written to stdout by all gates, prefixed by a `== label ==` header.
     pub stdout: String,
     /// Text written to stderr by all gates, plus spawn-failure lines.
@@ -28,7 +28,7 @@ pub struct ToolchainOutcome {
 /// One concrete toolchain gate to invoke: a human-readable label and the
 /// resolved argv to spawn.
 #[derive(Debug, Clone)]
-pub struct ToolchainGate {
+pub(crate) struct ToolchainGate {
     /// Human-readable label for this gate (e.g. `lint`, `typecheck`).
     pub label: &'static str,
     /// Resolved argv to spawn: `[bin, arg1, arg2, ...]`.
@@ -41,7 +41,7 @@ pub struct ToolchainGate {
 /// Gates are sourced only from enabled families, so `[checks]` opt-outs cover
 /// both static rules and external toolchain gates.
 #[must_use]
-pub fn run_toolchain_gates(
+pub(crate) fn run_toolchain_gates(
     path: &Path,
     enabled_families: &[SupportedFamily],
     include_inventory: bool,
@@ -249,7 +249,7 @@ const LEGACY_HARDCODED_GATES_FOR_MISSING_CONTRACTS: &[LegacyGateEntry] = &[
 /// Path-level skip rules (e.g. typecheck requires `tsconfig.json`) are
 /// applied per-requirement via `requirement_disabled_for_path`.
 #[must_use]
-pub fn toolchain_gate_list(
+pub(crate) fn toolchain_gate_list(
     path: &Path,
     manager: PackageManager,
     enabled_families: &[SupportedFamily],

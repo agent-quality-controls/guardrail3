@@ -11,7 +11,7 @@ pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3Check
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Error,
+                G3Severity::Info,
                 "monolithic hook mode".to_owned(),
                 "No modular `pre-commit.d` directory exists, so no dispatcher is required."
                     .to_owned(),
@@ -34,7 +34,7 @@ pub(crate) fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<G3Check
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Error,
+                G3Severity::Info,
                 "dispatcher pattern present".to_owned(),
                 "Modular hook layout is backed by a real dispatcher command.".to_owned(),
                 Some(input.rel_path.to_owned()),

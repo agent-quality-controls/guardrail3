@@ -11,7 +11,7 @@ pub(crate) fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec
         Some("#!/bin/bash" | "#!/usr/bin/env bash" | "#!/bin/sh") => results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "valid hook shebang present".to_owned(),
                 "Hook script starts with a supported shell shebang.".to_owned(),
                 Some(input.rel_path.to_owned()),

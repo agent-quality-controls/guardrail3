@@ -22,7 +22,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "hook contract has no exact trigger paths to prove".to_owned(),
                 "Family hook contracts only declare glob or extension trigger patterns here. Glob trigger routing is not yet provable; legacy hook rules remain active.".to_owned(),
                 Some(input.rel_path.to_owned()),
@@ -56,7 +56,7 @@ pub(crate) fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<G3CheckR
         results.push(
             G3CheckResult::from_parts(
                 ID.to_owned(),
-                G3Severity::Warn,
+                G3Severity::Info,
                 "hook contract trigger coverage proven".to_owned(),
                 "Every family-declared exact trigger path appears in `.githooks/pre-commit`'s `RUST_RELEVANT_PATTERN`.".to_owned(),
                 Some(input.rel_path.to_owned()),

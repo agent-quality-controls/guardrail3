@@ -16,7 +16,7 @@ pub use report::{FamilyResults, FamilyRun, ValidateReport};
 #[cfg(feature = "api")]
 pub use request::{
     AppCommand, InitCommand, InitRepoRequest, InitWorkspaceRequest, ValidateCommand,
-    ValidateRepoRequest, ValidateRequest,
+    ValidateRepoRequest, ValidateWorkspaceRequest,
 };
 #[cfg(feature = "api")]
 pub use supported_family::{SUPPORTED_FAMILIES, SupportedFamily};
