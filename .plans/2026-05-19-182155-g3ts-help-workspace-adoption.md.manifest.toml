@@ -1,0 +1,40 @@
+[[cli_help_contains]]
+command = ["--help"]
+text = "G3TS requires pnpm-managed TypeScript workspaces."
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "1. From the Git repo root, run: g3ts init repo"
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "2. Choose every top-level package.json root that G3TS should manage."
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "Root-only package: use ."
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "App with I/O: use apps/<name>"
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "Library without I/O: use packages/<name>"
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "g3ts init workspace --path <path>"
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "g3ts validate workspace --path <path>"
+
+[[cli_help_contains]]
+command = ["--help"]
+text = "g3ts validate repo"
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/cli.rs"
+text = "G3TS requires pnpm-managed TypeScript workspaces."
+

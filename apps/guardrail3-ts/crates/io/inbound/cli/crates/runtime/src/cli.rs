@@ -11,11 +11,20 @@ use guardrail3_ts_app_types::SupportedFamily;
     version,
     after_help = "G3TS enforces TypeScript repo setup and TypeScript workspace guardrails.
 
-Start here:
-  g3ts init repo
-  g3ts init workspace --path <path>
-  g3ts validate repo
-  g3ts validate workspace --path <path>
+Package manager:
+  G3TS requires pnpm-managed TypeScript workspaces.
+
+Adoption order:
+  1. From the Git repo root, run: g3ts init repo
+  2. Choose every top-level package.json root that G3TS should manage.
+  3. For each chosen root, run: g3ts init workspace --path <path>
+  4. For each chosen root, run: g3ts validate workspace --path <path>
+  5. After workspace adoption, run: g3ts validate repo
+
+Workspace path choices:
+  Root-only package: use .
+  App with I/O: use apps/<name> for CLIs, APIs, servers, UI apps, and other executable surfaces.
+  Library without I/O: use packages/<name> for reusable packages consumed by other software.
 
 Concepts:
   repo       Git repository surface: hooks, repo-level topology, marker pairs.
@@ -25,7 +34,8 @@ Rules:
   init writes setup.
   validate only reports.
   validate repo checks that Git will run G3TS.
-  validate workspace checks one TypeScript unit."
+  validate workspace checks one TypeScript unit.
+  Each top-level package.json should be managed by G3TS unless it is intentionally outside the TypeScript guardrail surface."
 )]
 pub struct Cli {
     /// Parsed subcommand payload.
