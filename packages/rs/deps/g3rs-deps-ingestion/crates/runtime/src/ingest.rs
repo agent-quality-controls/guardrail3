@@ -80,7 +80,6 @@ pub(crate) fn assemble(
         allowlist_present,
         allowed_deps: guardrail.allowed_deps.clone(),
         dependencies,
-        waivers: guardrail.waivers.clone(),
         installed_tools: Vec::new(),
     })
 }

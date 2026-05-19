@@ -54,10 +54,6 @@ const ID: &str = "g3rs-code/public-struct-named-fields";
 /// Runs the rule and appends any findings to `results`.
 pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckResult>) {
     for info in find_public_struct_field_bags(input.source) {
-        if crate::support::has_matching_waiver(input, ID, &format!("struct:{}", info.struct_name)) {
-            continue;
-        }
-
         let has_inherent_impl = struct_has_inherent_impl(input.source, &info.qualified_name);
         if input.is_shared_crate && info.all_fields_public && !has_inherent_impl {
             continue;
@@ -85,14 +81,17 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
             )
         };
 
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            severity,
-            "public struct exposes named public fields".to_owned(),
-            message,
-            Some(input.rel_path.to_owned()),
-            Some(info.line),
-        ));
+        results.push(
+            G3CheckResult::new(
+                ID.to_owned(),
+                severity,
+                "public struct exposes named public fields".to_owned(),
+                message,
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+            )
+            .with_selector(format!("struct:{}", info.struct_name)),
+        );
     }
 }
 

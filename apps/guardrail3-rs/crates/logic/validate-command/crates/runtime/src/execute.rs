@@ -3,6 +3,7 @@ use guardrail3_rs_app_types::{
     FamilyRun, FamilyRunner, ReportRenderer, SupportedFamily, ValidateRepoRequest, ValidateReport,
     ValidateWorkspaceRequest, WorkspaceCrawlError, WorkspaceCrawler,
 };
+use guardrail3_waivers::WaiverConfig;
 
 use crate::{
     cargo_gates, family_opt_out, marker_pairs,
@@ -33,6 +34,7 @@ pub fn execute(
             ));
         }
     };
+    let waivers = load_workspace_waivers(&request.workspace_root);
     let crawl = crawler.crawl(&request.workspace_root)?;
     let mut report = ValidateReport::scoped("workspace", request.workspace_root.clone());
     let mut family_errors = Vec::new();
@@ -41,10 +43,13 @@ pub fn execute(
 
     for family in &families {
         match family_runner.run_family(*family, &crawl) {
-            Ok(results) => report.runs.push(FamilyRun {
-                family: *family,
-                results,
-            }),
+            Ok(mut results) => {
+                guardrail3_waivers::apply_waivers(&mut results, &waivers);
+                report.runs.push(FamilyRun {
+                    family: *family,
+                    results,
+                });
+            }
             Err(error) => {
                 family_errors.push(format!("{}: {}", family_cli_name(*family), error));
             }
@@ -136,6 +141,7 @@ pub fn execute_repo(
     renderer: &dyn ReportRenderer,
 ) -> Result<ExecutionOutcome, WorkspaceCrawlError> {
     let crawl = crawler.crawl_any(&request.repo_root)?;
+    let waivers = load_workspace_waivers(&request.repo_root);
     let mut report = ValidateReport::scoped("repo", request.repo_root.clone());
     let mut family_errors = Vec::new();
 
@@ -149,10 +155,13 @@ pub fn execute_repo(
             continue;
         }
         match family_runner.run_family(*family, &crawl) {
-            Ok(results) => report.runs.push(FamilyRun {
-                family: *family,
-                results,
-            }),
+            Ok(mut results) => {
+                guardrail3_waivers::apply_waivers(&mut results, &waivers);
+                report.runs.push(FamilyRun {
+                    family: *family,
+                    results,
+                });
+            }
             Err(error) => {
                 family_errors.push(format!("{}: {}", family_cli_name(*family), error));
             }
@@ -161,6 +170,8 @@ pub fn execute_repo(
 
     let marker_pair_results = marker_pairs::check_repo(&request.repo_root);
     if !marker_pair_results.is_empty() {
+        let mut marker_pair_results = marker_pair_results;
+        guardrail3_waivers::apply_waivers(&mut marker_pair_results, &waivers);
         report.runs.push(FamilyRun {
             family: SupportedFamily::Topology,
             results: marker_pair_results,
@@ -177,6 +188,13 @@ pub fn execute_repo(
         (Some(_) | None, true) => 0,
     };
     Ok(ExecutionOutcome::new(stdout, stderr, exit_code))
+}
+
+/// Loads central waivers from the workspace config when it can be parsed.
+fn load_workspace_waivers(workspace_root: &std::path::Path) -> Vec<WaiverConfig> {
+    g3rs_toml_parser_runtime::from_path(workspace_root.join("guardrail3-rs.toml"))
+        .map(|config| config.waivers)
+        .unwrap_or_default()
 }
 
 /// Appends a formatted failure line for each non-zero gate outcome.

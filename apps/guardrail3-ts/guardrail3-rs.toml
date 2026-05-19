@@ -63,6 +63,7 @@ allowed_deps = [
   "g3ts-hooks-source-checks",
   "g3ts",
   "guardrail3-check-types",
+  "guardrail3-waivers",
   "guardrail3-ts-app-types",
   "guardrail3-ts-assertions",
   "guardrail3-ts-family-runner-config",
@@ -81,18 +82,18 @@ allowed_deps = [
 
 [[waivers]]
 rule = "g3rs-arch/dependency-count-split"
-file = "crates/logic/family-runner-config/Cargo.toml"
+subject = "crates/logic/family-runner-config/Cargo.toml"
 selector = "dependency-count"
 reason = "The TS config runner intentionally composes explicit config-family packages. Keeping family packages visible here is clearer than hiding them behind an aggregate facade."
 
 [[waivers]]
 rule = "g3rs-arch/dependency-count-split"
-file = "crates/logic/family-runner-structure/Cargo.toml"
+subject = "crates/logic/family-runner-structure/Cargo.toml"
 selector = "dependency-count"
 reason = "The TS structure runner intentionally composes explicit structure-family packages. Astro setup, content, MDX, SEO, and state dependencies stay visible here instead of being hidden behind an aggregate Astro facade."
 
 [[waivers]]
 rule = "g3rs-arch/dependency-count-split"
-file = "crates/logic/family-runner-hooks/crates/runtime/Cargo.toml"
+subject = "crates/logic/family-runner-hooks/crates/runtime/Cargo.toml"
 selector = "dependency-count"
 reason = "The TS hooks runner intentionally composes explicit hook contracts from each owning family. Hook requirements stay visible here instead of being hidden behind an aggregate Astro facade."

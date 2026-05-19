@@ -1,5 +1,4 @@
 use cargo_toml_parser::types::CargoToml;
-use g3_guardrail_toml_types::WaiverConfig;
 use g3_workspace_crawl::G3WorkspaceCrawl;
 /// Public ingestion entry point.
 use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
@@ -7,7 +6,6 @@ use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
     G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsSourceFile,
 };
-use g3rs_toml_parser::types::Guardrail3RsToml;
 
 /// Re-export of `G3RsGardeIngestionError` so the facade can reach it.
 pub use g3rs_garde_ingestion_types::G3RsGardeIngestionError as IngestionError;
@@ -167,7 +165,6 @@ fn parse_rust_policy(crawl: &G3WorkspaceCrawl) -> G3RsGardeRustPolicyInput {
                     .as_ref()
                     .and_then(|checks| checks.garde)
                     .unwrap_or(false),
-                waivers: collect_waivers(&parsed),
             },
             Err(err) => G3RsGardeRustPolicyInput::Invalid {
                 rel_path: entry.path.rel_path.clone(),
@@ -193,11 +190,6 @@ const fn rust_policy_enables_garde(policy: &G3RsGardeRustPolicyInput) -> bool {
         G3RsGardeRustPolicyInput::Parsed { garde_enabled, .. } => *garde_enabled,
         G3RsGardeRustPolicyInput::Missing | G3RsGardeRustPolicyInput::Invalid { .. } => false,
     }
-}
-
-/// Implements `collect waivers`.
-fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<WaiverConfig> {
-    parsed.waivers.clone()
 }
 
 /// Stub file-tree ingestion entry point for the garde family.

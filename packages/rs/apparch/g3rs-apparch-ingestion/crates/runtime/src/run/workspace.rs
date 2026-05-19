@@ -59,7 +59,6 @@ fn load_rust_policy(view: &CrawlView<'_>) -> G3RsApparchRustPolicyState {
             rel_path,
             profile: parsed.profile,
             allowed_deps: parsed.allowed_deps,
-            waivers: parsed.waivers,
         },
         Err(error) => G3RsApparchRustPolicyState::ParseError {
             rel_path,

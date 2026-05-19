@@ -1,4 +1,3 @@
-use g3_guardrail_toml_types::WaiverConfig;
 use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -144,7 +143,7 @@ pub struct G3RsArchConfigCrate {
     pub default_feature_deps: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchConfigChecksInput {
     pub crates: Vec<G3RsArchConfigCrate>,
     pub dependency_edges: Vec<G3RsArchDependencyEdge>,
@@ -161,24 +160,15 @@ pub struct G3RsArchFileTreeCrate {
     pub cargo_parse_error: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsArchRustPolicyState {
     Missing,
-    Unreadable {
-        rel_path: String,
-        reason: String,
-    },
-    ParseError {
-        rel_path: String,
-        reason: String,
-    },
-    Parsed {
-        rel_path: String,
-        waivers: Vec<WaiverConfig>,
-    },
+    Unreadable { rel_path: String, reason: String },
+    ParseError { rel_path: String, reason: String },
+    Parsed { rel_path: String },
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsArchFileTreeChecksInput {
     pub crates: Vec<G3RsArchFileTreeCrate>,
     pub module_dirs: Vec<G3RsArchModuleDir>,

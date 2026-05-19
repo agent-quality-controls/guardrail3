@@ -13,12 +13,12 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/too-many-use-imports"
-file = "crates/runtime/src/parser.rs"
+subject = "crates/runtime/src/parser.rs"
 selector = "top-level-use-imports"
 reason = "parser.rs is the top-level shell-script parser; it imports every support helper by name to keep the parse pipeline visible at one site"
 
 [[waivers]]
 rule = "g3rs-code/too-many-effective-code-lines"
-file = "crates/runtime/src/command_query/engine.rs"
+subject = "crates/runtime/src/command_query/engine.rs"
 selector = "effective-code-lines"
 reason = "engine.rs walks a parsed bash-like script using a single visitor; the per-shape branches handle every shell construct inline and splitting them would obscure the visitor's semantic decisions"

@@ -2,9 +2,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use cargo_toml_parser::{types::CargoToml, types::Value};
-use g3_guardrail_toml_types::WaiverConfig;
 use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
-use g3rs_toml_parser::parse as parse_guardrail3_toml;
 
 use crate::run::IngestionError;
 
@@ -38,8 +36,6 @@ pub(crate) struct SourceProfile {
     pub(crate) is_library_root: bool,
     /// Field `is_shared_crate`.
     pub(crate) is_shared_crate: bool,
-    /// Field `waivers`.
-    pub(crate) waivers: Vec<WaiverConfig>,
 }
 
 #[derive(Debug)]
@@ -60,8 +56,6 @@ struct PackageTargets {
     binary_root_rels: Vec<String>,
     /// Field `is_shared_crate`.
     is_shared_crate: bool,
-    /// Field `waivers`.
-    waivers: Vec<WaiverConfig>,
 }
 
 impl CargoTargetClassifier {
@@ -94,7 +88,6 @@ impl CargoTargetClassifier {
                 profile_name: None,
                 is_library_root: false,
                 is_shared_crate: false,
-                waivers: Vec::new(),
             };
         }
 
@@ -108,7 +101,6 @@ impl CargoTargetClassifier {
                 profile_name: None,
                 is_library_root: false,
                 is_shared_crate: false,
-                waivers: Vec::new(),
             };
         };
 
@@ -117,7 +109,6 @@ impl CargoTargetClassifier {
                 profile_name: Some("library".to_owned()),
                 is_library_root: true,
                 is_shared_crate: package.is_shared_crate,
-                waivers: package.waivers.clone(),
             };
         }
 
@@ -128,7 +119,6 @@ impl CargoTargetClassifier {
                 profile_name: Some("binary".to_owned()),
                 is_library_root: false,
                 is_shared_crate: package.is_shared_crate,
-                waivers: package.waivers.clone(),
             };
         }
 
@@ -137,7 +127,6 @@ impl CargoTargetClassifier {
                 profile_name: Some("library".to_owned()),
                 is_library_root: false,
                 is_shared_crate: package.is_shared_crate,
-                waivers: package.waivers.clone(),
             };
         }
 
@@ -145,7 +134,6 @@ impl CargoTargetClassifier {
             profile_name: None,
             is_library_root: false,
             is_shared_crate: package.is_shared_crate,
-            waivers: package.waivers.clone(),
         }
     }
 }
@@ -233,60 +221,7 @@ fn load_package_targets(
         library_root_rel: resolve_library_root(crawl, manifest_rel_path, &manifest),
         binary_root_rels: resolve_binary_roots(crawl, manifest_rel_path, &manifest),
         is_shared_crate: manifest_shared_flag(&manifest),
-        waivers: manifest_guardrail3_waivers(crawl, manifest_rel_path)?,
     })
-}
-
-/// List of waivers parsed from a `guardrail3-rs.toml` policy file.
-type ManifestWaivers = Vec<WaiverConfig>;
-
-/// Implements `manifest guardrail3 waivers`.
-fn manifest_guardrail3_waivers(
-    crawl: &G3WorkspaceCrawl,
-    manifest_rel_path: &str,
-) -> Result<ManifestWaivers, IngestionError> {
-    let Some(config_rel_path) =
-        nearest_guardrail3_rel_path(crawl, &manifest_dir_rel(manifest_rel_path))
-    else {
-        return Ok(Vec::new());
-    };
-    let Some(config_entry) = g3_workspace_crawl::entry(crawl, &config_rel_path) else {
-        return Ok(Vec::new());
-    };
-    if !config_entry.readable {
-        return Err(IngestionError::Unreadable {
-            path: config_entry.path.abs_path.clone(),
-            reason: "guardrail3-rs.toml is not readable".to_owned(),
-        });
-    }
-
-    let content = crate::fs::read_to_string(&config_entry.path.abs_path).map_err(|err| {
-        IngestionError::Unreadable {
-            path: config_entry.path.abs_path.clone(),
-            reason: err.to_string(),
-        }
-    })?;
-    let parsed = parse_guardrail3_toml(&content).map_err(|err| IngestionError::ParseFailed {
-        path: config_entry.path.abs_path.clone(),
-        reason: err.to_string(),
-    })?;
-
-    Ok(parsed.waivers)
-}
-
-/// Implements `nearest guardrail3 rel path`.
-fn nearest_guardrail3_rel_path(crawl: &G3WorkspaceCrawl, start_dir_rel: &str) -> Option<String> {
-    let mut current = start_dir_rel.to_owned();
-    loop {
-        let candidate = join_rel(&current, "guardrail3-rs.toml");
-        if g3_workspace_crawl::entry(crawl, &candidate).is_some() {
-            return Some(candidate);
-        }
-        if current.is_empty() {
-            return None;
-        }
-        current = parent_rel_dir(&current).unwrap_or_default();
-    }
 }
 
 /// Implements `manifest shared flag`.

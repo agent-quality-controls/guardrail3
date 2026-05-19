@@ -2,7 +2,6 @@ use clippy_toml_parser::types::{
     ClippyBanEntry as ParserBanEntry, ClippyBanSection as ParserBanSection,
     ClippyBoolSetting as ParserBoolSetting, ClippyToml, ClippyTomlDocument,
 };
-use g3_guardrail_toml_types::{WaiverMatch, has_waiver};
 use g3rs_clippy_types::{
     G3RsClippyCargoMemberState, G3RsClippyCargoRootState, G3RsClippyConfigChecksInput,
     G3RsClippyConfigState, G3RsClippyRustPolicyState,
@@ -178,31 +177,23 @@ pub(crate) fn check_threshold(
                 ),
                 Some(clippy_rel_path.to_owned()),
                 None,
-            ));
+            )
+            .with_selector(format!("key:{key}")));
         }
         None => {
-            results.push(G3CheckResult::new(
-                id.to_owned(),
-                G3Severity::Error,
-                format!("{key} missing"),
-                format!("Add `{key} = {expected}` to clippy.toml."),
-                Some(clippy_rel_path.to_owned()),
-                None,
-            ));
+            results.push(
+                G3CheckResult::new(
+                    id.to_owned(),
+                    G3Severity::Error,
+                    format!("{key} missing"),
+                    format!("Add `{key} = {expected}` to clippy.toml."),
+                    Some(clippy_rel_path.to_owned()),
+                    None,
+                )
+                .with_selector(format!("key:{key}")),
+            );
         }
     }
-}
-
-/// has matching waiver fn.
-pub(crate) fn has_matching_waiver(
-    input: &G3RsClippyConfigChecksInput,
-    rule: &str,
-    selector: &str,
-) -> bool {
-    has_waiver(
-        &input.waivers,
-        &WaiverMatch::new(rule, &input.clippy_rel_path, selector),
-    )
 }
 
 /// fn const.

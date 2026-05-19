@@ -19,15 +19,24 @@ pub(crate) fn render_report(report: &ValidateReport, include_inventory: bool) ->
             if !include_inventory && result.inventory() {
                 continue;
             }
-            let file = result.file().unwrap_or("-");
+            let subject = result.subject();
             family_lines.push(format!(
                 "[{:?}] {} {} {}",
                 result.severity(),
                 result.id(),
-                file,
+                subject,
                 result.title()
             ));
             family_lines.push(format!("  {}", result.message()));
+            if let Some(reason) = result.waiver_reason() {
+                family_lines.push(format!(
+                    "  waiver: rule=\"{}\" subject=\"{}\" selector=\"{}\" reason=\"{}\"",
+                    result.id(),
+                    result.subject(),
+                    result.selector(),
+                    reason
+                ));
+            }
         }
         if family_lines.is_empty() {
             continue;

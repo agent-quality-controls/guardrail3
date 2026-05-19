@@ -5,7 +5,7 @@
 
 use std::collections::BTreeMap;
 
-pub use g3_guardrail_toml_types::WaiverConfig;
+pub use guardrail3_waivers::WaiverConfig;
 use serde::{Deserialize, Serialize};
 use toml::Value;
 

@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{QueryAsMacroSite, error, warn};
 
@@ -13,41 +12,21 @@ pub(crate) fn check(macro_use: &QueryAsMacroSite, results: &mut Vec<G3CheckResul
     if !macro_use.policy_resolved {
         return;
     }
-    match macro_use.waiver_reason.as_deref() {
-        None => results.push(error(
+    let selector = format!("{}@L{}", macro_use.macro_name, macro_use.line);
+    results.push(
+        error(
             ID,
             "sqlx query_as missing reason",
             format!(
-                "`{}` bypasses derive-based garde boundary checks without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this usage with a reason.",
+                "`{}` bypasses derive-based garde boundary checks. Add a waiver entry in guardrail3-rs.toml with rule = \"{ID}\", subject = \"{}\", selector = \"{selector}\", and a reason for this usage.",
+                macro_use.rel_path,
                 macro_use.macro_name
             ),
             &macro_use.rel_path,
             Some(macro_use.line),
-        )),
-        Some(reason) => match validate_reason_text(reason) {
-            Ok(()) => results.push(warn(
-                ID,
-                "sqlx query_as requires validation review",
-                format!(
-                    "`{}` bypasses derive-based garde boundary checks with documented reason `{reason}`. Review the target type and ensure validated input handling is explicit.",
-                    macro_use.macro_name
-                ),
-                Some(&macro_use.rel_path),
-                Some(macro_use.line),
-            )),
-            Err(issue) => results.push(error(
-                ID,
-                "sqlx query_as reason too weak",
-                format!(
-                    "`{}` bypasses derive-based garde boundary checks with a weak reason: {}. Provide a more specific reason.",
-                    macro_use.macro_name,
-                    issue.message()
-                ),
-                &macro_use.rel_path,
-                Some(macro_use.line),
-            )),
-        },
-    }
+        )
+        .with_selector(selector),
+    );
 }
 
 /// Implements `check count`.

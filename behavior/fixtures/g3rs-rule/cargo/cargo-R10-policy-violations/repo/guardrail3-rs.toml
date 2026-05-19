@@ -7,42 +7,42 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-cargo/approved-allow-inventory"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "temp"
 
 [[waivers]]
 rule = "g3rs-cargo/unapproved-allow-entries"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "rust:warnings"
 reason = "Temporary lint suppression while root policy migration lands."
 
 [[waivers]]
 rule = "g3rs-cargo/unapproved-allow-entries"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "rust:unused_results"
 reason = "temp"
 
 [[waivers]]
 rule = "g3rs-cargo/approved-allow-inventory"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "clippy:option_if_let_else"
 reason = "Temporary lint suppression while expression control flow cleanup lands."
 
 [[waivers]]
 rule = "g3rs-cargo/approved-allow-inventory"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "clippy:ref_option_ref"
 reason = "Temporary lint suppression while borrowed option API cleanup lands."
 
 [[waivers]]
 rule = "g3rs-cargo/member-local-allows-forbidden"
-file = "crates/local_doc/Cargo.toml"
+subject = "crates/local_doc/Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "Temporary lint suppression while member API naming cleanup lands."
 
 [[waivers]]
 rule = "g3rs-cargo/member-local-allows-forbidden"
-file = "crates/local_weak/Cargo.toml"
+subject = "crates/local_weak/Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "temp"

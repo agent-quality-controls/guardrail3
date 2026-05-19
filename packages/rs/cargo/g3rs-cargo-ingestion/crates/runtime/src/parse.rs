@@ -89,7 +89,6 @@ pub(crate) fn parse_rust_policy_state(rel_path: &str, abs_path: &Path) -> G3RsCa
     G3RsCargoRustPolicyState::Parsed {
         rel_path: rel_path.to_owned(),
         profile: parsed.profile,
-        waivers: parsed.waivers,
     }
 }
 

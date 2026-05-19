@@ -1,4 +1,3 @@
-use g3_guardrail_toml_types::{WaiverConfig, WaiverMatch, has_waiver};
 use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
 
 /// One Rust source file paired with its parsed syntax tree.
@@ -31,8 +30,6 @@ pub(crate) struct CodeSourceRuleInput<'a> {
     pub(crate) is_test: bool,
     /// Field `is_shared_crate`.
     pub(crate) is_shared_crate: bool,
-    /// Field `waivers`.
-    pub(crate) waivers: &'a [WaiverConfig],
     #[allow(dead_code)] // reason: retained for upcoming profile-sensitive code source rules
     /// Field `profile_name`.
     pub(crate) profile_name: Option<&'a str>,
@@ -57,23 +54,10 @@ impl<'a> From<&'a G3RsCodeSourceFileAst> for CodeSourceRuleInput<'a> {
             source: &value.source,
             is_test: value.source_file.is_test,
             is_shared_crate: false,
-            waivers: &[],
             profile_name: value.source_file.profile_name.as_deref(),
             is_library_root: value.source_file.is_library_root,
         }
     }
-}
-
-/// Implements `has matching waiver`.
-pub(crate) fn has_matching_waiver(
-    input: &CodeSourceRuleInput<'_>,
-    rule: &str,
-    selector: &str,
-) -> bool {
-    has_waiver(
-        input.waivers,
-        &WaiverMatch::new(rule, input.rel_path, selector),
-    )
 }
 
 impl ParsedCodeSourceInput<'_> {
@@ -85,7 +69,6 @@ impl ParsedCodeSourceInput<'_> {
             source: &self.source,
             is_test: self.input.source_file.is_test,
             is_shared_crate: self.input.is_shared_crate,
-            waivers: &self.input.waivers,
             profile_name: self.input.source_file.profile_name.as_deref(),
             is_library_root: self.input.source_file.is_library_root,
         }

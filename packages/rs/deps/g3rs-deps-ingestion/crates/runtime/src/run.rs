@@ -71,7 +71,6 @@ pub(crate) fn ingest_for_config_checks_with_path(
         allowlist_present: false,
         allowed_deps: Vec::new(),
         dependencies: Vec::new(),
-        waivers: Vec::new(),
         installed_tools: discover_installed_tools(path_env),
     });
     for member_entry in member_entries {

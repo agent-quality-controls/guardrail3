@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3-guardrail-toml-types",
   "cargo-config-toml-parser",
   "cargo-toml-parser",
   "g3rs-cargo-types",

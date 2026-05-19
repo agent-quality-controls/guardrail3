@@ -12,6 +12,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/item-level-allow-with-reason"
-file = "crates/runtime/src/lib_tests/mod.rs"
+subject = "crates/runtime/src/lib_tests/mod.rs"
 selector = "item-level-allow-with-reason"
 reason = "Config package tests reuse the golden Astro i18n input builder; the allow is limited to the test module declaration and documents that unused helper cases are intentional."

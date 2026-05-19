@@ -12,6 +12,6 @@ garde = false
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/bans.rs"
+subject = "crates/types/src/bans.rs"
 selector = "struct:BansConfig"
 reason = "Schema mirror intentionally matches the deny.toml bans section surface."

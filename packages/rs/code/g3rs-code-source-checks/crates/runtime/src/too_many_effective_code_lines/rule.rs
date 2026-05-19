@@ -22,18 +22,17 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     if effective_lines <= 500 {
         return;
     }
-    if crate::support::has_matching_waiver(input, ID, "effective-code-lines") {
-        return;
-    }
-
-    results.push(G3CheckResult::new(
-        ID.to_owned(),
-        G3Severity::Error,
-        "too many effective code lines".to_owned(),
-        format!(
-            "{effective_lines} effective code-bearing lines (max 500). Split this file into smaller modules."
-        ),
-        Some(input.rel_path.to_owned()),
-        None,
-    ));
+    results.push(
+        G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "too many effective code lines".to_owned(),
+            format!(
+                "{effective_lines} effective code-bearing lines (max 500). Split this file into smaller modules."
+            ),
+            Some(input.rel_path.to_owned()),
+            None,
+        )
+        .with_selector("effective-code-lines"),
+    );
 }

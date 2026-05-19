@@ -11,6 +11,6 @@ allowed_deps = [
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "crates/assertions/src/common.rs"
+subject = "crates/assertions/src/common.rs"
 selector = "struct:ExpectedRuleResult"
 reason = "ExpectedRuleResult is a plain test-time data bag that exists only to express expected CheckResult shapes via struct-update syntax in tests; constructors would force dozens of overloads with no behavioral benefit."

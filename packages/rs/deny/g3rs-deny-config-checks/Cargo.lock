@@ -79,6 +79,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
+ "guardrail3-waivers",
  "serde",
  "toml",
 ]
@@ -97,6 +98,14 @@ dependencies = [
 [[package]]
 name = "guardrail3-reason-policy-runtime"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3-waivers"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-check-types",
+ "serde",
+]
 
 [[package]]
 name = "hashbrown"

@@ -67,6 +67,7 @@ allowed_deps = [
   "g3rs-topology-ingestion",
   "g3-workspace-crawl",
   "guardrail3-check-types",
+  "guardrail3-waivers",
   "guardrail3-rs",
   "guardrail3-rs-app-types",
   "guardrail3-rs-family-runner-policy",
@@ -84,6 +85,6 @@ allowed_deps = [
 
 [[waivers]]
 rule = "g3rs-arch/dependency-count-split"
-file = "crates/logic/family-runner-process/crates/runtime/Cargo.toml"
+subject = "crates/logic/family-runner-process/crates/runtime/Cargo.toml"
 selector = "dependency-count"
 reason = "Process family runner is the deliberate aggregation point that wires many independent family packages into the CLI; splitting this crate would hide the composition instead of reducing coupling."

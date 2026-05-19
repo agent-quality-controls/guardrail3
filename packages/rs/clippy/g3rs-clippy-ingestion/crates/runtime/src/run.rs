@@ -11,7 +11,7 @@ pub use crate::error::G3RsClippyIngestionError as IngestionError;
 /// # Errors
 ///
 /// Returns an error when the preferred `clippy.toml` is missing, or when the
-/// guardrail3-rs policy waivers fail to parse on a parsed policy state.
+/// guardrail3-rs policy fails to parse.
 pub fn ingest_for_config_checks(
     crawl: &G3WorkspaceCrawl,
 ) -> Result<G3RsClippyConfigChecksInput, IngestionError> {
@@ -19,24 +19,15 @@ pub fn ingest_for_config_checks(
         .ok_or(IngestionError::ClippyTomlNotFound)?;
 
     let clippy = crate::parse::parse_clippy_state(&clippy_entry.path.abs_path);
-    let (rust_policy, waivers) = match crate::select::select_root_guardrail3_rs_toml(crawl) {
-        Some(policy_entry) => {
-            let rust_policy = crate::parse::parse_rust_policy_state(
+    let rust_policy = crate::select::select_root_guardrail3_rs_toml(crawl).map_or(
+        G3RsClippyRustPolicyState::Missing,
+        |policy_entry| {
+            crate::parse::parse_rust_policy_state(
                 &policy_entry.path.rel_path,
                 &policy_entry.path.abs_path,
-            );
-            let waivers = match &rust_policy {
-                G3RsClippyRustPolicyState::Parsed { .. } => {
-                    crate::parse::parse_waivers(&policy_entry.path.abs_path)?
-                }
-                G3RsClippyRustPolicyState::Missing
-                | G3RsClippyRustPolicyState::Unreadable { .. }
-                | G3RsClippyRustPolicyState::ParseError { .. } => Vec::new(),
-            };
-            (rust_policy, waivers)
-        }
-        None => (G3RsClippyRustPolicyState::Missing, Vec::new()),
-    };
+            )
+        },
+    );
     let cargo_root = crate::select::select_root_cargo_toml(crawl).map_or(
         G3RsClippyCargoRootState::Missing,
         |cargo_entry| {
@@ -64,7 +55,6 @@ pub fn ingest_for_config_checks(
         cargo_root,
         cargo_workspace_members,
         cargo_configs,
-        waivers,
     ))
 }
 

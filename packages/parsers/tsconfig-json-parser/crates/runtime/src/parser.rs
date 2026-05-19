@@ -16,8 +16,7 @@ type NormalizeResult<T> = Result<T, String>;
     reason = "parser.rs IS the centralized tsconfig JSONC parser"
 )]
 pub fn parse(input: &str) -> Result<TsconfigSnapshot, crate::error::Error> {
-    let raw: Value = jsonc_parser::parse_to_serde_value(input, &ParseOptions::default())
-        .map_err(|err| crate::error::Error::Jsonc(err.to_string()))?;
+    let raw = parse_jsonc_value(input)?;
     normalize_snapshot(&raw).map_err(crate::error::Error::Jsonc)
 }
 
@@ -30,13 +29,19 @@ pub fn parse(input: &str) -> Result<TsconfigSnapshot, crate::error::Error> {
     reason = "parser.rs IS the centralized tsconfig JSONC parser"
 )]
 pub fn parse_document(input: &str) -> Result<TsconfigDocument, crate::error::Error> {
-    let raw: Value = jsonc_parser::parse_to_serde_value(input, &ParseOptions::default())
-        .map_err(|err| crate::error::Error::Jsonc(err.to_string()))?;
+    let raw = parse_jsonc_value(input)?;
     let typed = match normalize_snapshot(&raw) {
         Ok(snapshot) => TsconfigParseState::Parsed(snapshot),
         Err(reason) => TsconfigParseState::Invalid(reason),
     };
     Ok(TsconfigDocument { raw, typed })
+}
+
+/// Parses JSONC into a concrete JSON value and rejects empty/comment-only documents.
+fn parse_jsonc_value(input: &str) -> Result<Value, crate::error::Error> {
+    jsonc_parser::parse_to_serde_value(input, &ParseOptions::default())
+        .map_err(|err| crate::error::Error::Jsonc(err.to_string()))?
+        .ok_or_else(|| crate::error::Error::Jsonc("tsconfig JSONC document is empty".to_owned()))
 }
 
 /// Reads `tsconfig.json` from `path` and parses it into a typed snapshot.

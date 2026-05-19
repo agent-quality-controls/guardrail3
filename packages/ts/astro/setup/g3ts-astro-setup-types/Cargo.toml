@@ -14,7 +14,7 @@ all = ["api"]
 api = []
 
 [workspace]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 edition = "2024"

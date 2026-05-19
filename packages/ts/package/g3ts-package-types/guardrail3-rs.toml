@@ -9,6 +9,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/large-type-inventory"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsPackageRootSnapshot"
 reason = "Root package snapshot intentionally mirrors the full package.json policy surface used by package guardrails."

@@ -147,6 +147,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
+ "guardrail3-waivers",
  "serde",
  "toml",
 ]
@@ -162,6 +163,18 @@ dependencies = [
  "log",
  "regex-automata",
  "regex-syntax",
+]
+
+[[package]]
+name = "guardrail3-check-types"
+version = "0.1.0"
+
+[[package]]
+name = "guardrail3-waivers"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-check-types",
+ "serde",
 ]
 
 [[package]]

@@ -12,6 +12,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/too-many-effective-code-lines"
-file = "crates/runtime/src/parser.rs"
+subject = "crates/runtime/src/parser.rs"
 selector = "effective-code-lines"
 reason = "Package script parser is a tree-sitter shell reducer; splitting it safely requires a dedicated parser-module extraction."

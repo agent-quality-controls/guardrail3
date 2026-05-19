@@ -280,14 +280,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
-name = "g3-guardrail-toml-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
@@ -320,10 +312,8 @@ dependencies = [
 name = "g3rs-apparch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-apparch-types",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -379,7 +369,6 @@ dependencies = [
 name = "g3rs-apparch-types"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -396,7 +385,6 @@ dependencies = [
 name = "g3rs-arch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-arch-types",
  "guardrail3-check-types",
 ]
@@ -472,7 +460,6 @@ dependencies = [
 name = "g3rs-arch-types"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "serde",
 ]
 
@@ -489,11 +476,9 @@ name = "g3rs-cargo-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-cargo-types",
  "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -557,7 +542,6 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -576,7 +560,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-clippy-types",
  "g3rs-toml-parser",
  "guardrail3-check-types",
@@ -634,7 +617,6 @@ dependencies = [
  "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "g3-workspace-crawl",
  "g3rs-clippy-types",
  "g3rs-toml-parser",
@@ -649,7 +631,6 @@ dependencies = [
  "cargo-config-toml-parser",
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -716,7 +697,6 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "deny-toml-parser",
- "g3-guardrail-toml-types",
  "g3-workspace-crawl",
  "g3rs-code-ingestion-types",
  "g3rs-code-types",
@@ -745,7 +725,6 @@ dependencies = [
 name = "g3rs-code-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-code-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -761,7 +740,6 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "deny-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
@@ -862,7 +840,6 @@ dependencies = [
 name = "g3rs-deps-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-deps-types",
  "g3rs-toml-parser",
  "guardrail3-check-types",
@@ -928,7 +905,6 @@ version = "0.1.0"
 name = "g3rs-deps-types"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -946,10 +922,8 @@ name = "g3rs-fmt-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-fmt-types",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
  "rustfmt-toml-parser",
  "toml",
 ]
@@ -1022,7 +996,6 @@ name = "g3rs-fmt-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
  "serde",
@@ -1081,7 +1054,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "g3-workspace-crawl",
  "g3rs-garde-ingestion-types",
  "g3rs-garde-source-checks-types",
@@ -1110,7 +1082,6 @@ version = "0.1.0"
 dependencies = [
  "g3rs-garde-types",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -1126,7 +1097,6 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "serde",
 ]
 
@@ -1578,7 +1548,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
+ "guardrail3-waivers",
  "serde",
  "toml",
 ]
@@ -1926,6 +1896,15 @@ dependencies = [
  "g3rs-toml-parser-types",
  "guardrail3-check-types",
  "guardrail3-rs-app-types",
+ "guardrail3-waivers",
+]
+
+[[package]]
+name = "guardrail3-waivers"
+version = "0.1.0"
+dependencies = [
+ "guardrail3-check-types",
+ "serde",
 ]
 
 [[package]]

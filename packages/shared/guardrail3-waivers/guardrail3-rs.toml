@@ -1,0 +1,9 @@
+profile = "library"
+
+allowed_deps = [
+  "guardrail3-check-types",
+  "serde",
+]
+
+[checks]
+garde = false

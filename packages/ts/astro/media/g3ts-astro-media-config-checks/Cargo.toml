@@ -19,7 +19,7 @@ api = ["dep:g3ts-astro-media-config-checks-runtime", "dep:g3ts-astro-media-types
 
 [workspace]
 members = ["crates/runtime"]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 edition = "2024"

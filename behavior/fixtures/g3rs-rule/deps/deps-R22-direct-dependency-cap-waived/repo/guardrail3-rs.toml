@@ -31,7 +31,7 @@ allowed_deps = [
 
 [[waivers]]
 rule = "g3rs-deps/direct-dependency-cap"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "unique-direct-dependency-count"
 reason = "This fixture intentionally keeps 26 direct dependencies so the visible waiver warning path is covered."
 

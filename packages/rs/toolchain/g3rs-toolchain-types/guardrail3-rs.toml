@@ -11,6 +11,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-cargo/approved-allow-inventory"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "Shared toolchain type names intentionally repeat the family and rule context."

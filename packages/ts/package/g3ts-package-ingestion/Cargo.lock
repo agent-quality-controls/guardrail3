@@ -374,6 +374,7 @@ dependencies = [
 name = "syncpack-config-parser-runtime"
 version = "0.1.0"
 dependencies = [
+ "globset",
  "serde_json",
  "syncpack-config-parser-types",
 ]

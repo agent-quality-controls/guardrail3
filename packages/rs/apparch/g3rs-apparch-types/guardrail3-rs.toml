@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3-guardrail-toml-types",
   "g3rs-toml-parser",
   "serde",
 ]
@@ -11,6 +10,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-cargo/approved-allow-inventory"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "clippy:module_name_repetitions"
 reason = "Shared apparch type names intentionally repeat the family and rule context."

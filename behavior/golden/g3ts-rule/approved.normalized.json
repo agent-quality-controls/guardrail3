@@ -829,6 +829,26 @@
         "--path",
         ".",
         "--family",
+        "fmt",
+        "--rules-only",
+        "--inventory"
+      ],
+      "command_index": 0,
+      "cwd": "repo",
+      "exit_code": 0,
+      "fixture_hash": "sha256:c7e33c2ff3e3ba09f615c42627d5277166f33d54dece5d5131f2afaec663e821",
+      "fixture_id": "fmt-R40-prettier-config-waived",
+      "stderr": "",
+      "stdout": "== fmt ==\n[Info] g3ts-fmt/prettier-package-present package.json Prettier package is installed\n  `package.json` directly installs `prettier`.\n[Warn] g3ts-fmt/prettier-config-present prettier.config.* Prettier config is missing\n  `prettier.config.*` must exist. Add a local Prettier config instead of relying on implicit formatter defaults.\n  waiver: rule=\"g3ts-fmt/prettier-config-present\" subject=\"prettier.config.*\" selector=\"title:prettier-config-is-missing\" reason=\"This fixture intentionally omits Prettier config so the central G3TS waiver path is covered.\"\n[Info] g3ts-fmt/format-check-script package.json Format check script is configured\n  `package.json` defines `format:check` with a fail-closed `prettier --check` invocation.\n[Info] g3ts-fmt/validate-runs-format-check package.json Validate script runs format check\n  `package.json` defines a fail-closed `validate` script that reaches `format:check` or direct `prettier --check`.\n[Info] g3ts-fmt/syncpack-prettier-pin .syncpackrc Prettier is pinned by Syncpack\n  `.syncpackrc` pins `prettier` in a non-ignored version group.\n"
+    },
+    {
+      "command": [
+        "g3ts",
+        "validate",
+        "workspace",
+        "--path",
+        ".",
+        "--family",
         "hooks",
         "--rules-only",
         "--inventory"

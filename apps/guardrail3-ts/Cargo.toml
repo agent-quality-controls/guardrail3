@@ -19,6 +19,7 @@ rust-version = "1.88"
 [workspace.dependencies]
 clap = { version = "4.5", features = ["derive"] }
 guardrail3-check-types = { path = "../../packages/shared/guardrail3-check-types" }
+guardrail3-waivers = { path = "../../packages/shared/guardrail3-waivers" }
 g3-workspace-crawl = { path = "../../packages/shared/g3-workspace-crawl", features = ["api"] }
 g3ts-astro-content-config-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-config-checks" }
 g3ts-astro-content-file-tree-checks = { path = "../../packages/ts/astro/content/g3ts-astro-content-file-tree-checks" }

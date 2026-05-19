@@ -8,6 +8,7 @@ publish = false
 cargo-toml-parser = { path = "../../../../../../../packages/parsers/cargo-toml-parser", features = ["api"] }
 guardrail3-rs-app-types = { path = "../../../../types/app-types" }
 guardrail3-check-types.workspace = true
+guardrail3-waivers.workspace = true
 g3rs-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3rs-toml-parser/crates/runtime", features = ["api"] }
 g3rs-toml-parser-types = { path = "../../../../../../../packages/parsers/g3rs-toml-parser/crates/types", features = ["api"] }
 g3rs-hooks-contract-types.workspace = true

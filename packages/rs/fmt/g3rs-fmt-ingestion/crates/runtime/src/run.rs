@@ -143,17 +143,16 @@ fn ingest_rust_policy(crawl: &G3WorkspaceCrawl) -> G3RsFmtRustPolicyState {
             reason: "file is not readable".to_owned(),
         };
     };
-    let parsed = match g3rs_toml_parser::parse(&content) {
-        Ok(parsed) => parsed,
+    match g3rs_toml_parser::parse(&content) {
+        Ok(_parsed) => {}
         Err(err) => {
             return G3RsFmtRustPolicyState::ParseError {
                 rel_path: entry.path.rel_path.clone(),
                 reason: err.to_string(),
             };
         }
-    };
+    }
     G3RsFmtRustPolicyState::Parsed {
         rel_path: entry.path.rel_path.clone(),
-        waivers: parsed.waivers,
     }
 }

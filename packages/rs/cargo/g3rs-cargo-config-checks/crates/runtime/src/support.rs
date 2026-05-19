@@ -2,7 +2,6 @@ use cargo_toml_parser::types::{
     CargoBoolFieldState, CargoLintTableState, CargoStringFieldState, CargoToml, InheritableValue,
     LintValue, ToolLints,
 };
-use g3_guardrail_toml_types::{WaiverConfig, WaiverMatch, find_waiver_reason};
 use g3rs_cargo_types::{G3RsCargoPolicyRoot, G3RsCargoRustPolicyState, G3RsCargoWorkspaceMember};
 use g3rs_toml_parser::types::RustProfile;
 use guardrail3_check_types::{G3CheckResult, G3Severity};
@@ -359,17 +358,6 @@ pub(crate) fn allow_selector(family: &str, lint_name: &str) -> String {
     format!("{family}:{lint_name}")
 }
 
-/// waiver reason fn.
-pub(crate) fn waiver_reason<'a>(
-    entries: &'a [WaiverConfig],
-    rule: &str,
-    file: &str,
-    selector: &str,
-) -> Option<&'a str> {
-    find_waiver_reason(entries, &WaiverMatch::new(rule, file, selector))
-        .map(g3_guardrail_toml_types::WaiverReason::as_str)
-}
-
 /// fn const.
 pub(crate) const fn rust_policy_valid(root: &G3RsCargoPolicyRoot) -> bool {
     matches!(
@@ -385,16 +373,6 @@ pub(crate) const fn rust_profile(root: &G3RsCargoPolicyRoot) -> Option<RustProfi
         G3RsCargoRustPolicyState::Missing
         | G3RsCargoRustPolicyState::Unreadable { .. }
         | G3RsCargoRustPolicyState::ParseError { .. } => None,
-    }
-}
-
-/// rust policy waivers fn.
-pub(crate) fn rust_policy_waivers(root: &G3RsCargoPolicyRoot) -> &[WaiverConfig] {
-    match &root.rust_policy {
-        G3RsCargoRustPolicyState::Parsed { waivers, .. } => waivers.as_slice(),
-        G3RsCargoRustPolicyState::Missing
-        | G3RsCargoRustPolicyState::Unreadable { .. }
-        | G3RsCargoRustPolicyState::ParseError { .. } => &[],
     }
 }
 

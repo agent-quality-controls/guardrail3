@@ -1,6 +1,5 @@
 //! Shared apparch types: layers, dependencies, crates, and check inputs.
 
-use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_toml_parser::types::RustProfile;
 use serde::Serialize;
 
@@ -76,7 +75,7 @@ impl G3RsApparchPatchKind {
 }
 
 /// Parse state of the per-crate `guardrail3-rs.toml` rust policy file.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum G3RsApparchRustPolicyState {
     /// No rust policy file present.
     Missing,
@@ -102,8 +101,6 @@ pub enum G3RsApparchRustPolicyState {
         profile: Option<RustProfile>,
         /// Allow-listed external dependencies declared by the policy.
         allowed_deps: Vec<String>,
-        /// Waivers declared by the policy.
-        waivers: Vec<WaiverConfig>,
     },
 }
 
@@ -226,7 +223,7 @@ pub struct G3RsApparchCrateDependencyChecksInput {
 }
 
 /// Input for the crate-purity check on a single crate.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchCratePurityChecksInput {
     /// Crate under inspection.
     pub krate: G3RsApparchCrate,
@@ -237,7 +234,7 @@ pub struct G3RsApparchCratePurityChecksInput {
 }
 
 /// Input for the patch-bypass check on a single bypass entry.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchPatchBypassChecksInput {
     /// Bypass entry under inspection.
     pub patch: G3RsApparchPatchBypass,
@@ -262,7 +259,7 @@ pub struct G3RsApparchSameLayerCyclesChecksInput {
 }
 
 /// Aggregated input for all apparch config checks.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct G3RsApparchConfigChecksInput {
     /// Per-crate dependency checks.
     pub crate_dependency_checks: Vec<G3RsApparchCrateDependencyChecksInput>,

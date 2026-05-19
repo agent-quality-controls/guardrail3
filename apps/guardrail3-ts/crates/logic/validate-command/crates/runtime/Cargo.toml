@@ -7,6 +7,7 @@ publish = false
 [dependencies]
 guardrail3-ts-app-types = { path = "../../../../types/app-types" }
 guardrail3-check-types.workspace = true
+guardrail3-waivers.workspace = true
 g3ts-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/runtime", features = ["api"] }
 g3ts-toml-parser-types = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/types", features = ["api"] }
 

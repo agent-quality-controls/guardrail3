@@ -1,4 +1,3 @@
-use g3_guardrail_toml_types::WaiverConfig;
 use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntry, G3WorkspaceEntryKind};
 use g3rs_code_ingestion_types::G3RsCodeIngestionError as IngestionError;
 
@@ -14,8 +13,6 @@ pub(crate) struct SelectedCodeSourceFile<'a> {
     pub(crate) is_library_root: bool,
     /// Whether the owning crate is explicitly marked shared.
     pub(crate) is_shared_crate: bool,
-    /// Package-local waivers that apply to source checks.
-    pub(crate) waivers: Vec<WaiverConfig>,
 }
 
 /// List of selected Rust source files (with their classifier metadata) for the `code` source lane.
@@ -57,7 +54,6 @@ pub(crate) fn select_source_files(
                 profile_name: profile.profile_name,
                 is_library_root: profile.is_library_root,
                 is_shared_crate: profile.is_shared_crate,
-                waivers: profile.waivers,
             }
         })
         .collect())

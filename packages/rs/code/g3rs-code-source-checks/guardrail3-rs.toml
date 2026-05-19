@@ -1,7 +1,6 @@
 profile = "library"
 
 allowed_deps = [
-  "g3-guardrail-toml-types",
   "g3rs-code-source-checks-runtime",
   "g3rs-code-types",
   "guardrail3-check-types",
@@ -16,6 +15,6 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/too-many-effective-code-lines"
-file = "crates/runtime/src/public_struct_named_fields/rule.rs"
+subject = "crates/runtime/src/public_struct_named_fields/rule.rs"
 selector = "effective-code-lines"
 reason = "This rule owns a large public-field AST resolver; splitting the resolver safely is a dedicated source-rule refactor."

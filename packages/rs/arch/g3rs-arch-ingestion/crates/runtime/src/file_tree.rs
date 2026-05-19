@@ -59,8 +59,8 @@ pub(crate) fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyStat
             };
         }
     };
-    let parsed = match g3rs_toml_parser::parse(&content) {
-        Ok(parsed) => parsed,
+    match g3rs_toml_parser::parse(&content) {
+        Ok(_parsed) => {}
         Err(err) => {
             return G3RsArchRustPolicyState::ParseError {
                 rel_path: entry.path.rel_path.clone(),
@@ -70,7 +70,6 @@ pub(crate) fn ingest_rust_policy(view: &CrawlView<'_>) -> G3RsArchRustPolicyStat
     };
     G3RsArchRustPolicyState::Parsed {
         rel_path: entry.path.rel_path.clone(),
-        waivers: parsed.waivers,
     }
 }
 

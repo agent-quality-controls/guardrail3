@@ -1,0 +1,77 @@
+[[tree]]
+path = "packages/shared/guardrail3-waivers"
+
+[[tree]]
+path = "scripts/verify-central-waiver-engine.py"
+
+[[public_api]]
+crate = "guardrail3-waivers"
+types = ["WaiverConfig", "WaiverKey", "WaiverReason"]
+functions = ["apply_waivers", "find_waiver_reason"]
+
+[[public_api]]
+crate = "guardrail3-check-types"
+types = ["G3CheckResult"]
+functions = [
+  "subject",
+  "selector",
+  "waiver_key",
+  "waiver_reason",
+  "apply_waiver",
+  "with_subject",
+  "with_selector",
+]
+
+[[schema_field]]
+crate = "guardrail3-waivers"
+type = "WaiverConfig"
+required = ["rule", "subject", "selector", "reason"]
+forbidden = ["file"]
+
+[[runner_contract]]
+tool = "g3rs"
+path = "apps/guardrail3-rs/crates/logic/validate-command/crates/runtime/src/execute.rs"
+must_call = "guardrail3_waivers::apply_waivers"
+must_parse = "g3rs_toml_parser_runtime::from_path"
+
+[[runner_contract]]
+tool = "g3ts"
+path = "apps/guardrail3-ts/crates/logic/validate-command/crates/runtime/src/execute.rs"
+must_call = "guardrail3_waivers::apply_waivers"
+must_parse = "g3ts_toml_parser_runtime::from_path"
+
+[[forbidden_import]]
+scope = "packages/rs"
+patterns = [
+  "WaiverMatch",
+  "has_waiver",
+  "find_waiver_reason",
+  "g3_guardrail_toml_types",
+]
+
+[[forbidden_import]]
+scope = "packages/ts"
+patterns = [
+  "WaiverMatch",
+  "has_waiver",
+  "find_waiver_reason",
+  "g3_guardrail_toml_types",
+]
+
+[[forbidden_config_key]]
+scope = "behavior/fixtures"
+table = "waivers"
+key = "file"
+
+[[fixture_contract]]
+tool = "g3rs"
+path = "behavior/fixtures/g3rs-rule/deps/deps-R22-direct-dependency-cap-waived"
+must_contain = [
+  "subject = \"Cargo.toml\"",
+  "selector = \"unique-direct-dependency-count\"",
+]
+
+[[fixture_contract]]
+tool = "g3ts"
+path = "behavior/fixtures/g3ts-rule"
+must_have_waived_fixture = true

@@ -23,7 +23,6 @@ workspace = true
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
 deny-toml-parser = { path = "../../../../../parsers/deny-toml-parser", version = "0.1.0" }
-g3-guardrail-toml-types = { path = "../../../../../parsers/g3-guardrail-toml-types", version = "0.1.0" }
 g3rs-code-types = { path = "../../../g3rs-code-types", version = "0.1.0" }
 g3rs-code-ingestion-types = { path = "../types", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }

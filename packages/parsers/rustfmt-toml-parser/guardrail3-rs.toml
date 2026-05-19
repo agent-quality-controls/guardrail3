@@ -12,24 +12,24 @@ garde = false
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/rustfmt_toml.rs"
+subject = "crates/types/src/rustfmt_toml.rs"
 selector = "struct:RustfmtToml"
 reason = "Schema mirror intentionally matches rustfmt's config surface."
 
 [[waivers]]
 rule = "RS-CLIPPY-CONFIG-01"
-file = "clippy.toml"
+subject = "clippy.toml"
 selector = "key:max-struct-bools"
 reason = "Schema mirror parser package needs a higher bool-field threshold than the repo baseline."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-04"
-file = "crates/runtime/src/fs.rs"
+subject = "crates/runtime/src/fs.rs"
 selector = "lint:clippy::disallowed_methods"
 reason = "fs.rs is the centralized filesystem boundary for this parser crate."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-04"
-file = "crates/runtime/src/parser.rs"
+subject = "crates/runtime/src/parser.rs"
 selector = "lint:clippy::disallowed_methods"
 reason = "parser.rs is the centralized TOML parser boundary for this parser crate."

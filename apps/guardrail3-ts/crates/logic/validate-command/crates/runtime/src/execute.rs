@@ -3,6 +3,7 @@ use guardrail3_ts_app_types::{
     FamilyRun, FamilyRunner, ReportRenderer, ValidateReport, ValidateRequest, WorkspaceCrawlError,
     WorkspaceCrawler,
 };
+use guardrail3_waivers::WaiverConfig;
 
 use crate::{ExecutionOutcome, family_cli_name, family_opt_out, selected_families_with_opt_out};
 
@@ -18,6 +19,7 @@ pub fn execute(
     renderer: &dyn ReportRenderer,
 ) -> Result<ExecutionOutcome, WorkspaceCrawlError> {
     let crawl = crawler.crawl(&request.workspace_root)?;
+    let waivers = load_workspace_waivers(&request.workspace_root);
     let mut report = ValidateReport::default();
     let mut family_errors = Vec::new();
 
@@ -26,7 +28,10 @@ pub fn execute(
 
     for family in families {
         match family_runner.run_family(family, &crawl) {
-            Ok(results) => report.runs.push(FamilyRun { family, results }),
+            Ok(mut results) => {
+                guardrail3_waivers::apply_waivers(&mut results, &waivers);
+                report.runs.push(FamilyRun { family, results });
+            }
             Err(error) => family_errors.push(format!("{}: {}", family_cli_name(family), error)),
         }
     }
@@ -51,6 +56,13 @@ pub fn execute(
     };
 
     Ok(ExecutionOutcome::new(stdout, stderr, exit_code))
+}
+
+/// Loads central waivers from the workspace config when it can be parsed.
+fn load_workspace_waivers(workspace_root: &std::path::Path) -> Vec<WaiverConfig> {
+    g3ts_toml_parser_runtime::from_path(workspace_root.join("guardrail3-ts.toml"))
+        .map(|config| config.waivers)
+        .unwrap_or_default()
 }
 
 /// Returns the highest visible severity in the current report.

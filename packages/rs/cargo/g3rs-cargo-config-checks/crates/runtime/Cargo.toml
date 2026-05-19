@@ -24,8 +24,6 @@ shared = true
 
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
-g3-guardrail-toml-types = { path = "../../../../../parsers/g3-guardrail-toml-types", version = "0.1.0" }
 g3rs-cargo-types = { path = "../../../g3rs-cargo-types", version = "0.1.0" }
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
-guardrail3-reason-policy = { path = "../../../../../shared/reason-policy", version = "0.0.0" }
 guardrail3-check-types = { path = "../../../../../shared/guardrail3-check-types", version = "0.1.0" }

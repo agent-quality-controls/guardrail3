@@ -1,0 +1,11 @@
+{
+  "name": "fmt-clean-golden",
+  "private": true,
+  "scripts": {
+    "format:check": "prettier --check --cache .",
+    "validate": "pnpm format:check"
+  },
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

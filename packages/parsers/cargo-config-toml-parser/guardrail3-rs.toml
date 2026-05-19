@@ -12,6 +12,6 @@ garde = false
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_config_toml.rs"
+subject = "crates/types/src/cargo_config_toml.rs"
 selector = "struct:CargoConfigToml"
 reason = "Schema mirror intentionally matches Cargo's top-level config surface."

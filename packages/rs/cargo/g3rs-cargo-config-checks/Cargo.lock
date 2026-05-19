@@ -32,14 +32,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "g3-guardrail-toml-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "g3rs-cargo-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -52,11 +44,9 @@ name = "g3rs-cargo-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-cargo-types",
  "g3rs-toml-parser",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -64,7 +54,6 @@ name = "g3rs-cargo-types"
 version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
- "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -88,7 +77,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
- "g3-guardrail-toml-types",
+ "guardrail3-waivers",
  "serde",
  "toml",
 ]
@@ -98,15 +87,12 @@ name = "guardrail3-check-types"
 version = "0.1.0"
 
 [[package]]
-name = "guardrail3-reason-policy"
-version = "0.0.0"
+name = "guardrail3-waivers"
+version = "0.1.0"
 dependencies = [
- "guardrail3-reason-policy-runtime",
+ "guardrail3-check-types",
+ "serde",
 ]
-
-[[package]]
-name = "guardrail3-reason-policy-runtime"
-version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

@@ -1,0 +1,19 @@
+id = "fmt-R40-prettier-config-waived"
+tool = "g3ts"
+run_from = "repo"
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "fmt", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_policy_waived"
+
+rule_family = "fmt"
+target_rules = [
+  "g3ts-fmt/prettier-config-present",
+]
+intentionally_invalid = [
+  "prettier_config_missing_waived",
+]
+expected_findings = [
+  "g3ts-fmt/prettier-config-present",
+]

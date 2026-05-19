@@ -24,24 +24,24 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
         if !reason_text_is_useful(&reason) {
             continue;
         }
-        if crate::support::has_matching_waiver(input, ID, &format!("lint:{}", info.lint)) {
-            continue;
-        }
-        results.push(G3CheckResult::new(
-            ID.to_owned(),
-            G3Severity::Warn,
-            if info.kind.attr_name() == "allow" {
-                "item-level allow with reason".to_owned()
-            } else {
-                "item-level expect with reason".to_owned()
-            },
-            format!(
-                "#[{}({})] reason: {reason}",
-                info.kind.attr_name(),
-                info.lint
-            ),
-            Some(input.rel_path.to_owned()),
-            Some(line),
-        ));
+        results.push(
+            G3CheckResult::new(
+                ID.to_owned(),
+                G3Severity::Warn,
+                if info.kind.attr_name() == "allow" {
+                    "item-level allow with reason".to_owned()
+                } else {
+                    "item-level expect with reason".to_owned()
+                },
+                format!(
+                    "#[{}({})] reason: {reason}",
+                    info.kind.attr_name(),
+                    info.lint
+                ),
+                Some(input.rel_path.to_owned()),
+                Some(line),
+            )
+            .with_selector(format!("lint:{}", info.lint)),
+        );
     }
 }

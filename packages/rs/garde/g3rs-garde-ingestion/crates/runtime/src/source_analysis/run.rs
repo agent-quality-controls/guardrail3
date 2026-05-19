@@ -4,12 +4,11 @@
     clippy::type_complexity,
     clippy::arithmetic_side_effects,
     clippy::indexing_slicing,
-    reason = "analyze_source_files orchestrates the full per-source-file pipeline (per-file syn parse, per-boundary classification, per-rule waiver application, cross-file simple-name aggregation); flattening loses the parallel structure with the data model; the (has_non_primitive, has_validate_derive) tuple is the compact contract between the per-file pass and the cross-file aggregator; counters increment by 1 per occurrence and saturating wouldn't change the rule output; `states[0]` is exercised on a non-empty Vec the producer just inserted into"
+    reason = "analyze_source_files orchestrates the full per-source-file pipeline (per-file syn parse, per-boundary classification, cross-file simple-name aggregation); flattening loses the parallel structure with the data model; the (has_non_primitive, has_validate_derive) tuple is the compact contract between the per-file pass and the cross-file aggregator; counters increment by 1 per occurrence and saturating wouldn't change the rule output; `states[0]` is exercised on a non-empty Vec the producer just inserted into"
 )]
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use g3_guardrail_toml_types::{WaiverConfig, WaiverMatch, find_waiver_reason};
 use g3rs_garde_types::{
     G3RsGardeBoundaryFieldSite, G3RsGardeBoundaryKind, G3RsGardeDerivedBoundaryTypeSite,
     G3RsGardeInputFailureSite, G3RsGardeManualDeserializeImplSite, G3RsGardeQueryAsMacroSite,
@@ -50,7 +49,7 @@ pub(crate) fn analyze_source_files(
     rust_policy: &G3RsGardeRustPolicyInput,
 ) -> AnalyzedGardeSource {
     let mut input_failures = Vec::new();
-    let rust_policy = resolve_rust_policy(rust_policy, &mut input_failures);
+    let policy_resolved = resolve_rust_policy(rust_policy, &mut input_failures);
 
     let mut parsed_files = Vec::new();
     let mut ordered = source_files.to_vec();
@@ -218,23 +217,11 @@ pub(crate) fn analyze_source_files(
         }
 
         for macro_use in parsed_file.parsed.query_as_macros {
-            let selector = format!("{}@L{}", macro_use.macro_name, macro_use.line);
             query_as_macros.push(G3RsGardeQueryAsMacroSite {
                 rel_path: parsed_file.rel_path.clone(),
                 line: macro_use.line,
                 macro_name: macro_use.macro_name,
-                policy_resolved: rust_policy.is_some(),
-                waiver_reason: rust_policy.and_then(|waivers: &[WaiverConfig]| {
-                    find_waiver_reason(
-                        waivers,
-                        &WaiverMatch::new(
-                            "g3rs-garde/query-as-inventory",
-                            &parsed_file.rel_path,
-                            &selector,
-                        ),
-                    )
-                    .map(|reason| reason.as_str().to_owned())
-                }),
+                policy_resolved,
             });
         }
     }
@@ -351,23 +338,18 @@ fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
 }
 
 /// Implements `resolve rust policy`.
-fn resolve_rust_policy<'a>(
-    input: &'a G3RsGardeRustPolicyInput,
+fn resolve_rust_policy(
+    input: &G3RsGardeRustPolicyInput,
     input_failures: &mut Vec<G3RsGardeInputFailureSite>,
-) -> Option<&'a [WaiverConfig]> {
+) -> bool {
     match input {
-        G3RsGardeRustPolicyInput::Missing => Some(&[]),
-        G3RsGardeRustPolicyInput::Parsed {
-            rel_path: _,
-            garde_enabled: _,
-            waivers,
-        } => Some(waivers.as_slice()),
+        G3RsGardeRustPolicyInput::Missing | G3RsGardeRustPolicyInput::Parsed { .. } => true,
         G3RsGardeRustPolicyInput::Invalid { rel_path, message } => {
             input_failures.push(G3RsGardeInputFailureSite {
                 rel_path: rel_path.clone(),
                 message: message.clone(),
             });
-            None
+            false
         }
     }
 }

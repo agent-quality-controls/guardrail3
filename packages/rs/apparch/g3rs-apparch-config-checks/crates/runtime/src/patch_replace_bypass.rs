@@ -1,7 +1,5 @@
-use g3_guardrail_toml_types::{WaiverMatch, find_waiver_reason};
 use g3rs_apparch_types::{G3RsApparchPatchBypassChecksInput, G3RsApparchRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
-use guardrail3_reason_policy::validate_reason_text;
 
 const ID: &str = "g3rs-apparch/patch-replace-bypass";
 
@@ -37,13 +35,8 @@ fn push_policy_unavailable(
 pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec<G3CheckResult>) {
     let patch = &input.patch;
     let selector = patch.key.as_str();
-    let reason = match &input.rust_policy {
-        G3RsApparchRustPolicyState::Parsed { waivers, .. } => find_waiver_reason(
-            waivers,
-            &WaiverMatch::new(ID, &patch.cargo_rel_path, selector),
-        )
-        .map(g3_guardrail_toml_types::WaiverReason::as_str),
-        G3RsApparchRustPolicyState::Missing => None,
+    match &input.rust_policy {
+        G3RsApparchRustPolicyState::Parsed { .. } | G3RsApparchRustPolicyState::Missing => {}
         G3RsApparchRustPolicyState::Unreadable { rel_path, reason } => {
             push_policy_unavailable(patch, rel_path, reason, "is unreadable", results);
             return;
@@ -52,15 +45,14 @@ pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec
             push_policy_unavailable(patch, rel_path, reason, "could not be parsed", results);
             return;
         }
-    };
-
-    match reason {
-        None => results.push(G3CheckResult::new(
+    }
+    results.push(
+        G3CheckResult::new(
             ID.to_owned(),
             G3Severity::Error,
             format!("{} bypass `{}` missing waiver", patch.kind.label(), patch.key),
             format!(
-                "Internal {} entry `{}` resolves to `{}` and bypasses normal apparch dependency analysis. Add a waiver in guardrail3-rs.toml with rule = \"{}\", file = \"{}\", selector = \"{}\", and a specific reason.",
+                "Internal {} entry `{}` resolves to `{}` and bypasses normal apparch dependency analysis. Add a waiver in guardrail3-rs.toml with rule = \"{}\", subject = \"{}\", selector = \"{}\", and a specific reason.",
                 patch.kind.label(),
                 patch.key,
                 patch.target_rel_dir,
@@ -70,36 +62,7 @@ pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec
             ),
             Some(patch.cargo_rel_path.clone()),
             None,
-        )),
-        Some(reason) => match validate_reason_text(reason) {
-            Ok(()) => results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Warn,
-                format!("{} bypass `{}` is documented", patch.kind.label(), patch.key),
-                format!(
-                    "Internal {} entry `{}` resolves to `{}` with documented reason `{}`.",
-                    patch.kind.label(),
-                    patch.key,
-                    patch.target_rel_dir,
-                    reason
-                ),
-                Some(patch.cargo_rel_path.clone()),
-                None,
-            )),
-            Err(issue) => results.push(G3CheckResult::new(
-                ID.to_owned(),
-                G3Severity::Error,
-                format!("{} bypass `{}` reason too weak", patch.kind.label(), patch.key),
-                format!(
-                    "Internal {} entry `{}` resolves to `{}` but the waiver reason is too weak: {}.",
-                    patch.kind.label(),
-                    patch.key,
-                    patch.target_rel_dir,
-                    issue.message()
-                ),
-                Some(patch.cargo_rel_path.clone()),
-                None,
-            )),
-        },
-    }
+        )
+        .with_selector(selector.to_owned()),
+    );
 }

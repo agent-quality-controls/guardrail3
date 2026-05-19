@@ -12,30 +12,30 @@ garde = false
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_toml.rs"
+subject = "crates/types/src/cargo_toml.rs"
 selector = "struct:CargoToml"
 reason = "Schema mirror intentionally matches Cargo's top-level manifest surface."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_toml.rs"
+subject = "crates/types/src/cargo_toml.rs"
 selector = "struct:PackageSection"
 reason = "Schema mirror intentionally matches Cargo's package section surface."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_toml.rs"
+subject = "crates/types/src/cargo_toml.rs"
 selector = "struct:WorkspacePackageSection"
 reason = "Schema mirror intentionally matches Cargo's workspace.package section surface."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_toml.rs"
+subject = "crates/types/src/cargo_toml.rs"
 selector = "struct:DependencyDetail"
 reason = "Schema mirror intentionally matches Cargo's detailed dependency surface."
 
 [[waivers]]
 rule = "RS-CODE-SOURCE-19"
-file = "crates/types/src/cargo_toml.rs"
+subject = "crates/types/src/cargo_toml.rs"
 selector = "struct:ProfileConfig"
 reason = "Schema mirror intentionally matches Cargo's profile section surface."

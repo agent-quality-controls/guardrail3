@@ -7,78 +7,78 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroPackageSurfaceSnapshot"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroPackageScriptCommand"
 reason = "Type package exposes parsed package-script DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroPackageScriptToolInvocation"
 reason = "Type package exposes parsed package-script DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroPackageScriptParseBlocker"
 reason = "Type package exposes parsed package-script DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroConfigSurfaceSnapshot"
 reason = "Type package exposes parsed Astro config DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroIntegrationSnapshot"
 reason = "Type package exposes parsed Astro integration DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroCallSnapshot"
 reason = "Type package exposes parsed Astro call DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroStaticObjectProperty"
 reason = "Type package exposes parsed Astro static-value DTOs consumed by separate check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroMediaPolicySnapshot"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroMediaEslintSurfaceSnapshot"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroMediaIntegrationContractInput"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroMediaEslintPluginContractInput"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."
 
 [[waivers]]
 rule = "g3rs-code/public-struct-named-fields"
-file = "src/types.rs"
+subject = "src/types.rs"
 selector = "struct:G3TsAstroMediaConfigChecksInput"
 reason = "Type package exposes typed DTOs consumed by separate ingestion and check crates; fields are the public package contract."

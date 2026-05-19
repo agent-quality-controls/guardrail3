@@ -55,14 +55,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "g3-guardrail-toml-types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
-]
-
-[[package]]
 name = "g3rs-garde-source-checks"
 version = "0.1.0"
 dependencies = [
@@ -76,7 +68,6 @@ version = "0.1.0"
 dependencies = [
  "g3rs-garde-types",
  "guardrail3-check-types",
- "guardrail3-reason-policy",
 ]
 
 [[package]]
@@ -92,24 +83,12 @@ version = "0.1.0"
 dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
- "g3-guardrail-toml-types",
  "serde",
 ]
 
 [[package]]
 name = "guardrail3-check-types"
 version = "0.1.0"
-
-[[package]]
-name = "guardrail3-reason-policy"
-version = "0.0.0"
-dependencies = [
- "guardrail3-reason-policy-runtime",
-]
-
-[[package]]
-name = "guardrail3-reason-policy-runtime"
-version = "0.0.0"
 
 [[package]]
 name = "hashbrown"

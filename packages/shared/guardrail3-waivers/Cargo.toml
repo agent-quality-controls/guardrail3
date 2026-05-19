@@ -1,39 +1,37 @@
 [package]
-name = "g3-guardrail-toml-types"
+name = "guardrail3-waivers"
 version = "0.1.0"
 edition = "2024"
-description = "Shared TOML policy types for guardrail3 config parsers"
+description = "Shared waiver contract and application engine for guardrail3 findings"
 license = "MIT OR Apache-2.0"
 rust-version = "1.85"
-repository = "https://github.com/ArcticLens/websmasher"
-keywords = ["guardrail3", "toml", "policy", "types"]
+repository = "https://github.com/Agent-Quality-Controls/guardrail3"
+keywords = ["guardrail3", "waivers", "policy", "lint"]
 categories = ["config", "development-tools"]
 publish = false
+readme = "README.md"
+include = ["src/**", "Cargo.toml", "README.md", "LICENSE*"]
 
 [features]
 default = ["all"]
 all = ["api"]
 api = []
 
-[package.metadata.guardrail3]
-shared = true
-
 [dependencies]
+guardrail3-check-types = { path = "../guardrail3-check-types", version = "0.1.0" }
 serde = { version = "1", features = ["derive"] }
-toml = "0.8"
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
 
 [workspace]
 resolver = "3"
 
 [workspace.package]
 edition = "2024"
-version = "0.1.0"
-license = "MIT OR Apache-2.0"
-rust-version = "1.85"
-repository = "https://github.com/ArcticLens/websmasher"
 
 [workspace.lints.rust]
 warnings = "deny"

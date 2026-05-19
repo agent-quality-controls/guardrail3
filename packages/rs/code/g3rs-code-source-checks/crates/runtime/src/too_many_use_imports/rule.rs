@@ -22,18 +22,17 @@ pub(crate) fn check(input: &CodeSourceRuleInput<'_>, results: &mut Vec<G3CheckRe
     if use_count <= 20 {
         return;
     }
-    if crate::support::has_matching_waiver(input, ID, "top-level-use-imports") {
-        return;
-    }
-
-    results.push(G3CheckResult::new(
-        ID.to_owned(),
-        G3Severity::Error,
-        "too many use imports".to_owned(),
-        format!(
-            "{use_count} top-level use imports (max 20). Reduce imports by consolidating or splitting the file."
-        ),
-        Some(input.rel_path.to_owned()),
-        None,
-    ));
+    results.push(
+        G3CheckResult::new(
+            ID.to_owned(),
+            G3Severity::Error,
+            "too many use imports".to_owned(),
+            format!(
+                "{use_count} top-level use imports (max 20). Reduce imports by consolidating or splitting the file."
+            ),
+            Some(input.rel_path.to_owned()),
+            None,
+        )
+        .with_selector("top-level-use-imports"),
+    );
 }

@@ -12,6 +12,6 @@ allowed_deps = [
 
 [[waivers]]
 rule = "multiple_crate_versions"
-file = "Cargo.toml"
+subject = "Cargo.toml"
 selector = "lint:clippy::multiple_crate_versions"
 reason = "This internal workspace package intentionally depends on parser crates that currently pull overlapping transitive versions."

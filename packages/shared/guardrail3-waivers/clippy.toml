@@ -136,10 +136,10 @@ disallowed-types = [
     # --- Ban std::sync::Mutex/RwLock (use parking_lot) ---
     { path = "std::sync::Mutex", reason = "Use parking_lot::Mutex -- no poisoning, better performance" },
     { path = "std::sync::RwLock", reason = "Use parking_lot::RwLock -- no poisoning, better performance" },
-    { path = "std::sync::LazyLock", reason = "Use explicit dependency wiring instead of process-global lazy state" },
-    { path = "std::sync::OnceLock", reason = "Use explicit dependency wiring instead of process-global one-time state" },
-    { path = "once_cell::sync::Lazy", reason = "Use explicit dependency wiring instead of process-global lazy state" },
-    { path = "once_cell::sync::OnceCell", reason = "Use explicit dependency wiring instead of process-global one-time state" },
+    { path = "std::sync::LazyLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "std::sync::OnceLock", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::Lazy", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
+    { path = "once_cell::sync::OnceCell", reason = "Use DI and explicit state threading -- global lazy state hides ownership and makes tests brittle" },
     # --- Ban std::fs::File (use centralized fs module) ---
     { path = "std::fs::File", reason = "BANNED: Create a centralized fs module -- no direct file handle construction" },
     # --- Ban std::any::Any (type erasure bypasses typed boundaries) ---

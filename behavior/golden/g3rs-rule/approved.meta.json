@@ -1,10 +1,10 @@
 {
   "suite": "g3rs-rule",
   "kind": "approved",
-  "run_id": "2026-05-19T09-55-46.489081Z-d06b5496",
-  "run_commit": "60d929764",
+  "run_id": "2026-05-19T13-48-03.640303Z-d06b5496",
+  "run_commit": "ad4969b4e",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-19T09:55:46.489081Z",
+  "recorded_at": "2026-05-19T13:48:03.640303Z",
   "fixture_hash": "sha256:074651e50643245e17bfafa37a3456c9a9b175dbaf9d2a00d0f5ee6f588c1483",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
@@ -263,5 +263,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "universal waiver policy adds deps direct dependency cap waiver warning and exact unwaived guidance"
+  "comment": "central-waiver-engine"
 }

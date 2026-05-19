@@ -1,7 +1,6 @@
 use cargo_config_toml_parser::types::CargoConfigToml;
 use cargo_toml_parser::types::CargoTomlDocument;
 use clippy_toml_parser::types::ClippyTomlDocument;
-use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_toml_parser::types::RustProfile;
 use serde::Serialize;
 
@@ -90,7 +89,6 @@ pub struct G3RsClippyConfigChecksInput {
     pub cargo_root: G3RsClippyCargoRootState,
     pub cargo_workspace_members: Vec<G3RsClippyCargoMemberState>,
     pub cargo_configs: Vec<G3RsClippyCargoConfigState>,
-    pub waivers: Vec<WaiverConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

@@ -1,11 +1,11 @@
 {
   "suite": "g3ts-rule",
-  "kind": "received",
-  "run_id": "2026-05-18T18-57-35.49679Z-d06b5496",
-  "run_commit": "68745c957",
+  "kind": "approved",
+  "run_id": "2026-05-19T13-49-39.844935Z-d06b5496",
+  "run_commit": "ad4969b4e",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T18:57:35.49679Z",
-  "fixture_hash": "sha256:3ebf216101f41fb0afa7b85c2a1b63e75170c8b6cdba9a762c1fac4eaf661615",
+  "recorded_at": "2026-05-19T13:49:39.844935Z",
+  "fixture_hash": "sha256:e4a5683c6a75c770699872382c6b27f399b0729336d8855590943e4bb1091eea",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -173,6 +173,10 @@
     {
       "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R30-validate-not-wired/fixture.toml",
       "sha256": "sha256:6e53f62e7434ac040974820037da28115a3bebe91aaae4a033f72eadc98bf58b"
+    },
+    {
+      "path": "behavior/fixtures/g3ts-rule/fmt/fmt-R40-prettier-config-waived/fixture.toml",
+      "sha256": "sha256:bb210a293db1622230a60b3b1ba4cf8aeb358bb722a3a5d8612e5f8967cc5a8a"
     },
     {
       "path": "behavior/fixtures/g3ts-rule/hooks/hooks-R00-clean-golden/fixture.toml",
@@ -350,5 +354,6 @@
       "path": "behavior/fixtures/g3ts-rule/typecov/typecov-R50-non100-policy-clean/fixture.toml",
       "sha256": "sha256:b1fa8c953aeba6cad6a7e2523197cb5979d706f0caebee73ffd476337589873d"
     }
-  ]
+  ],
+  "comment": "central-waiver-engine"
 }

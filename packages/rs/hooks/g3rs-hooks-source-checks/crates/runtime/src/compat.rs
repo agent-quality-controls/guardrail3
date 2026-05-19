@@ -6,7 +6,7 @@ pub(crate) struct G3CheckResult(guardrail3_check_types::G3CheckResult);
 
 impl G3CheckResult {
     /// `from_parts` function.
-    pub(crate) const fn from_parts(
+    pub(crate) fn from_parts(
         id: String,
         severity: G3Severity,
         title: String,

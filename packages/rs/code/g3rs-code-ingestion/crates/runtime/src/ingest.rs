@@ -1,4 +1,3 @@
-use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_code_types::{G3RsCodeSourceChecksInput, G3RsSourceFile};
 
 /// Bundle of per-source-file metadata threaded into `assemble`.
@@ -15,8 +14,6 @@ pub(crate) struct AssembleInputs {
     pub(crate) is_library_root: bool,
     /// Whether the owning crate opts into `package.metadata.guardrail3.shared = true`.
     pub(crate) is_shared_crate: bool,
-    /// Waivers declared in the nearest enclosing `guardrail3-rs.toml`.
-    pub(crate) waivers: Vec<WaiverConfig>,
 }
 
 /// Build one `code` source checks input from selected metadata and source text.
@@ -30,6 +27,5 @@ pub(crate) fn assemble(inputs: AssembleInputs) -> G3RsCodeSourceChecksInput {
             is_library_root: inputs.is_library_root,
         },
         is_shared_crate: inputs.is_shared_crate,
-        waivers: inputs.waivers,
     }
 }

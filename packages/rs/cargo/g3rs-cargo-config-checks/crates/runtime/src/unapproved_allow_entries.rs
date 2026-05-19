@@ -1,26 +1,20 @@
 use cargo_toml_parser::types::ToolLints;
 use g3rs_cargo_types::G3RsCargoPolicyRoot;
 use guardrail3_check_types::G3CheckResult;
-use guardrail3_reason_policy::validate_reason_text;
 
 use crate::support::{
     allow_selector, explicit_allow_entries, is_approved_allow, lints_table_is_well_formed,
-    policy_override_lints, root_package_policy_lints, rust_policy_valid, rust_policy_waivers,
-    waiver_reason,
+    policy_override_lints, root_package_policy_lints, rust_policy_valid,
 };
 
 /// I D const.
 const ID: &str = "g3rs-cargo/unapproved-allow-entries";
 
-/// Counts of unapproved `allow` entries classified by waiver-reason status.
+/// Counts of unapproved `allow` entries.
 #[derive(Default)]
 struct AllowCounts {
-    /// Unapproved `allow` entries with a useful waiver reason.
-    documented: usize,
-    /// Unapproved `allow` entries that lacked any waiver reason.
-    missing_reason: usize,
-    /// Unapproved `allow` entries with a waiver reason judged too weak.
-    weak_reason: usize,
+    /// Unapproved `allow` entries found.
+    total: usize,
 }
 
 /// check fn.
@@ -46,9 +40,7 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
         }
     }
 
-    let total = counts
-        .documented
-        .saturating_add(counts.missing_reason.saturating_add(counts.weak_reason));
+    let total = counts.total;
     if total == 0 && lint_tables_well_formed && rust_policy_valid(root) {
         results.push(crate::support::info(
             ID,
@@ -64,8 +56,8 @@ pub(crate) fn check(root: &G3RsCargoPolicyRoot, results: &mut Vec<G3CheckResult>
             ID,
             "unapproved allow count",
             format!(
-                "`{}` has {total} unapproved manifest allow entries ({} documented, {} missing reasons, {} weak reasons).",
-                root.cargo_rel_path, counts.documented, counts.missing_reason, counts.weak_reason
+                "`{}` has {total} unapproved manifest allow entries.",
+                root.cargo_rel_path
             ),
             &root.cargo_rel_path,
         ));
@@ -97,50 +89,18 @@ fn classify_unapproved_allow(
     results: &mut Vec<G3CheckResult>,
 ) {
     let selector = allow_selector(family, lint_name);
-    match waiver_reason(
-        rust_policy_waivers(root),
-        ID,
-        &root.cargo_rel_path,
-        &selector,
-    ) {
-        None => {
-            counts.missing_reason = counts.missing_reason.saturating_add(1);
-            results.push(crate::support::error(
-                ID,
-                "unapproved allow entry missing reason",
-                format!(
-                    "`{}` explicitly allows `{lint_name}` in `{family}` without a matching waiver reason. Add a waiver entry in guardrail3-rs.toml for this lint with a reason.",
-                    root.cargo_rel_path
-                ),
-                &root.cargo_rel_path,
-            ));
-        }
-        Some(reason) => match validate_reason_text(reason) {
-            Ok(()) => {
-                counts.documented = counts.documented.saturating_add(1);
-                results.push(crate::support::error(
-                    ID,
-                    "unapproved allow entry",
-                    format!(
-                        "`{}` explicitly allows `{lint_name}` in `{family}`. Remove this `allow` override or get it added to the approved inventory.",
-                        root.cargo_rel_path
-                    ),
-                    &root.cargo_rel_path,
-                ));
-            }
-            Err(issue) => {
-                counts.weak_reason = counts.weak_reason.saturating_add(1);
-                results.push(crate::support::error(
-                    ID,
-                    "unapproved allow entry reason too weak",
-                    format!(
-                        "`{}` explicitly allows `{lint_name}` in `{family}` with a weak reason: {}.",
-                        root.cargo_rel_path,
-                        issue.message()
-                    ),
-                    &root.cargo_rel_path,
-                ));
-            }
-        },
-    }
+    counts.total = counts.total.saturating_add(1);
+    results.push(
+        crate::support::error(
+            ID,
+            "unapproved allow entry",
+            format!(
+                "`{}` explicitly allows `{lint_name}` in `{family}`. Remove this `allow` override or add `[[waivers]]` with rule = \"{ID}\", subject = \"{}\", selector = \"{selector}\", and a specific reason.",
+                root.cargo_rel_path,
+                root.cargo_rel_path
+            ),
+            &root.cargo_rel_path,
+        )
+        .with_selector(selector),
+    );
 }

@@ -52,7 +52,6 @@ pub fn ingest_for_source_checks(
                 profile_name: selected.profile_name,
                 is_library_root: selected.is_library_root,
                 is_shared_crate: selected.is_shared_crate,
-                waivers: selected.waivers,
             }))
         })
         .collect()

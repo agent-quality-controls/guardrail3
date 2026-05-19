@@ -16,12 +16,12 @@ garde = false
 
 [[waivers]]
 rule = "g3rs-code/too-many-effective-code-lines"
-file = "crates/runtime/src/parser.rs"
+subject = "crates/runtime/src/parser.rs"
 selector = "effective-code-lines"
 reason = "Astro config parser is a SWC reducer state machine; splitting it safely requires a dedicated parser-module extraction."
 
 [[waivers]]
 rule = "g3rs-code/too-many-use-imports"
-file = "crates/runtime/src/parser.rs"
+subject = "crates/runtime/src/parser.rs"
 selector = "top-level-use-imports"
 reason = "Astro config parser imports one SWC AST surface in a single reducer; reducing imports safely belongs with the parser-module split."

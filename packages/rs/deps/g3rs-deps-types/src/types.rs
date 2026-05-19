@@ -1,4 +1,3 @@
-use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_toml_parser::types::RustProfile;
 use serde::Serialize;
 
@@ -53,8 +52,6 @@ pub struct G3RsDepsConfigChecksInput {
     pub allowed_deps: Vec<String>,
     /// Normalized external dependency entries owned by config checks.
     pub dependencies: Vec<G3RsDepsResolvedDependency>,
-    /// Waivers declared by the workspace policy.
-    pub waivers: Vec<WaiverConfig>,
     /// Tool names discovered on PATH for the pointed workspace process environment.
     pub installed_tools: Vec<String>,
 }
