@@ -377,6 +377,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "g3-guardrail-toml-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "g3-workspace-crawl"
 version = "0.1.0"
 dependencies = [
@@ -1294,6 +1302,7 @@ dependencies = [
 name = "g3ts-toml-parser-types"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "serde",
  "toml",
 ]

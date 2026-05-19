@@ -30,9 +30,9 @@ all-features = true
 cargo-config-toml-parser = { path = "../../../../../parsers/cargo-config-toml-parser", version = "0.1.0" }
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
+g3-guardrail-toml-types = { path = "../../../../../parsers/g3-guardrail-toml-types", version = "0.1.0" }
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 g3rs-clippy-types = { path = "../../../g3rs-clippy-types", version = "0.1.0" }
 g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", version = "0.1.0", default-features = false, features = ["api"] }
 glob = "0.3"
 toml = "0.8"
-

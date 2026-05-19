@@ -1,10 +1,11 @@
 use cargo_toml_parser::types::CargoToml;
+use g3_guardrail_toml_types::WaiverConfig;
 use g3_workspace_crawl::G3WorkspaceCrawl;
 /// Public ingestion entry point.
 use g3rs_garde_source_checks_types::G3RsGardeSourceChecksInput;
 use g3rs_garde_types::{
     G3RsGardeApplicability, G3RsGardeClippyInput, G3RsGardeConfigChecksInput,
-    G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsGardeWaiver, G3RsSourceFile,
+    G3RsGardeFileTreeChecksInput, G3RsGardeRustPolicyInput, G3RsSourceFile,
 };
 use g3rs_toml_parser::types::Guardrail3RsToml;
 
@@ -195,17 +196,8 @@ const fn rust_policy_enables_garde(policy: &G3RsGardeRustPolicyInput) -> bool {
 }
 
 /// Implements `collect waivers`.
-fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<G3RsGardeWaiver> {
-    parsed
-        .waivers
-        .iter()
-        .map(|waiver| G3RsGardeWaiver {
-            rule: waiver.rule.clone(),
-            file: waiver.file.clone(),
-            selector: waiver.selector.clone(),
-            reason: waiver.reason.clone(),
-        })
-        .collect()
+fn collect_waivers(parsed: &Guardrail3RsToml) -> Vec<WaiverConfig> {
+    parsed.waivers.clone()
 }
 
 /// Stub file-tree ingestion entry point for the garde family.

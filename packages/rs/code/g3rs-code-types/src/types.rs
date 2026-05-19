@@ -3,6 +3,7 @@
 use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::types::ClippyToml;
 use deny_toml_parser::types::DenyToml;
+use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_toml_parser::types::Guardrail3RsToml;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::types::RustfmtToml;
@@ -108,20 +109,7 @@ pub struct G3RsCodeSourceChecksInput {
     /// True when the file belongs to a shared (cross-family) crate.
     pub is_shared_crate: bool,
     /// Waiver entries that may suppress findings on this file.
-    pub waivers: Vec<G3RsCodeWaiver>,
-}
-
-/// A waiver that suppresses a specific rule on a specific selector.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct G3RsCodeWaiver {
-    /// Rule identifier the waiver applies to.
-    pub rule: String,
-    /// Repo-relative path of the file the waiver applies to.
-    pub file: String,
-    /// Selector inside the file (item path or similar).
-    pub selector: String,
-    /// Justification text for the waiver.
-    pub reason: String,
+    pub waivers: Vec<WaiverConfig>,
 }
 
 /// A structural cap root used for module-tree size checks.

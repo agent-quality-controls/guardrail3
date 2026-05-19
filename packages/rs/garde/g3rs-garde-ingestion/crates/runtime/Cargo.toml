@@ -29,6 +29,7 @@ all-features = true
 [dependencies]
 cargo-toml-parser = { path = "../../../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../../../parsers/clippy-toml-parser", version = "0.1.0" }
+g3-guardrail-toml-types = { path = "../../../../../parsers/g3-guardrail-toml-types", version = "0.1.0" }
 g3rs-toml-parser = { path = "../../../../../parsers/g3rs-toml-parser", version = "0.1.0" }
 g3rs-garde-source-checks-types = { path = "../../../g3rs-garde-source-checks/crates/types", version = "0.1.0" }
 g3rs-garde-types = { path = "../../../g3rs-garde-types", version = "0.1.0" }
@@ -37,4 +38,3 @@ g3-workspace-crawl = { path = "../../../../../shared/g3-workspace-crawl", versio
 proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1.0.45"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
-

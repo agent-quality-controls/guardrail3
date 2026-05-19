@@ -1,3 +1,4 @@
+use g3_guardrail_toml_types::{WaiverConfig, WaiverMatch, find_waiver_reason};
 use g3rs_fmt_types::{G3RsFmtConfigChecksInput, G3RsFmtRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
@@ -15,19 +16,18 @@ pub(crate) fn check(input: &G3RsFmtConfigChecksInput, results: &mut Vec<G3CheckR
     }
 
     let ignore = format!("{:?}", rustfmt.ignore);
-    let empty = Vec::new();
+    let empty = Vec::<WaiverConfig>::new();
     let waivers = match &input.rust_policy {
         G3RsFmtRustPolicyState::Parsed { waivers, .. } => waivers,
         G3RsFmtRustPolicyState::Missing
         | G3RsFmtRustPolicyState::Unreadable { .. }
         | G3RsFmtRustPolicyState::ParseError { .. } => &empty,
     };
-    let reason = waivers
-        .iter()
-        .find(|entry| {
-            entry.rule == ID && entry.file == input.rustfmt_rel_path && entry.selector == "ignore"
-        })
-        .map(|entry| entry.reason.as_str());
+    let reason = find_waiver_reason(
+        waivers,
+        &WaiverMatch::new(ID, &input.rustfmt_rel_path, "ignore"),
+    )
+    .map(g3_guardrail_toml_types::WaiverReason::as_str);
 
     match reason {
         None => results.push(G3CheckResult::new(

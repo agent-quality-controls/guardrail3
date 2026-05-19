@@ -1,3 +1,4 @@
+use g3_guardrail_toml_types::{WaiverMatch, find_waiver_reason};
 use g3rs_apparch_types::{G3RsApparchPatchBypassChecksInput, G3RsApparchRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 use guardrail3_reason_policy::validate_reason_text;
@@ -37,14 +38,11 @@ pub(crate) fn check(input: &G3RsApparchPatchBypassChecksInput, results: &mut Vec
     let patch = &input.patch;
     let selector = patch.key.as_str();
     let reason = match &input.rust_policy {
-        G3RsApparchRustPolicyState::Parsed { waivers, .. } => waivers
-            .iter()
-            .find(|waiver| {
-                waiver.rule == ID
-                    && waiver.file == patch.cargo_rel_path
-                    && waiver.selector == selector
-            })
-            .map(|waiver| waiver.reason.as_str()),
+        G3RsApparchRustPolicyState::Parsed { waivers, .. } => find_waiver_reason(
+            waivers,
+            &WaiverMatch::new(ID, &patch.cargo_rel_path, selector),
+        )
+        .map(g3_guardrail_toml_types::WaiverReason::as_str),
         G3RsApparchRustPolicyState::Missing => None,
         G3RsApparchRustPolicyState::Unreadable { rel_path, reason } => {
             push_policy_unavailable(patch, rel_path, reason, "is unreadable", results);

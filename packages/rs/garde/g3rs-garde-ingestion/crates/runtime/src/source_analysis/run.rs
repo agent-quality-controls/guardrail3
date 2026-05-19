@@ -4,16 +4,16 @@
     clippy::type_complexity,
     clippy::arithmetic_side_effects,
     clippy::indexing_slicing,
-    clippy::excessive_nesting,
     reason = "analyze_source_files orchestrates the full per-source-file pipeline (per-file syn parse, per-boundary classification, per-rule waiver application, cross-file simple-name aggregation); flattening loses the parallel structure with the data model; the (has_non_primitive, has_validate_derive) tuple is the compact contract between the per-file pass and the cross-file aggregator; counters increment by 1 per occurrence and saturating wouldn't change the rule output; `states[0]` is exercised on a non-empty Vec the producer just inserted into"
 )]
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use g3_guardrail_toml_types::{WaiverConfig, WaiverMatch, find_waiver_reason};
 use g3rs_garde_types::{
     G3RsGardeBoundaryFieldSite, G3RsGardeBoundaryKind, G3RsGardeDerivedBoundaryTypeSite,
     G3RsGardeInputFailureSite, G3RsGardeManualDeserializeImplSite, G3RsGardeQueryAsMacroSite,
-    G3RsGardeRustPolicyInput, G3RsGardeWaiver, G3RsSourceFile,
+    G3RsGardeRustPolicyInput, G3RsSourceFile,
 };
 
 use super::parse;
@@ -224,15 +224,16 @@ pub(crate) fn analyze_source_files(
                 line: macro_use.line,
                 macro_name: macro_use.macro_name,
                 policy_resolved: rust_policy.is_some(),
-                waiver_reason: rust_policy.and_then(|waivers: &[G3RsGardeWaiver]| {
-                    waivers
-                        .iter()
-                        .find(|waiver| {
-                            waiver.rule == "g3rs-garde/query-as-inventory"
-                                && waiver.file == parsed_file.rel_path
-                                && waiver.selector == selector
-                        })
-                        .map(|waiver| waiver.reason.clone())
+                waiver_reason: rust_policy.and_then(|waivers: &[WaiverConfig]| {
+                    find_waiver_reason(
+                        waivers,
+                        &WaiverMatch::new(
+                            "g3rs-garde/query-as-inventory",
+                            &parsed_file.rel_path,
+                            &selector,
+                        ),
+                    )
+                    .map(|reason| reason.as_str().to_owned())
                 }),
             });
         }
@@ -353,7 +354,7 @@ fn strip_local_path_prefixes(candidate_name: &str) -> Option<&str> {
 fn resolve_rust_policy<'a>(
     input: &'a G3RsGardeRustPolicyInput,
     input_failures: &mut Vec<G3RsGardeInputFailureSite>,
-) -> Option<&'a [G3RsGardeWaiver]> {
+) -> Option<&'a [WaiverConfig]> {
     match input {
         G3RsGardeRustPolicyInput::Missing => Some(&[]),
         G3RsGardeRustPolicyInput::Parsed {

@@ -23,6 +23,4 @@ pub use types::G3RsCargoRustPolicyState;
 #[cfg(feature = "api")]
 pub use types::G3RsCargoSourceChecksInput;
 #[cfg(feature = "api")]
-pub use types::G3RsCargoWaiver;
-#[cfg(feature = "api")]
 pub use types::G3RsCargoWorkspaceMember;

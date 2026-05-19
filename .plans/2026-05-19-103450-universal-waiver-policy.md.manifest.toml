@@ -1,0 +1,86 @@
+[[package]]
+path = "packages/parsers/g3-guardrail-toml-types"
+kind = "shared-parser-types"
+
+[[public_api]]
+crate = "g3-guardrail-toml-types"
+symbols = [
+  "WaiverConfig",
+  "WaiverMatch",
+  "WaiverReason",
+  "find_waiver_reason",
+  "has_waiver",
+]
+
+[[parser_schema]]
+parser = "g3rs-toml-parser"
+root_type = "Guardrail3RsToml"
+must_have_field = "waivers"
+waiver_type_owner = "g3-guardrail-toml-types"
+
+[[parser_schema]]
+parser = "g3ts-toml-parser"
+root_type = "Guardrail3TsToml"
+must_have_field = "waivers"
+waiver_type_owner = "g3-guardrail-toml-types"
+
+[[forbidden_type]]
+path = "packages/rs/cargo/g3rs-cargo-types/src/types.rs"
+name = "G3RsCargoWaiver"
+
+[[forbidden_type]]
+path = "packages/rs/clippy/g3rs-clippy-types/src/types.rs"
+name = "G3RsClippyWaiver"
+
+[[forbidden_type]]
+path = "packages/rs/code/g3rs-code-types/src/types.rs"
+name = "G3RsCodeWaiver"
+
+[[forbidden_type]]
+path = "packages/rs/fmt/g3rs-fmt-types/src/types.rs"
+name = "G3RsFmtWaiver"
+
+[[forbidden_type]]
+path = "packages/rs/garde/g3rs-garde-types/src/lib.rs"
+name = "G3RsGardeWaiver"
+
+[[waiver_consumer]]
+family = "cargo"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "clippy"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "code"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "fmt"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "garde"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "arch"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "apparch"
+must_use_shared_matcher = true
+
+[[waiver_consumer]]
+family = "deps"
+must_use_shared_matcher = true
+
+[[rule_contract]]
+rule = "g3rs-deps/direct-dependency-cap"
+selector = "unique-direct-dependency-count"
+waived_severity = "Warn"
+unwaived_severity = "Error"
+
+[[verifier]]
+path = "scripts/verify-universal-waiver-policy.py"

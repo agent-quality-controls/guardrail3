@@ -1,4 +1,4 @@
-use g3rs_toml_parser::types::WaiverConfig;
+use g3_guardrail_toml_types::WaiverConfig;
 use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

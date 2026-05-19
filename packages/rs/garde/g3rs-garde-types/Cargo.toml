@@ -19,7 +19,7 @@ api = []
 shared = true
 
 [workspace]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 edition = "2024"
@@ -91,4 +91,5 @@ workspace = true
 [dependencies]
 cargo-toml-parser = { path = "../../../parsers/cargo-toml-parser", version = "0.1.0" }
 clippy-toml-parser = { path = "../../../parsers/clippy-toml-parser", version = "0.1.0" }
+g3-guardrail-toml-types = { path = "../../../parsers/g3-guardrail-toml-types", version = "0.1.0" }
 serde = { version = "1", features = ["derive"] }

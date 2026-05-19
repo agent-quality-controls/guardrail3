@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 
+pub use g3_guardrail_toml_types::WaiverConfig;
 use serde::{Deserialize, Serialize};
 use toml::Value;
 
@@ -54,17 +55,6 @@ pub struct RustChecksConfig {
     pub release: Option<bool>,
     pub hooks_shared: Option<bool>,
     pub hooks_rs: Option<bool>,
-    #[serde(flatten)]
-    pub extra: BTreeMap<String, Value>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub struct WaiverConfig {
-    pub rule: String,
-    pub file: String,
-    pub selector: String,
-    pub reason: String,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
 }

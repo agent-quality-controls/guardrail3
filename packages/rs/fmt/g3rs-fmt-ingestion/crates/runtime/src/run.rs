@@ -3,7 +3,7 @@ use g3_workspace_crawl::G3WorkspaceCrawl;
 use g3rs_fmt_types::{
     G3RsFmtCargoState, G3RsFmtConfigChecksInput, G3RsFmtFileTreeChecksInput,
     G3RsFmtRustPolicyState, G3RsFmtRustfmtConfigState, G3RsFmtSourceChecksInput,
-    G3RsFmtToolchainState, G3RsFmtWaiver,
+    G3RsFmtToolchainState,
 };
 
 /// Re-export of `G3RsFmtIngestionError` so the facade can reach it.
@@ -154,15 +154,6 @@ fn ingest_rust_policy(crawl: &G3WorkspaceCrawl) -> G3RsFmtRustPolicyState {
     };
     G3RsFmtRustPolicyState::Parsed {
         rel_path: entry.path.rel_path.clone(),
-        waivers: parsed
-            .waivers
-            .into_iter()
-            .map(|waiver| G3RsFmtWaiver {
-                rule: waiver.rule,
-                file: waiver.file,
-                selector: waiver.selector,
-                reason: waiver.reason,
-            })
-            .collect(),
+        waivers: parsed.waivers,
     }
 }

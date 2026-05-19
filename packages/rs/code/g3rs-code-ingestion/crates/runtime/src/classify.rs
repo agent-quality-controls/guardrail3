@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use cargo_toml_parser::{types::CargoToml, types::Value};
+use g3_guardrail_toml_types::WaiverConfig;
 use g3_workspace_crawl::{G3WorkspaceCrawl, G3WorkspaceEntryKind};
-use g3rs_code_types::G3RsCodeWaiver;
 use g3rs_toml_parser::parse as parse_guardrail3_toml;
 
 use crate::run::IngestionError;
@@ -29,7 +29,7 @@ pub(crate) fn is_test_root_path(rel_path: &str) -> bool {
     file_name.ends_with("_test.rs") || file_name.ends_with("_tests.rs")
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 /// Struct `SourceProfile` used by this module.
 pub(crate) struct SourceProfile {
     /// Field `profile_name`.
@@ -39,7 +39,7 @@ pub(crate) struct SourceProfile {
     /// Field `is_shared_crate`.
     pub(crate) is_shared_crate: bool,
     /// Field `waivers`.
-    pub(crate) waivers: Vec<G3RsCodeWaiver>,
+    pub(crate) waivers: Vec<WaiverConfig>,
 }
 
 #[derive(Debug)]
@@ -61,7 +61,7 @@ struct PackageTargets {
     /// Field `is_shared_crate`.
     is_shared_crate: bool,
     /// Field `waivers`.
-    waivers: Vec<G3RsCodeWaiver>,
+    waivers: Vec<WaiverConfig>,
 }
 
 impl CargoTargetClassifier {
@@ -238,7 +238,7 @@ fn load_package_targets(
 }
 
 /// List of waivers parsed from a `guardrail3-rs.toml` policy file.
-type ManifestWaivers = Vec<G3RsCodeWaiver>;
+type ManifestWaivers = Vec<WaiverConfig>;
 
 /// Implements `manifest guardrail3 waivers`.
 fn manifest_guardrail3_waivers(
@@ -271,16 +271,7 @@ fn manifest_guardrail3_waivers(
         reason: err.to_string(),
     })?;
 
-    Ok(parsed
-        .waivers
-        .into_iter()
-        .map(|waiver| G3RsCodeWaiver {
-            rule: waiver.rule,
-            file: waiver.file,
-            selector: waiver.selector,
-            reason: waiver.reason,
-        })
-        .collect())
+    Ok(parsed.waivers)
 }
 
 /// Implements `nearest guardrail3 rel path`.

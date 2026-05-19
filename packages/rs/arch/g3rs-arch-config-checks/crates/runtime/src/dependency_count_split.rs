@@ -1,3 +1,4 @@
+use g3_guardrail_toml_types::{WaiverMatch, has_waiver as shared_has_waiver};
 use g3rs_arch_types::types::{G3RsArchConfigCrate, G3RsArchRustPolicyState};
 use guardrail3_check_types::{G3CheckResult, G3Severity};
 
@@ -34,7 +35,8 @@ fn has_waiver(node: &G3RsArchConfigCrate, rust_policy: &G3RsArchRustPolicyState)
     let G3RsArchRustPolicyState::Parsed { waivers, .. } = rust_policy else {
         return false;
     };
-    waivers.iter().any(|waiver| {
-        waiver.rule == ID && waiver.file == node.cargo_rel_path && waiver.selector == SELECTOR
-    })
+    shared_has_waiver(
+        waivers,
+        &WaiverMatch::new(ID, &node.cargo_rel_path, SELECTOR),
+    )
 }

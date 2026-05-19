@@ -1,5 +1,6 @@
 use cargo_toml_parser::types::CargoToml;
 use clippy_toml_parser::types::ClippyToml;
+use g3_guardrail_toml_types::WaiverConfig;
 use serde::Serialize;
 use std::path::PathBuf;
 
@@ -107,21 +108,13 @@ pub struct G3RsGardeInputFailureSite {
     pub message: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct G3RsGardeWaiver {
-    pub rule: String,
-    pub file: String,
-    pub selector: String,
-    pub reason: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsGardeRustPolicyInput {
     Missing,
     Parsed {
         rel_path: String,
         garde_enabled: bool,
-        waivers: Vec<G3RsGardeWaiver>,
+        waivers: Vec<WaiverConfig>,
     },
     Invalid {
         rel_path: String,

@@ -1,11 +1,11 @@
 {
   "suite": "g3rs-rule",
   "kind": "approved",
-  "run_id": "2026-05-18T11-54-06.241276Z-d06b5496",
-  "run_commit": "cf3fad18d",
+  "run_id": "2026-05-19T09-55-46.489081Z-d06b5496",
+  "run_commit": "60d929764",
   "working_tree": "dirty",
-  "recorded_at": "2026-05-18T11:54:06.241276Z",
-  "fixture_hash": "sha256:388712ad5a7e2580830d8ef3ebbf62ea13beb801542040b552c07b64a8dddb74",
+  "recorded_at": "2026-05-19T09:55:46.489081Z",
+  "fixture_hash": "sha256:074651e50643245e17bfafa37a3456c9a9b175dbaf9d2a00d0f5ee6f588c1483",
   "manifest_hash": "sha256:d06b5496eaf8419209ccfa3d4f9bac379bbd96d4f0f700d1e723f55f26b169da",
   "tool_version": "0.1.8",
   "output_schema_version": "1",
@@ -135,6 +135,10 @@
       "sha256": "sha256:c57746f054de1296eb4f36f3736cb4d1ec8e94f6252b333301efce8578f597db"
     },
     {
+      "path": "behavior/fixtures/g3rs-rule/deps/deps-R22-direct-dependency-cap-waived/fixture.toml",
+      "sha256": "sha256:f556621e19213ba7e6cec9c2ba9f48cd60688f74203403530dc153ec00935a1c"
+    },
+    {
       "path": "behavior/fixtures/g3rs-rule/fmt/fmt-R00-clean-golden/fixture.toml",
       "sha256": "sha256:adebb10f0071bee476e2bdfc9a9938499c8d7d173e673ac47c3d30cc4c241e0b"
     },
@@ -259,5 +263,5 @@
       "sha256": "sha256:d455a123ef73726164e907c351bf24481b7dc4ad2866b5244e751f774d25c0f4"
     }
   ],
-  "comment": "Approve dynamic workspace rust-version wording for cargo-msrv hook contract."
+  "comment": "universal waiver policy adds deps direct dependency cap waiver warning and exact unwaived guidance"
 }

@@ -78,6 +78,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "g3-guardrail-toml-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "g3rs-code-source-checks"
 version = "0.1.0"
 dependencies = [
@@ -89,6 +97,7 @@ dependencies = [
 name = "g3rs-code-source-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "g3rs-code-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -104,6 +113,7 @@ dependencies = [
  "cargo-toml-parser",
  "clippy-toml-parser",
  "deny-toml-parser",
+ "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "rust-toolchain-toml-parser",
  "rustfmt-toml-parser",
@@ -129,6 +139,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "serde",
  "toml",
 ]

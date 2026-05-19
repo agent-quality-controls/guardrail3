@@ -2,6 +2,7 @@ use clippy_toml_parser::types::{
     ClippyBanEntry as ParserBanEntry, ClippyBanSection as ParserBanSection,
     ClippyBoolSetting as ParserBoolSetting, ClippyToml, ClippyTomlDocument,
 };
+use g3_guardrail_toml_types::{WaiverMatch, has_waiver};
 use g3rs_clippy_types::{
     G3RsClippyCargoMemberState, G3RsClippyCargoRootState, G3RsClippyConfigChecksInput,
     G3RsClippyConfigState, G3RsClippyRustPolicyState,
@@ -198,9 +199,10 @@ pub(crate) fn has_matching_waiver(
     rule: &str,
     selector: &str,
 ) -> bool {
-    input.waivers.iter().any(|waiver| {
-        waiver.rule == rule && waiver.file == input.clippy_rel_path && waiver.selector == selector
-    })
+    has_waiver(
+        &input.waivers,
+        &WaiverMatch::new(rule, &input.clippy_rel_path, selector),
+    )
 }
 
 /// fn const.

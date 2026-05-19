@@ -21,5 +21,3 @@ pub use types::G3RsFmtRustfmtConfigState;
 pub use types::G3RsFmtSourceChecksInput;
 #[cfg(feature = "api")]
 pub use types::G3RsFmtToolchainState;
-#[cfg(feature = "api")]
-pub use types::G3RsFmtWaiver;

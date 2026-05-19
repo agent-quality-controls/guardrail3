@@ -9,6 +9,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
+name = "g3-guardrail-toml-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "g3rs-apparch-config-checks"
 version = "0.1.0"
 dependencies = [
@@ -20,6 +28,7 @@ dependencies = [
 name = "g3rs-apparch-config-checks-runtime"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "g3rs-apparch-types",
  "guardrail3-check-types",
  "guardrail3-reason-policy",
@@ -29,6 +38,7 @@ dependencies = [
 name = "g3rs-apparch-types"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "g3rs-toml-parser",
  "serde",
 ]
@@ -52,6 +62,7 @@ dependencies = [
 name = "g3rs-toml-parser-types"
 version = "0.1.0"
 dependencies = [
+ "g3-guardrail-toml-types",
  "serde",
  "toml",
 ]

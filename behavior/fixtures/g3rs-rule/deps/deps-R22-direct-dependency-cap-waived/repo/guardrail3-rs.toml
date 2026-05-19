@@ -1,0 +1,39 @@
+profile = "library"
+
+allowed_deps = [
+  "dep01",
+  "dep02",
+  "dep03",
+  "dep04",
+  "dep05",
+  "dep06",
+  "dep07",
+  "dep08",
+  "dep09",
+  "dep10",
+  "dep11",
+  "dep12",
+  "dep13",
+  "dep14",
+  "dep15",
+  "dep16",
+  "dep17",
+  "dep18",
+  "dep19",
+  "dep20",
+  "dep21",
+  "dep22",
+  "dep23",
+  "dep24",
+  "dep25",
+  "dep26",
+]
+
+[[waivers]]
+rule = "g3rs-deps/direct-dependency-cap"
+file = "Cargo.toml"
+selector = "unique-direct-dependency-count"
+reason = "This fixture intentionally keeps 26 direct dependencies so the visible waiver warning path is covered."
+
+[checks]
+garde = false

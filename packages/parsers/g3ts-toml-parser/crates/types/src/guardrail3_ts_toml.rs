@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 
+pub use g3_guardrail_toml_types::WaiverConfig;
 use serde::{Deserialize, Serialize};
 use toml::Value;
 
@@ -21,6 +22,8 @@ pub type CollectionFieldsMap = BTreeMap<String, Vec<String>>;
 pub struct Guardrail3TsToml {
     pub version: Option<String>,
     pub checks: Option<TsChecksConfig>,
+    #[serde(default)]
+    pub waivers: Vec<WaiverConfig>,
     pub astro: Option<TsAstroPolicyConfig>,
     pub style: Option<TsStylePolicyConfig>,
     pub typecov: Option<TsTypecovPolicyConfig>,

@@ -1,0 +1,20 @@
+id = "deps-R22-direct-dependency-cap-waived"
+tool = "g3rs"
+run_from = "repo"
+path_prepend = ["bin"]
+commands = [
+  ["validate", "workspace", "--path", ".", "--family", "deps", "--rules-only", "--inventory"],
+]
+expected_exit = "zero"
+level = "family_rule_policy_waived"
+
+rule_family = "deps"
+target_rules = [
+  "g3rs-deps/direct-dependency-cap",
+]
+intentionally_invalid = [
+  "direct_dependency_count_above_cap_waived",
+]
+expected_findings = [
+  "g3rs-deps/direct-dependency-cap",
+]

@@ -1,10 +1,13 @@
+use g3_guardrail_toml_types::{WaiverMatch, find_waiver_reason};
 use g3rs_deps_types::G3RsDepsConfigChecksInput;
 use guardrail3_check_types::G3CheckResult;
 
-use crate::support::{error, unique_direct_dependency_names};
+use crate::support::{error, unique_direct_dependency_names, warn};
 
 /// Rule identifier emitted by this check.
 const ID: &str = "g3rs-deps/direct-dependency-cap";
+/// Waiver selector for the workspace-wide unique direct dependency count.
+const SELECTOR: &str = "unique-direct-dependency-count";
 /// Constant value used by the surrounding module.
 const MAX_UNIQUE_DIRECT_DEPENDENCIES: usize = 25;
 
@@ -14,13 +17,30 @@ pub(crate) fn check(input: &G3RsDepsConfigChecksInput, results: &mut Vec<G3Check
     if unique_direct_dependency_count <= MAX_UNIQUE_DIRECT_DEPENDENCIES {
         return;
     }
+    if let Some(reason) = find_waiver_reason(
+        &input.waivers,
+        &WaiverMatch::new(ID, &input.crate_cargo_rel_path, SELECTOR),
+    ) {
+        results.push(warn(
+            ID,
+            "direct dependency cap waived",
+            format!(
+                "Crate `{}` has {unique_direct_dependency_count} unique direct dependencies (max {MAX_UNIQUE_DIRECT_DEPENDENCIES}), but `{SELECTOR}` is waived because: {}",
+                input.crate_name,
+                reason.as_str()
+            ),
+            &input.crate_cargo_rel_path,
+        ));
+        return;
+    }
 
     results.push(error(
         ID,
         "too many direct dependencies",
         format!(
-            "Crate `{}` has {unique_direct_dependency_count} unique direct dependencies (max {MAX_UNIQUE_DIRECT_DEPENDENCIES}). Reduce direct dependencies by consolidating or splitting the crate.",
-            input.crate_name
+            "Crate `{}` has {unique_direct_dependency_count} unique direct dependencies (max {MAX_UNIQUE_DIRECT_DEPENDENCIES}). Reduce direct dependencies by consolidating or splitting the crate. If this crate is intentionally a composition point, add `[[waivers]]` with rule = \"{ID}\", file = \"{}\", selector = \"{SELECTOR}\", and a specific reason.",
+            input.crate_name,
+            input.crate_cargo_rel_path
         ),
         &input.crate_cargo_rel_path,
     ));

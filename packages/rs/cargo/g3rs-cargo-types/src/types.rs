@@ -1,4 +1,5 @@
 use cargo_toml_parser::types::CargoTomlDocument;
+use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_toml_parser::types::RustProfile;
 use serde::Serialize;
 
@@ -20,15 +21,7 @@ impl G3RsCargoPolicyRootKind {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct G3RsCargoWaiver {
-    pub rule: String,
-    pub file: String,
-    pub selector: String,
-    pub reason: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsCargoRustPolicyState {
     Missing,
     Unreadable {
@@ -42,7 +35,7 @@ pub enum G3RsCargoRustPolicyState {
     Parsed {
         rel_path: String,
         profile: Option<RustProfile>,
-        waivers: Vec<G3RsCargoWaiver>,
+        waivers: Vec<WaiverConfig>,
     },
 }
 

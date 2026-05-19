@@ -1,7 +1,8 @@
+use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigState, G3RsClippyCargoMemberState, G3RsClippyCargoRootState,
     G3RsClippyConfigChecksInput, G3RsClippyConfigState, G3RsClippyFileTreeChecksInput,
-    G3RsClippyRustPolicyState, G3RsClippyShadowedConfig, G3RsClippyWaiver,
+    G3RsClippyRustPolicyState, G3RsClippyShadowedConfig,
 };
 
 /// assemble config input fn.
@@ -12,7 +13,7 @@ pub(crate) const fn assemble_config_input(
     cargo_root: G3RsClippyCargoRootState,
     cargo_workspace_members: Vec<G3RsClippyCargoMemberState>,
     cargo_configs: Vec<G3RsClippyCargoConfigState>,
-    waivers: Vec<G3RsClippyWaiver>,
+    waivers: Vec<WaiverConfig>,
 ) -> G3RsClippyConfigChecksInput {
     G3RsClippyConfigChecksInput {
         clippy_rel_path,

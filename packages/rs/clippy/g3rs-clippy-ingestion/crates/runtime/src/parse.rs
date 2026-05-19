@@ -1,8 +1,9 @@
 use std::path::Path;
 
+use g3_guardrail_toml_types::WaiverConfig;
 use g3rs_clippy_types::{
     G3RsClippyCargoConfigState, G3RsClippyCargoMemberState, G3RsClippyCargoRootState,
-    G3RsClippyConfigState, G3RsClippyRustPolicyState, G3RsClippyWaiver,
+    G3RsClippyConfigState, G3RsClippyRustPolicyState,
 };
 use glob::Pattern;
 
@@ -70,7 +71,7 @@ pub(crate) fn parse_rust_policy_state(
 }
 
 /// parse waivers fn.
-pub(crate) fn parse_waivers(abs_path: &Path) -> IngestResult<Vec<G3RsClippyWaiver>> {
+pub(crate) fn parse_waivers(abs_path: &Path) -> IngestResult<Vec<WaiverConfig>> {
     let content = read_to_string(abs_path).map_err(|reason| IngestionError::Unreadable {
         path: abs_path.to_path_buf(),
         reason,
@@ -80,16 +81,7 @@ pub(crate) fn parse_waivers(abs_path: &Path) -> IngestResult<Vec<G3RsClippyWaive
         reason: err.to_string(),
     })?;
 
-    Ok(parsed
-        .waivers
-        .into_iter()
-        .map(|waiver| G3RsClippyWaiver {
-            rule: waiver.rule,
-            file: waiver.file,
-            selector: waiver.selector,
-            reason: waiver.reason,
-        })
-        .collect())
+    Ok(parsed.waivers)
 }
 
 /// parse cargo config state fn.

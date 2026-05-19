@@ -1,6 +1,7 @@
 //! Shared fmt-family types: parsed state, waivers, and check inputs.
 
 use cargo_toml_parser::types::CargoToml;
+use g3_guardrail_toml_types::WaiverConfig;
 use rust_toolchain_toml_parser::types::RustToolchainToml;
 use rustfmt_toml_parser::types::RustfmtToml;
 use serde::Serialize;
@@ -42,21 +43,8 @@ pub enum G3RsFmtToolchainState {
     ParseError,
 }
 
-/// A waiver entry declared in the rust policy file.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct G3RsFmtWaiver {
-    /// Rule identifier the waiver applies to.
-    pub rule: String,
-    /// File the waiver applies to.
-    pub file: String,
-    /// Selector targeting the waived item.
-    pub selector: String,
-    /// Reason justifying the waiver.
-    pub reason: String,
-}
-
 /// Parse state of the per-workspace rust policy `guardrail3-rs.toml` file.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum G3RsFmtRustPolicyState {
     /// No rust policy file present.
     Missing,
@@ -79,7 +67,7 @@ pub enum G3RsFmtRustPolicyState {
         /// Repo-relative path to the policy file.
         rel_path: String,
         /// Waivers declared by the policy.
-        waivers: Vec<G3RsFmtWaiver>,
+        waivers: Vec<WaiverConfig>,
     },
 }
 
