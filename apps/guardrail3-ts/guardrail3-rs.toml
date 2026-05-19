@@ -77,6 +77,8 @@ allowed_deps = [
   "g3ts-toml-parser-types",
   "guardrail3-ts-validate-command",
   "guardrail3-ts-validate-command-assertions",
+  "package-json-parser",
+  "serde_json",
   "tempfile",
 ]
 

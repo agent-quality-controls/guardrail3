@@ -10,6 +10,8 @@ guardrail3-check-types.workspace = true
 guardrail3-waivers.workspace = true
 g3ts-toml-parser-runtime = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/runtime", features = ["api"] }
 g3ts-toml-parser-types = { path = "../../../../../../../packages/parsers/g3ts-toml-parser/crates/types", features = ["api"] }
+package-json-parser = { path = "../../../../../../../packages/parsers/package-json-parser", features = ["api"] }
+serde_json = "1"
 
 [features]
 default = ["api"]

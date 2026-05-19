@@ -6,6 +6,8 @@ mod family_opt_out;
 mod fs;
 /// Command execution flow for init requests.
 mod init;
+/// Package manifest mutations for init workspace.
+mod init_package_json;
 /// Final CLI outcome payload.
 mod outcome;
 /// Family-selection helpers shared by command execution.

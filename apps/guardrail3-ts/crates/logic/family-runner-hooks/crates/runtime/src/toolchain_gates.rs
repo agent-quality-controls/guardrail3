@@ -42,12 +42,35 @@ pub struct ToolchainGate {
 /// via `guardrail3-ts.toml` covers both the static rule families and the
 /// toolchain gates.
 #[must_use]
-pub fn run_toolchain_gates(path: &Path, disabled: &[SupportedFamily]) -> ToolchainOutcome {
+pub fn run_toolchain_gates(
+    path: &Path,
+    disabled: &[SupportedFamily],
+    include_inventory: bool,
+) -> ToolchainOutcome {
     let mut outcome = ToolchainOutcome::default();
     let manager = detect_package_manager(path);
+    if include_inventory {
+        let _ = writeln!(&mut outcome.stdout, "== toolchain ==");
+        let _ = writeln!(
+            &mut outcome.stdout,
+            "[Info] g3ts-toolchain/package-manager package manager detected"
+        );
+        let _ = writeln!(
+            &mut outcome.stdout,
+            "  detected: {}",
+            package_manager_name(manager)
+        );
+    }
     for gate in toolchain_gate_list(path, manager, disabled) {
         let label = gate.label;
         let argv = gate.argv;
+        if include_inventory {
+            let _ = writeln!(
+                &mut outcome.stdout,
+                "[Info] g3ts-toolchain/gate {label} toolchain gate scheduled"
+            );
+            let _ = writeln!(&mut outcome.stdout, "  command: {}", argv.join(" "));
+        }
         let Some((bin, rest)) = argv.split_first() else {
             continue;
         };
@@ -55,26 +78,64 @@ pub fn run_toolchain_gates(path: &Path, disabled: &[SupportedFamily]) -> Toolcha
         match result {
             Ok(output) => {
                 if !output.status.success() {
-                    let _ = writeln!(&mut outcome.stdout, "== {label} ==");
-                    outcome
-                        .stdout
-                        .push_str(&String::from_utf8_lossy(&output.stdout));
-                    outcome
-                        .stderr
-                        .push_str(&String::from_utf8_lossy(&output.stderr));
+                    ensure_toolchain_header(&mut outcome.stdout);
+                    let _ = writeln!(
+                        &mut outcome.stdout,
+                        "[Error] g3ts-toolchain/gate {label} toolchain gate failed"
+                    );
+                    let _ = writeln!(&mut outcome.stdout, "  command: {}", argv.join(" "));
+                    let _ = writeln!(
+                        &mut outcome.stdout,
+                        "  exit-code: {}",
+                        output.status.code().unwrap_or(1)
+                    );
+                    push_command_output("stdout", &output.stdout, &mut outcome.stdout);
+                    push_command_output("stderr", &output.stderr, &mut outcome.stdout);
                     outcome.exit_code = 1;
                 }
             }
             Err(error) => {
+                ensure_toolchain_header(&mut outcome.stdout);
                 let _ = writeln!(
-                    &mut outcome.stderr,
-                    "{label}: failed to spawn {bin}: {error}"
+                    &mut outcome.stdout,
+                    "[Error] g3ts-toolchain/gate {label} toolchain gate failed"
                 );
+                let _ = writeln!(&mut outcome.stdout, "  command: {}", argv.join(" "));
+                let _ = writeln!(&mut outcome.stdout, "  spawn-error: {bin}: {error}");
                 outcome.exit_code = 1;
             }
         }
     }
     outcome
+}
+
+/// Adds the toolchain section header unless it is already present.
+fn ensure_toolchain_header(output: &mut String) {
+    if output.contains("== toolchain ==") {
+        return;
+    }
+    let _ = writeln!(output, "== toolchain ==");
+}
+
+/// Appends a bounded stdout or stderr snippet to one toolchain finding.
+fn push_command_output(label: &str, bytes: &[u8], output: &mut String) {
+    let text = String::from_utf8_lossy(bytes);
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return;
+    }
+    let snippet: String = trimmed.chars().take(1200).collect();
+    let _ = writeln!(output, "  {label}: {snippet}");
+}
+
+/// Returns the CLI-visible name for one detected package manager.
+const fn package_manager_name(manager: PackageManager) -> &'static str {
+    match manager {
+        PackageManager::Pnpm => "pnpm",
+        PackageManager::Yarn => "yarn",
+        PackageManager::Npm => "npm",
+        PackageManager::Bun => "bun",
+    }
 }
 
 /// Centralized process-spawn boundary for toolchain gates. This is the one

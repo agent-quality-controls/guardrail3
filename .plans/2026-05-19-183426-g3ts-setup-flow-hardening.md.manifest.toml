@@ -1,0 +1,51 @@
+[[cli_help_contains]]
+command = ["validate", "repo", "--help"]
+text = "--inventory"
+
+[[repo_validation]]
+case = "unadopted_root_package"
+files = ["package.json"]
+command = ["validate", "repo", "--path", "{repo}"]
+expect_exit = 1
+expect_stdout_contains = ["g3ts-repo/unadopted-workspace", "g3ts init workspace --path ."]
+
+[[repo_validation]]
+case = "repo_inventory_package_root"
+files = ["package.json", "guardrail3-ts.toml"]
+init_repo = true
+command = ["validate", "repo", "--path", "{repo}", "--inventory"]
+expect_stdout_contains = ["g3ts-repo/workspace-adoption-inventory", "package root `.` is adopted"]
+
+[[init_workspace]]
+case = "fresh_root_package"
+files = ["package.json"]
+command = ["init", "workspace", "--path", "{repo}"]
+expect_files = ["guardrail3-ts.toml", ".npmrc", ".syncpackrc", "pnpm-workspace.yaml"]
+expect_package_json_contains = [
+  "\"private\": true",
+  "\"packageManager\": \"pnpm@10.32.0\"",
+  "\"preinstall\": \"npx only-allow pnpm\"",
+  "\"lint:packages\": \"syncpack lint\"",
+  "\"syncpack\": \"15.3.1\"",
+  "\"pnpm\""
+]
+
+[[toolchain_inventory]]
+case = "workspace_inventory_commands"
+command = ["validate", "workspace", "--path", "{repo}", "--inventory"]
+expect_stdout_contains = ["== toolchain ==", "g3ts-toolchain/package-manager", "g3ts-toolchain/gate"]
+
+[[workspace_validation]]
+case = "non_astro_workspace_skips_astro_by_default"
+files = ["package.json", "guardrail3-ts.toml"]
+command = ["validate", "workspace", "--path", "{repo}", "--rules-only", "--inventory"]
+expect_exit = 1
+expect_stdout_not_contains = ["== astro-content ==", "== astro-mdx ==", "== astro-seo =="]
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/io/inbound/cli/crates/runtime/src/execute.rs"
+text = "g3ts-repo/unadopted-workspace"
+
+[[source_contains]]
+path = "apps/guardrail3-ts/crates/logic/family-runner-hooks/crates/runtime/src/toolchain_gates.rs"
+text = "g3ts-toolchain/gate"

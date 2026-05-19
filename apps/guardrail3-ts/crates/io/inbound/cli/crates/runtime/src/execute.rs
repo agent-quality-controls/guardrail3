@@ -11,6 +11,7 @@ use guardrail3_ts_family_runner_hooks::run_toolchain_gates;
 use guardrail3_ts_validate_command::{disabled_families, execute};
 
 use crate::cli::FamilyArg;
+use crate::fs as g3ts_fs;
 use crate::marker_pairs::check_marker_pair_completeness;
 use crate::process::run_git;
 use crate::run::CliOutput;
@@ -63,7 +64,10 @@ pub(crate) fn run_validate(
 
     if !rules_only {
         let disabled = disabled_families(path);
-        let toolchain = run_toolchain_gates(path, &disabled);
+        let toolchain = run_toolchain_gates(path, &disabled, inventory);
+        if !toolchain.stdout.is_empty() && stdout.trim() == "No findings." {
+            stdout.clear();
+        }
         if !toolchain.stdout.is_empty() {
             stdout.push_str(&toolchain.stdout);
         }
@@ -87,6 +91,7 @@ pub(crate) fn run_validate(
 /// `path` is `None`, the repo root is discovered via `git rev-parse`.
 pub(crate) fn run_validate_repo(
     path: Option<&Path>,
+    inventory: bool,
     crawler: &dyn WorkspaceCrawler,
     family_runner: &dyn FamilyRunner,
     renderer: &dyn ReportRenderer,
@@ -105,7 +110,7 @@ pub(crate) fn run_validate_repo(
     let request = ValidateRequest {
         workspace_root: repo_root.clone(),
         families: vec![SupportedFamily::Hooks, SupportedFamily::Topology],
-        include_inventory: false,
+        include_inventory: inventory,
     };
     let outcome = match execute(&request, crawler, family_runner, renderer) {
         Ok(outcome) => outcome,
@@ -121,6 +126,20 @@ pub(crate) fn run_validate_repo(
     let mut stdout = outcome.stdout().to_owned();
     let stderr = outcome.stderr().to_owned();
     let mut exit_code = outcome.exit_code();
+
+    let adoption_findings = check_workspace_adoption(&repo_root, inventory);
+    if !adoption_findings.is_empty() {
+        if stdout.trim() == "No findings." {
+            stdout.clear();
+        }
+        stdout.push_str("== workspace-adoption ==\n");
+        for finding in &adoption_findings {
+            let _ = writeln!(&mut stdout, "{finding}");
+            if finding.starts_with("[Error]") {
+                exit_code = 1;
+            }
+        }
+    }
 
     let marker_findings = check_marker_pair_completeness(&repo_root);
     if !marker_findings.is_empty() {
@@ -145,6 +164,61 @@ pub(crate) fn run_validate_repo(
         stderr,
         exit_code,
     }
+}
+
+/// Reports package roots that have not been adopted by G3TS.
+fn check_workspace_adoption(repo_root: &Path, inventory: bool) -> Vec<String> {
+    let mut findings = Vec::new();
+    for rel_path in package_root_candidates(repo_root) {
+        let abs_path = repo_root.join(&rel_path);
+        let display_path = if rel_path.as_os_str().is_empty() {
+            "."
+        } else {
+            rel_path.to_str().unwrap_or("<non-utf8>")
+        };
+        if abs_path.join("guardrail3-ts.toml").is_file() {
+            if inventory {
+                findings.push(format!(
+                    "[Info] g3ts-repo/workspace-adoption-inventory {display_path} TypeScript package root is adopted"
+                ));
+                findings.push(format!("  package root `{display_path}` is adopted."));
+            }
+        } else {
+            findings.push(format!(
+                "[Error] g3ts-repo/unadopted-workspace {display_path} TypeScript package root is not adopted"
+            ));
+            findings.push(format!(
+                "  `{display_path}` has package.json but no guardrail3-ts.toml. Run: g3ts init workspace --path {display_path}"
+            ));
+        }
+    }
+    findings
+}
+
+/// Returns root, apps/*, and packages/* package roots visible to repo validation.
+fn package_root_candidates(repo_root: &Path) -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    if repo_root.join("package.json").is_file() {
+        candidates.push(PathBuf::new());
+    }
+    for parent in ["apps", "packages"] {
+        for path in g3ts_fs::read_dir_paths(&repo_root.join(parent)) {
+            let Some(candidate) = package_root_child(parent, &path) else {
+                continue;
+            };
+            candidates.push(candidate);
+        }
+    }
+    candidates
+}
+
+/// Converts an immediate child directory into an app/package root candidate.
+fn package_root_child(parent: &str, path: &Path) -> Option<PathBuf> {
+    if !path.join("package.json").is_file() {
+        return None;
+    }
+    path.file_name()
+        .map(|name| PathBuf::from(parent).join(name))
 }
 
 /// Returns true when staged TS-relevant files exist inside `path`.

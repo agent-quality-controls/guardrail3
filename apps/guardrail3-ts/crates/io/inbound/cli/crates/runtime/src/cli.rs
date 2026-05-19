@@ -91,6 +91,9 @@ pub enum ValidateCommand {
         /// Optional repo root override; defaults to git rev-parse --show-toplevel.
         #[arg(long = "path")]
         path: Option<PathBuf>,
+        /// Includes inventory findings in the rendered output.
+        #[arg(long = "inventory", default_value_t = false)]
+        inventory: bool,
     },
     /// Validates one TypeScript workspace root against the selected families.
     Workspace {

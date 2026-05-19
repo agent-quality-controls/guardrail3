@@ -1572,6 +1572,8 @@ dependencies = [
  "guardrail3-check-types",
  "guardrail3-ts-app-types",
  "guardrail3-waivers",
+ "package-json-parser",
+ "serde_json",
 ]
 
 [[package]]

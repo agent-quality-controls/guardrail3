@@ -82,8 +82,8 @@ fn run_validate_command(
             family_runner,
             renderer,
         ),
-        ValidateCommand::Repo { path } => {
-            execute::run_validate_repo(path.as_deref(), crawler, family_runner, renderer)
+        ValidateCommand::Repo { path, inventory } => {
+            execute::run_validate_repo(path.as_deref(), inventory, crawler, family_runner, renderer)
         }
     }
 }

@@ -12,7 +12,7 @@
       "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
-      "stdout": "Top-level CLI parser for the g3ts binary\n\nUsage: g3ts <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3TS enforces TypeScript repo setup and TypeScript workspace guardrails.\n\nStart here:\n  g3ts init repo\n  g3ts init workspace --path <path>\n  g3ts validate repo\n  g3ts validate workspace --path <path>\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3TS.\n  validate workspace checks one TypeScript unit.\n"
+      "stdout": "Top-level CLI parser for the g3ts binary\n\nUsage: g3ts <COMMAND>\n\nCommands:\n  init      Writes repo or workspace setup\n  validate  Reports repo or workspace validation findings\n  help      Print this message or the help of the given subcommand(s)\n\nOptions:\n  -h, --help     Print help\n  -V, --version  Print version\n\nG3TS enforces TypeScript repo setup and TypeScript workspace guardrails.\n\nPackage manager:\n  G3TS requires pnpm-managed TypeScript workspaces.\n\nAdoption order:\n  1. From the Git repo root, run: g3ts init repo\n  2. Choose every top-level package.json root that G3TS should manage.\n  3. For each chosen root, run: g3ts init workspace --path <path>\n  4. For each chosen root, run: g3ts validate workspace --path <path>\n  5. After workspace adoption, run: g3ts validate repo\n\nWorkspace path choices:\n  Root-only package: use .\n  App with I/O: use apps/<name> for CLIs, APIs, servers, UI apps, and other executable surfaces.\n  Library without I/O: use packages/<name> for reusable packages consumed by other software.\n\nConcepts:\n  repo       Git repository surface: hooks, repo-level topology, marker pairs.\n  workspace  One adopted TypeScript unit: package.json plus guardrail3-ts.toml.\n\nRules:\n  init writes setup.\n  validate only reports.\n  validate repo checks that Git will run G3TS.\n  validate workspace checks one TypeScript unit.\n  Each top-level package.json should be managed by G3TS unless it is intentionally outside the TypeScript guardrail surface.\n"
     },
     {
       "command": [
@@ -113,7 +113,7 @@
       "fixture_hash": "sha256:73c1662304bef4371c36a24d0417a42bee51376f2a77a477d1ef5188a5b31f4b",
       "fixture_id": "C10-help-contract",
       "stderr": "",
-      "stdout": "Validates repository-level invariants (hooks, tools, topology, marker pairs)\n\nUsage: g3ts validate repo [OPTIONS]\n\nOptions:\n      --path <PATH>  Optional repo root override; defaults to git rev-parse --show-toplevel\n  -h, --help         Print help\n"
+      "stdout": "Validates repository-level invariants (hooks, tools, topology, marker pairs)\n\nUsage: g3ts validate repo [OPTIONS]\n\nOptions:\n      --path <PATH>  Optional repo root override; defaults to git rev-parse --show-toplevel\n      --inventory    Includes inventory findings in the rendered output\n  -h, --help         Print help\n"
     },
     {
       "command": [
