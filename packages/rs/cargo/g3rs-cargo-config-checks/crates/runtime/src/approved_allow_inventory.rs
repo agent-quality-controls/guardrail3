@@ -67,9 +67,9 @@ fn inspect_clippy_lints(
         results.push(
             crate::support::error(
                 ID,
-                "approved allow entry missing reason",
+                "approved allow entry requires waiver",
                 format!(
-                    "`{}` explicitly allows `{lint_name}` in `clippy`. Add `[[waivers]]` with rule = \"{ID}\", subject = \"{}\", selector = \"{selector}\", and a specific reason.",
+                    "`{}` explicitly allows `{lint_name}` in `clippy`. This approved escape hatch requires an exact `[[waivers]]` entry with rule = \"{ID}\", subject = \"{}\", selector = \"{selector}\", and a specific reason.",
                     root.cargo_rel_path,
                     root.cargo_rel_path
                 ),
